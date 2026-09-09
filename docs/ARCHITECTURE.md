@@ -218,12 +218,13 @@
 
 ## 6. 分阶段实施路线
 
-| 阶段 | 内容 | 验证方式 |
-|---|---|---|
-| **P0 跑通（当前目标）** | conda 建 3.11 环境 → 装 `lightrag-hku` + `mineru` → 10–20 篇测试文档解析建图 → query 跑通 local/hybrid/global 综述 | 手工核验 5+ 个中文 Q：实体问答 + 全局综述各验 |
-| P1 多格式 | MinerU 处理 PDF，Docling 补 doc/txt/md | 混合文档库能一次性入库 |
-| P2 打磨 | FastAPI + SSE + 引用标注；必要时补社区摘要做强全局综述 | 对比全局综述效果是否达标 |
-| P3 扩展（按需） | Postgres+pgvector 持久化 / 图迁 NebulaGraph | 仅在确实需要时才做 |
+| 阶段 | 内容 | 验证方式 | 状态（2026-09） |
+|---|---|---|---|
+| **P0 跑通** | conda 建 3.11 环境 → `lightrag-hku` + `mineru` → 测试文档建图 → query 跑通 local/hybrid/global 综述 | 手动核验 3 个模式的中文问答 | ✅ 完成 |
+| **P1 多格式** | `scripts/parse.py`（MinerU/Docling 路由、幂等/容错/元数据）+ index 固定 `ids=doc_id`（见 p1.md） | 混合文档库一次性入库，3 问验收（实体级/跨格式/global） | ✅ 完成 |
+| P2 引用溯源 + API 壳 | 引用粒度从「文件名」深化到 TextUnit / PDF 页码（兑现 P1 预留的 `span_map`）；FastAPI 壳（REST + SSE 流式/事件上报） | 答案带页级引用来源；SSE 能流式返回 | 待做 |
+| P3 Agent 编排（对应 §2.7） | 自研组装层：意图路由（map-reduce / single-window）、检索压缩进 `max_data_tokens`、多轮会话、引用列表随生成流转；可选语义缓存 | 多轮追问有效；引用随链路流转；token 预算受控 | 待做 |
+| P4 扩展（按需） | Postgres+pgvector 持久化 / 图迁 NebulaGraph；全局综述若仍弱，补社区摘要（§5-5） | 仅在确实需要时才做 | 待做 |
 
 ---
 
