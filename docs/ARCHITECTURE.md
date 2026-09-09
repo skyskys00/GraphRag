@@ -218,13 +218,15 @@
 
 ## 6. 分阶段实施路线
 
-| 阶段 | 内容 | 验证方式 | 状态（2026-09） |
+> 阶段任务按「做得到、可验收」的边界划分；「完成形态」列是可感知的验收效果。交互层（UI/API）的分层定位见 §2.8，组装层规范见 §2.7。
+
+| 阶段 | 内容（任务边界） | 完成形态（可验收） | 状态（2026-09） |
 |---|---|---|---|
-| **P0 跑通** | conda 建 3.11 环境 → `lightrag-hku` + `mineru` → 测试文档建图 → query 跑通 local/hybrid/global 综述 | 手动核验 3 个模式的中文问答 | ✅ 完成 |
-| **P1 多格式** | `scripts/parse.py`（MinerU/Docling 路由、幂等/容错/元数据）+ index 固定 `ids=doc_id`（见 p1.md） | 混合文档库一次性入库，3 问验收（实体级/跨格式/global） | ✅ 完成 |
-| P2 引用溯源 + API 壳 | 引用粒度从「文件名」深化到 TextUnit / PDF 页码（兑现 P1 预留的 `span_map`）；FastAPI 壳（REST + SSE 流式/事件上报） | 答案带页级引用来源；SSE 能流式返回 | 待做 |
-| P3 Agent 编排（对应 §2.7） | 自研组装层：意图路由（map-reduce / single-window）、检索压缩进 `max_data_tokens`、多轮会话、引用列表随生成流转；可选语义缓存 | 多轮追问有效；引用随链路流转；token 预算受控 | 待做 |
-| P4 扩展（按需） | Postgres+pgvector 持久化 / 图迁 NebulaGraph；全局综述若仍弱，补社区摘要（§5-5） | 仅在确实需要时才做 | 待做 |
+| **P0 跑通** | conda 建 3.11 环境 → `lightrag-hku` + `mineru` → 测试文档建图 → query 跑通 local/hybrid/global 综述 | 3 个模式的中文问答可用 | ✅ 完成 |
+| **P1 多格式** | `scripts/parse.py`（MinerU/Docling 路由、幂等/容错/元数据）+ index 固定 `ids=doc_id`（见 p1.md） | 混合文档库（pdf/docx/md）一次性入库，3 问验收过 | ✅ 完成 |
+| P2 引用溯源 + 交互层 | ① parse.py 扩展：填 `span_map`（md 偏移 ↔ PDF 页码，读 mineru `middle.json` / docling provenance）；② 切分层落地（§2.3）：结构化文档标题层级切分，TextUnit 携带 doc_id / 页码 / 标题路径；③ FastAPI 壳：`POST /query` 返回结构化回答 + `references[]`（含 doc_id+页码），SSE 流式（「检索完成 / 生成第 N 段」事件）；④ 交互：FastAPI 自带 `/docs`（Swagger）即可用，可选加 Streamlit 单页（上传 / 提问 / 引用列表） | ① parsed json 的 `span_map` 非空且指向真实页码；② 回答引用到页级，如「张伟 · 03_会议纪要.md · 第 1 页」；③ 浏览器经 `/docs` 或 SSE 能看到流式事件 | 待做 |
+| P3 Agent 编排（对应 §2.7） | 自研组装层：意图路由（全局 → map-reduce；局部 → single-window）→ 检索多路结果压缩进 `max_data_tokens`（组装前过滤+排名）→ **带引用**生成；多轮会话（history 注入，记忆归 Agent 层管）；可选：rerank（bge-reranker，§2.6）与语义缓存（二期，§2.7-5） | 多轮追问能衔接上文；token 预算受控（组装前压缩）；答案引用列表随链路流转、可回到 TextUnit/页码 | 待做 |
+| P4 扩展（按需） | Postgres+pgvector 一库通吃 / 图迁 NebulaGraph / 社区摘要补全局综述（§5-5） | 触发条件：数据量上万级，或全局综述不达标 | 按需 |
 
 ---
 
