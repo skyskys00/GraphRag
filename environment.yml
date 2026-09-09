@@ -1,0 +1,27 @@
+# GraphRAG 练手项目环境基准（与 P1 落地验证过的版本组合一致）
+# 用法：conda env create -f environment.yml
+#
+# 版本配对坑（详见 p1.md §8「P1 落地记录」）：
+#   - mineru 要求 transformers>=4.57.3,<5.0.0（5.x 移除了旧 API find_pruneable_heads_and_indices）
+#   - sentence-transformers 6.x 要求 transformers>=5，若装会毁掉 mineru → 双双锁 4.x
+#   - mineru 主包默认不装齐解析依赖，需显式补 torchvision/shapely/pyclipper/ftfy/opencv
+
+name: graphrag
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - lightrag-hku
+      # ---- 解析引擎 ----
+      - mineru
+      - docling               # docx/pptx/xlsx/html/epub 兜底（PDF 一律走 MinerU）
+      # ---- MinerU pipeline extras ----
+      - torch==2.14.0
+      - torchvision==0.29.0
+      - shapely
+      - pyclipper
+      - ftfy
+      - opencv-python
+      # ---- 版本配对（坑） ----
+      - transformers==4.57.6
+      - sentence-transformers==4.1.0

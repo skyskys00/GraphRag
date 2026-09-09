@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# 环境/密钥
+.env
+
+# LightRAG 运行时存储
+storage/
+logs/
+
+# P1 解析产物（纯中间件，可删掉重解析）
+inputs/parsed/
+
+# macOS
+.DS_Store
