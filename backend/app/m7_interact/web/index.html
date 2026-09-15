@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GraphRAG 知识问答</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --bdr:#e2e5ea; --ink:#1f2530; --sub:#6b7280; --acc:#2563eb; --acc2:#1e40af; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:15px/1.7 -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+  header { display:flex; align-items:baseline; gap:10px; padding:16px 22px;
+           background:var(--card); border-bottom:1px solid var(--bdr); position:sticky; top:0; }
+  header h1 { font-size:17px; margin:0; }
+  header .src { color:var(--sub); font-size:12px; }
+  main { max-width:860px; margin:0 auto; padding:22px 20px 120px; }
+  .msg { margin:14px 0; }
+  .msg.user { text-align:right; }
+  .bubble { display:inline-block; max-width:85%; text-align:left; padding:10px 14px;
+            border-radius:12px; background:var(--card); border:1px solid var(--bdr); white-space:pre-wrap; word-break:break-word; }
+  .msg.user .bubble { background:var(--acc); border-color:var(--acc); color:#fff; }
+  .ans h2 { font-size:15px; margin:12px 0 6px; }
+  .ans h3 { font-size:14px; margin:10px 0 4px; }
+  .ans p { margin:6px 0; }
+  .ans ul { margin:6px 0; padding-left:20px; }
+  .cit { margin:10px 0 0; display:flex; flex-wrap:wrap; gap:6px; }
+  .cit .cg { font-size:12px; background:#eef2ff; color:var(--acc2); border:1px solid #c7d2fe;
+             padding:3px 8px; border-radius:999px; cursor:pointer; }
+  .cit .cg:hover { background:#dbe4ff; }
+  .tag { font-size:11px; color:var(--sub); margin-top:6px; }
+  .streaming::after { content:"▋"; color:var(--acc); animation:blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity:0; } }
+  footer { position:fixed; left:0; right:0; bottom:0; background:var(--card);
+           border-top:1px solid var(--bdr); padding:10px 20px; }
+  footer .wrap { max-width:860px; margin:0 auto; display:flex; gap:10px; align-items:center; }
+  form { display:flex; flex:1; gap:8px; }
+  input[type=text] { flex:1; padding:10px 12px; border:1px solid var(--bdr); border-radius:10px; font-size:15px; }
+  button { padding:10px 20px; border:0; border-radius:10px; background:var(--acc); color:#fff; font-size:15px; cursor:pointer; }
+  button:disabled { background:#9ca3af; cursor:wait; }
+  label.opt { font-size:13px; color:var(--sub); display:flex; gap:4px; align-items:center; white-space:nowrap; }
+  dialog { border:1px solid var(--bdr); border-radius:12px; padding:0; width:min(620px, 92vw); }
+  dialog .hd { padding:12px 16px; border-bottom:1px solid var(--bdr); font-weight:600; display:flex; justify-content:space-between; }
+  dialog .bd { padding:14px 16px; max-height:55vh; overflow:auto; }
+  dialog .bd .f { margin:4px 0; font-size:13px; }
+  dialog .bd .snip { background:var(--bg); border-radius:8px; padding:10px; margin-top:8px; white-space:pre-wrap; font-size:13px; }
+  dialog button { background:transparent; color:var(--sub); padding:2px 6px; font-size:16px; }
+</style>
+</head>
+<body>
+  <header><h1>GraphRAG 知识问答</h1><span class="src">M7 交互层 · DeepSeek v4-flash</span></header>
+
+  <main id="thread"></main>
+
+  <footer>
+    <div class="wrap">
+      <label class="opt"><input type="checkbox" id="streamToggle">流式</label>
+      <form id="askForm"><input type="text" id="q" autocomplete="off"
+             placeholder="输入问题，如：客户投诉的处理流程是怎样的？"><button type="submit" id="send">发送</button></form>
+    </div>
+  </footer>
+
+  <dialog id="cite">
+    <div class="hd"><span id="citeTitle">引用详情</span><button id="citeClose" type="button">×</button></div>
+    <div class="bd" id="citeBody"></div>
+  </dialog>
+
+<script>
+(() => {
+  const thread = document.getElementById('thread');
+  const form = document.getElementById('askForm');
+  const input = document.getElementById('q');
+  const sendBtn = document.getElementById('send');
+  const streamToggle = document.getElementById('streamToggle');
+  const citeDlg = document.getElementById('cite');
+  const citeBody = document.getElementById('citeBody');
+  const citeClose = document.getElementById('citeClose');
+
+  const history = [];          // [{role, content}] 供多轮注入
+  let busy = false;
+  let es = null;
+
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const render = src => {
+    const out = [];
+    let buf = '';
+    for (const raw of src.split('\n')) {
+      const line = raw.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      if (/^[-*] /.test(line)) {
+        if (!buf) { buf = '<ul>'; } else if (!buf.startsWith('<ul>')) { out.push(buf); buf = '<ul>'; }
+        buf += `<li>${line.replace(/^[-*] /, '')}</li>`;
+      } else {
+        if (buf) { out.push(buf + '</ul>'); buf = ''; }
+        const h = line.match(/^(#{1,3}) /);
+        if (h) out.push(`<h${h[1].length}>${line.replace(/^#+ /, '')}</h${h[1].length}>`);
+        else if (line.trim()) out.push(`<p>${line}</p>`);
+      }
+    }
+    if (buf) out.push(buf + '</ul>');
+    return out.join('');
+  };
+
+  function addMsg(role, text) {
+    const m = document.createElement('div');
+    m.className = 'msg ' + role;
+    m.innerHTML = `<div class="bubble"></div>`;
+    if (role === 'bot') m.querySelector('.bubble').className += ' ans';
+    if (text) m.querySelector('.bubble').textContent = text;
+    thread.appendChild(m);
+    thread.scrollTop = thread.scrollHeight;
+    return m;
+  }
+
+  function addCit(m, citations) {
+    const box = document.createElement('div');
+    box.className = 'cit';
+    citations.forEach(c => {
+      const g = document.createElement('span');
+      g.className = 'cg';
+      let label = `[${c.marker}] ${(c.file_path || c.text_unit_id || '').split('/').pop()}`;
+      if (c.page_range && c.page_range.length) label += ` · p${c.page_range[0] + 1}`;
+      g.textContent = label;
+      g.title = c.text_unit_id;
+      g.onclick = () => showCite(c);
+      box.appendChild(g);
+    });
+    m.querySelector('.bubble').after(box);
+  }
+
+  function showCite(c) {
+    const rows = [
+      ['文本单元', c.text_unit_id],
+      ['文件', c.file_path || '（未溯源，文本片段定位）'],
+      ['页码', c.page_range && c.page_range.length ? (c.page_range[0] + 1) + '-' + (c.page_range[1] + 1) : '—'],
+      ['章节', c.anchor || '—'],
+      ['文档ID', c.full_doc_id],
+    ];
+    citeBody.innerHTML = rows.map(([k, v]) => `<div class="f"><b>${k}</b>：${esc(String(v))}</div>`).join('')
+      + `<div class="snip">${esc(c.snippet || '')}</div>`;
+    citeTitle.textContent = `引用 [${c.marker}] 原文定位`;
+    citeDlg.showModal();
+  }
+  citeClose.onclick = () => citeDlg.close();
+
+  function setBusy(v) {
+    busy = v; sendBtn.disabled = v; sendBtn.textContent = v ? '回答中…' : '发送';
+  }
+
+  async function postAnswer(query) {
+    setBusy(true);
+    const bot = addMsg('bot');
+    const bubble = bot.querySelector('.bubble');
+    bubble.className += ' streaming';
+    try {
+      const res = await fetch('/answer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, history }),
+      });
+      if (!res.ok) { bubble.textContent = `请求失败 ${res.status}：${await res.text()}`; return; }
+      const data = await res.json();
+      bubble.classList.remove('streaming');
+      bubble.innerHTML = render(data.text || '');
+      addCit(bot, data.citations || []);
+      history.push({ role: 'user', content: query }, { role: 'assistant', content: data.text });
+      const tag = document.createElement('div');
+      tag.className = 'tag';
+      const m = data.meta || {};
+      tag.textContent = `检索 ${m.mode || '?'} · 使用 ${m.used_chunks ?? '?'} 段 · 引用 ${(data.citations || []).length} 条 · 耗时 ${(m.elapsed ?? '').toString()}s`;
+      bot.appendChild(tag);
+    } catch (e) {
+      bubble.classList.remove('streaming');
+      bubble.textContent = `请求异常：${e}`;
+    } finally { setBusy(false); }
+  }
+
+  async function streamAnswer(query) {
+    setBusy(true);
+    const bot = addMsg('bot');
+    const bubble = bot.querySelector('.bubble');
+    bubble.className += ' ans streaming';
+    let citations = [];
+    try {
+      const url = '/answer/stream?q=' + encodeURIComponent(query)
+        + '&history=' + encodeURIComponent(JSON.stringify(history));
+      es = new EventSource(url);
+      es.addEventListener('delta', e => {
+        const d = JSON.parse(e.data);
+        const text = (bubble.dataset.raw || '') + d.text;
+        bubble.dataset.raw = text;
+        bubble.innerHTML = render(text);
+      });
+      es.addEventListener('citations', e => {
+        const d = JSON.parse(e.data);
+        citations = d.citations || [];
+        bubble.classList.remove('streaming');
+        addCit(bot, citations);
+      });
+      es.addEventListener('done', e => {
+        es.close(); es = null;
+        const d = JSON.parse(e.data);
+        bubble.classList.remove('streaming');
+        bubble.innerHTML = render(d.text || bubble.dataset.raw || '');
+        if (citations.length) addCit(bot, citations);
+        history.push({ role: 'user', content: query }, { role: 'assistant', content: d.text });
+      });
+      es.addEventListener('error', () => {
+        if (es) { es.close(); es = null; }
+        bubble.classList.remove('streaming');
+        if (!citations.length && !bubble.dataset.raw) bubble.textContent = '流式连接中断或结束';
+        setBusy(false);
+      });
+    } catch (e) {
+      bubble.classList.remove('streaming');
+      bubble.textContent = `请求异常：${e}`;
+      setBusy(false);
+    }
+  }
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const query = input.value.trim();
+    if (!query || busy) return;
+    input.value = '';
+    addMsg('user', query);
+    if (streamToggle.checked) streamAnswer(query);
+    else postAnswer(query);
+  });
+})();
+</script>
+</body>
+</html>

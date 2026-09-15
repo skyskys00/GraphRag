@@ -1,0 +1,1 @@
+"""M2 切分层包：parse/blocks.jsonl -> TextUnit（契约 textunit.md v2）。"""

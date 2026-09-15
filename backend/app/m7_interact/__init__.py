@@ -1,0 +1,1 @@
+"""M7 交互层：FastAPI/SSE + 轻量 WebUI。"""

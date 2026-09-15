@@ -1,0 +1,61 @@
+/* ===== 浅暖色系 design tokens ===== */
+:root {
+  --bg: #faf6f0;
+  --bg-soft: #f4eee4;
+  --surface: #ffffff;
+  --surface-alt: #fbf7f0;
+
+  --text: #3d3229;
+  --text-soft: #7a6e63;
+  --text-mute: #a89b8d;
+
+  --primary: #b36b3b;
+  --primary-hover: #9c5a2e;
+  --primary-soft: #f1e3d3;
+
+  --accent: #e59b3c;
+  --accent-soft: #fbe9cc;
+
+  --success: #7a9e6a;
+  --error: #c46453;
+  --error-bg: #fbeae6;
+
+  --border: #e7ddd0;
+  --border-soft: #efe7da;
+
+  --shadow-sm: 0 1px 2px rgba(61, 50, 41, 0.04), 0 1px 1px rgba(61, 50, 41, 0.03);
+  --shadow-md: 0 4px 16px rgba(61, 50, 41, 0.08), 0 1px 2px rgba(61, 50, 41, 0.04);
+
+  --radius: 14px;
+  --radius-sm: 8px;
+
+  font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui,
+    -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  font-size: 15px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+button {
+  font-family: inherit;
+}

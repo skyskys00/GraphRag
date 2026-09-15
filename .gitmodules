@@ -1,0 +1,9 @@
+[submodule "backend/lightrag/source"]
+	path = backend/lightrag/source
+	url = https://github.com/HKUDS/LightRAG.git
+[submodule "backend/mineru/source"]
+	path = backend/mineru/source
+	url = https://github.com/opendatalab/MinerU.git
+[submodule "backend/docling/source"]
+	path = backend/docling/source
+	url = https://github.com/docling-project/docling.git

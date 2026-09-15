@@ -1,0 +1,1 @@
+"""M3 索引层包：TextUnit -> LightRAG 图 + 向量（provider 在 providers.py）。"""

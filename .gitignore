@@ -15,3 +15,20 @@ inputs/parsed/
 
 # macOS
 .DS_Store
+
+# LightRAG 源码仓库（外部依赖，lock 在 lightrag/source，不入主仓库）
+lightrag/source/
+
+# MinerU / Docling 源码仓库（同 lightrag，拆解用）
+mineru/source/
+docling/source/
+
+# 运行时数据（可重建，不入库）
+backend/data/
+
+# 前端
+frontend/node_modules/
+frontend/dist/
+
+# 本地 Claude 记忆与配置
+.claude/

@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://graphrag.local/contracts/textunit/v2",
+  "title": "TextUnit",
+  "description": "GraphRAG 统一数据模型 v2 —— 切分层（M2）出口。v2：基于 MinerU/Docling 拆解补全 page_range/anchor/block_type 的取值机制。依据：lightrag/docs/{interfaces,qa-notes}.md + mineru/docs/mineru.md + docling/docs/docling.md。",
+  "type": "object",
+  "properties": {
+    "text_unit_id": {
+      "type": "string",
+      "description": "稳定块 ID：<full_doc_id>-chunk-<NNN>。对应 LightRAG chunk_key。"
+    },
+    "content": {
+      "type": "string",
+      "minLength": 1,
+      "description": "解析后渲染文本（含 <table>/<drawing>/<equation> 占位）；非原始字符序列。"
+    },
+    "tokens": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "full_doc_id": {
+      "type": "string",
+      "description": "上游 Document.doc_id。"
+    },
+    "chunk_order_index": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "文档内序号（引用排序依赖它稳定）。"
+    },
+    "file_path": {
+      "type": "string"
+    },
+    "heading": {
+      "type": "object",
+      "description": "标题三级结构（P 策略自带，F/R/V 经 backfill）。",
+      "properties": {
+        "level": { "type": "integer", "minimum": 1 },
+        "heading": { "type": "string" },
+        "parent_headings": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["level", "heading", "parent_headings"]
+    },
+    "title_path": {
+      "type": "string",
+      "description": "规范化标题路径 'H1 / H2'（由 heading 合成；我们新增）。"
+    },
+    "page_range": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 0 },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "本块覆盖页码区间 [start, end]，闭区间。取值：PDF 从 MinerU content_list 每项内嵌的 `page_idx`（0 起始；或 Docling `prov.page_no`）、PPTX=`slide+1`、XLSX=sheet 序号、HTML=估算页。**docx 无页码**（流式排版，不设此字段）。"
+    },
+    "anchor": {
+      "type": "string",
+      "description": "原文定位锚。PDF=`page_idx:bbox`（content_list 内嵌 bbox，单位归一化 0–1000）；docx：**Docling 不提供 paraId**（无 w14:paraId 读取），需 M1 自研定位补丁（读原始 docx XML 的 w14:paraId 或降级为无定位锚）。取值机制见 textunit.md §4。"
+    },
+    "block_type": {
+      "type": "string",
+      "enum": ["heading", "title", "paragraph", "table", "drawing", "equation", "mixed"],
+      "description": "聚合块类型。取值：MinerU `text_level`（doc_title→title / paragraph_title→heading）+ span 类型（image/table/inline_equation...）映射；Docling label（paragraph/table/picture/formula/heading...）映射；多块聚合取主导类型（M2）。"
+    },
+    "sidecar": {
+      "type": "object",
+      "description": "块级溯源引用（P 策略 / 多模态自带）。",
+      "properties": {
+        "type": { "type": "string", "enum": ["block", "drawing", "table", "equation"] },
+        "id": { "type": "string" }
+      }
+    },
+    "embedding": {
+      "type": "array",
+      "items": { "type": "number" },
+      "description": "dense 向量（bge-m3）。"
+    },
+    "entity_refs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "派生视图：由 entity_chunks 反查（M2 后填），不冗余写回。"
+    },
+    "llm_cache_list": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["text_unit_id", "content", "tokens", "full_doc_id", "chunk_order_index", "file_path"],
+  "additionalProperties": true
+}

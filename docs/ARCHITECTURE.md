@@ -1,8 +1,13 @@
-# GraphRAG 系统架构与选型方案（v1）
+# GraphRAG 系统架构与选型方案（v2）
 
-> 调研日期：2026-09-03 ｜ 状态：规划基准稿，待确认项见 §7
-> 本节结论由 4 路并行调研交叉验证（框架层 / 解析层 / 存储检索层 / Agent 与平台层），
-> 信息源自 GitHub 一手仓库与官方文档，个别观点标注了来源与风险。
+> 调研日期：2026-09-03 ｜ 修订：2026-09-11（依据拆解调研与 **docs/FRAMEWORK_NOTES.md** 修正事实、明确「内建 vs 自研」边界、补版本锁定与全部实施路线）
+>
+> **本版修订摘要**：
+> - **A 档修正**：明确 LightRAG `mix` 不含稀疏/BM25、且无内建 RRF 与 reranker（§2.4/2.6，检索增强在外层）；embedding 载体定 **Xinference**（Ollama 无 sparse，§3）；chunk 上限理由更正（§2.3）；DeepSeek 模型名更正为 `deepseek-v4-flash / v4-pro`（§3/§7）；NebulaGraph 非 LightRAG 官方支持、需自写 adapter（§2.5）。
+> - **补充**：版本锁定总表（§3.1）、query 预处理（§2.6）、目录与产物规范（§6-阶段0）、图片索引策略（§6-阶段1）、评测基线贯穿（§6）、模型下载镜像（§6-阶段0）。
+> - **§6 分阶段实施路线已完整撰写**（按模块顺序、逐阶段给验收）。
+
+本节结论由 4 路并行调研交叉验证（框架层 / 解析层 / 存储检索层 / Agent 与平台层），信息源自 GitHub 一手仓库与官方文档，个别观点标注了来源与风险。
 
 ---
 
@@ -15,13 +20,13 @@
 | 图谱 | 轻量图（LightRAG 式） | 图作「关系索引」辅助跨文档查询，不做全量社区检测 |
 | 部署 | 本地/私有化单机 | Docker Compose 编排，数据不出内网 |
 | 硬件 | 本机 **Mac M3 / 24GB 统一内存 / Metal 3**（arm64，已核实） | Apple Silicon MPS 可加速 MinerU 与本地模型；Python 需 conda 建 3.10+ 环境（系统 3.9 太老） |
-| LLM 接入 | **DeepSeek**（OpenAI 兼容 API） | 抽取/生成统一走 DeepSeek，单 key 跑通全链路 |
+| LLM 接入 | **DeepSeek**（OpenAI 兼容 API） | 抽取/生成统一走 DeepSeek，单 key 跑通全链路；**实测定 `deepseek-v4-flash` 全模型（抽取+生成），不用 pro**（见 §3.1 与 §8.1） |
 | 内容形态 | **PDF 为主** + doc/txt/md 等 | MinerU 主力 + Docling 补多格式 |
 | 综述问答 | **需要全局综述** | LightRAG `global`/`mix` 起步，按效果决定是否补社区摘要 |
-| 目标 | **开发练手、测通即可**；暂不优化长期运维成本 | 存储优先「跑通」，MVP 用 LightRAG 默认存储 |
+| 目标 | **开发练手、测通即可**；暂不优化长期运维成本 | 存储做成**可切换接口**：MVP 用 LightRAG 默认存储跑通，Postgres 适配器随时切换；代码按 M0–M9 模块化重建（见 **docs/FRAMEWORK_NOTES.md**） |
 
 **核心选型一句话**：
-**LightRAG（框架内核）+ MinerU 3.x（文档解析）+ bge-m3（中文 embedding）+ Postgres/pgvector（持久化）+ LangGraph/轻量 Agent 层（编排与组装）**，全部本地私有化，抽取/建图用国产便宜模型。
+**LightRAG（框架内核）+ MinerU 3.x（文档解析）+ bge-m3（本地 embedding，经 Xinference 供 dense+sparse）+ bge-reranker-v2-m3（精排）+ Postgres/pgvector（持久化）+ LangChain 薄包装（消息/工具层）**，全部本地私有化，抽取/建图用国产便宜模型（deepseek-v4-flash），**全链路统一 `deepseek-v4-flash`（2026-09-13 实测定案，见 §8.1；不用 pro）**。
 
 ---
 
@@ -59,11 +64,11 @@
 │  用户问题                                                                 │
 │    │                                                                      │
 │    ▼                                                                      │
-│  [5 检索召回] mix/混合：local(图遍历)+global(关系链)+naive(向量)+BM25       │
-│              → RRF(k=60) 融合 → bge-reranker 精排                          │
+│  [5 检索召回] 内建 mix(图+向量local/global/naive) + 关键词sparse/BM25        │
+│              → RRF(k=60) 融合 → bge-reranker 精排（外层增强，M5）            │
 │    │                                                                      │
 │    ▼                                                                      │
-│  [6 Agent 编排] LangGraph（或轻量路由）：                                  │
+│  [6 Agent 编排] LangChain 薄包装（history+工具协议）：                      │
 │    意图识别 → 多路召回 → context 组装（带引用/来源 ID）→ 生成(流式)         │
 │    全局性/跨文档问题 → map-reduce 分块合并                                  │
 │    │                                                                      │
@@ -80,7 +85,7 @@
 
 **原则：所有输入统一收敛为两个内部标准，避免下游各管各的。**
 
-1. **统一文档格式 = Markdown**（解析层出口）。MinerU 输出 Markdown、Docling 输出 Markdown、RAGFlow DeepDoc 也归一为带版面的排版结构后进 Markdown。**理由**：Markdown 是 LightRAG/LangChain/LlamaIndex 全部原生输入的通用语言；保留标题层级、表格（HTML）、公式（LaTeX）信息，是后续「标题层级切分」和图表问答的前提。原始 PDF 仅存档，不参与索引。
+1. **统一文档格式 = Markdown**（解析层出口）。MinerU 输出 Markdown、Docling 输出 Markdown；RAGFlow DeepDoc 输出的本质是**纯文本 chunk（并非 Markdown）**，可借鉴其版面聚类思路，归一处理仍需自建（对照基准，不作为依赖）。**理由**：Markdown 是 LightRAG/LangChain/LlamaIndex 全部原生输入的通用语言；保留标题层级、表格（HTML）、公式（LaTeX）信息，是后续「标题层级切分」和图表问答的前提。原始 PDF 仅存档，不参与索引。
 2. **统一数据模型 = Document ─ TextUnit**（参考微软 GraphRAG 的数据模型）。每个块（TextUnit）必须携带：`text / 来源 doc_id / 页码 / 标题路径（hierarchy） / 块类型（text|table|title|...） / embedding / 关系出的实体引用`。所有下游（向量、图、引用标注）都只认这套模型。
 
 > 反面教材：直接把 pdfplumber 逐页吐的裸文本喂给检索，会丢掉结构，导致中文表格/条款块切开、引用无法溯源。
@@ -91,19 +96,27 @@
 |---|---|---|
 | **MinerU 3.x**（opendatalab） | PDF/扫描件 → Markdown/JSON，中文解析开源第一梯队；自动去页眉页脚、阅读顺序、公式→LaTeX、表格→HTML、跨页表格合并；离线私有部署 + Apple MPS/GPU | **主力解析器（强推）**。低资源用 `pipeline`（纯 CPU 可跑，4GB 显存），精度优先用 `vlm/hybrid`（8GB 显存）。需注意 license 为「MinerU Open Source License」（基于 Apache 2.0 的定制版，**非纯 Apache**，商用前读条款） |
 | **Docling**（IBM，MIT） | DOCX/PPTX/XLSX/HTML/EPUB/邮件等**多格式**统一解析 | **多格式补充件**。中文版式弱于 MinerU，用作非 PDF 格式的兜底 |
-| **PaddleOCR / PP-StructureV3**（Apache-2.0） | 中文 OCR 底座、表格单元格坐标 | **OCR 增强件**。MinerU pipeline 已内置 PP-OCRv6，一般不用重复部署；仅在需要印章/古籍/生僻字或表格坐标做二次结构化时单独用 |
+| **PaddleOCR / PP-StructureV3**（Apache-2.0） | 中文 OCR 底座、表格单元格坐标 | **OCR 增强件**。实测 MinerU v3.4.5 OCR = **pytorchocr**（PyTorch 复刻推理 **PP-OCRv6** 权重，PDF-Extract-Kit-1.0 打包，pip 主链不依赖 paddlepaddle）；Docling 扫描件默认 **RapidOCR**（**PP-OCRv4/v5**，多语言）。一般无需重复部署；仅在需要印章/古籍/生僻字或表格坐标做二次结构化时单独用 |
 | LlamaParse | 闭源 SaaS，绑定 LlamaCloud | **不推荐**（离线约束 + 付费 + 闭源） |
 
 **MinerU 引擎选择**（pipeline / vlm / hybrid 三选一）：
 
 | 维度 | `pipeline` | `vlm` | `hybrid`（有 GPU 时推荐） |
 |---|---|---|---|
-| 原理 | 传统 OCR（内置 PP-OCRv6）+ 版面分析 | 视觉语言大模型（MinerU2.5-Pro） | 两者融合，`effort=medium/high` |
+| 原理 | 传统 OCR（内置 PaddleOCR 系）+ 版面分析 | 视觉语言大模型（MinerU2.5-Pro） | 两者融合，`effort=medium/high` |
 | 硬件 | 纯 CPU 可跑；最低 4GB 显存（含 Apple MPS） | 必须 GPU ≥8GB 显存 | 同 vlm（≥8GB 显存） |
 | 准确率(OmniDocBench v1.6) | 86.47 | 95.30 | 95.26(medium)/95.39(high) |
 | 特点 | 快、稳、无 VLM 幻觉；复杂版面弱 | 最高精度、吃显存 | 精度高+低幻觉，medium 比 high 快 35–220% 且只降 0.13 分 |
 
 **选择建议（本机 = Mac M3 / 24GB / MPS）**：练手阶段**首选 `pipeline`**（MPS/CPU 都能跑、最快最稳，中文常规文档 86 分够用）；遇到扫描件/复杂多栏再对该类文档单独开 `hybrid medium`（M3 统一内存可跑、会慢）；不主动上 `vlm`。
+
+**源码实测补充（2026-09-12，详见 docs/PARSER_COMPARISON.md）**：
+1. MinerU 引擎用 **`-b pipeline`**（3.4.5 默认 hybrid-engine 依赖大型 VLM，本机不可行）；
+2. **LightRAG 官方 parser 已内置 mineru 与 docling 两套消费链**（`parser/external/`，ir_builder 产 blocks.jsonl）——M1 沿用官方链、只补扩展字段，不重写解析器；
+3. **结构对接一律走 JSON / content_list**（Markdown 导出会丢 label/prov 等元数据，仅作轻量视图）；
+4. docx 无页码且 Docling 不读 `w14:paraId`——原文定位需**自研补丁**或降级「文件+文本片段」（见 docs/modules/M0_contracts/textunit.md §4.2）。
+
+> 口径说明：上表 OmniDocBench 分数为 **MinerU 官方自评**、以英文/通用版式为主要榜单，中文**常规文档仅供参考**；具体内置 OCR 版本随 MinerU 迭代，安装后以实际版本为准。
 
 ### 2.2.1 结构化抽取（可选增强）：google/langextract
 
@@ -121,18 +134,21 @@
 
 - **结构化文档（合同/手册/论文/法规）→ 优先「标题层级切分」**：按 MinerU 还原出的标题结构聚合，每个 chunk 是完整结构单元（RAGFlow 的 Title/Hierarchy Chunker 即此思路）。**不建议对结构化文档用纯语义切分**（慢、对表格/条款不稳）。
 - **通用/长文本 → TokenChunker**：`chunk_size ≈ 512 tokens（中文约 500–1000 字）`，`overlap 10–15%`，**先按自然段落边界切再按 token**（避免从句子/表格中间切断）。
-- **上限**：单 chunk 不超过 `1200–1500 tokens`（超出显著降低检索精度并超 reranker 预算）。
+- **上限**：单 chunk 不超过 `1200–1500 tokens`（bge-reranker-v2-m3 上下文上限 8192 tokens，设上限主要控**定位粒度与时延**——过长块中 query 相关性会被稀释）。
 - **表格整块为一个 chunk**，标题/章节路径作为 metadata 前置。
 
 ### 2.4 索引层（双索引）
 
-- **图索引（LightRAG 建图）**：LLM 抽取 实体/关系 构建轻量图。**每个环节可独立配模型**——抽取/建图用便宜模型（DeepSeek-lite/Kimi/Qwen），回答用强模型；开 `ENABLE_LLM_CACHE`（LLM 缓存）与 `MAX_ENTITY_TOKENS`（上下文截断）控成本。支持**增量更新与选择性删除**（复用索引期缓存重建受影响实体）——这是知识库持续扩写的关键。
-- **向量索引**：TextUnit 用 **bge-m3** 编码（dense+sparse 一次拿到，8192 token，1024 维，中文强）。**无需另建 BM25 索引**——bge-m3 的 sparse 即稠密+稀疏混合检索的基础。精排用 **bge-reranker**。
-- 五查询模式：`local / global / hybrid / naive / mix`，默认 `mix`（三者合并）——详见 §2.6。
+- **图索引（LightRAG 建图）**：LLM 抽取 实体/关系 构建轻量图。**每个环节可独立配模型**——抽取/建图与回答**统一 `deepseek-v4-flash`**（2026-09-13 实测定案，不用 pro，见 §8.1）；开 `ENABLE_LLM_CACHE`（LLM 缓存）与 `MAX_ENTITY_TOKENS`（上下文截断）控成本。支持**增量更新与选择性删除**（复用索引期缓存重建受影响实体）——这是知识库持续扩写的关键。
+- **向量索引**：TextUnit 用 **bge-m3** 编码（dense+sparse 一次拿到，8192 token，1024 维，中文强）。**无需另建 BM25 索引**——前提是 embedding 载体支持 sparse 输出（选 **Xinference**；**Ollama 只吐 dense、不满足**）。精排用 **bge-reranker-v2-m3**。
+
+**内建 vs 自研（重做关键边界，必读）**：
+- **LightRAG 内建**：`local / global / naive / hybrid / mix` 五种检索模式（图 + 向量），其中 `mix = local + global + naive`；
+- **外层自研（检索增强层，模块 M5）**：关键词路（sparse/BM25 可切换）、**RRF(k=60) 融合**、**bge-reranker 精排**、query 预处理——LightRAG **无多路融合 RRF**；chunk 重排管道实测存在但默认 off（`rerank.py`，`RERANK_BINDING="null"`），仅作用于 chunks 且需 provider，「三路融合 + 精排」仍是目标态、需外层实现。M5 可**复用其 `process_chunks_unified` 精排管道**（详见 `lightrag/docs/retriever.md`）。
 
 ### 2.5 持久化层
 
-**注意（按你的练手目标）**：MVP 直接用 LightRAG 默认存储跑通功能即可，下表「准生产/扩展」两行只在需要时再启用——不要为了"生产就绪"提前引入 Postgres。
+**注意（按你的练手目标）**：存储做成**可切换接口**（模块 M4）。MVP 用 LightRAG 默认存储跑通功能；**Postgres 适配器在 M4 阶段就实现，切换只改配置**——不在 MVP 阶段提前引入 Postgres 服务，也不锁死在默认存储。
 
 **分阶段演进，避免一开始就上重系统（个人单机从简）：**
 
@@ -140,28 +156,38 @@
 |---|---|---|
 | MVP（先跑通） | LightRAG 默认存储（JsonKV + NetworkX + 轻量向量库） | 零运维；**缺点：内存态，不适合长期保存，索引重建即费 token** |
 | **准生产（推荐目标）** | **Postgres + pgvector 一库通吃**：图结构、向量、原文块、索引状态同一库 | LightRAG 官方推荐路径；pgvector 支撑「百万–数千万」级向量，个人/小团队完全够；**省一个独立向量库服务的运维** |
-| 扩展（数据量再上万级 +） | 图 → **NebulaGraph**（Apache-2.0 可商用、中文原生、分布式）｜向量 → **Milvus**（亿级主战场、中文生态最强）或 **Qdrant**（部署轻、内置 RRF/DBSF） | 迁移成本高，非必须不要提前做 |
+| 扩展（数据量再上万级 +） | 图 → **NebulaGraph**（Apache-2.0 可商用、中文原生、分布式）｜向量 → **Milvus**（亿级主战场、中文生态最强）、**Qdrant**（部署轻、内置 RRF/DBSF）或 **Chroma**（最轻，HNSW 须全量驻内存，64GB 约 1500 万条 1024 维——**适合起步、天花板低**） | 迁移成本高，非必须不要提前做。⚠️ **LightRAG 官方无 NebulaGraph 适配器**（官方支持 pgvector/Neo4j/Milvus/Qdrant/MongoDB 等），需自写 storage adapter，成本高于表格所示 |
 
 **许可证风险提醒（重点，避免踩坑）：**
 - **Neo4j Community = GPLv3**（可商用内用，但**修改版对外分发须开源**，且 Community 单实例无高可用）；官网 license 页面有过 Commons Clause 历史——**下载发行版时务必核对 LICENSE 文件是否是纯 GPLv3**。真要开图库，**NebulaGraph（Apache 2.0）更省心**。
-- **Elasticsearch**：默认 AGPL/SSPL/EL-2.0 三选一（SSPL/EL-2.0 非 OSI 开源，SSPL 网络服务触发源码公开）；**商用省心用 OpenSearch（Apache 2.0）**。
-- **Chroma**：HNSW 必须全量驻内存，64GB 约放 1500 万条 1024 维向量——**适合起步，天花板低**。
+- **Elasticsearch**：当前为 **ELv2 / SSPL 双许可**（均非 OSI 开源；AGPL 是 6.x 时代旧条款，SSPL 网络服务触发源码公开）；**商用省心用 OpenSearch（Apache 2.0）**。
 
-### 2.6 检索召回层（hybrid 混合检索）
+### 2.6 检索召回层（三路混合：内建 + 外层增强）
 
-**结论：做「图谱 + 向量 + 关键词」三路混合，融合器用 RRF（k=60），精排用 bge-reranker。**
+**目标态：做「图谱 + 向量 + 关键词」三路混合，融合用 RRF（k=60），精排用 bge-reranker-v2-m3。** 按能力归属拆两层（对应 §2.4 的「内建 vs 自研」边界）：
 
+**LightRAG 内建三路（M5 直接封装）：**
 - `local`（图遍历）：query → 实体匹配 → 沿图扩张（实体↔原文/↔关系/↔邻实体）——实体级问答主力；
-- `global`（关系链/跨文档主题）：轻量图下即关系链聚合，替代微软 GraphRAG 昂贵的社区报告；
+- `global`（跨文档主题 / 关系链）：**不锚定单一实体**，以关系为锚，把散布多篇文档、围绕同一主题的片段捞回聚合——直接支撑综述类问题；机制远轻于微软 GraphRAG 的社区报告；
 - `naive`（纯向量）：语义召回，覆盖种子实体未命中的情况；
-- `BM25/sparse`（bge-m3 自带）：精确匹配人名/机构名/中文专名/数字兜底。
-- LightRAG 的 `mix` 模式天然把三路 RRF 融合，LLM 调用量比微软 GraphRAG 少一个数量级，**成本与延迟都适配个人单机**。
-- 上线初期建议就用 **RAGAS + 自有中文测试集**（含人名/专名 query）定 baseline（faithfulness / context recall 等），再调轮重排与融合权重。
-- **全局综述类问题**（已确认需要）：用 LightRAG `global`（关系链跨文档聚合）起步；若主题综述效果不足，再按 §5-5 补社区摘要（HiRAG 分层树思路）。
+- `mix` = local + global + naive 合并检索（LightRAG 内建的合并，无 RRF）。
+
+**外层增强（自研实现，模块 M5）：**
+- **关键词路**：bge-m3 `sparse`（经 Xinference）或 BM25——**接口做成可切换**。精确匹配人名/机构名/中文专名/数字兜底；
+- **RRF(k=60) 融合**：三路（图 + 向量 + 关键词）按排名倒数融合，产出统一列表；
+- **rerank 精排**：bge-reranker-v2-m3（经 Xinference `/v1/rerank`）对 RRF 结果 top-K 精排；
+- **query 预处理**：意图/实体识别 + 中文专名改写，提升 `local` 种子实体命中率（中文缩写/同义易漏）。
+
+> ⚠️ 边界提醒：LightRAG 的 `mix` **不含关键词路，也没有内建 RRF 与 reranker**（v1 稿把目标态写成内建能力，重做后已更正）。
+
+**检索策略 vs 生成策略（分层，勿混淆）**：`global` 是**检索策略**（M5 决定从哪召回）；`map-reduce` 是**生成/组装策略**（M6 决定如何组织上下文与合并）。跨文档综述通常是「global 检索 + map-reduce 组装」**组合使用**，二者不互斥（见 §2.7 意图路由）。
+
+**评测与迭代（贯穿）**：建 **RAGAS + 自有中文测试集**（含人名/专名 query）定 baseline（faithfulness / context recall 等），再调融合权重与 rerank 阈值；每次改动回归对比（模块 M9）。
+**全局综述类问题**：用 LightRAG `global`（关系链跨文档聚合）起步；若主题综述效果不足，再按 §5-5 补社区摘要（HiRAG 分层树思路）。
 
 ### 2.7 Agent 编排与上下文组装（「传给 agent → 返回用户」这一段的落地）
 
-**推荐：LightRAG 内核 + 一层可控的 Agent 编排**（个人单机不必上重 LangGraph；若后续要多智能体、复杂工具调用，再引入 LangGraph 状态机）。
+**推荐：LightRAG 内核 + 一层可控的 Agent 编排**（对应模块 M6）。用 **LangChain 薄包装**：仅用于**对话 history 管理**与**工具调用协议**（agent 可调图谱检索 / 文档检索两个工具）；模板化的 prompt/上下文组装**自研，不深度用 LCEL 抽象**。若后续要多智能体、复杂工具调用，再引入 **LangGraph 状态机**。
 
 组装规范（抄微软 GraphRAG 的最佳实践、做中文化）：
 
@@ -173,8 +199,11 @@
 
 ### 2.8 交互层
 
-- **Web UI**：LightRAG 官方 server 自带 WebUI（文档管理 / 图探索 / 查询调试），个人单机够用；对外给 API 用 FastAPI 包一层（SSE + 引用标注 + 多轮会话）。
-- 多轮会话记忆（可选用 RAGFlow「AI Memory」/Dify 会话变量思路；或自管 history 注入）。
+- **后端（M7，已落地）**：FastAPI 统一对外——在线线：SSE 流式 + 引用标注 + 多轮会话；**文档管理**：`POST /docs` 后台入库管线（M1→M2→M3 增量）→ `GET /docs` 列表状态 → `DELETE /docs/{doc_id}` 软删；**图谱导出**：`GET /graph`（PG 全图节点/边，软删文档独有实体已过滤，节点带 `docs[]`/`chunks[]` 供前端反查）；**文档预览**：`GET /docs/{doc_id}/preview`（读 M2 chunks JSONL，供前端引用→原文跳转高亮）；**按文档过滤图谱**：`GET /graph?doc_id=`（仅返回该文档贡献的实体子图）；**引用排序修复**：后端 `cite.py parse_citations` 按置信度降序输出。详见 `docs/modules/M7_interact.md`（v3 文档管理 / v4 图谱导出 / v5 预览+按文档过滤+排序）。
+- **Web UI**：M7 自带零依赖 WebUI（答案 + 引用定位原文）作轻量兜底；正式前端见 **M8**（React，`frontend/`）。
+- **专业前端（M8，已落地）**：图谱展示主轴 = 「问题 → 回答 + 引用高亮 → 点击引用定位原文 → 引用「在图谱中查看」跳图谱并聚焦相关实体子图」。渲染层选 **AntV G6 v5.1.1**；布局采用「左侧可折叠侧边栏 + 主区 + 右栏 tab」，问答为主视图，左侧导航（问答 / 文档管理 / 知识图谱，导航项数组模式便于扩展新模块如数据分析），右侧 tab 切换「引用来源 / 预览」（右栏为未来「关联」模块留出位）。M8 v1=SSE 流式问答 + `[n]` 引用溯源 + 多轮；v2.1=文档上传/文档管理视图；v2.2=知识图谱（G6 力导向全图 + 类型着色 + 点节点详情 + 引用→图谱单向下钻高亮）；**v2.3**=左侧可折叠侧边栏 + 右栏 tab + 文档全文预览（置信度第一片段柔和浅杏高亮，非亮非黄） + 引用按置信度降序并限前 5 条 + 图谱按文档维度过滤下拉（图谱移入主列，不再全屏）。详见 `docs/modules/M8_frontend.md` + 需求稿 `M8_frontend_req.md`。
+- 多轮会话记忆：当前自管 history 注入（可进阶 RAGFlow「AI Memory」/Dify 会话变量思路）。
+- **模型下载**：本机直连 HuggingFace 不通，统一 `HF_ENDPOINT=https://hf-mirror.com`。
 
 ---
 
@@ -182,13 +211,30 @@
 
 | 环节 | 建议 | 说明 |
 |---|---|---|
-| 实体抽取/建图 | 便宜模型：DeepSeek-lite / Kimi / Qwen（可再开 `ENABLE_LLM_CACHE`） | 抽取是调用最密集的环节，用便宜模型省大头 |
-| 回答生成 | 强模型：DeepSeek / GLM | 输出质量优先 |
-| Embedding | **bge-m3 本地部署**（Ollama / Xinference / TEI） | 私有化场景首选自部署；也可 DashScope text-embedding-v3 API（`dense&sparse`，有免费额度）|
-| Rerank | **bge-reranker-v2-m3**（本地） | 中文专名精确性提升明显 |
-| 语言设置 | `SUMMARY_LANGUAGE=zh`（LightRAG） | 让实体/关系/报告直接输出中文，避免英文图污染 |
+| 实体抽取/建图 | 便宜模型：**deepseek-v4-flash** / Kimi / Qwen（可再开 `ENABLE_LLM_CACHE`） | 抽取是调用最密集的环节，用便宜模型省大头 |
+| 回答生成 | **deepseek-v4-flash**（**统一全链路 flash**，不用 pro——2026-09-13 实测定案） | 输出质量优先；flash 实测抽取已优于 GLM（见 §8.1） |
+| Embedding | **bge-m3 经 Xinference 本地部署**（dense+sparse 双输出） | **不选 Ollama**（只吐 dense、无 sparse，破坏「免建 BM25」前提）；也可 DashScope text-embedding-v3 API（`dense&sparse`，有免费额度）|
+| Rerank | **bge-reranker-v2-m3**（经 Xinference `/v1/rerank` 标准接口） | 中文专名精确性提升明显 |
+| 语言设置 | 生成/报告 `SUMMARY_LANGUAGE=zh`；**实体抽取需另行配 `language=zh`**（entity_extraction 参数或自定义 prompt） | 只设 SUMMARY_LANGUAGE 时实体仍可能英文，两个都要配，避免英文图污染 |
+| 测试/低成本 | **GLM 免费档备选**：`glm-4.5-flash` / `glm-4-flash-250414`（bigmodel `https://open.bigmodel.cn/api/paas/v4`） | 主链仍 DeepSeek；**测试/评测/练手**用 GLM 免费档控成本或作降级；`glm-4.7-flash` 访问量大、大概率不可用，勿作第一选择（接入示例见 `lightrag/docs/llm.md` §3.2.1） |
 
 > 中文 token 膨胀约 2 倍：`max_tokens` 与 `max_data_tokens` 都要给足。
+
+### 3.1 组件版本锁定总表（初始基线，实施时以最新稳定版为准并回归）
+
+| 组件 | 版本/型号（初始基线） | 许可证 | 部署形态 | 备注 |
+|---|---|---|---|---|
+| LightRAG（pip：lightrag-hku） | v1.5.7 起锁定，升级前回归 | MIT | Python 包 | 迭代快，版本是易碎点（§5.2） |
+| MinerU | 3.x（装后核实内置 OCR 内核） | 定制 Apache（§2.2） | Python / MPS | pipeline 起步，扫描件 hybrid |
+| Docling | 当前稳定版 | MIT | Python | 多格式兜底 |
+| bge-m3 | BAAI/bge-m3 | MIT | **Xinference（FlagEmbedding 后端）** | dense+sparse，8192/1024 维 |
+| bge-reranker-v2-m3 | BAAI/bge-reranker-v2-m3 | MIT | **Xinference** | `/v1/rerank` |
+| **Xinference（模型网关）** | 当前稳定版 | Apache-2.0 | 本地进程/容器 | 统一承载 bge 两模型，单地址三端点；先于一切模块部署 |
+| DeepSeek API | `deepseek-v4-flash`（**全链路统一，不用 pro**） | — | 云端（OpenAI 兼容） | 抽取 / 生成，单 key 全链路；**注意 v4-flash 是推理模型，须 `extra_body` 传 `thinking={"type":"disabled"}` 关思考模式**（见 §8.1） |
+| GLM（bigmodel，测试/低成本备选） | `glm-4.5-flash` / `glm-4-flash-250414`（免费档） | 商用授权视邀请（个人测试 OK） | 云端 `https://open.bigmodel.cn/api/paas/v4` | 测试 / 评测 / 降级用；`glm-4.7-flash` 流量大不稳定，不作主选 |
+| Postgres + pgvector | Postgres 16 + pgvector 0.8+ | PostgreSQL / Apache | 本地或容器 | 准生产，一库通吃 |
+| FastAPI | 当前稳定版 | MIT | Python | SSE 流式 |
+| AntV G6 | v5.1.1（**已落地** 2026-09-15） | MIT | npm 前端（frontend/） | 知识图谱渲染（M8 v2.2）；引入后 dist JS ≈1.65MB（gzip ≈481KB，后续可代码分割） |
 
 ---
 
@@ -208,25 +254,30 @@
 ## 5. 风险与注意事项清单
 
 1. **License**：MinerU 定制 Apache 条款（§2.2）；Neo4j Community GPLv3（§2.5）；ES 双许可坑。轻量图方案下图库选 Postgres 内联即可绕开大部分。
-2. **维护状态**：微软 GraphRAG 已维护模式（仅修 bug）→ 只当检索/组装思路参考；**LightRAG 2026-09 仍日均提交**，但 v1.5 迭代快，需锁定版本并在升级前回归测试。
+2. **维护状态**：微软 GraphRAG 已维护模式（仅修 bug）→ 只当检索/组装思路参考；**LightRAG 2026-09 仍日均提交**，但 v1.5 迭代快，需锁定版本并在升级前回归测试（版本锁定表见 §3.1）。
 3. **成本**：抽取环节最贵 → 便宜模型 + LLM 缓存 + 增量更新（不要全量重建）。
 4. **中文抽取噪声**：轻量图不加 schema 约束时实体质量不稳 → 可选 `SchemaLLMPathExtractor`（LlamaIndex）思路给抽取加 schema；或用 RAGFlow Graph 编译的受约束抽取作对比。
 5. **全局问答能力**：放弃社区报告后，纯 LightRAG `global` 的主题综述能力弱于微软 GraphRAG。若后续发现「全库综述」需求频繁，再评估在 light 图基础上补社区摘要（参照 HiRAG 分层树思路）。
 6. **LangExtract**：默认 Gemini 且非 Google 官方支持产品（医疗场景受 Health AI Developer Foundations 条款约束）；作为可选增强层，接国内模型需验证第三方 provider 插件。
+7. **模型网关单点（Xinference）**：embedding/rerank 都经它，服务不可用则检索不可用 → 纳入健康检查与启动脚本；其余模块禁止绕过它直连本地模型。
 
 ---
 
-## 6. 分阶段实施路线
+## 6. 分阶段实施路线（方向级）
 
-> 阶段任务按「做得到、可验收」的边界划分；「完成形态」列是可感知的验收效果。交互层（UI/API）的分层定位见 §2.8，组装层规范见 §2.7。
+> 原则：本步只定**顺序、每步做什么、每步的重点是什么**；具体任务清单在进入该步时再展开（记录到 `docs/modules/Mx_xxx.md`），方向未定前不写细。
 
-| 阶段 | 内容（任务边界） | 完成形态（可验收） | 状态（2026-09） |
-|---|---|---|---|
-| **P0 跑通** | conda 建 3.11 环境 → `lightrag-hku` + `mineru` → 测试文档建图 → query 跑通 local/hybrid/global 综述 | 3 个模式的中文问答可用 | ✅ 完成 |
-| **P1 多格式** | `scripts/parse.py`（MinerU/Docling 路由、幂等/容错/元数据）+ index 固定 `ids=doc_id`（见 p1.md） | 混合文档库（pdf/docx/md）一次性入库，3 问验收过 | ✅ 完成 |
-| P2 引用溯源 + 交互层 | ① parse.py 扩展：填 `span_map`（md 偏移 ↔ PDF 页码，读 mineru `middle.json` / docling provenance）；② 切分层落地（§2.3）：结构化文档标题层级切分，TextUnit 携带 doc_id / 页码 / 标题路径；③ FastAPI 壳：`POST /query` 返回结构化回答 + `references[]`（含 doc_id+页码），SSE 流式（「检索完成 / 生成第 N 段」事件）；④ 交互：FastAPI 自带 `/docs`（Swagger）即可用，可选加 Streamlit 单页（上传 / 提问 / 引用列表） | ① parsed json 的 `span_map` 非空且指向真实页码；② 回答引用到页级，如「张伟 · 03_会议纪要.md · 第 1 页」；③ 浏览器经 `/docs` 或 SSE 能看到流式事件 | 待做 |
-| P3 Agent 编排（对应 §2.7） | 自研组装层：意图路由（全局 → map-reduce；局部 → single-window）→ 检索多路结果压缩进 `max_data_tokens`（组装前过滤+排名）→ **带引用**生成；多轮会话（history 注入，记忆归 Agent 层管）；可选：rerank（bge-reranker，§2.6）与语义缓存（二期，§2.7-5） | 多轮追问能衔接上文；token 预算受控（组装前压缩）；答案引用列表随链路流转、可回到 TextUnit/页码 | 待做 |
-| P4 扩展（按需） | Postgres+pgvector 一库通吃 / 图迁 NebulaGraph / 社区摘要补全局综述（§5-5） | 触发条件：数据量上万级，或全局综述不达标 | 按需 |
+| # | 操作（做什么） | 重点（关注什么） |
+|---|---|---|
+| **① 拆解 LightRAG 源码** | 拉取并锁定版本（v1.5.7 起），安装跑通最小样例，通读目录结构 | 源码拆解四大块：**存储 / 检索(retriever) / 图构建与实体抽取 / LLM 接入 / 模块间接口规范**；验证 §2.4「内建 vs 自研」边界为真，明确 RRF / rerank / 关键词路哪些需外层实现 |
+| **② 拆解 MinerU / Docling 源码** | 分别拉取安装，用样例 PDF / docx 跑通，读源码 | **数据流**（输入 → 版面/文字 → 中间表示 → 输出；页码 / 表格 / 公式 / 标题路径如何携带）与**输入输出接口规范**；确认可归一为统一 Markdown（M1 adapter 的对接依据） |
+| **③ 部署 Xinference 模型网关** | 启动 Xinference，加载 bge-m3 与 bge-reranker-v2-m3，写启动 + 健康检查脚本 | 验证 embedding / rerank 端点可用；**实测 bge-m3 dense+sparse 双输出**（「免建 BM25」的前提，拿不到早失败）；可与 ①② 并行 |
+| **④ 定契约地基（共享层 M0）** | 定义 Document / TextUnit Schema、config（模型映射 / 缓存 / 语言）、llm_client / embed_client | **契约先行**：TextUnit 字段（text / doc_id / 页码 / 标题路径 / 块类型 / embedding / 实体引用）与 doc_id 规则定死，所有模块据此开发、用样例数据 mock 上下游；**契约以 JSON Schema 机器校验落地，说明见 `docs/modules/M0_contracts/`** |
+| **⑤ Agent 编排（M6）** | 按 LangChain 薄包装接入（history + 工具协议）；定意图路由与上下文组装的方向 | **编排边界**：组装 / 引用自研，LangChain 不做重抽象；single-window 与 map-reduce 各治哪类问题 |
+| **⑥ 前端设计与展示** | ① （可选）Figma 画稿，对齐「问题 → 回答 + 引用 → 定位原文 → 图谱游走」动线；② **搭前端工程并引入 AntV G6**（本机未装：npm 初始化 + 安装 `@antv/g6`，属部署步骤）；③ **与 ⑤ 编排对齐，定前端所需的最小 API 契约**（SSE 事件定义 / 引用标注字段形状）；④ 按主轴线实现页面：回答 + 引用高亮 → 点击定位原文 → 答案节点图上游走 | 页面**只依赖稳定 API**（SSE + 引用标注）、与后端解耦；时序是**先部署依赖（②）→ 画稿对齐（①）→ 定 API 契约（③）→ 渲染实现（④）**；G6 只做渲染层，布局/交互体验在稿上先定 |
+| **⑦ 联调与评测基线** | 后端各段（解析 → 切分 → 索引 → 检索 → 编排）+ **前端页面端到端**汇合：FastAPI（StreamingResponse + SSE）作统一入口，产物经「契约校验（④ 的 Schema）/ 写库」衔接；跑真实文档，建 RAGAS 种子测试集；**含前端走查**（引用高亮 / 点击定位 / 图谱游走）；最后 **Docker Compose** 收敛部署 | 联调**先过契约再过行为**；靠**统一日志 / 观测**定位断点（契约错 vs 行为错）；评测基线守住每次改动；前端当「眼睛」，端到端问题在真实路径上暴露 |
+
+> **当前推进状态（2026-09-15）**：①–⑦ 方向级路线已全部落地——M0 契约（`docs/modules/M0_contracts/`）、M1 解析、M2 切分、M3 索引（DeepSeek 定案，§8.1）、M4 存储（PG）、M5 检索、M6 生成、M7 交互层（v3 文档管理、v4 图谱导出、v5 预览+按文档过滤+引用排序）、M8 前端（v1 问答 / v2.1 文档上传管理 / v2.2 知识图谱＋引用→图谱联动 / v2.3 侧边栏+预览+引用排序+图谱过滤，§8.2）均按 `docs/modules/` 记录落地；**M9 评测层待启动**。Docker Compose 收敛部署未做（后续项）。
 
 ---
 
@@ -240,3 +291,45 @@
 | 4 | 全局综述 | 需要 |
 | 5 | LangExtract 结构化抽取 | 暂不纳入 MVP，作后续可选项 |
 | 6 | 目标 | 练手、测通即可；不预优化运维成本 |
+| 7 | embedding/rerank 载体 | **Xinference**（本地模型网关，支持 dense+sparse 与 `/v1/rerank`；不选 Ollama） |
+| 8 | DeepSeek 模型 | **统一 `deepseek-v4-flash`**（抽取+生成；不用 pro；2026-09-13 实测定案，见 §8.1） |
+| 9 | 检索增强 | 三路 RRF(k=60) + rerank **外层自研**（模块 M5） |
+| 10 | 开发形态 | 按 **M0–M9** 模块化重做；契约先行、线 A/B 并行走；记录按 docs/modules/ |
+
+---
+
+## 8. 实测附录（持续追加）
+
+### 8.1 M3 索引层 DeepSeek 后端定案（2026-09-13）
+
+详见模块记录 `docs/modules/M3_index.md`（含对比表与复现命令）。
+
+**关键坑——DeepSeek v4-flash 思考模式**：v4-flash 是推理模型，默认思考模式占 `reasoning_tokens` 75–100%，极端时烧光 `max_tokens` 致 `content=""`、抽取失败重试卡死。修复 `extra_body={"thinking": {"type": "disabled"}}`（**OpenAI SDK 不接受 `thinking` 直接参数**，须 `extra_body` 透传；`reasoning_effort=low`/`reasoning={effort:"none"}` 无效）。依据：deepseek api-docs 思考模式指南。
+
+**GLM vs DeepSeek 抽取对比**（公平样本 3 文档）：
+
+| 文档 | GLM 实体/关系 | DeepSeek 实体/关系 | 备注 |
+|---|---|---|---|
+| 会议纪要 | 23/23 | 16/10 | GLM 表头词噪音（`事项`/`状态`/`负责人`） |
+| 办公用品 | 16/13 | 10/9 | 同上 |
+| 季度复盘 | 76/88 | 47/48 | GLM 大量「指标+数值」脏实体（`ARPU值提升8%`/`收入1,200万元`） |
+
+**结论**：DeepSeek 数量少但更净——实体名贴近业务对象、数值沉淀入关系描述（信息不丢）；GLM 免费档图噪声大。DeepSeek 另两文档（投诉SOP/产品需求，GLM 曾失败/未做）均一次通过。**后续全链路统一 deepseek-v4-flash。**
+
+### 8.2 M7 文档管理 / M8 前端·文档上传与知识图谱落地（2026-09-15）
+
+详见 `docs/modules/M7_interact.md`（v3 文档管理、v4 图谱导出、v5 预览+按文档过滤+引用排序）与 `docs/modules/M8_frontend.md`（v1/v2.1/v2.2/v2.3）。
+
+**文档管理闭环（M7 v3 + M8 v2.1）**：`POST /docs` 后台跑 M1→M2→M3 增量入库（模块级 `asyncio.Lock` 串行 + `documents.json` 注册表 processing→ready/failed）→ `GET /docs` 列表/状态 → `DELETE /docs/{doc_id}` **软删**（PG 图谱跨文档共享、source_id 是 chunk id 无法物理删：注册表标记 + 列表移除 + 检索侧 `excluded_docs` 过滤零召回）。前端输入框附件上传 + 2s 轮询状态 + toast，文档管理视图列表/badge/删除。实测：上传 → ready → 对新文档提问命中 → 删除 → 列表空 + 0 召回。
+
+**知识图谱 + 问答联动（M7 v4 + M8 v2.2）**：`GET /graph` 从 PG（`PGTableGraphStorage.get_all_nodes/edges` + `lightrag_doc_chunks` 建 chunk→doc 映射）全量导出并软删过滤——**仅当实体所有贡献文档都属已删除集才剔除**，共享实体/无归属实体保守保留；节点含 `docs[]`/`chunks[]`。前端 AntV G6 v5.1 力导向全图（类型着色 / 缩放拖拽 / 点节点详情侧栏），引用卡「在图谱中查看」→ 切图谱视图并本地反查高亮引用 chunk/文档相关实体 + 1 跳邻域聚焦。headless 走查断言全过（聚焦栏「已定位引用相关实体 51 个，含 1 跳邻域共 52 个节点」）；`npm run lint` + `tsc --noEmit` + `build` 全绿。
+
+**侧边栏 + 文档预览 + 引用排序 + 图谱文档过滤（M7 v5 + M8 v2.3，2026-09-15）**：
+- **布局**：左侧可折叠 Sidebar（导航项数组模式，新增模块只需 push 一项），问答为主视图；右侧 tab 切换「引用来源 / 预览」（右栏为未来「关联」等模块预留位）；图谱移入主列（不再全屏）。输入框上移 5px。
+- **文档预览**：`GET /docs/{doc_id}/preview` 读 M2 chunks JSONL 返回全部 TextUnit；前端 `DocumentPreview` 组件按 `text_unit_id` 定位（替代页码，doc 无稳定页码的格式也适用），最高置信度片段柔和浅杏高亮（非亮、非黄）。引用来源卡新增「原文档 #」一键跳预览定位。
+- **引用排序修复**：根因是 `cite.py parse_citations` 按正文中 `[n]` 出现顺序输出（与置信度无关）；修复方案 `citations.sort(key=lambda c: c.score, reverse=True)`（后端已加）；前端再按 score 降序并 slice(0, 5) 双保险，仅展示置信度前 5 条。
+- **按文档过滤图谱**：`GET /graph?doc_id=` 可选参数，服务端在节点归属文档集合判断前做过滤（保留软删过滤逻辑）；前端 GraphView 顶部工具条 select 选择文档维度，切换后重新拉取并渲染子图。`npm run build` 全绿。
+
+**实现期踩坑（可复用）**：引用 `text_unit_id`（M2 格式 `{doc_id}-chunk-{i}`）≠ 图谱节点 `chunks[]`（PG `chunk-{md5}`），反查须同时试 chunk 与 fullDocId（后者可靠）；React dev StrictMode 双挂载会废掉一次性 pending ref → 用「build effect 存初始 render promise + `graphReady` state 门控 focus effect」，且 applyFocus 里**不要二次 `await graph.render()`**（244 节点力导向二次 render 长时间不 resolve、聚焦卡死）；headless Chrome（CDP）磁盘缓存旧 vite 模块会伪证代码未变，走查前须 `Network.setCacheDisabled` + 干净 profile。
+
+> 数据现状（2026-09-13）：`inputs/raw` 5 文档（会议纪要.docx / 办公用品.pdf / 季度复盘.pdf / 投诉SOP.md / 产品需求.docx）已全量过 M1→M2→M3，双库对比基准 `data/lightrag`（GLM）/ `data/lightrag_deepseek`（DeepSeek）保留。
