@@ -10,7 +10,7 @@
   height: 100vh;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 20px 28px;
 }
 
 /* ===== 侧边栏（问答/文档管理/图谱导航，可折叠） ===== */
@@ -496,7 +496,7 @@
 /* ===== 输入区 ===== */
 .input-area {
   grid-area: input;
-  padding: 9px 20px 8px 0;
+  padding: 9px 20px 28px 0;
   display: flex;
   flex-direction: column;
   gap: 8px;

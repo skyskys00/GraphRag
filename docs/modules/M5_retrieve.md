@@ -1,6 +1,6 @@
-# M5 模块记录：检索层 v1（三路 RRF + rerank + 溯源）
+# M5 模块记录：检索层 v1.6（三路 RRF + rerank + 白名单过滤）
 
-> 状态：**正式落地**（2026-09-13，PG 库 lightrag_m4，四题全绿。v0.1 冒烟基线保留作对比）。
+> 状态：**v1.6 已落地**（白名单 allowed_docs + 黑名单 excluded_docs 双过滤）。
 > 契约：query 输入 → 精排后 chunk 列表（带 full_doc_id / score / 来源）。
 > 依据：`docs/FRAMEWORK_NOTES.md` §3 ｜ `docs/ARCHITECTURE.md` §2.6 ｜ 版本与实测见 `docs/CHANGELOG.md`
 > 前置：M3 索引（PG，bge-m3 dense 1024d）+ M4 存储切换 + Xinference bge-m3/bge-reranker-v2-m3

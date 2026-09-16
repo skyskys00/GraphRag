@@ -1,6 +1,6 @@
 # M8 模块记录：正式问答前端（React + SSE 流式 + 文档管理 + 知识图谱）—— 已落地
 
-> 状态：**v1 问答主链路 + v2.1 文档上传/文档管理 + v2.2 知识图谱/问答联动 均已落地**（2026-09-15）。本文为模块落地记录（结构/契约/实测/验收/变更）；产品侧需求稿见 `docs/modules/M8_frontend_req.md`（v2.2）。
+> 状态：**v2.3.1 已落地**（v2.3 侧边栏+预览+过滤 → v2.3.1 移除预置问题 + 输入框视觉上移）。
 > 契约：消费 M7 交互层 API（`POST /answer`、`GET /answer/stream`(SSE)、`POST/GET /docs`、`DELETE /docs/{doc_id}`、`GET /graph`、`GET /health`）。
 > 依据：`docs/ARCHITECTURE.md` §2.8 交互层 / §6 ⑥ 前端设计与联调 ｜ `docs/modules/M7_interact.md`（后端契约）
 

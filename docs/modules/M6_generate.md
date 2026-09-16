@@ -1,6 +1,6 @@
 # M6 模块记录：生成层（编排 + 引用标注）—— 已落地
 
-> 状态：**已落地**（2026-09-14 v1，MVP：single-window 组装 + 生成 + TextUnit 级引用）。下文为落地前的规划方向，实施结果见 §8 / §10 与代码 `app/m6_generate/`。
+> 状态：**v1.1 已落地**（软删 excluded_docs + 白名单 allowed_docs 双向透传 M5）。
 > 契约：query + M5 精排 context → 答案（text）+ 结构化引用（citations）。
 > 依据：`docs/FRAMEWORK_NOTES.md` §3 模块划分 ｜ `docs/ARCHITECTURE.md` §2.7 Agent 编排与上下文组装 ｜ `docs/modules/M0_contracts/textunit.md` §1（M6 引用标注消费 text_unit_id/file_path/page_range/anchor）
 > 前置：M5 检索 v1/v1.5 已落地（三路 RRF + rerank + full_doc_id 溯源）、DeepSeek v4-flash 统一链路、M2 chunk 产物含 page_range/anchor

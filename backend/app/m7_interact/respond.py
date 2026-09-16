@@ -36,10 +36,12 @@ async def make_answer(
 ) -> dict[str, Any]:
     q = build_query_with_history(query, history)
     excluded = sorted(deps.excluded_docs)
+    allowed = sorted(deps.allowed_docs) if deps.allowed_docs else None
     result = await answer(
         deps.rag, q, deps.sparse, entities=deps.entities,
         sidecar=deps.sidecar, query_func=deps.query_func,
         response_type=response_type, exclude_docs=excluded,
+        allowed_docs=allowed,
     )
     return _jsonable_result(result)
 
@@ -51,9 +53,11 @@ async def stream_answer(
     response_type: str | None = None,
 ) -> AsyncIterator[str]:
     q = build_query_with_history(query, history)
+    allowed = sorted(deps.allowed_docs) if deps.allowed_docs else None
     async for event, payload in answer_stream(
         deps.rag, q, deps.sparse, entities=deps.entities,
         sidecar=deps.sidecar, query_stream_func=deps.query_stream_func,
         response_type=response_type, exclude_docs=sorted(deps.excluded_docs),
+        allowed_docs=allowed,
     ):
         yield sse(event, payload)

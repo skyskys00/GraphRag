@@ -17,12 +17,7 @@ import type { Citation, UploadDoc } from './types'
 // 开发时可通过 USE_MOCK=true 用离线 mock 流走查（不依赖后端）
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
 
-const SUGGESTIONS = [
-  '客户投诉的处理流程是怎样的？',
-  '智能客服系统近期完成了哪些迭代？',
-  '办公用品月度汇总的口径是什么？',
-  '季度复盘的核心指标有哪些？',
-]
+const SUGGESTIONS: string[] = []
 
 type View = 'chat' | 'documents' | 'graph'
 type RightTab = 'citations' | 'preview'

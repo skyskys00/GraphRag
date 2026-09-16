@@ -38,12 +38,15 @@ async def retrieve(
     sparse_doc: dict[str, Any],
     entities: list[str] | None = None,
     exclude_docs: list[str] | None = None,
+    allowed_docs: list[str] | None = None,
 ) -> dict[str, Any]:
     """正式检索：返回 {query, preprocess, routes, fusion, results, sources}。
 
     entities: 实体名列表（PG 图节点名），用于预处理的同义词扩展/专名匹配。
               None 时跳过预处理增强，只用原 query。
     exclude_docs: 软删文档的 full_doc_id 集合，召回结果按此过滤（保证删除后不再推荐）。
+    allowed_docs: 白名单文档集合。如有，则只返回属于这些文档的 chunk；
+                  与 exclude_docs 同时存在时，取「allowed 且不 excluded」的交集。
     """
     prep: PreprocessedQuery | None = None
     q_vec = query
@@ -88,10 +91,14 @@ async def retrieve(
 
     results = []
     excluded = set(exclude_docs or [])
+    allowed = set(allowed_docs or [])
     rank = 0
     for item in reranked:
         cid = item["chunk_id"]
-        if excluded and meta[cid]["full_doc_id"] in excluded:
+        doc_id = meta[cid]["full_doc_id"]
+        if excluded and doc_id in excluded:
+            continue
+        if allowed and doc_id not in allowed:
             continue
         rank += 1
         results.append(

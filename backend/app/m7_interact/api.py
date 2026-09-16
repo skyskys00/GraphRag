@@ -120,15 +120,14 @@ async def preview_doc(doc_id: str) -> dict[str, Any]:
     """文档全文预览：读 M2 产物 data/chunks/<doc_id>.jsonl 返回全部 TextUnit（按顺序）。
 
     配合引用来源「原文档」跳转：前端按 text_unit_id 定位 + 置信度第一片段高亮。
+    filename 优先从文档注册表取，没有则从第一个 chunk 的 file_path 推断。
     """
     deps = _deps()
-    rec = documents.get_doc(deps, doc_id)
-    if rec is None:
-        raise HTTPException(status_code=404, detail=f"文档不存在或已删除: {doc_id}")
     f = deps.chunks_dir / f"{doc_id}.jsonl"
     if not f.exists():
         raise HTTPException(status_code=404, detail=f"文档未就绪(无切片): {doc_id}")
     units: list[dict[str, Any]] = []
+    filename = ""
     for line in f.read_text(encoding="utf-8").splitlines():
         if not line.strip():
             continue
@@ -140,14 +139,22 @@ async def preview_doc(doc_id: str) -> dict[str, Any]:
             "page_range": u.get("page_range"),
             "file_path": u.get("file_path"),
         })
-    return {"doc_id": doc_id, "filename": rec.get("filename") or "", "units": units}
+        if not filename and u.get("file_path"):
+            filename = Path(u["file_path"]).name
+    # 注册表有记录则以它的 filename 为准（上传时的原始文件名更准确）
+    rec = documents.get_doc(deps, doc_id)
+    if rec and rec.get("filename"):
+        filename = rec["filename"]
+    return {"doc_id": doc_id, "filename": filename, "units": units}
 
 
 @app.get("/graph")
 async def graph_data(doc_id: str | None = Query(None)) -> dict[str, Any]:
     """知识图谱（服务端按软删文档集合过滤；doc_id 指定时进一步只保留该文档关联子图）。"""
     deps = _deps()
-    return await collect_graph(deps.rag, deps.excluded_docs, doc_id=doc_id)
+    return await collect_graph(
+        deps.rag, deps.excluded_docs, doc_id=doc_id, allowed_docs=deps.allowed_docs,
+    )
 
 
 web_dir = Path(__file__).resolve().parent / WEB_DIRNAME

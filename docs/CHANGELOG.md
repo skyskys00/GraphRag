@@ -23,6 +23,18 @@
 
 ---
 
+## [v2.1] 2026-09-16 —— 功能修复：预置问题 / 输入框位置 / 预览 404 / 检索白名单
+
+**影响模块**：M5 检索（v1.6.1）、M7 交互（v5.1）、M8 前端（v2.3.1）
+
+- **M8 v2.3.1 · 前端**：
+  - 移除空态页 4 个预置问题（旧版五文档语境已不适用），描述文案改为通用「支持 PDF/DOCX/MD/PPTX/TXT 等格式文档上传，答案带引用，可溯源到原文」。
+  - 输入框视觉上移：`.app` 加 `padding-bottom: 28px` + `.input-area` 底部 padding 8→28px，解决「输入框贴视口底部、看着别扭」（此前两次调整只改了 input-area 内部 padding-top，未触发布局位置）。
+- **M7 v5.1 · 后端**：
+  - 修复文档预览 404：`GET /docs/{doc_id}/preview` 不再依赖 `documents.json` 注册表判断文档是否存在，改为直接以 `data/chunks/<doc_id>.jsonl` 存在为准；filename 优先取注册表（上传时的原始名），无记录则从第一个 chunk 的 `file_path` 推断。（根因：初始离线建库的 5 篇文档不在注册表中，旧实现直接返回 404。）
+  - 检索从「黑名单（excluded_docs）」升级为「**白名单 + 黑名单**」双过滤：新增 `allowed_docs`（已上传且未删除的文档集合），M5 retrieve / M6 answer / M7 respond / graph 导出全链路透传。语义：`allowed_docs` 有值时只从白名单文档召回；`excluded_docs` 仍保留用于软删即时生效。注册表为空时 `allowed_docs = None`（不限定，兼容纯离线建库场景）。
+- **M5 v1.6 · 检索**：`retrieve()` 新增 `allowed_docs` 参数，在 rerank 后结果过滤阶段与 `exclude_docs` 叠加生效（取「在白名单 ∩ 不在黑名单」的交集）。
+
 ## [v2.0] 2026-09-16 —— 工程维护：文档体系重做
 
 **模块 `docs`（文档体系）**：

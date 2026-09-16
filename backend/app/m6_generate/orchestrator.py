@@ -40,11 +40,15 @@ async def answer(
     max_data_tokens: int = DEFAULT_MAX_DATA_TOKENS,
     response_type: str | None = None,
     exclude_docs: list[str] | None = None,
+    allowed_docs: list[str] | None = None,
 ) -> dict[str, Any]:
     """M6 总入口。返回 Answer dict：query/text/citations/retrieval/meta。"""
     from app.m5_retrieve.retriever import retrieve
 
-    retr = await retrieve(rag, query, sparse_doc, entities=entities, exclude_docs=exclude_docs)
+    retr = await retrieve(
+        rag, query, sparse_doc, entities=entities,
+        exclude_docs=exclude_docs, allowed_docs=allowed_docs,
+    )
 
     mode = route(query, retr)
     context, markers = assemble(query, retr["results"], max_data_tokens)
@@ -83,6 +87,7 @@ async def answer_stream(
     query_stream_func=None,
     response_type: str | None = None,
     exclude_docs: list[str] | None = None,
+    allowed_docs: list[str] | None = None,
 ) -> Any:
     """answer() 的流式变体：生成走 query_stream_func（真 token 级），yield (event, payload)。
 
@@ -91,7 +96,10 @@ async def answer_stream(
     """
     from app.m5_retrieve.retriever import retrieve
 
-    retr = await retrieve(rag, query, sparse_doc, entities=entities, exclude_docs=exclude_docs)
+    retr = await retrieve(
+        rag, query, sparse_doc, entities=entities,
+        exclude_docs=exclude_docs, allowed_docs=allowed_docs,
+    )
     mode = route(query, retr)
     context, markers = assemble(query, retr["results"], DEFAULT_MAX_DATA_TOKENS)
 

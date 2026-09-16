@@ -57,6 +57,20 @@ def excluded_doc_ids(deps: Any) -> set[str]:
     return {r["doc_id"] for r in reg.values() if r.get("deleted") and r.get("doc_id")}
 
 
+def allowed_doc_ids(deps: Any) -> set[str] | None:
+    """白名单文档集合（检索侧限定范围用）。
+
+    注册表有记录（即通过上传功能入库）且未删除的文档 = 允许检索的范围。
+    若注册表为空（纯离线建库、未走上传流程），返回 None 表示不限定（全库检索），
+    避免首次部署时因注册表为空导致全部检索不到。
+    """
+    reg = _load_registry(deps)
+    ids = [r["doc_id"] for r in reg.values() if not r.get("deleted") and r.get("doc_id")]
+    if not ids:
+        return None
+    return set(ids)
+
+
 def get_doc(deps: Any, doc_id: str) -> dict[str, Any] | None:
     """按 doc_id 查未删除文档记录（预览接口取 filename 用）。"""
     reg = _load_registry(deps)
@@ -125,6 +139,11 @@ async def ingest(deps: Any, src_path: Path, filename: str) -> str:
         full_text, text_chunks = _single_doc_texts(deps.chunks_dir, doc_id)
         await deps.rag.ainsert_custom_chunks(full_text, text_chunks, doc_id=doc_id)
         await build_workspace_deps(deps)
+        # 白名单同步：新文档加入允许检索集合
+        if deps.allowed_docs is None:
+            deps.allowed_docs = {doc_id}
+        else:
+            deps.allowed_docs.add(doc_id)
         return doc_id
 
 
@@ -151,6 +170,8 @@ async def delete_doc(deps: Any, doc_id: str) -> bool:
             shutil.rmtree(deps.parse_dir / doc_id, ignore_errors=True)
             (deps.chunks_dir / f"{doc_id}.jsonl").unlink(missing_ok=True)
             deps.excluded_docs.add(doc_id)
+            if deps.allowed_docs is not None:
+                deps.allowed_docs.discard(doc_id)
             deps.sidecar = load_sidecar(deps.chunks_dir)
             return True
     return False

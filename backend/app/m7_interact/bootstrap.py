@@ -37,6 +37,8 @@ class AppDeps:
     parse_dir: Path
     uploads_dir: Path
     excluded_docs: set[str]
+    # v2.3.1：白名单模式——只检索已上传（未删除）的文档
+    allowed_docs: set[str] | None
 
     async def dispose(self) -> None:
         await self.rag.finalize_storages()
@@ -77,9 +79,10 @@ async def build_deps(proj: Path, working_dir: str, chunks_dir: str) -> AppDeps:
         query_func=query_func, query_stream_func=query_stream_func, proj=proj,
         working_dir=wd, chunks_dir=proj / chunks_dir,
         parse_dir=proj / "data" / "parse", uploads_dir=proj / "data" / "uploads",
-        excluded_docs=set(),
+        excluded_docs=set(), allowed_docs=None,
     )
     deps.excluded_docs = documents.excluded_doc_ids(deps)
+    deps.allowed_docs = documents.allowed_doc_ids(deps)
     return deps
 
 

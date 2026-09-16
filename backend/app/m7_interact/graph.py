@@ -46,15 +46,30 @@ def _docs_of(source_ids: list[str], chunk_to_doc: dict[str, str]) -> set[str]:
     return {chunk_to_doc[c] for c in source_ids if c in chunk_to_doc}
 
 
-def _keep(doc_set: set[str], excluded: set[str]) -> bool:
-    """归属文档全部（且非空）在排除集合 → 剔除；含有效文档或无法归因 → 保留。"""
+def _keep(doc_set: set[str], excluded: set[str], allowed: set[str] | None) -> bool:
+    """归属文档过滤：
+    - allowed 有值：至少一个归属文档在白名单内 → 保留
+    - excluded 有值：全部归属文档都在排除集合 → 剔除
+    - 无法归因（doc_set 空）→ 保守保留
+    """
     if not doc_set:
         return True
-    return not doc_set.issubset(excluded)
+    if allowed is not None and not doc_set.intersection(allowed):
+        return False
+    if excluded and doc_set.issubset(excluded):
+        return False
+    return True
 
 
-async def collect_graph(rag: Any, excluded_docs: set[str], doc_id: str | None = None) -> dict[str, Any]:
-    """图数据导出。doc_id 指定时仅保留该文档贡献的实体（按文档维度过滤，见 M8 v2.3）。"""
+async def collect_graph(
+    rag: Any,
+    excluded_docs: set[str],
+    doc_id: str | None = None,
+    allowed_docs: set[str] | None = None,
+) -> dict[str, Any]:
+    """图数据导出。doc_id 指定时仅保留该文档贡献的实体（按文档维度过滤，见 M8 v2.3）。
+    allowed_docs 白名单：如有，则只保留归属至少一个白名单文档的实体/边。
+    """
     ws = os.environ.get("POSTGRES_WORKSPACE", "lightrag_m4")
     chunk_to_doc = await _chunk_to_doc(ws)
     excluded = set(excluded_docs or ())
@@ -67,7 +82,7 @@ async def collect_graph(rag: Any, excluded_docs: set[str], doc_id: str | None = 
     for n in raw_nodes:
         source_ids = _as_list(n.get("source_id"))
         doc_set = _docs_of(source_ids, chunk_to_doc)
-        if not _keep(doc_set, excluded):
+        if not _keep(doc_set, excluded, allowed_docs):
             continue
         if doc_id is not None and doc_id not in doc_set:
             continue
