@@ -2,14 +2,12 @@
 .app {
   display: grid;
   grid-template-rows: 52px 1fr auto;
-  grid-template-columns: auto 1fr 320px;
+  grid-template-columns: auto 1fr 400px;
   grid-template-areas:
     'header header header'
     'sidebar chat cite'
     'sidebar input cite';
   height: 100vh;
-  max-width: 1280px;
-  margin: 0 auto;
   padding: 0 20px 28px;
 }
 
@@ -160,6 +158,9 @@
   flex-direction: column;
   gap: 18px;
   padding-right: 20px;
+  /* 聊天流在轨道内居中：宽度不超过 760px，且始终留出两侧空隙 */
+  width: min(760px, calc(100% - 100px));
+  margin: 0 auto;
 }
 .chat::-webkit-scrollbar {
   width: 8px;
@@ -500,6 +501,9 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  /* 与聊天流同宽，始终留出两侧空隙后居中 */
+  width: min(760px, calc(100% - 100px));
+  margin: 0 auto;
 }
 .opt-row {
   display: flex;
@@ -613,6 +617,7 @@
   overflow-y: auto;
   padding: 24px 20px 40px 0;
   max-width: 720px;
+  margin: 0 auto;
 }
 .doc-head {
   display: flex;

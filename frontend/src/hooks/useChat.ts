@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { AnswerMeta, ChatMessage, Citation, HistoryMessage } from '../types'
 import { mockEventStream } from '../mocks/events'
 import { subscribeStream } from '../lib/sse'
@@ -9,6 +9,36 @@ export interface UseChatOptions {
 
 let msgSeq = 0
 const nextId = () => `msg_${Date.now()}_${msgSeq++}`
+
+const STORAGE_KEY = 'graphrag.chat.history.v1'
+
+function isValidMessage(m: unknown): m is ChatMessage {
+  if (typeof m !== 'object' || m === null) return false
+  const o = m as Record<string, unknown>
+  return (
+    typeof o.id === 'string' &&
+    (o.role === 'user' || o.role === 'assistant') &&
+    typeof o.text === 'string' &&
+    typeof o.state === 'string'
+  )
+}
+
+// 刷新后恢复对话历史；中断的流式消息降级为 complete（保留已生成部分）
+function loadHistory(): ChatMessage[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return []
+    const parsed: unknown = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+    return parsed
+      .filter(isValidMessage)
+      .map((m) =>
+        m.state === 'pending' || m.state === 'streaming' ? { ...m, state: 'complete' } : m,
+      )
+  } catch {
+    return []
+  }
+}
 
 async function* realEventStream(
   query: string,
@@ -30,12 +60,24 @@ async function* realEventStream(
 }
 
 export function useChat({ useMock = false }: UseChatOptions = {}) {
-  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [messages, setMessages] = useState<ChatMessage[]>(loadHistory)
   const [backendOnline, setBackendOnline] = useState<boolean | null>(null)
   const [activeCitation, setActiveCitation] = useState<number | null>(null)
   const abortRef = useRef<{ close: () => void } | null>(null)
   const messagesRef = useRef<ChatMessage[]>([])
   messagesRef.current = messages
+
+  // 历史持久化：流式频繁更新 state，用 400ms 防抖收尾写入
+  useEffect(() => {
+    const t = setTimeout(() => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(messages))
+      } catch {
+        // 隐私模式 / 配额满时静默降级为不持久化
+      }
+    }, 400)
+    return () => clearTimeout(t)
+  }, [messages])
 
   const historyFromMessages = (msgs: ChatMessage[]): HistoryMessage[] =>
     msgs
@@ -137,6 +179,11 @@ export function useChat({ useMock = false }: UseChatOptions = {}) {
     abortRef.current = null
     setMessages([])
     setActiveCitation(null)
+    try {
+      localStorage.removeItem(STORAGE_KEY)
+    } catch {
+      // 隐私模式等：忽略
+    }
   }, [])
 
   const currentCitations = (() => {
