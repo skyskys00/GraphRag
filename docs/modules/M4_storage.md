@@ -2,7 +2,7 @@
 
 > 状态：**已落地**（2026-09-13）。Postgres + pgvector 一库通吃，5 文档全量索引 + 四模式检索回归通过，持久化验证通过。
 > 目标：把 M3/M5 依赖的存储从「LightRAG 默认文件态」切换为「**Postgres + pgvector 一库通吃**」，且**后端可切换只改配置**。
-> 依据：`lightrag/docs/storage.md`（官方 PG 后端完整拆解）｜ `docs/FRAMEWORK_NOTES.md` §5.10（框架选型修正）｜ `docs/ARCHITECTURE.md` §2.5/§3.1
+> 依据：`lightrag/docs/storage.md`（官方 PG 后端完整拆解）｜ `docs/ARCHITECTURE.md` §2.5/§3.1
 
 ## 1. 定位与职责
 
@@ -10,7 +10,7 @@ M4 = **统一存取接口 + 可切换后端**：M3 写、M5 读，全链路只�
 
 **半程联调意义**：M1–M4 完成「文档 → 可检索」持久化闭环——当前 M3/M5 已在**默认文件态**（`data/lightrag_deepseek`）跑通，M4 是把同一套数据搬到 PG，**功能等价、数据可迁移、检索冒烟保持绿色**。
 
-## 2. 选型结论（来自 storage.md §7 + FRAMEWORK_NOTES §5.10）
+## 2. 选型结论（来自 storage.md §7 + ARCHITECTURE §2.5）
 
 **直接采用 LightRAG 官方 Postgres 完整组合**（不是自研、不是从零重写）：
 
@@ -79,7 +79,7 @@ PG 落库（workspace=lightrag_m4），与文件态库 `data/lightrag_deepseek` 
 2. **增量幂等验证**：二次入库同批文档不重复实体（写前恢复锚点契约），本次未做重跑覆盖验证；
 3. **文件态库保留**：`data/lightrag_deepseek` 仍作对照样本，正式数据以 PG（workspace=lightrag_m4）为准。
 
-## 7. 变更记录
+## 7. 版本
 
-- **2026-09-13 · v0 规划**：依据 storage.md 拆解结论 + FRAMEWORK_NOTES §5.10 定方案（官方 PG 组合、图选纯表、docker 部署、配置切换），只规划未实施。
-- **2026-09-13 · v1 落地**：orbstack 起 `graphrag-pg`（pgvector/pgvector:pg16，pgvector 0.8.6，vol 持久化）；`.env` 加 STORAGE_BACKEND + POSTGRES_*；providers.py 加 `build_storage_config()` 四点组合开关；5 文档全量重索引 PG 成功（chunks 30/docs 5）；四模式检索回归全绿；持久化验证通过。
+- **v1**（2026-09-13）：Postgres+pgvector 一库通吃落地。
+- 变更记录：**逐条版本历史见 `docs/CHANGELOG.md`**（v0 规划 → v1 落地 PG）。本文件不再维护历史流水。

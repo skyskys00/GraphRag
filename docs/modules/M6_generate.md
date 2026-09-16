@@ -18,7 +18,7 @@ M6 = **从「精排 chunk 列表」到「带引用的最终答案」** 这一段
 - **意图路由**：跨文档综述 → map-reduce（分块要点→合并→生成）；实体级/局部 → single-window（§2.7-1）。
 - **流式**：SSE + token 级；map-reduce 只在 reduce 阶段流式（§2.7-4）→ 归 M7，M6 留事件位不实现。
 - **LangChain 薄包装**：仅用于 history 管理与工具调用协议；组装/生成自研，不深度用 LCEL（§2.7 开头）→ **MVP 决策见 §6**。
-- 检索策略（`global`/`local`/`mix`，M5）与生成策略（`single-window`/`map-reduce`，M6）是**分层、不互斥**的关系（ARCHITECTURE §5.6 附近）。
+- 检索策略（`global`/`local`/`mix`，M5）与生成策略（`single-window`/`map-reduce`，M6）是**分层、不互斥**的关系（ARCHITECTURE §2.6）。
 
 ## 3. MVP 范围
 
@@ -127,8 +127,7 @@ class Answer:
 - **预算超窗** → assemble 截断 + 记录截断日志，供 M8 评估召回是否够。
 - **与已有模块耦合** → M6 只入 M0/读 M5 结果与 M2 产物，不反向改 M3/M4/M5 内部，遵守"低耦合三原则"。
 
-## 10. 变更记录
+## 10. 版本
 
-- **2026-09-14 · v0 规划**：规划初稿（不执行）；对齐 FRAMEWORK_NOTES §3 / ARCHITECTURE §2.7 / textunit 契约 v2；明确 MVP 范围、缺依赖（溯源 sidecar）、LangChain 不引入决策、验收与实施步骤。
-- **2026-09-14 · v1 落地**（MVP 全量实现于 `app/m6_generate/`）：sidecar（30 textunit 溯源）/ assemble / generate / cite / orchestrator / runner（CLI，`-w/-q/--response`）。运行 `python -m app.m6_generate.runner -q "问题"`。单测（无 LLM）通过；内置 5 题端到端通过（8 chunks each，citations 9/3/8/4/8，耗时 7–26s）。已知边界：`[n]` 与检索上下文错位时按真实材料诚实说明（e.g. 投诉受理步骤正文仅标题），不编造。
-- **2026-09-14 · v1.1（软删过滤透传）**：`answer()` / `answer_stream()` 增 `exclude_docs` 参数透传 M5 `retrieve(exclude_docs=)`（M7 传入 `deps.excluded_docs`）——软删文档不再进入组装/引用。生成/组装逻辑未改动。
+- **v1.1**（2026-09-14）：软删 `exclude_docs` 透传 M5。
+- 变更记录：**逐条版本历史见 `docs/CHANGELOG.md`**（v0 规划 → v1 落地 MVP → v1.1 软删透传）。本文件不再维护历史流水。

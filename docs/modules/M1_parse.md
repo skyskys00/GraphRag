@@ -60,9 +60,7 @@ conda run -n graphrag python -m app.m1_parse.run -s inputs/raw/Mini-OpenClaw.pdf
 2. **docx anchor 降级**（已定）：不写 paraId 补丁，anchor 保持 null，引用退化为「文件 + 文本片段」；后续按实际效果再决定是否补 `msword_backend` 插桩。
 3. **text_level 深标题校准（暂缓）**：先以跑通为目标（标题=2 / 正文=null）；若切分/检索效果不足或需细分层级，再在多文档上校准 0/1/2 语义。
 
-## 8. 变更记录
+## 8. 版本
 
-- **2026-09-12 · v0.1**：M1 骨架首跑 8/8；修正 `write_meta` 参数名；text_level 语义实测入 parse.md v1.2。
-- **2026-09-12 · v0.2**：A 项完成——① 表格 content 渲染为 HTML；② docx anchor 确认降级（null，引用退化为文件+文本片段，paraId 补丁按后续效果再决定）；③ text_level 深标题校准暂缓（先跑通，效果不足再细分）。
-- **2026-09-14 · v0.3（联动补记）**：`run.py` 的 `process_one(src, out_root, engine=None)` 被 M7 文档上传管线（`app/m7_interact/documents.py`）以库函数方式复用 —— 上传单文件 → 返回 parse 目录，目录名即 doc_id，实现业务人员自助入库的一环。M1 自身逻辑未改动。
-- （后续在此追加）
+- **v0.3**（2026-09-14）：`process_one` 被 M7 上传管线复用（doc_id=目录名）。
+- 变更记录：**逐条版本历史见 `docs/CHANGELOG.md`**（v0.1 骨架首跑 8/8 → v0.2 A 项表格渲染/anchor 降级 → v0.3 联动复用）。本文件不再维护历史流水。

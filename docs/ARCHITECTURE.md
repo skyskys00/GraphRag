@@ -2,10 +2,13 @@
 
 > 调研日期：2026-09-03 ｜ 修订：2026-09-11（依据拆解调研与 **docs/FRAMEWORK_NOTES.md** 修正事实、明确「内建 vs 自研」边界、补版本锁定与全部实施路线）
 >
+> **本文件层定位（蓝图层）**：方向 / 选型 / 版本锁定 / 路线。不承载模块实现细节（见 `docs/modules/Mx_*.md`）、不承载版本时序（见 `docs/CHANGELOG.md`）、概念决策与文档治理见 `docs/FRAMEWORK_NOTES.md` §0/§5。
+>
 > **本版修订摘要**：
 > - **A 档修正**：明确 LightRAG `mix` 不含稀疏/BM25、且无内建 RRF 与 reranker（§2.4/2.6，检索增强在外层）；embedding 载体定 **Xinference**（Ollama 无 sparse，§3）；chunk 上限理由更正（§2.3）；DeepSeek 模型名更正为 `deepseek-v4-flash / v4-pro`（§3/§7）；NebulaGraph 非 LightRAG 官方支持、需自写 adapter（§2.5）。
 > - **补充**：版本锁定总表（§3.1）、query 预处理（§2.6）、目录与产物规范（§6-阶段0）、图片索引策略（§6-阶段1）、评测基线贯穿（§6）、模型下载镜像（§6-阶段0）。
 > - **§6 分阶段实施路线已完整撰写**（按模块顺序、逐阶段给验收）。
+> - **2026-09-16 瘦身**：§8 实测附录并入 `docs/CHANGELOG.md`（时序内容移出蓝图，本节留指引）；§2 压缩引擎/选型过程细节，保留选型结论与「内建 vs 自研」边界。
 
 本节结论由 4 路并行调研交叉验证（框架层 / 解析层 / 存储检索层 / Agent 与平台层），信息源自 GitHub 一手仓库与官方文档，个别观点标注了来源与风险。
 
@@ -20,13 +23,13 @@
 | 图谱 | 轻量图（LightRAG 式） | 图作「关系索引」辅助跨文档查询，不做全量社区检测 |
 | 部署 | 本地/私有化单机 | Docker Compose 编排，数据不出内网 |
 | 硬件 | 本机 **Mac M3 / 24GB 统一内存 / Metal 3**（arm64，已核实） | Apple Silicon MPS 可加速 MinerU 与本地模型；Python 需 conda 建 3.10+ 环境（系统 3.9 太老） |
-| LLM 接入 | **DeepSeek**（OpenAI 兼容 API） | 抽取/生成统一走 DeepSeek，单 key 跑通全链路；**实测定 `deepseek-v4-flash` 全模型（抽取+生成），不用 pro**（见 §3.1 与 §8.1） |
+| LLM 接入 | **DeepSeek**（OpenAI 兼容 API） | 抽取/生成统一走 DeepSeek，单 key 跑通全链路；**实测定 `deepseek-v4-flash` 全模型（抽取+生成），不用 pro**（见 §3.1 与 CHANGELOG v1.0 M3） |
 | 内容形态 | **PDF 为主** + doc/txt/md 等 | MinerU 主力 + Docling 补多格式 |
 | 综述问答 | **需要全局综述** | LightRAG `global`/`mix` 起步，按效果决定是否补社区摘要 |
 | 目标 | **开发练手、测通即可**；暂不优化长期运维成本 | 存储做成**可切换接口**：MVP 用 LightRAG 默认存储跑通，Postgres 适配器随时切换；代码按 M0–M9 模块化重建（见 **docs/FRAMEWORK_NOTES.md**） |
 
 **核心选型一句话**：
-**LightRAG（框架内核）+ MinerU 3.x（文档解析）+ bge-m3（本地 embedding，经 Xinference 供 dense+sparse）+ bge-reranker-v2-m3（精排）+ Postgres/pgvector（持久化）+ LangChain 薄包装（消息/工具层）**，全部本地私有化，抽取/建图用国产便宜模型（deepseek-v4-flash），**全链路统一 `deepseek-v4-flash`（2026-09-13 实测定案，见 §8.1；不用 pro）**。
+**LightRAG（框架内核）+ MinerU 3.x（文档解析）+ bge-m3（本地 embedding，经 Xinference 供 dense+sparse）+ bge-reranker-v2-m3（精排）+ Postgres/pgvector（持久化）+ LangChain 薄包装（消息/工具层）**，全部本地私有化，抽取/建图用国产便宜模型（deepseek-v4-flash），**全链路统一 `deepseek-v4-flash`（2026-09-13 实测定案，见 CHANGELOG v1.0；不用 pro）**。
 
 ---
 
@@ -99,16 +102,7 @@
 | **PaddleOCR / PP-StructureV3**（Apache-2.0） | 中文 OCR 底座、表格单元格坐标 | **OCR 增强件**。实测 MinerU v3.4.5 OCR = **pytorchocr**（PyTorch 复刻推理 **PP-OCRv6** 权重，PDF-Extract-Kit-1.0 打包，pip 主链不依赖 paddlepaddle）；Docling 扫描件默认 **RapidOCR**（**PP-OCRv4/v5**，多语言）。一般无需重复部署；仅在需要印章/古籍/生僻字或表格坐标做二次结构化时单独用 |
 | LlamaParse | 闭源 SaaS，绑定 LlamaCloud | **不推荐**（离线约束 + 付费 + 闭源） |
 
-**MinerU 引擎选择**（pipeline / vlm / hybrid 三选一）：
-
-| 维度 | `pipeline` | `vlm` | `hybrid`（有 GPU 时推荐） |
-|---|---|---|---|
-| 原理 | 传统 OCR（内置 PaddleOCR 系）+ 版面分析 | 视觉语言大模型（MinerU2.5-Pro） | 两者融合，`effort=medium/high` |
-| 硬件 | 纯 CPU 可跑；最低 4GB 显存（含 Apple MPS） | 必须 GPU ≥8GB 显存 | 同 vlm（≥8GB 显存） |
-| 准确率(OmniDocBench v1.6) | 86.47 | 95.30 | 95.26(medium)/95.39(high) |
-| 特点 | 快、稳、无 VLM 幻觉；复杂版面弱 | 最高精度、吃显存 | 精度高+低幻觉，medium 比 high 快 35–220% 且只降 0.13 分 |
-
-**选择建议（本机 = Mac M3 / 24GB / MPS）**：练手阶段**首选 `pipeline`**（MPS/CPU 都能跑、最快最稳，中文常规文档 86 分够用）；遇到扫描件/复杂多栏再对该类文档单独开 `hybrid medium`（M3 统一内存可跑、会慢）；不主动上 `vlm`。
+**MinerU 引擎选择（本机 = Mac M3 / 24GB / MPS）**：练手阶段**首选 `pipeline`**（MPS/CPU 都能跑、最快最稳，中文常规文档够用）；扫描件/复杂多栏对该类文档单独开 `hybrid medium`；不主动上 `vlm`。引擎原理/硬件/自评分数对比见 `docs/PARSER_COMPARISON.md`。
 
 **源码实测补充（2026-09-12，详见 docs/PARSER_COMPARISON.md）**：
 1. MinerU 引擎用 **`-b pipeline`**（3.4.5 默认 hybrid-engine 依赖大型 VLM，本机不可行）；
@@ -116,19 +110,14 @@
 3. **结构对接一律走 JSON / content_list**（Markdown 导出会丢 label/prov 等元数据，仅作轻量视图）；
 4. docx 无页码且 Docling 不读 `w14:paraId`——原文定位需**自研补丁**或降级「文件+文本片段」（见 docs/modules/M0_contracts/textunit.md §4.2）。
 
-> 口径说明：上表 OmniDocBench 分数为 **MinerU 官方自评**、以英文/通用版式为主要榜单，中文**常规文档仅供参考**；具体内置 OCR 版本随 MinerU 迭代，安装后以实际版本为准。
+> 口径提醒：引擎自评分数为 **MinerU 官方口径**、以英文/通用版式榜单为主，中文常规文档仅供参考（具体 OCR 版本随 MinerU 迭代，安装后以实际为准）——详见 `docs/PARSER_COMPARISON.md`。
 
 ### 2.2.1 结构化抽取（可选增强）：google/langextract
 
-> 用户原指的「longextract」实为 **google/langextract**（Apache-2.0，非 Google 官方支持产品），与同名评测基准 longextract-bench 无关。
-
-- **定位**：「**文本 → 结构化知识**」的语义字段抽取库，**不是文档解析器**——输入是纯文本/URL（不处理 PDF 版面、无 OCR），工作中位于 MinerU 之后。
-- **核心能力**：LLM 少样本驱动抽取（默认 Gemini，支持 OpenAI / Ollama 本地模型）；**schema 约束**（`output_schema` 强制结构）；**每个抽取值映射回源文本字符区间**（grounded，无法定位自动标 null）；长文档分块并行多轮抽取（可处理 14 万+ 字符）；输出 JSONL + 可交互 HTML 高亮可视化。
-- **在 GraphRAG 里的用途**（与 LightRAG 内置实体抽取互补，非常规依赖）：
-  1. 需**定向提取固定字段**的文档（合同要素、报告指标、临床记录）→ 按自定义 schema 抽成结构化记录，可作高置信度图节点/属性来源或结构化查询；
-  2. **grounded 溯源**天然契合引用标注需求，可复用其「取值 ↔ 原文位置」思想强化答案溯源；
-  3. 批量任务可用 Vertex/OpenAI Batch 降本。
-- **注意**：默认走 Gemini——能否接国内模型取决于第三方 provider 插件，实现时需核实。
+- 定位：「**文本 → 结构化知识**」的语义字段抽取库，**不是文档解析器**（输入纯文本/URL、无 OCR/版面），工作在 MinerU 之后。
+- 与 `longextract-bench` 评测基准无关（Apache-2.0，**非 Google 官方支持产品**）；默认走 Gemini，能否接国内模型需核实 provider 插件。
+- 用途（与 LightRAG 实体抽取互补，非常规依赖）：定向抽固定字段（合同要素/报告指标）作高置信度图节点来源；`grounded` 溯源（取值↔原文字符区间）思想可强化答案溯源。
+- **决策**：MVP 不纳入，作后续可选项。
 
 ### 2.3 切分层
 
@@ -139,7 +128,7 @@
 
 ### 2.4 索引层（双索引）
 
-- **图索引（LightRAG 建图）**：LLM 抽取 实体/关系 构建轻量图。**每个环节可独立配模型**——抽取/建图与回答**统一 `deepseek-v4-flash`**（2026-09-13 实测定案，不用 pro，见 §8.1）；开 `ENABLE_LLM_CACHE`（LLM 缓存）与 `MAX_ENTITY_TOKENS`（上下文截断）控成本。支持**增量更新与选择性删除**（复用索引期缓存重建受影响实体）——这是知识库持续扩写的关键。
+- **图索引（LightRAG 建图）**：LLM 抽取 实体/关系 构建轻量图。**每个环节可独立配模型**——抽取/建图与回答**统一 `deepseek-v4-flash`**（2026-09-13 实测定案，不用 pro，见 CHANGELOG v1.0）；开 `ENABLE_LLM_CACHE`（LLM 缓存）与 `MAX_ENTITY_TOKENS`（上下文截断）控成本。支持**增量更新与选择性删除**（复用索引期缓存重建受影响实体）——这是知识库持续扩写的关键。
 - **向量索引**：TextUnit 用 **bge-m3** 编码（dense+sparse 一次拿到，8192 token，1024 维，中文强）。**无需另建 BM25 索引**——前提是 embedding 载体支持 sparse 输出（选 **Xinference**；**Ollama 只吐 dense、不满足**）。精排用 **bge-reranker-v2-m3**。
 
 **内建 vs 自研（重做关键边界，必读）**：
@@ -158,9 +147,7 @@
 | **准生产（推荐目标）** | **Postgres + pgvector 一库通吃**：图结构、向量、原文块、索引状态同一库 | LightRAG 官方推荐路径；pgvector 支撑「百万–数千万」级向量，个人/小团队完全够；**省一个独立向量库服务的运维** |
 | 扩展（数据量再上万级 +） | 图 → **NebulaGraph**（Apache-2.0 可商用、中文原生、分布式）｜向量 → **Milvus**（亿级主战场、中文生态最强）、**Qdrant**（部署轻、内置 RRF/DBSF）或 **Chroma**（最轻，HNSW 须全量驻内存，64GB 约 1500 万条 1024 维——**适合起步、天花板低**） | 迁移成本高，非必须不要提前做。⚠️ **LightRAG 官方无 NebulaGraph 适配器**（官方支持 pgvector/Neo4j/Milvus/Qdrant/MongoDB 等），需自写 storage adapter，成本高于表格所示 |
 
-**许可证风险提醒（重点，避免踩坑）：**
-- **Neo4j Community = GPLv3**（可商用内用，但**修改版对外分发须开源**，且 Community 单实例无高可用）；官网 license 页面有过 Commons Clause 历史——**下载发行版时务必核对 LICENSE 文件是否是纯 GPLv3**。真要开图库，**NebulaGraph（Apache 2.0）更省心**。
-- **Elasticsearch**：当前为 **ELv2 / SSPL 双许可**（均非 OSI 开源；AGPL 是 6.x 时代旧条款，SSPL 网络服务触发源码公开）；**商用省心用 OpenSearch（Apache 2.0）**。
+**许可证风险提醒（重点）**：Neo4j Community = **GPLv3**（修改版对外分发须开源、官网 license 页面有过 Commons Clause 历史，下载前务必核对纯 GPLv3）；Elasticsearch = **ELv2 / SSPL 双许可**（均非 OSI 开源）。真要开图库选 **NebulaGraph（Apache 2.0）**、搜索选 **OpenSearch**——轻量图方案下用 Postgres 内联基本绕开这些（汇总见 §5 第 1 条）。
 
 ### 2.6 检索召回层（三路混合：内建 + 外层增强）
 
@@ -199,9 +186,9 @@
 
 ### 2.8 交互层
 
-- **后端（M7，已落地）**：FastAPI 统一对外——在线线：SSE 流式 + 引用标注 + 多轮会话；**文档管理**：`POST /docs` 后台入库管线（M1→M2→M3 增量）→ `GET /docs` 列表状态 → `DELETE /docs/{doc_id}` 软删；**图谱导出**：`GET /graph`（PG 全图节点/边，软删文档独有实体已过滤，节点带 `docs[]`/`chunks[]` 供前端反查）；**文档预览**：`GET /docs/{doc_id}/preview`（读 M2 chunks JSONL，供前端引用→原文跳转高亮）；**按文档过滤图谱**：`GET /graph?doc_id=`（仅返回该文档贡献的实体子图）；**引用排序修复**：后端 `cite.py parse_citations` 按置信度降序输出。详见 `docs/modules/M7_interact.md`（v3 文档管理 / v4 图谱导出 / v5 预览+按文档过滤+排序）。
+- **后端（M7，已落地）**：FastAPI 统一对外——在线线：SSE 流式 + 引用标注 + 多轮会话；**文档管理**（`POST/GET/DELETE /docs`，软删）、**图谱导出** `GET /graph`（软删过滤，节点带 `docs[]`/`chunks[]`）、**文档预览** `GET /docs/{doc_id}/preview`、**按文档过滤** `GET /graph?doc_id=`。各版本演进与实测见 `docs/CHANGELOG.md` v1.0 M7 条目，接口细节见 `docs/modules/M7_interact.md`。
 - **Web UI**：M7 自带零依赖 WebUI（答案 + 引用定位原文）作轻量兜底；正式前端见 **M8**（React，`frontend/`）。
-- **专业前端（M8，已落地）**：图谱展示主轴 = 「问题 → 回答 + 引用高亮 → 点击引用定位原文 → 引用「在图谱中查看」跳图谱并聚焦相关实体子图」。渲染层选 **AntV G6 v5.1.1**；布局采用「左侧可折叠侧边栏 + 主区 + 右栏 tab」，问答为主视图，左侧导航（问答 / 文档管理 / 知识图谱，导航项数组模式便于扩展新模块如数据分析），右侧 tab 切换「引用来源 / 预览」（右栏为未来「关联」模块留出位）。M8 v1=SSE 流式问答 + `[n]` 引用溯源 + 多轮；v2.1=文档上传/文档管理视图；v2.2=知识图谱（G6 力导向全图 + 类型着色 + 点节点详情 + 引用→图谱单向下钻高亮）；**v2.3**=左侧可折叠侧边栏 + 右栏 tab + 文档全文预览（置信度第一片段柔和浅杏高亮，非亮非黄） + 引用按置信度降序并限前 5 条 + 图谱按文档维度过滤下拉（图谱移入主列，不再全屏）。详见 `docs/modules/M8_frontend.md` + 需求稿 `M8_frontend_req.md`。
+- **专业前端（M8，已落地）**：图谱展示主轴 = 「问题 → 回答 + 引用高亮 → 点击引用定位原文 → 引用「在图谱中查看」跳图谱并聚焦相关实体子图」。渲染层 **AntV G6 v5.1.1**；布局「左侧可折叠侧边栏 + 主区 + 右栏 tab」，问答为主视图，导航项数组模式便于扩展新模块，右栏 tab 切换「引用来源 / 预览」（为未来「关联」模块留位）。版本演进（含 v2.3 侧边栏/预览/排序/过滤）与实测见 `docs/CHANGELOG.md` v1.0 M8 条目，细节见 `docs/modules/M8_frontend.md` + 需求稿 `M8_frontend_req.md`。
 - 多轮会话记忆：当前自管 history 注入（可进阶 RAGFlow「AI Memory」/Dify 会话变量思路）。
 - **模型下载**：本机直连 HuggingFace 不通，统一 `HF_ENDPOINT=https://hf-mirror.com`。
 
@@ -212,7 +199,7 @@
 | 环节 | 建议 | 说明 |
 |---|---|---|
 | 实体抽取/建图 | 便宜模型：**deepseek-v4-flash** / Kimi / Qwen（可再开 `ENABLE_LLM_CACHE`） | 抽取是调用最密集的环节，用便宜模型省大头 |
-| 回答生成 | **deepseek-v4-flash**（**统一全链路 flash**，不用 pro——2026-09-13 实测定案） | 输出质量优先；flash 实测抽取已优于 GLM（见 §8.1） |
+| 回答生成 | **deepseek-v4-flash**（**统一全链路 flash**，不用 pro——2026-09-13 实测定案） | 输出质量优先；flash 实测抽取已优于 GLM（见 CHANGELOG v1.0） |
 | Embedding | **bge-m3 经 Xinference 本地部署**（dense+sparse 双输出） | **不选 Ollama**（只吐 dense、无 sparse，破坏「免建 BM25」前提）；也可 DashScope text-embedding-v3 API（`dense&sparse`，有免费额度）|
 | Rerank | **bge-reranker-v2-m3**（经 Xinference `/v1/rerank` 标准接口） | 中文专名精确性提升明显 |
 | 语言设置 | 生成/报告 `SUMMARY_LANGUAGE=zh`；**实体抽取需另行配 `language=zh`**（entity_extraction 参数或自定义 prompt） | 只设 SUMMARY_LANGUAGE 时实体仍可能英文，两个都要配，避免英文图污染 |
@@ -230,7 +217,7 @@
 | bge-m3 | BAAI/bge-m3 | MIT | **Xinference（FlagEmbedding 后端）** | dense+sparse，8192/1024 维 |
 | bge-reranker-v2-m3 | BAAI/bge-reranker-v2-m3 | MIT | **Xinference** | `/v1/rerank` |
 | **Xinference（模型网关）** | 当前稳定版 | Apache-2.0 | 本地进程/容器 | 统一承载 bge 两模型，单地址三端点；先于一切模块部署 |
-| DeepSeek API | `deepseek-v4-flash`（**全链路统一，不用 pro**） | — | 云端（OpenAI 兼容） | 抽取 / 生成，单 key 全链路；**注意 v4-flash 是推理模型，须 `extra_body` 传 `thinking={"type":"disabled"}` 关思考模式**（见 §8.1） |
+| DeepSeek API | `deepseek-v4-flash`（**全链路统一，不用 pro**） | — | 云端（OpenAI 兼容） | 抽取 / 生成，单 key 全链路；**注意 v4-flash 是推理模型，须 `extra_body` 传 `thinking={"type":"disabled"}` 关思考模式**（见 CHANGELOG v1.0） |
 | GLM（bigmodel，测试/低成本备选） | `glm-4.5-flash` / `glm-4-flash-250414`（免费档） | 商用授权视邀请（个人测试 OK） | 云端 `https://open.bigmodel.cn/api/paas/v4` | 测试 / 评测 / 降级用；`glm-4.7-flash` 流量大不稳定，不作主选 |
 | Postgres + pgvector | Postgres 16 + pgvector 0.8+ | PostgreSQL / Apache | 本地或容器 | 准生产，一库通吃 |
 | FastAPI | 当前稳定版 | MIT | Python | SSE 流式 |
@@ -277,7 +264,7 @@
 | **⑥ 前端设计与展示** | ① （可选）Figma 画稿，对齐「问题 → 回答 + 引用 → 定位原文 → 图谱游走」动线；② **搭前端工程并引入 AntV G6**（本机未装：npm 初始化 + 安装 `@antv/g6`，属部署步骤）；③ **与 ⑤ 编排对齐，定前端所需的最小 API 契约**（SSE 事件定义 / 引用标注字段形状）；④ 按主轴线实现页面：回答 + 引用高亮 → 点击定位原文 → 答案节点图上游走 | 页面**只依赖稳定 API**（SSE + 引用标注）、与后端解耦；时序是**先部署依赖（②）→ 画稿对齐（①）→ 定 API 契约（③）→ 渲染实现（④）**；G6 只做渲染层，布局/交互体验在稿上先定 |
 | **⑦ 联调与评测基线** | 后端各段（解析 → 切分 → 索引 → 检索 → 编排）+ **前端页面端到端**汇合：FastAPI（StreamingResponse + SSE）作统一入口，产物经「契约校验（④ 的 Schema）/ 写库」衔接；跑真实文档，建 RAGAS 种子测试集；**含前端走查**（引用高亮 / 点击定位 / 图谱游走）；最后 **Docker Compose** 收敛部署 | 联调**先过契约再过行为**；靠**统一日志 / 观测**定位断点（契约错 vs 行为错）；评测基线守住每次改动；前端当「眼睛」，端到端问题在真实路径上暴露 |
 
-> **当前推进状态（2026-09-15）**：①–⑦ 方向级路线已全部落地——M0 契约（`docs/modules/M0_contracts/`）、M1 解析、M2 切分、M3 索引（DeepSeek 定案，§8.1）、M4 存储（PG）、M5 检索、M6 生成、M7 交互层（v3 文档管理、v4 图谱导出、v5 预览+按文档过滤+引用排序）、M8 前端（v1 问答 / v2.1 文档上传管理 / v2.2 知识图谱＋引用→图谱联动 / v2.3 侧边栏+预览+引用排序+图谱过滤，§8.2）均按 `docs/modules/` 记录落地；**M9 评测层待启动**。Docker Compose 收敛部署未做（后续项）。
+> **当前推进状态（2026-09-16）**：①–⑦ 路线已全部落地（模块记录在 `docs/modules/`），**M9 评测层待启动**；Docker Compose 收敛部署未做（后续项）。各模块版本与实测见 `docs/CHANGELOG.md`。
 
 ---
 
@@ -292,44 +279,13 @@
 | 5 | LangExtract 结构化抽取 | 暂不纳入 MVP，作后续可选项 |
 | 6 | 目标 | 练手、测通即可；不预优化运维成本 |
 | 7 | embedding/rerank 载体 | **Xinference**（本地模型网关，支持 dense+sparse 与 `/v1/rerank`；不选 Ollama） |
-| 8 | DeepSeek 模型 | **统一 `deepseek-v4-flash`**（抽取+生成；不用 pro；2026-09-13 实测定案，见 §8.1） |
+| 8 | DeepSeek 模型 | **统一 `deepseek-v4-flash`**（抽取+生成；不用 pro；2026-09-13 实测定案，见 CHANGELOG v1.0） |
 | 9 | 检索增强 | 三路 RRF(k=60) + rerank **外层自研**（模块 M5） |
 | 10 | 开发形态 | 按 **M0–M9** 模块化重做；契约先行、线 A/B 并行走；记录按 docs/modules/ |
 
 ---
 
-## 8. 实测附录（持续追加）
+## 8. 实测附录（历史，已归档）
 
-### 8.1 M3 索引层 DeepSeek 后端定案（2026-09-13）
-
-详见模块记录 `docs/modules/M3_index.md`（含对比表与复现命令）。
-
-**关键坑——DeepSeek v4-flash 思考模式**：v4-flash 是推理模型，默认思考模式占 `reasoning_tokens` 75–100%，极端时烧光 `max_tokens` 致 `content=""`、抽取失败重试卡死。修复 `extra_body={"thinking": {"type": "disabled"}}`（**OpenAI SDK 不接受 `thinking` 直接参数**，须 `extra_body` 透传；`reasoning_effort=low`/`reasoning={effort:"none"}` 无效）。依据：deepseek api-docs 思考模式指南。
-
-**GLM vs DeepSeek 抽取对比**（公平样本 3 文档）：
-
-| 文档 | GLM 实体/关系 | DeepSeek 实体/关系 | 备注 |
-|---|---|---|---|
-| 会议纪要 | 23/23 | 16/10 | GLM 表头词噪音（`事项`/`状态`/`负责人`） |
-| 办公用品 | 16/13 | 10/9 | 同上 |
-| 季度复盘 | 76/88 | 47/48 | GLM 大量「指标+数值」脏实体（`ARPU值提升8%`/`收入1,200万元`） |
-
-**结论**：DeepSeek 数量少但更净——实体名贴近业务对象、数值沉淀入关系描述（信息不丢）；GLM 免费档图噪声大。DeepSeek 另两文档（投诉SOP/产品需求，GLM 曾失败/未做）均一次通过。**后续全链路统一 deepseek-v4-flash。**
-
-### 8.2 M7 文档管理 / M8 前端·文档上传与知识图谱落地（2026-09-15）
-
-详见 `docs/modules/M7_interact.md`（v3 文档管理、v4 图谱导出、v5 预览+按文档过滤+引用排序）与 `docs/modules/M8_frontend.md`（v1/v2.1/v2.2/v2.3）。
-
-**文档管理闭环（M7 v3 + M8 v2.1）**：`POST /docs` 后台跑 M1→M2→M3 增量入库（模块级 `asyncio.Lock` 串行 + `documents.json` 注册表 processing→ready/failed）→ `GET /docs` 列表/状态 → `DELETE /docs/{doc_id}` **软删**（PG 图谱跨文档共享、source_id 是 chunk id 无法物理删：注册表标记 + 列表移除 + 检索侧 `excluded_docs` 过滤零召回）。前端输入框附件上传 + 2s 轮询状态 + toast，文档管理视图列表/badge/删除。实测：上传 → ready → 对新文档提问命中 → 删除 → 列表空 + 0 召回。
-
-**知识图谱 + 问答联动（M7 v4 + M8 v2.2）**：`GET /graph` 从 PG（`PGTableGraphStorage.get_all_nodes/edges` + `lightrag_doc_chunks` 建 chunk→doc 映射）全量导出并软删过滤——**仅当实体所有贡献文档都属已删除集才剔除**，共享实体/无归属实体保守保留；节点含 `docs[]`/`chunks[]`。前端 AntV G6 v5.1 力导向全图（类型着色 / 缩放拖拽 / 点节点详情侧栏），引用卡「在图谱中查看」→ 切图谱视图并本地反查高亮引用 chunk/文档相关实体 + 1 跳邻域聚焦。headless 走查断言全过（聚焦栏「已定位引用相关实体 51 个，含 1 跳邻域共 52 个节点」）；`npm run lint` + `tsc --noEmit` + `build` 全绿。
-
-**侧边栏 + 文档预览 + 引用排序 + 图谱文档过滤（M7 v5 + M8 v2.3，2026-09-15）**：
-- **布局**：左侧可折叠 Sidebar（导航项数组模式，新增模块只需 push 一项），问答为主视图；右侧 tab 切换「引用来源 / 预览」（右栏为未来「关联」等模块预留位）；图谱移入主列（不再全屏）。输入框上移 5px。
-- **文档预览**：`GET /docs/{doc_id}/preview` 读 M2 chunks JSONL 返回全部 TextUnit；前端 `DocumentPreview` 组件按 `text_unit_id` 定位（替代页码，doc 无稳定页码的格式也适用），最高置信度片段柔和浅杏高亮（非亮、非黄）。引用来源卡新增「原文档 #」一键跳预览定位。
-- **引用排序修复**：根因是 `cite.py parse_citations` 按正文中 `[n]` 出现顺序输出（与置信度无关）；修复方案 `citations.sort(key=lambda c: c.score, reverse=True)`（后端已加）；前端再按 score 降序并 slice(0, 5) 双保险，仅展示置信度前 5 条。
-- **按文档过滤图谱**：`GET /graph?doc_id=` 可选参数，服务端在节点归属文档集合判断前做过滤（保留软删过滤逻辑）；前端 GraphView 顶部工具条 select 选择文档维度，切换后重新拉取并渲染子图。`npm run build` 全绿。
-
-**实现期踩坑（可复用）**：引用 `text_unit_id`（M2 格式 `{doc_id}-chunk-{i}`）≠ 图谱节点 `chunks[]`（PG `chunk-{md5}`），反查须同时试 chunk 与 fullDocId（后者可靠）；React dev StrictMode 双挂载会废掉一次性 pending ref → 用「build effect 存初始 render promise + `graphReady` state 门控 focus effect」，且 applyFocus 里**不要二次 `await graph.render()`**（244 节点力导向二次 render 长时间不 resolve、聚焦卡死）；headless Chrome（CDP）磁盘缓存旧 vite 模块会伪证代码未变，走查前须 `Network.setCacheDisabled` + 干净 profile。
-
-> 数据现状（2026-09-13）：`inputs/raw` 5 文档（会议纪要.docx / 办公用品.pdf / 季度复盘.pdf / 投诉SOP.md / 产品需求.docx）已全量过 M1→M2→M3，双库对比基准 `data/lightrag`（GLM）/ `data/lightrag_deepseek`（DeepSeek）保留。
+> 2026-09-16 起：实测记录（M3 DeepSeek 抽取对比、M5 检索四题与 A/B 预处理对比、M7/M8 落地闭环与前端走查、实现期踩坑）**按时间并入 `docs/CHANGELOG.md` v1.0 各模块条目**，本节不再留存正文。
+> 数据现状：`inputs/raw` 5 文档（会议纪要.docx / 办公用品.pdf / 季度复盘.pdf / 投诉SOP.md / 产品需求.docx）已全量过 M1→M2→M3；正式库 `data/lightrag_deepseek`（DeepSeek），对照库 `data/lightrag`（GLM）。

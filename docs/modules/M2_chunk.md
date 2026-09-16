@@ -60,7 +60,7 @@ conda run -n graphrag python -m app.m2_chunk.runner -s data/parse -o data/chunks
 - `approx_tokens` 是长度粗估，真实 token 数由 M3 索引（LightRAG 侧）计；
 - docx 文档 `page_range/anchor=null` 是设计降级（流式排版无页码），引用定位退化为「文件+文本片段」。
 
-## 8. 变更记录
+## 8. 版本
 
-- **2026-09-13 · v1 补记**：M2 闭环时未写模块记录、当时记忆也已清空，本条依据**现有代码 + 产物实测**重建（`chunker.py/textunit.py` 逻辑逐条核对 + M2 全套重跑复现 + 与索引库 vdb_chunks 对账）。历史统计（8 文档 66 块）无法复验，只在 §6 注明。
-- **2026-09-14 · 联动补记**：`runner.py` 的 `process_document(doc_dir, chunks_dir)` 被 M7 文档上传管线（`documents.py`）复用——上传文档自动走到 M2 切分，产出 `<doc_id>.jsonl` 后由 M3 增量建图。M2 自身逻辑未改动。
+- **v1**（2026-09-13）：闭环补记（代码+产物实测重建）；`process_document` 后被 M7 上传管线复用（联动补记）。
+- 变更记录：**逐条版本历史见 `docs/CHANGELOG.md`**。本文件不再维护历史流水。

@@ -95,8 +95,7 @@ DeepSeek：实体「ARPU」+ 关系描述写道「…提升8%」 ← 干净，�
 - [x] 思考模式修复对 DeepSeek v4-flash 生效（reasoning_tokens 消失）；
 - [x] 逐文档隔离失败、返回码聚合；`--only`/`--limit` 调试可用。
 
-## 7. 变更记录
+## 7. 版本
 
-- **2026-09-12 · v0.1**：GLM 冒烟首跑（会议纪要 23实体/15关系…），思路与命令记录入 [[project-doc-nav]]。
-- **2026-09-13 · v0.2**：DeepSeek v4-flash 后端贯通——修复思考模式（`extra_body` 透传 `thinking=disabled`）；全量 5 文档隔离索引；GLM vs DeepSeek 效果对比（§5）；定 DeepSeek 为统一抽取后端。
-- **2026-09-14 · v0.3（联动补记）**：增量建图被 M7 文档上传管线（`documents.py`）复用 —— 对上传单文档调用 `rag.ainsert_custom_chunks(full_text, text_chunks, doc_id=...)`（upsert 幂等，**不重建旧数据**），随后 `build_workspace_deps` 重建稀疏索引。M3 自身逻辑未改动。
+- **v0.3**（2026-09-14）：增量建图 `ainsert_custom_chunks` 被 M7 上传管线复用。
+- 变更记录：**逐条版本历史见 `docs/CHANGELOG.md`**（v0.1 GLM 冒烟 → v0.2 DeepSeek 定案+思考模式修复 → v0.3 联动复用）。本文件不再维护历史流水。

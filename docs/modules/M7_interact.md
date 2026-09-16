@@ -1,6 +1,6 @@
 # M7 模块记录：交互层（FastAPI/SSE + 轻量 WebUI）—— 已落地
 
-> 状态：**已落地**（2026-09-14 v3：v2 token 级流式 + **文档上传/文档管理路由**，见 §8/§10）。下文为落地前的规划方向，实施结果见 §8 / §10 与代码 `app/m7_interact/`。
+> 状态：**已落地**（2026-09-15 **v5**：v1 壳 → v2 真 token 流式 → v3 文档管理 → v4 图谱导出 → v5 预览+过滤+引用排序）。下文为落地前的规划方向，实施结果见 §8 / §10 与代码 `app/m7_interact/`。
 > 契约：HTTP/SSE → 流式响应（Answer 的交互外观），消费 M6 的 Answer dict，不重写检索/生成。
 > 依据：`docs/FRAMEWORK_NOTES.md` §3 模块划分（M7 交互层/关键技术归属） ｜ `docs/ARCHITECTURE.md` §2.8 交互层、§2.7-4 流式输出、§6 步骤⑥⑦ 前端设计与联调
 > 前置：M6 生成层 v1 已落地（`answer()` 返回 query/text/citations/retrieval/meta；5 题端到端全绿，引用溯源到 textunit + file_path + page_range/anchor）。历史参照：scripts/ 时代 p2 曾规划「FastAPI/SSE 壳 + 页级引用 + span_map」（旧代码已删，此处只借用思路不回归）
@@ -129,10 +129,7 @@ DELETE /docs/{doc_id}         → {deleted: doc_id}   // 软删：注册表标�
 - **引用定位粒度不足** → 当前「文件 + 页/章节 + 片段」已满足点击定位；真需要字符级高亮再评估补 span（不优先）。
 - **与已有模块耦合** → M7 只组合 M6 Answer + M0 LLM client，不反向改 M5/M6 内部；契约只增不改。
 
-## 10. 变更记录
+## 10. 版本
 
-- **2026-09-14 · v0 规划**：规划初稿（不执行）；对齐 FRAMEWORK_NOTES §3 / ARCHITECTURE §2.8 交互层 + §2.7-4 流式 + §6 ⑥⑦；基于 M6 落地现状（Answer dict、非流式 query_func）划 MVP 边界（非流式 JSON 先行 / SSE 事件线 / 零依赖 WebUI / 多轮最小注入），暂缓 token 级流式、AntV G6、文档管理、span_map 回归。
-- **2026-09-14 · v1 落地**（全量实现于 `app/m7_interact/`）：`api.py`（/health、POST /answer、GET /answer/stream + 静态挂载）/ `bootstrap.py`（依赖装配缓存）/ `respond.py` / `events.py` / `history.py` / `web/index.html` / `runner.py`。运行 `python -m app.m7_interact.runner --port 8787` 即起服务。实测：POST /answer 29.6s 单题契约对齐 CLI；SSE 事件线 6 帧序正确；WebUI 静态页 GET / 200。已知边界：delta 为整段回放（token 级流式等 M0）；浏览器交互走查待用户验证；multi-round 为最小拼接注入。
-- **2026-09-14 · v2 流式升级**：M0 `providers._llm_config()` / `build_query_stream_func()`（DeepSeek `AsyncOpenAI stream=True`，`extra_body` 禁 thinking）+ M6 `generate`→`generate_stream`、`orchestrator.answer_stream` + M7 `respond.stream_answer` 改消费 `answer_stream`、`events.py` 移除分块回放（仅留 `sse()` 编码）。实测单题 delta×544 真 token 增量（11s），事件线 `retrieved→delta→citations→done` 不变。
-- **2026-09-14 · v3 文档管理落地**：新增 `documents.py`（入库管线：M1 `process_one` → M2 `process_document` → M3 `rag.ainsert_custom_chunks(..., doc_id)` 增量建图 → `build_workspace_deps` 重建 sparse/sidecar/entities；`documents.json` 注册表 task_id↦doc_id/status，`processing|ready|failed`；模块级 `asyncio.Lock` 串行入库与 sparse 重建）+ 三路由（`POST /docs` 后台任务入库、`GET /docs` 列表、`DELETE /docs/{doc_id}` 软删）。删除策略定**软删**（PG 图谱跨文档共享、source_id=chunk id 无法物理删）：注册表标记 + parse/chunks 文件清除 + `deps.excluded_docs` 经 M5 `retrieve(exclude_docs=)`/M6 `answer` 透传过滤，删除后不再召回。FastAPI `docs_url="/swagger"`（`/docs` 被文档接口占用）。实测（curl 全链路）：上传 md → processing → ready → 提问命中新 doc → DELETE → 列表空 + 0 召回；正式问答/SSE 回归绿。
-- **2026-09-15 · v4 图谱导出**：新增 `graph.py`（`build_chunk_doc_map` 读 `lightrag_doc_chunks` 建 `{chunk_id: full_doc_id}`；`collect_graph(rag, excluded_docs)` 用 `PGTableGraphStorage.get_all_nodes/edges` 全量导出并软删过滤——**仅当实体所有贡献文档都被排除才剔除**，共享实体/无归属实体保守保留；边仅保留两端都在保留集的） + 路由 `GET /graph` → `{nodes:[{id, entity_type, description, docs[], chunks[]}], edges:[{source, target, relation, weight}], meta}`。节点追加 `chunks` 字段供前端「引用→图谱」反查高亮（引用 text_unit_id 是 M2 格式、图谱 chunk 是 PG `chunk-{md5}`，须用 fullDocId 反查）。实测：`curl :8787/graph` ≈244 节点/269 边，软删文档独有实体已过滤。消费方见 `M8_frontend.md` v2.2。
+- **v5**（2026-09-15）：文档预览 `GET /docs/{id}/preview` + 图谱按文档过滤 `GET /graph?doc_id=` + 引用置信度排序修复。
+- 变更记录：**逐条版本历史见 `docs/CHANGELOG.md`**（v0 规划 → v1 壳 → v2 真流式 → v3 文档管理 → v4 图谱导出 → v5 预览/过滤/排序）。本文件不再维护历史流水。
