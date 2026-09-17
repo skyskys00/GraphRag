@@ -87,7 +87,7 @@ export function Dashboard({
   }
 
   return (
-    <main className="dashboard">
+    <main className="dash-view">
       <div className="dash-head">
         <div className="dash-title-group">
           {editing ? (

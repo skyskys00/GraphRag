@@ -877,7 +877,9 @@
 }
 
 /* ===== 仪表盘视图 ===== */
-.dashboard {
+/* 注意：类名不能叫 .dashboard，会与 App 根的 .app.dashboard 修饰符撞名，
+   把 display:grid 覆盖成 flex，导致侧边栏与内容上下堆叠。 */
+.dash-view {
   grid-area: dash;
   overflow-y: auto;
   padding: 24px 20px 40px 0;
