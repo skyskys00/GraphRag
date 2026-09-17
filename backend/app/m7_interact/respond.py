@@ -7,6 +7,7 @@ from typing import Any, AsyncIterator
 from app.m6_generate.orchestrator import answer, answer_stream
 
 from .bootstrap import AppDeps
+from .collections import add_recent_query
 from .events import sse
 from .history import build_query_with_history
 
@@ -43,6 +44,7 @@ async def make_answer(
         response_type=response_type, exclude_docs=excluded,
         allowed_docs=allowed,
     )
+    add_recent_query(deps.proj, deps.collection_id, query)
     return _jsonable_result(result)
 
 
@@ -61,3 +63,4 @@ async def stream_answer(
         allowed_docs=allowed,
     ):
         yield sse(event, payload)
+    add_recent_query(deps.proj, deps.collection_id, query)

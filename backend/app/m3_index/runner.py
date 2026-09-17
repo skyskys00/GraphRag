@@ -21,9 +21,13 @@ from .providers import build_llm_func, build_embedding_func, build_storage_confi
 def _load_dotenv(path: Path) -> None:
     for line in path.read_text(encoding="utf-8").splitlines():
         line = line.strip()
-        if line and not line.startswith("#") and "=" in line:
-            k, _, v = line.partition("=")
-            os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, _, v = line.partition("=")
+        v = v.strip().strip('"').strip("'")
+        if " #" in v:
+            v = v.split(" #", 1)[0].rstrip()
+        os.environ.setdefault(k.strip(), v)
 
 
 def _read_units(path: Path) -> list[dict]:
@@ -43,13 +47,14 @@ def load_rag_data(chunks_root: Path) -> list[dict]:
     return docs
 
 
-async def build_rag(working_dir: Path) -> LightRAG:
+async def build_rag(working_dir: Path, workspace: str = "lightrag_m4") -> LightRAG:
     embed = build_embedding_func()
     extract, query = build_llm_func()
     from lightrag.llm_roles import RoleLLMConfig
 
     rag = LightRAG(
         working_dir=str(working_dir),
+        workspace=workspace,
         llm_model_func=query,
         embedding_func=embed,
         llm_model_kwargs={"temperature": 0.1, "max_tokens": 8000},

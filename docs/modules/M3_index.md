@@ -1,6 +1,6 @@
 # M3 模块记录：索引层（LightRAG 建图 + bge-m3 向量）
 
-> 状态：**DeepSeek 正式态跑通**（2026-09-13，5/5 文档，隔离库 `data/lightrag_deepseek/`）。
+> 状态：**DeepSeek 正式态跑通**（2026-09-13，5/5 文档，隔离库 `data/lightrag_deepseek/`）；v0.3.1 新增 `build_rag(working_dir, workspace)` 参数 + `_load_dotenv` 内联注释修复（配合 M8 v3 多知识库）。
 > 契约：`docs/modules/M0_contracts/textunit.md`（v2）｜ 关联：Xinference bge-m3（见 [[graphrag-project-env]]）
 
 ## 1. 定位与职责

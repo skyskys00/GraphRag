@@ -1,6 +1,6 @@
 # M7 模块记录：交互层（FastAPI/SSE + 轻量 WebUI）—— 已落地
 
-> 状态：**v5.1 已落地**（v5 预览+过滤+排序 → v5.1 预览不依赖注册表 + 检索白名单 allowed_docs）。
+> 状态：**v6.0 已落地**（多知识库 Collection + 仪表盘：按 collection 缓存 AppDeps、CRUD 接口、全业务路由带 `collection_id`、`GET /stats` 聚合；移除 `POSTGRES_WORKSPACE` env + 修复 `_load_dotenv` 内联注释解析 → 全线 PG 存储）。
 > 契约：HTTP/SSE → 流式响应（Answer 的交互外观），消费 M6 的 Answer dict，不重写检索/生成。
 > 依据：`docs/FRAMEWORK_NOTES.md` §3 模块划分（M7 交互层/关键技术归属） ｜ `docs/ARCHITECTURE.md` §2.8 交互层、§2.7-4 流式输出、§6 步骤⑥⑦ 前端设计与联调
 > 前置：M6 生成层 v1 已落地（`answer()` 返回 query/text/citations/retrieval/meta；5 题端到端全绿，引用溯源到 textunit + file_path + page_range/anchor）。历史参照：scripts/ 时代 p2 曾规划「FastAPI/SSE 壳 + 页级引用 + span_map」（旧代码已删，此处只借用思路不回归）

@@ -23,6 +23,7 @@ export interface GraphFocus {
 interface GraphViewProps {
   focus?: GraphFocus | null | undefined
   uploadDocs: UploadDoc[]
+  collectionId: string
 }
 
 type LoadState = 'loading' | 'ready' | 'error'
@@ -57,7 +58,7 @@ function trunc(s: string, n: number) {
   return s.length > n ? `${s.slice(0, n)}…` : s
 }
 
-export function GraphView({ focus, uploadDocs }: GraphViewProps) {
+export function GraphView({ focus, uploadDocs, collectionId }: GraphViewProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const graphRef = useRef<Graph | null>(null)
   const prevFocusedRef = useRef<Set<string>>(new Set())
@@ -93,7 +94,7 @@ export function GraphView({ focus, uploadDocs }: GraphViewProps) {
     setFocusInfo(null)
     async function load() {
       try {
-        const raw = await fetchGraph(filterDoc || undefined)
+        const raw = await fetchGraph(filterDoc || undefined, collectionId)
         if (!alive) return
         rawDataRef.current = raw
         infoByIdRef.current = new Map(raw.nodes.map((n) => [n.id, {

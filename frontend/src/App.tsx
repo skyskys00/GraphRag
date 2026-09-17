@@ -8,19 +8,38 @@ import { InputBar } from './components/InputBar'
 import { EmptyState } from './components/EmptyState'
 import { DocumentManager } from './components/DocumentManager'
 import { DocumentPreview } from './components/DocumentPreview'
+import { Dashboard } from './components/Dashboard'
 import { useChat } from './hooks/useChat'
-import { checkHealth, deleteDoc, listDocs, uploadDoc } from './lib/api'
+import {
+  checkHealth,
+  createCollection,
+  deleteCollection,
+  deleteDoc,
+  listCollections,
+  listDocs,
+  renameCollection,
+  uploadDoc,
+} from './lib/api'
 import { GraphView } from './components/GraphView'
 import type { GraphFocus } from './components/GraphView'
-import type { Citation, UploadDoc } from './types'
+import type { AppView, Citation, CollectionInfo, UploadDoc } from './types'
 
 // 开发时可通过 USE_MOCK=true 用离线 mock 流走查（不依赖后端）
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
 
+const COLLECTION_KEY = 'graphrag.collection.v1'
 const SUGGESTIONS: string[] = []
 
-type View = 'chat' | 'documents' | 'graph'
 type RightTab = 'citations' | 'preview'
+
+function loadCollection(): string {
+  try {
+    const v = localStorage.getItem(COLLECTION_KEY)
+    return v && v !== 'null' && v !== 'undefined' ? v : 'default'
+  } catch {
+    return 'default'
+  }
+}
 
 function App() {
   const {
@@ -34,7 +53,7 @@ function App() {
     currentCitations,
   } = useChat({ useMock: USE_MOCK })
 
-  const [activeView, setActiveView] = useState<View>('chat')
+  const [activeView, setActiveView] = useState<AppView>('dashboard')
   const [graphFocus, setGraphFocus] = useState<GraphFocus | null>(null)
   const [docs, setDocs] = useState<UploadDoc[]>([])
   const [uploading, setUploading] = useState(false)
@@ -46,6 +65,12 @@ function App() {
   const [previewDoc, setPreviewDoc] = useState<UploadDoc | null>(null)
   const [previewJump, setPreviewJump] = useState<string | null>(null)
 
+  // 多知识库：当前集合 + 全量列表
+  const [current, setCurrent] = useState<string>(loadCollection)
+  const [collections, setCollections] = useState<CollectionInfo[]>([
+    { id: 'default', name: '默认知识库', created_at: '', doc_count: 0 },
+  ])
+
   const bottomRef = useRef<HTMLDivElement>(null)
   const autoScrollRef = useRef(true)
   const chatRef = useRef<HTMLDivElement>(null)
@@ -54,6 +79,14 @@ function App() {
     setToast(msg)
     window.clearTimeout(toastTimerRef.current)
     toastTimerRef.current = window.setTimeout(() => setToast(null), 4000)
+  }, [])
+
+  const persistCurrent = useCallback((id: string) => {
+    try {
+      localStorage.setItem(COLLECTION_KEY, id)
+    } catch {
+      // 隐私模式 / 配额满时静默
+    }
   }, [])
 
   // 流式过程中自动滚到底（用户主动上翻后暂停跟随）
@@ -93,13 +126,43 @@ function App() {
     }
   }, [setBackendOnline])
 
+  // 加载知识库列表；current 校验，已删除则回落 default
+  const loadCollections = useCallback(async () => {
+    try {
+      const list = await listCollections()
+      setCollections(list)
+      return list
+    } catch {
+      return null
+    }
+  }, [])
+
+  useEffect(() => {
+    if (USE_MOCK) return
+    let alive = true
+    loadCollections().then((list) => {
+      if (!alive || !list) return
+      const ids = new Set(list.map((c) => c.id))
+      if (!ids.has(current)) {
+        setCurrent('default')
+        persistCurrent('default')
+        showToast('所在知识库已被删除，已切换到默认知识库')
+      }
+    })
+    return () => {
+      alive = false
+    }
+    // 仅 mount 时校验一次
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const refreshDocs = useCallback(async () => {
     try {
-      setDocs(await listDocs())
+      setDocs(await listDocs(current))
     } catch {
       // 后端离线时静默，UI 保持上次列表
     }
-  }, [])
+  }, [current])
 
   useEffect(() => {
     if (!USE_MOCK) refreshDocs()
@@ -108,8 +171,9 @@ function App() {
   const handleUpload = async (file: File) => {
     setUploading(true)
     try {
-      await uploadDoc(file)
+      await uploadDoc(file, current)
       await refreshDocs()
+      await loadCollections()
       showToast(`已开始处理「${file.name}」，入库后可对它提问`)
     } catch (err) {
       showToast(`上传失败：${err instanceof Error ? err.message : String(err)}`)
@@ -129,9 +193,10 @@ function App() {
       } else if (docs.length > 0) {
         showToast('文档已入库，可对它提问')
       }
+      void loadCollections()
     }
     prevProcessingRef.current = hasProcessing
-  }, [hasProcessing, docs, showToast])
+  }, [hasProcessing, docs, showToast, loadCollections])
 
   useEffect(() => {
     if (!hasProcessing) return
@@ -141,9 +206,10 @@ function App() {
 
   const handleDelete = async (docId: string) => {
     try {
-      await deleteDoc(docId)
+      await deleteDoc(docId, current)
       setDocs((prev) => prev.filter((d) => d.doc_id !== docId))
       if (previewDoc?.doc_id === docId) setPreviewDoc(null)
+      await loadCollections()
       showToast('文档已删除，不再参与检索')
     } catch (err) {
       showToast(`删除失败：${err instanceof Error ? err.message : String(err)}`)
@@ -192,12 +258,108 @@ function App() {
     return m
   }, [currentCitations])
 
-  return (
-    <div className={`app${activeView === 'documents' ? ' docs' : activeView === 'graph' ? ' graph' : ''}`}>
-      <TopBar online={backendOnline} onClear={clear} />
-      <Sidebar activeView={activeView} onNav={setActiveView} />
+  // ---------- 知识库操作 ----------
 
-      {activeView === 'documents' ? (
+  const handleSwitch = (id: string) => {
+    if (id === current) return
+    setCurrent(id)
+    persistCurrent(id)
+    setGraphFocus(null)
+    setPreviewDoc(null)
+    setRightTab('citations')
+  }
+
+  const handleCreate = async (name: string) => {
+    try {
+      const { id } = await createCollection(name)
+      const list = await loadCollections()
+      setCurrent(id)
+      persistCurrent(id)
+      setActiveView('dashboard')
+      showToast(`已创建「${name}」，上传文档即可使用`)
+      return list
+    } catch (err) {
+      showToast(`创建失败：${err instanceof Error ? err.message : String(err)}`)
+    }
+  }
+
+  const handleRename = async (id: string, name: string) => {
+    try {
+      await renameCollection(id, name)
+      await loadCollections()
+      showToast('已重命名')
+    } catch (err) {
+      showToast(`重命名失败：${err instanceof Error ? err.message : String(err)}`)
+    }
+  }
+
+  const handleDeleteCollection = async (id: string) => {
+    const col = collections.find((c) => c.id === id)
+    if (!col || id === 'default') return
+    const ok = window.confirm(
+      `删除知识库「${col.name}」将删除其下全部文档、TextUnit、图谱与索引数据，且不可恢复。确定继续？`,
+    )
+    if (!ok) return
+    try {
+      await deleteCollection(id)
+      await loadCollections()
+      if (id === current) {
+        setCurrent('default')
+        persistCurrent('default')
+        setActiveView('dashboard')
+        setGraphFocus(null)
+        setPreviewDoc(null)
+      }
+      showToast('知识库已删除')
+    } catch (err) {
+      showToast(`删除失败：${err instanceof Error ? err.message : String(err)}`)
+    }
+  }
+
+  const currentCollection =
+    collections.find((c) => c.id === current) ??
+    ({ id: current, name: current, created_at: '', doc_count: 0 } as CollectionInfo)
+
+  return (
+    <div
+      className={`app${
+        activeView === 'dashboard'
+          ? ' dashboard'
+          : activeView === 'documents'
+            ? ' docs'
+            : activeView === 'graph'
+              ? ' graph'
+              : ''
+      }`}
+    >
+      <TopBar online={backendOnline} onClear={clear} />
+      <Sidebar
+        activeView={activeView}
+        onNav={setActiveView}
+        collections={collections}
+        current={current}
+        onSwitch={handleSwitch}
+        onCreate={handleCreate}
+        onRename={handleRename}
+        onDelete={handleDeleteCollection}
+      />
+
+      {activeView === 'dashboard' ? (
+        <Dashboard
+          collection={currentCollection}
+          docs={docs}
+          uploading={uploading}
+          onRename={handleRename}
+          onDelete={handleDeleteCollection}
+          onUpload={handleUpload}
+          onGoDocuments={() => setActiveView('documents')}
+          onGoGraph={() => setActiveView('graph')}
+          onAsk={(q) => {
+            setActiveView('chat')
+            send(q, undefined, current)
+          }}
+        />
+      ) : activeView === 'documents' ? (
         <DocumentManager
           docs={docs}
           onDelete={handleDelete}
@@ -205,10 +367,10 @@ function App() {
           onBack={() => setActiveView('chat')}
         />
       ) : activeView === 'graph' ? (
-        <GraphView focus={graphFocus} uploadDocs={docs} />
+        <GraphView focus={graphFocus} uploadDocs={docs} collectionId={current} />
       ) : messages.length === 0 ? (
         <main className="chat" ref={chatRef}>
-          <EmptyState suggestions={SUGGESTIONS} onPick={(q) => send(q)} />
+          <EmptyState suggestions={SUGGESTIONS} onPick={(q) => send(q, undefined, current)} />
         </main>
       ) : (
         <div ref={chatRef} style={{ gridArea: 'chat', overflowY: 'auto', paddingRight: 20 }}>
@@ -221,43 +383,46 @@ function App() {
         </div>
       )}
 
-      <aside className="cite-panel">
-        <div className="cite-tabs" role="tablist">
-          <button
-            className={`cite-tab${rightTab === 'citations' ? ' active' : ''}`}
-            onClick={() => setRightTab('citations')}
-          >
-            引用来源
-          </button>
-          <button
-            className={`cite-tab${rightTab === 'preview' ? ' active' : ''}`}
-            onClick={() => setRightTab('preview')}
-          >
-            预览
-            {previewDoc && <span className="cite-tab-dot" aria-hidden />}
-          </button>
-        </div>
+      {activeView !== 'dashboard' && (
+        <aside className="cite-panel">
+          <div className="cite-tabs" role="tablist">
+            <button
+              className={`cite-tab${rightTab === 'citations' ? ' active' : ''}`}
+              onClick={() => setRightTab('citations')}
+            >
+              引用来源
+            </button>
+            <button
+              className={`cite-tab${rightTab === 'preview' ? ' active' : ''}`}
+              onClick={() => setRightTab('preview')}
+            >
+              预览
+              {previewDoc && <span className="cite-tab-dot" aria-hidden />}
+            </button>
+          </div>
 
-        {rightTab === 'citations' || !previewDoc ? (
-          <CitationPanel
-            citations={currentCitations}
-            activeMarker={activeCitation}
-            onJumpToGraph={handleJumpToGraph}
-            onOpenPreview={openPreview}
-          />
-        ) : (
-          <DocumentPreview
-            doc={previewDoc}
-            jumpUnitId={previewJump}
-            topUnitId={topUnitByDoc.get(previewDoc.doc_id ?? '')?.unitId ?? null}
-            onClose={() => setRightTab('citations')}
-          />
-        )}
-      </aside>
+          {rightTab === 'citations' || !previewDoc ? (
+            <CitationPanel
+              citations={currentCitations}
+              activeMarker={activeCitation}
+              onJumpToGraph={handleJumpToGraph}
+              onOpenPreview={openPreview}
+            />
+          ) : (
+            <DocumentPreview
+              doc={previewDoc}
+              jumpUnitId={previewJump}
+              topUnitId={topUnitByDoc.get(previewDoc.doc_id ?? '')?.unitId ?? null}
+              collectionId={current}
+              onClose={() => setRightTab('citations')}
+            />
+          )}
+        </aside>
+      )}
 
       {activeView === 'chat' && (
         <InputBar
-          onSend={send}
+          onSend={(q, rt) => send(q, rt, current)}
           onUpload={handleUpload}
           disabled={isStreaming || backendOnline === false}
           uploading={uploading}

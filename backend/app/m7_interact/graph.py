@@ -12,7 +12,6 @@
 """
 from __future__ import annotations
 
-import os
 from typing import Any
 
 import asyncpg
@@ -66,12 +65,13 @@ async def collect_graph(
     excluded_docs: set[str],
     doc_id: str | None = None,
     allowed_docs: set[str] | None = None,
+    workspace: str = "lightrag_m4",
 ) -> dict[str, Any]:
     """图数据导出。doc_id 指定时仅保留该文档贡献的实体（按文档维度过滤，见 M8 v2.3）。
     allowed_docs 白名单：如有，则只保留归属至少一个白名单文档的实体/边。
+    workspace 见 M8 v3：按 collection 传各自 workspace（默认 lightrag_m4）。
     """
-    ws = os.environ.get("POSTGRES_WORKSPACE", "lightrag_m4")
-    chunk_to_doc = await _chunk_to_doc(ws)
+    chunk_to_doc = await _chunk_to_doc(workspace)
     excluded = set(excluded_docs or ())
 
     raw_nodes = await rag.chunk_entity_relation_graph.get_all_nodes()

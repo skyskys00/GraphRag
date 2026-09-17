@@ -23,6 +23,22 @@
 
 ---
 
+## [v3.0] 2026-09-17 —— 多知识库 + 仪表盘（M8 v3）
+
+**影响模块**：M3 索引（v0.3.1）、M7 交互（v6.0）、M8 前端（v3.0）
+
+- **M8 v3.0 · 前端**：
+  - 新增「多知识库」（FR-33~37）：侧边栏顶部知识库切换器（切换 / 新建 / 重命名 / 删除），default 恒在且不可删；全部视图（问答 / 文档 / 图谱 / 仪表盘）按当前库上下文切换；`localStorage` 持久化当前库，库被删则回落默认并提示。
+  - 新增「仪表盘」视图（FR-38~43）：库名 + 重命名/删除操作、统计卡片三连（文档数 / 实体数 / 关系数，点击跳文档管理 / 图谱）、最近问答列表（点击继续对话）、文档概览（前 5 条，更多跳文档管理）、快速操作按钮组；空库给上传引导，不以空列表糊脸。
+  - 现有单库行为零迁移：未新建知识库时完全等同 v2，现有文档自动归属默认库。
+- **M7 v6.0 · 后端**：
+  - 按 collection 维度重构 `bootstrap.py`：`AppDeps` 增加 `collection_id` + `workspace`，`get_deps(collection_id)` 字典缓存，每库独立 rag/sparse/entities/sidecar/白名单。
+  - 新增 `app/m7_interact/collections.py`：注册表 `data/collections.json`，CRUD + 每库最近问答（封顶 20）。删除 = registry 移除 + `shutil.rmtree` + best-effort 清 PG `lightrag_*` 所有该 workspace 行。
+  - 全部业务路由加 `collection_id`（缺省 `default`）：`/answer` body、`/answer/stream` query、`/docs` query/form、`/graph` query。新增 `GET /collections`（含 doc_count）、`POST/PATCH/DELETE /collections`、`GET /stats`（doc/node/edge 计数 + recent_queries）。
+  - 后端环境修复：移除 `backend/.env` 的 `POSTGRES_WORKSPACE`（postgres_impl import 时 `load_dotenv(".env")` 会把它重新注入，pop 无效，移除后 `db.workspace=None` → 实例 workspace 生效）；修复 `m3_index/runner.py::_load_dotenv` 内联注释剥离 bug（此前 `STORAGE_BACKEND=pg   # pg|local` 被读成完整串 → 静默落 local 存储）。修复后 M7 全线切回 PG（M4 应然状态）。
+- **M3 v0.3.1 · 索引**：`build_rag(working_dir, workspace)` 增加 `workspace` 参数透传给 `LightRAG`；`_load_dotenv` 修复内联注释。
+- **选型结论**：Collection = 一个 `workspace` 值（复用 LightRAG 原生行级隔离），放弃「同 workspace 加 `collection_id` 列」方案——后者需要 fork 官方子模块改 DDL/storage，维护成本高；spike 实证同进程多 workspace initialize 无冲突、双向隔离。
+
 ## [v2.1] 2026-09-16 —— 功能修复：预置问题 / 输入框位置 / 预览 404 / 检索白名单
 
 **影响模块**：M5 检索（v1.6.1）、M7 交互（v5.1）、M8 前端（v2.3.1）

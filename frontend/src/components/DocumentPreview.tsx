@@ -6,12 +6,19 @@ interface DocumentPreviewProps {
   doc: UploadDoc
   jumpUnitId?: string | null
   topUnitId?: string | null
+  collectionId: string
   onClose: () => void
 }
 
 type LoadState = 'loading' | 'ready' | 'error'
 
-export function DocumentPreview({ doc, jumpUnitId, topUnitId, onClose }: DocumentPreviewProps) {
+export function DocumentPreview({
+  doc,
+  jumpUnitId,
+  topUnitId,
+  collectionId,
+  onClose,
+}: DocumentPreviewProps) {
   const [state, setState] = useState<LoadState>('loading')
   const [preview, setPreview] = useState<DocPreview | null>(null)
   const [errorMsg, setErrorMsg] = useState('')
@@ -25,7 +32,7 @@ export function DocumentPreview({ doc, jumpUnitId, topUnitId, onClose }: Documen
     setPreview(null)
     async function load() {
       try {
-        const p = await fetchDocPreview(docId)
+        const p = await fetchDocPreview(docId, collectionId)
         if (!alive) return
         setPreview(p)
         setState('ready')

@@ -10,6 +10,7 @@ export function subscribeStream(params: {
   query: string
   history?: string // JSON 字符串
   response?: string
+  collectionId?: string
 }): {
   events: AsyncIterable<SseEvent>
   close: () => void
@@ -18,6 +19,7 @@ export function subscribeStream(params: {
   url.searchParams.set('q', params.query)
   if (params.history) url.searchParams.set('history', params.history)
   if (params.response) url.searchParams.set('response', params.response)
+  if (params.collectionId) url.searchParams.set('collection_id', params.collectionId)
 
   const es = new EventSource(url.toString())
 

@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-import os
 import shutil
 from pathlib import Path
 from typing import Any
@@ -119,7 +118,7 @@ async def build_workspace_deps(deps: Any) -> None:
 
     稀疏索引是上传后新文档能被检索的先决条件（启动时只在文件缺失才构建）。
     """
-    ws = os.environ.get("POSTGRES_WORKSPACE", "lightrag_m4")
+    ws = deps.workspace
     sparse_path = deps.working_dir / SPARSE_FILE
     await asyncio.to_thread(build_sparse, ws, sparse_path)
     deps.sparse = load_sparse(sparse_path)

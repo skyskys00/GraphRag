@@ -44,11 +44,13 @@ async function* realEventStream(
   query: string,
   history: HistoryMessage[],
   responseType?: string,
+  collectionId?: string,
 ): AsyncGenerator<import('../types').SseEvent> {
   const { events, close } = subscribeStream({
     query,
     history: JSON.stringify(history),
     response: responseType,
+    collectionId,
   })
   try {
     for await (const evt of events) {
@@ -85,7 +87,7 @@ export function useChat({ useMock = false }: UseChatOptions = {}) {
       .map((m) => ({ role: m.role, content: m.text }))
 
   const send = useCallback(
-    async (query: string, responseType?: string) => {
+    async (query: string, responseType?: string, collectionId?: string) => {
       const userMsg: ChatMessage = {
         id: nextId(),
         role: 'user',
@@ -104,7 +106,12 @@ export function useChat({ useMock = false }: UseChatOptions = {}) {
       try {
         const iterator = useMock
           ? mockEventStream(query)
-          : realEventStream(query, historyFromMessages(messagesRef.current), responseType)
+          : realEventStream(
+              query,
+              historyFromMessages(messagesRef.current),
+              responseType,
+              collectionId,
+            )
 
         let text = ''
         let citations: Citation[] = []

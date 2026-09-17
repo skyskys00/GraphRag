@@ -11,38 +11,37 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, AsyncIterator
 
-from fastapi import FastAPI, File, HTTPException, Query, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import documents
-from .bootstrap import WEB_DIRNAME, AppDeps, get_deps
+from . import collections, documents
+from .bootstrap import WEB_DIRNAME, dispose, evict_deps, get_deps
 from .events import sse
 from .graph import collect_graph
 from .respond import make_answer, stream_answer
+
+_PROJ = Path(__file__).resolve().parents[2]
 
 
 class AnswerRequest(BaseModel):
     query: str
     history: list[dict[str, Any]] = []
     response_type: str | None = None
+    collection_id: str = "default"
 
 
 @asynccontextmanager
 async def lifespan(fastapi_app: FastAPI):
-    fastapi_app.state.deps = await get_deps()
+    await get_deps()  # 预热默认库（单库行为不变）
     yield
-    await fastapi_app.state.deps.dispose()
+    await dispose()
 
 
 # docs_url 让给 /docs（文档管理接口）；Swagger 挪到 /swagger
 app = FastAPI(title="GraphRAG M7 交互层", version="0.1.0", lifespan=lifespan,
               docs_url="/swagger", redoc_url=None)
-
-
-def _deps() -> AppDeps:
-    return app.state.deps
 
 
 @app.get("/health")
@@ -53,7 +52,8 @@ async def health() -> dict[str, str]:
 @app.post("/answer")
 async def post_answer(req: AnswerRequest) -> dict[str, Any]:
     try:
-        return await make_answer(_deps(), req.query, req.history, req.response_type)
+        deps = await get_deps(req.collection_id)
+        return await make_answer(deps, req.query, req.history, req.response_type)
     except Exception as e:  # noqa: BLE001 —— 边界：把 LLM/检索异常转成可读 500
         raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}") from e
 
@@ -63,6 +63,7 @@ async def stream_answer_ep(
     q: str = Query(..., description="问题"),
     history: str = Query("", description="history JSON 字符串"),
     response: str | None = Query(None, description="response_type 中文要求"),
+    collection_id: str = Query("default"),
 ) -> StreamingResponse:
     hist: list[dict[str, Any]] = []
     if history:
@@ -73,7 +74,8 @@ async def stream_answer_ep(
 
     async def gen() -> AsyncIterator[str]:
         try:
-            async for evt in stream_answer(_deps(), q, hist, response):
+            deps = await get_deps(collection_id)
+            async for evt in stream_answer(deps, q, hist, response):
                 yield evt
         except Exception as e:  # noqa: BLE001
             yield sse("error", {"message": f"{type(e).__name__}: {e}"})
@@ -85,9 +87,12 @@ async def stream_answer_ep(
 
 
 @app.post("/docs")
-async def upload_doc(file: UploadFile = File(...)) -> dict[str, Any]:
-    """文档上传：落盘 data/uploads → 注册 processing → 后台跑 M1→M2→M3→sparse。"""
-    deps = _deps()
+async def upload_doc(
+    file: UploadFile = File(...),
+    collection_id: str = Form("default"),
+) -> dict[str, Any]:
+    """文档上传：落盘 <collection>/uploads → 注册 processing → 后台跑 M1→M2→M3→sparse。"""
+    deps = await get_deps(collection_id)
     filename = Path(file.filename or "upload").name  # 去路径，防目录穿越
     deps.uploads_dir.mkdir(parents=True, exist_ok=True)
     dest = deps.uploads_dir / f"{uuid.uuid4().hex[:8]}_{filename}"
@@ -102,27 +107,27 @@ async def upload_doc(file: UploadFile = File(...)) -> dict[str, Any]:
 
 
 @app.get("/docs")
-async def list_docs() -> list[dict[str, Any]]:
+async def list_docs(collection_id: str = Query("default")) -> list[dict[str, Any]]:
     """文档列表（含处理状态；doc_id 在入库完成后回填）。"""
-    return documents.list_docs(_deps())
+    return documents.list_docs(await get_deps(collection_id))
 
 
 @app.delete("/docs/{doc_id}")
-async def delete_doc(doc_id: str) -> dict[str, Any]:
+async def delete_doc(doc_id: str, collection_id: str = Query("default")) -> dict[str, Any]:
     """软删文档：注册表标记 + 文件层清除 + 检索侧过滤。"""
-    if not await documents.delete_doc(_deps(), doc_id):
+    if not await documents.delete_doc(await get_deps(collection_id), doc_id):
         raise HTTPException(status_code=404, detail=f"文档不存在: {doc_id}")
     return {"deleted": doc_id}
 
 
 @app.get("/docs/{doc_id}/preview")
-async def preview_doc(doc_id: str) -> dict[str, Any]:
-    """文档全文预览：读 M2 产物 data/chunks/<doc_id>.jsonl 返回全部 TextUnit（按顺序）。
+async def preview_doc(doc_id: str, collection_id: str = Query("default")) -> dict[str, Any]:
+    """文档全文预览：读 M2 产物 <collection>/chunks/<doc_id>.jsonl 返回全部 TextUnit。
 
     配合引用来源「原文档」跳转：前端按 text_unit_id 定位 + 置信度第一片段高亮。
     filename 优先从文档注册表取，没有则从第一个 chunk 的 file_path 推断。
     """
-    deps = _deps()
+    deps = await get_deps(collection_id)
     f = deps.chunks_dir / f"{doc_id}.jsonl"
     if not f.exists():
         raise HTTPException(status_code=404, detail=f"文档未就绪(无切片): {doc_id}")
@@ -149,12 +154,79 @@ async def preview_doc(doc_id: str) -> dict[str, Any]:
 
 
 @app.get("/graph")
-async def graph_data(doc_id: str | None = Query(None)) -> dict[str, Any]:
+async def graph_data(
+    doc_id: str | None = Query(None),
+    collection_id: str = Query("default"),
+) -> dict[str, Any]:
     """知识图谱（服务端按软删文档集合过滤；doc_id 指定时进一步只保留该文档关联子图）。"""
-    deps = _deps()
+    deps = await get_deps(collection_id)
     return await collect_graph(
         deps.rag, deps.excluded_docs, doc_id=doc_id, allowed_docs=deps.allowed_docs,
+        workspace=deps.workspace,
     )
+
+
+# ---------- M8 v3 多知识库 + 仪表盘 ----------
+
+@app.get("/collections")
+async def list_collections() -> list[dict[str, Any]]:
+    """知识库列表（default 恒在首位）；doc_count = 该库 documents.json 未删 ready 数。"""
+    items = collections.list_collections(_PROJ)
+    for c in items:
+        deps = await get_deps(c["id"])
+        c["doc_count"] = sum(1 for r in documents.list_docs(deps) if r.get("status") == "ready")
+    return items
+    
+
+@app.post("/collections")
+async def create_collection(name: str = Query(...)) -> dict[str, str]:
+    """新建知识库：生成 col_<uuid8>（兼作 workspace 与目录名）。"""
+    cid = collections.create_collection(_PROJ, name.strip())
+    return {"id": cid}
+
+
+@app.patch("/collections/{col_id}")
+async def rename_collection(col_id: str, name: str = Query(...)) -> dict[str, str]:
+    if not collections.rename_collection(_PROJ, col_id, name.strip()):
+        if col_id == "default":
+            raise HTTPException(status_code=409, detail="默认知识库不可重命名")
+        raise HTTPException(status_code=404, detail=f"知识库不存在: {col_id}")
+    return {"id": col_id}
+
+
+@app.delete("/collections/{col_id}")
+async def delete_collection(col_id: str) -> dict[str, str]:
+    if col_id == "default":
+        raise HTTPException(status_code=409, detail="默认知识库不可删除")
+    if not await collections.delete_collection(_PROJ, col_id):
+        raise HTTPException(status_code=404, detail=f"知识库不存在: {col_id}")
+    await evict_deps(col_id)
+    return {"deleted": col_id}
+
+
+@app.get("/stats")
+async def stats(collection_id: str = Query("default")) -> dict[str, Any]:
+    """仪表盘聚合：文档/实体/关系计数 + 最近问答。"""
+    deps = await get_deps(collection_id)
+    doc_count = sum(1 for r in documents.list_docs(deps) if r.get("status") == "ready")
+
+    import asyncpg
+    conn = await asyncpg.connect(
+        host="127.0.0.1", port=5432, user="postgres", password="postgres", database="postgres")
+    try:
+        nodes = await conn.fetchval(
+            "SELECT count(*) FROM lightrag_graph_nodes WHERE workspace=$1", deps.workspace)
+        edges = await conn.fetchval(
+            "SELECT count(*) FROM lightrag_graph_edges WHERE workspace=$1", deps.workspace)
+    finally:
+        await conn.close()
+
+    return {
+        "doc_count": doc_count,
+        "node_count": nodes,
+        "edge_count": edges,
+        "recent_queries": collections.load_recent_queries(_PROJ, collection_id),
+    }
 
 
 web_dir = Path(__file__).resolve().parent / WEB_DIRNAME

@@ -103,3 +103,27 @@ export interface DocPreview {
   filename: string
   units: PreviewUnit[]
 }
+
+// M8 v3 多知识库（Collection）契约镜像（GET/POST/PATCH/DELETE /collections）
+export interface CollectionInfo {
+  id: string
+  name: string
+  created_at: string
+  doc_count: number
+}
+
+export interface RecentQuery {
+  query: string
+  ts: string
+}
+
+// M8 v3 仪表盘契约镜像（GET /stats）
+export interface DashboardStats {
+  doc_count: number
+  node_count: number
+  edge_count: number
+  recent_queries: RecentQuery[]
+}
+
+// 主区视图：仪表盘 / 问答 / 文档管理 / 知识图谱
+export type AppView = 'dashboard' | 'chat' | 'documents' | 'graph'

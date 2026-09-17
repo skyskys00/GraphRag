@@ -1,11 +1,29 @@
-import type { Answer, DocPreview, GraphData, HistoryMessage, UploadDoc } from '../types'
+import type {
+  Answer,
+  CollectionInfo,
+  DashboardStats,
+  DocPreview,
+  GraphData,
+  HistoryMessage,
+  UploadDoc,
+} from '../types'
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? '/api'
+
+// 拼带 collection_id 的 query string；extra 键值非空才追加
+function withQuery(path: string, params: Record<string, string | undefined>): string {
+  const url = new URL(`${API_BASE}${path}`, window.location.origin)
+  for (const [k, v] of Object.entries(params)) {
+    if (v !== undefined && v !== '') url.searchParams.set(k, v)
+  }
+  return url.toString()
+}
 
 export async function postAnswer(params: {
   query: string
   history?: HistoryMessage[]
   response_type?: string
+  collection_id?: string
 }): Promise<Answer> {
   const res = await fetch(`${API_BASE}/answer`, {
     method: 'POST',
@@ -14,6 +32,7 @@ export async function postAnswer(params: {
       query: params.query,
       history: params.history ?? [],
       response_type: params.response_type ?? null,
+      collection_id: params.collection_id ?? 'default',
     }),
   })
   if (!res.ok) {
@@ -32,33 +51,70 @@ export async function checkHealth(): Promise<boolean> {
   }
 }
 
-export async function uploadDoc(file: File): Promise<void> {
+export async function uploadDoc(file: File, collection_id = 'default'): Promise<void> {
   const form = new FormData()
   form.append('file', file)
+  form.append('collection_id', collection_id)
   const res = await fetch(`${API_BASE}/docs`, { method: 'POST', body: form })
   if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`)
 }
 
-export async function listDocs(): Promise<UploadDoc[]> {
-  const res = await fetch(`${API_BASE}/docs`)
+export async function listDocs(collection_id = 'default'): Promise<UploadDoc[]> {
+  const res = await fetch(withQuery('/docs', { collection_id }))
   if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`)
   return (await res.json()) as UploadDoc[]
 }
 
-export async function deleteDoc(docId: string): Promise<void> {
-  const res = await fetch(`${API_BASE}/docs/${encodeURIComponent(docId)}`, { method: 'DELETE' })
+export async function deleteDoc(docId: string, collection_id = 'default'): Promise<void> {
+  const res = await fetch(withQuery(`/docs/${encodeURIComponent(docId)}`, { collection_id }), {
+    method: 'DELETE',
+  })
   if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`)
 }
 
-export async function fetchGraph(docId?: string): Promise<GraphData> {
-  const qs = docId ? `?doc_id=${encodeURIComponent(docId)}` : ''
-  const res = await fetch(`${API_BASE}/graph${qs}`)
+export async function fetchGraph(
+  docId?: string,
+  collection_id = 'default',
+): Promise<GraphData> {
+  const res = await fetch(withQuery('/graph', { doc_id: docId, collection_id }))
   if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`)
   return (await res.json()) as GraphData
 }
 
-export async function fetchDocPreview(docId: string): Promise<DocPreview> {
-  const res = await fetch(`${API_BASE}/docs/${encodeURIComponent(docId)}/preview`)
+export async function fetchDocPreview(docId: string, collection_id = 'default'): Promise<DocPreview> {
+  const res = await fetch(withQuery(`/docs/${encodeURIComponent(docId)}/preview`, { collection_id }))
   if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`)
   return (await res.json()) as DocPreview
+}
+
+// ---------- M8 v3：知识库 ----------
+
+export async function listCollections(): Promise<CollectionInfo[]> {
+  const res = await fetch(`${API_BASE}/collections`)
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`)
+  return (await res.json()) as CollectionInfo[]
+}
+
+export async function createCollection(name: string): Promise<{ id: string }> {
+  const res = await fetch(withQuery('/collections', { name }), { method: 'POST' })
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`)
+  return (await res.json()) as { id: string }
+}
+
+export async function renameCollection(id: string, name: string): Promise<void> {
+  const res = await fetch(withQuery(`/collections/${encodeURIComponent(id)}`, { name }), {
+    method: 'PATCH',
+  })
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`)
+}
+
+export async function deleteCollection(id: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/collections/${encodeURIComponent(id)}`, { method: 'DELETE' })
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`)
+}
+
+export async function fetchStats(collection_id = 'default'): Promise<DashboardStats> {
+  const res = await fetch(withQuery('/stats', { collection_id }))
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`)
+  return (await res.json()) as DashboardStats
 }
