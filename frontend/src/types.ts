@@ -71,9 +71,13 @@ export interface ChatMessage {
 export interface GraphNode {
   id: string
   entity_type: string
+  /** 7 大类归一化类型（组织/人物/产品项目/概念/事件/地点/其他），供类型过滤 chip */
+  entity_group: string
   description: string
   docs: string[]
   chunks: string[]
+  /** top_n>0 且节点≥40 时才计算（服务端按 PageRank 取 top_n） */
+  pagerank?: number
 }
 
 export interface GraphEdge {
@@ -81,13 +85,51 @@ export interface GraphEdge {
   target: string
   relation: string
   weight: number
+  rel_type: number
+  rel_type_name: string
 }
 
-export interface GraphData {
+export interface EntityGraphData {
+  level: 'entity'
   nodes: GraphNode[]
   edges: GraphEdge[]
   meta: { node_count: number; edge_count: number }
 }
+
+// M8 v4.0 文档级图谱（level=document）
+export interface DocGraphNode {
+  id: string
+  label: string
+  entity_count: number
+  cluster_id: number
+  created_at: string
+}
+
+export interface DocGraphEdge {
+  source: string
+  target: string
+  type: 'concept' | 'citation'
+  weight: number
+  shared_entities?: string[]
+  snippet?: string
+}
+
+export interface DocCluster {
+  id: number
+  name: string
+  doc_count: number
+  color: string
+}
+
+export interface DocumentGraphData {
+  level: 'document'
+  nodes: DocGraphNode[]
+  edges: DocGraphEdge[]
+  clusters: DocCluster[]
+  meta: { node_count: number; edge_count: number; cluster_count: number }
+}
+
+export type GraphData = EntityGraphData | DocumentGraphData
 
 // M8 v2.3 文档全文预览契约镜像（GET /docs/{doc_id}/preview）
 export interface PreviewUnit {

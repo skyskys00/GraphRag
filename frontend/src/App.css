@@ -1180,6 +1180,207 @@
   font-size: 12px;
   color: var(--text-mute);
 }
+
+/* M8 v4.0 粒度切换 */
+.graph-level-switch {
+  display: flex;
+  background: var(--surface-soft);
+  border-radius: 8px;
+  padding: 2px;
+  border: 1px solid var(--border);
+}
+.graph-level-btn {
+  background: transparent;
+  border: none;
+  padding: 5px 14px;
+  font-size: 13px;
+  color: var(--text-soft);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+.graph-level-btn:hover {
+  color: var(--text);
+}
+.graph-level-btn.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  font-weight: 500;
+}
+
+/* M8 v4.0 Phase 3：核心/全部实体切换 */
+.graph-core-switch {
+  display: flex;
+  background: var(--surface-soft);
+  border-radius: 8px;
+  padding: 2px;
+  border: 1px solid var(--border);
+}
+.graph-core-btn {
+  background: transparent;
+  border: none;
+  padding: 5px 12px;
+  font-size: 13px;
+  color: var(--text-soft);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.graph-core-btn:hover {
+  color: var(--text);
+}
+.graph-core-btn.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  font-weight: 500;
+}
+
+/* M8 v4.0 Phase 3：实体类型过滤 chips */
+.graph-type-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 2px 2px;
+  flex-shrink: 0;
+}
+.graph-chips-label {
+  font-size: 12px;
+  color: var(--text-soft);
+  margin-right: 2px;
+}
+.graph-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 12px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.graph-chip:hover {
+  border-color: var(--primary);
+}
+.graph-chip.off {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+.graph-chip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--chip-color, #aaa);
+  flex-shrink: 0;
+}
+
+/* 话题聚类 legend */
+.graph-legend {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  max-height: calc(100% - 24px);
+  overflow-y: auto;
+  z-index: 5;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.graph-legend-title {
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+.graph-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0;
+  color: var(--text-soft);
+  white-space: nowrap;
+}
+.graph-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.6);
+}
+.graph-legend-text {
+  font-size: 12px;
+}
+.graph-legend-count {
+  color: var(--text-mute);
+  font-size: 11px;
+}
+
+/* 详情卡下钻按钮 */
+.graph-drill-btn {
+  width: 100%;
+  margin-top: 12px;
+  padding: 8px 12px;
+  border: 1px solid var(--primary);
+  background: transparent;
+  color: var(--primary);
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.graph-drill-btn:hover {
+  background: var(--primary);
+  color: white;
+}
+.graph-detail-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0 12px;
+  font-size: 13px;
+}
+.graph-meta-key {
+  color: var(--text-mute);
+  margin-right: 8px;
+}
+.graph-meta-val {
+  color: var(--text);
+  font-weight: 500;
+}
+.graph-rel-shared {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-mute);
+  line-height: 1.4;
+  padding-left: 8px;
+  border-left: 2px solid var(--border);
+}
+
+.graph-rel-type-tag {
+  display: inline-block;
+  font-size: 10px;
+  color: white;
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-right: 6px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.graph-legend-item.muted {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
 .graph-body {
   display: flex;
   gap: 16px;

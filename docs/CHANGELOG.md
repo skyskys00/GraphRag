@@ -23,6 +23,15 @@
 
 ---
 
+## [v4.0] 2026-09-18 —— 双层图谱优化（M8 v4.0 Phase 1/2/3）
+
+**影响模块**：M7 交互（v7/v8/v9）、M8 前端（v4.0）；规划：`docs/modules/GRAPH_OPTIMIZATION_v4.md`
+
+- **M7 v7 · 文档级图谱**：`GET /graph?level=document`——节点=文档、边=概念关联（Jaccard 阈值 0.05）+ 话题聚类（networkx `greedy_modularity_communities` 社区发现，cluster 自动命名取高频实体拼接）。数据完全从实体归属关系派生，不新增表、与 collection 隔离天然兼容；文档<200 时计算毫秒级。
+- **M7 v8 · 引用关系边 + 关系分类**：文档级新增 citation 边（文件名/编号变体正则匹配 TextUnit 文本，有向，含引用次数 + 首个 snippet）；实体级边新增 `rel_type`/`rel_type_name`（6 类关键词规则方案 A：归属/动作/因果/时间/同义/属性 + 未分类）。**实测**：默认库 191 条边中 133 条分类成功（≈70%），覆盖 5/6 类（无时间类数据）；文档交叉引用检测到 1 条（snippet 正确）。
+- **M7 v9 · 实体筛选**：`collect_graph` 新增 `top_n`（>0 且节点≥40 时按 PageRank 取 top_n 核心节点，只保留节点间边）；实体类型归一化 7 大类（`normalize_entity_type`：organization/org/组织→组织、metric→概念…）。**实测**：默认库 160 节点/191 边 → top_n=60 得 60 节点/76 边，pagerank 降序、边全在集合内，核心 top3=公司/客户投诉/一级(紧急)。
+- **M8 v4.0 · 前端**：Phase 1 文档级图谱视图（`DocGraphView` 双粒度切换、双击下钻、话题 legend）；Phase 2 实体级边按关系类型着色 + 关系类型 legend 点击过滤 + 详情卡类型标签；Phase 3 核心/全部实体切换（`top_n` 参数）+ 7 类实体类型过滤 chip（视图层过滤，联动剔除悬空边）。实测 headless CDP 9/9：默认核心 60、切全部 160 节点、chips 隐藏/恢复/多选累计、回归文档视图正常。
+
 ## [v3.0] 2026-09-17 —— 多知识库 + 仪表盘（M8 v3）
 
 **影响模块**：M3 索引（v0.3.1）、M7 交互（v6.0）、M8 前端（v3.0）

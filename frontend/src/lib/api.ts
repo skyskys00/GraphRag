@@ -73,10 +73,23 @@ export async function deleteDoc(docId: string, collection_id = 'default'): Promi
 }
 
 export async function fetchGraph(
-  docId?: string,
-  collection_id = 'default',
+  params: {
+    docId?: string
+    level?: 'entity' | 'document'
+    collection_id?: string
+    /** >0 时请求 PageRank top_n 核心节点（level=entity 有效） */
+    top_n?: number
+  } = {},
 ): Promise<GraphData> {
-  const res = await fetch(withQuery('/graph', { doc_id: docId, collection_id }))
+  const { docId, level = 'entity', collection_id = 'default', top_n } = params
+  const res = await fetch(
+    withQuery('/graph', {
+      doc_id: docId,
+      level,
+      collection_id,
+      top_n: top_n && top_n > 0 ? String(top_n) : undefined,
+    }),
+  )
   if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`)
   return (await res.json()) as GraphData
 }

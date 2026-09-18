@@ -19,7 +19,7 @@ from pydantic import BaseModel
 from . import collections, documents
 from .bootstrap import WEB_DIRNAME, dispose, evict_deps, get_deps
 from .events import sse
-from .graph import collect_graph
+from .graph import collect_document_graph, collect_graph
 from .respond import make_answer, stream_answer
 
 _PROJ = Path(__file__).resolve().parents[2]
@@ -155,14 +155,35 @@ async def preview_doc(doc_id: str, collection_id: str = Query("default")) -> dic
 
 @app.get("/graph")
 async def graph_data(
+    level: str = Query("entity", pattern="^(entity|document)$"),
     doc_id: str | None = Query(None),
+    top_n: int = Query(0, ge=0),
     collection_id: str = Query("default"),
 ) -> dict[str, Any]:
-    """知识图谱（服务端按软删文档集合过滤；doc_id 指定时进一步只保留该文档关联子图）。"""
+    """知识图谱。level=entity 实体级（默认，向下兼容）；level=document 文档级（概念关联+话题聚类）。
+
+    doc_id 仅 level=entity 时生效（单文档子图过滤）。
+    top_n 仅 level=entity 时有效：>0 时按 PageRank 只保留 top_n 个核心节点（节点少于 40 时不筛选）。
+    """
     deps = await get_deps(collection_id)
+    if level == "document":
+        # 文档元数据（filename / created_at）从文档注册表取
+        doc_meta: dict[str, dict[str, Any]] = {}
+        for rec in documents.list_docs(deps):
+            did = rec.get("doc_id")
+            if did:
+                doc_meta[did] = {
+                    "filename": rec.get("filename") or did,
+                    "created_at": rec.get("created_at") or "",
+                }
+        return await collect_document_graph(
+            deps.rag, deps.excluded_docs, deps.allowed_docs,
+            workspace=deps.workspace, doc_meta=doc_meta,
+            chunks_dir=deps.chunks_dir,
+        )
     return await collect_graph(
         deps.rag, deps.excluded_docs, doc_id=doc_id, allowed_docs=deps.allowed_docs,
-        workspace=deps.workspace,
+        workspace=deps.workspace, top_n=top_n,
     )
 
 
