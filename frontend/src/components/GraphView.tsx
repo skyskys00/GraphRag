@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { CSSProperties } from 'react'
+import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react'
 import { Graph } from '@antv/g6'
 import type { Element as GElement } from '@antv/g'
 import type {
@@ -540,6 +540,43 @@ export function GraphView({ focus, uploadDocs, collectionId }: GraphViewProps) {
     setGraphLevel(level)
   }
 
+  // ---------- M8 v4.0.1：节点详情浮窗（fixed + 头部拖拽）----------
+  const detailRef = useRef<HTMLElement | null>(null)
+  const [detailPos, setDetailPos] = useState<{ x: number; y: number } | null>(null)
+  const dragRef = useRef<{
+    startX: number
+    startY: number
+    originX: number
+    originY: number
+  } | null>(null)
+
+  const onHeadPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    // 点在关闭按钮上不启动拖拽
+    if ((e.target as HTMLElement).closest('button')) return
+    const el = detailRef.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    dragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      originX: rect.left,
+      originY: rect.top,
+    }
+    e.currentTarget.setPointerCapture?.(e.pointerId)
+  }
+  const onHeadPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const d = dragRef.current
+    if (!d) return
+    // left/top 由 inline style 覆盖 CSS 默认的 right 定位
+    setDetailPos({
+      x: d.originX + (e.clientX - d.startX),
+      y: Math.max(8, d.originY + (e.clientY - d.startY)),
+    })
+  }
+  const onHeadPointerUp = () => {
+    dragRef.current = null
+  }
+
   return (
     <div className="graph-view">
       <div className="graph-toolbar">
@@ -720,10 +757,20 @@ export function GraphView({ focus, uploadDocs, collectionId }: GraphViewProps) {
           )}
         </div>
 
-        {/* ---------- 详情卡 ---------- */}
+        {/* ---------- 详情卡（浮窗，可拖动）---------- */}
         {(selectedEntity || selectedDoc) && (
-          <aside className="graph-detail">
-            <div className="graph-detail-head">
+          <aside
+            className="graph-detail"
+            ref={detailRef}
+            style={detailPos ? { left: detailPos.x, top: detailPos.y } : undefined}
+          >
+            <div
+              className="graph-detail-head"
+              onPointerDown={onHeadPointerDown}
+              onPointerMove={onHeadPointerMove}
+              onPointerUp={onHeadPointerUp}
+              title="拖动可移动详情"
+            >
               <span className="graph-type-tag">
                 {selectedDoc ? '文档' : selectedEntity?.entityType}
               </span>
@@ -738,6 +785,10 @@ export function GraphView({ focus, uploadDocs, collectionId }: GraphViewProps) {
                   {selectedDoc.label}
                 </h3>
                 <div className="graph-detail-meta">
+                  <div>
+                    <span className="graph-meta-key">文档ID</span>
+                    <span className="graph-meta-val doc-id">{selectedId}</span>
+                  </div>
                   <div><span className="graph-meta-key">实体数</span><span className="graph-meta-val">{selectedDoc.entityCount}</span></div>
                   <div>
                     <span className="graph-meta-key">话题</span>

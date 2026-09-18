@@ -246,6 +246,21 @@ def _load_doc_text(chunks_dir: Path, doc_id: str) -> list[tuple[str, str]]:
             continue
     return units
 
+def _infer_doc_filename(chunks_dir: Path | None, doc_id: str) -> str:
+    """从 M2 切片首条 file_path 推断文档名（注册表缺失时的回退）。"""
+    if chunks_dir is not None:
+        f = chunks_dir / f"{doc_id}.jsonl"
+        if f.exists():
+            try:
+                for line in f.read_text(encoding="utf-8").splitlines():
+                    if line.strip():
+                        fp = json.loads(line).get("file_path")
+                        if fp:
+                            return Path(fp).name
+            except json.JSONDecodeError:
+                pass
+    return doc_id
+
 
 def _citation_edges(
     doc_ids: list[str],
@@ -461,8 +476,9 @@ async def collect_document_graph(
 ) -> dict[str, Any]:
     """文档级图谱：节点=文档，边=概念关联（Jaccard）+ 引用关系，话题聚类（社区发现）。
 
-    doc_meta: doc_id -> {filename, created_at, ...}，可选，用于节点 label/时间；
-    不传则节点 label 回退为 doc_id。
+    doc_meta: doc_id -> {filename, created_at, ...}，可选。用于节点 label/时间，
+    且作为「可见文档」白名单：节点只保留注册表有记录的文档（幽灵文档/重复索引不显示）。
+    不传（纯离线建库、无注册表）则回退全量显示，label 从 chunks file_path 推断。
     chunks_dir: TextUnit JSONL 目录，传了才检测引用关系边。
     """
     # 复用实体级的节点提取+过滤逻辑，拿到过滤后的实体节点（含 docs 归属）
@@ -485,6 +501,14 @@ async def collect_document_graph(
     # 文档 → 实体集合
     doc_entities = _doc_entity_sets(keep_nodes)
 
+    # 关键修复：文档级节点只保留「文档管理可见文档」（doc_meta 注册表有记录）——
+    # 幽灵文档（chunk 索引残留但从未走上传接口、注册表缺失）无法预览/删除，且与
+    # 注册文档可能重复索引（同文档建库两遍），不应作为文档节点出现，与实体级白名单过滤对齐。
+    # doc_meta 为空（纯离线建库、无注册表）时回退全量显示。
+    meta_ids = set((doc_meta or {}).keys())
+    if meta_ids:
+        doc_entities = {d: es for d, es in doc_entities.items() if d in meta_ids}
+
     # 概念关联边
     concept_edges = _concept_edges(doc_entities)
 
@@ -496,7 +520,8 @@ async def collect_document_graph(
     nodes: list[dict[str, Any]] = []
     for doc_id in doc_ids:
         meta = (doc_meta or {}).get(doc_id, {})
-        filename = meta.get("filename") or doc_id
+        # label 优先注册表 filename，其次从 M2 chunk file_path 推断
+        filename = meta.get("filename") or _infer_doc_filename(chunks_dir, doc_id)
         nodes.append({
             "id": doc_id,
             "label": filename,

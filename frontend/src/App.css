@@ -1170,7 +1170,10 @@
   color: var(--text);
   font-size: 13px;
   padding: 5px 8px;
-  max-width: 220px;
+  /* M8 v4.0.1：固定宽度（约等于「全部文档」选项），长文档名不再撑开布局 */
+  width: 160px;
+  max-width: 160px;
+  flex: none;
 }
 .graph-filter-select:focus {
   outline: none;
@@ -1356,6 +1359,12 @@
   color: var(--text);
   font-weight: 500;
 }
+.graph-meta-val.doc-id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  color: var(--text-soft);
+  word-break: break-all;
+}
 .graph-rel-shared {
   margin-top: 4px;
   font-size: 11px;
@@ -1444,15 +1453,20 @@
   z-index: 3;
 }
 
-/* 节点详情侧栏 */
+/* 节点详情浮窗（M8 v4.0.1：fixed 可拖动，不再挤压右栏引用/预览） */
 .graph-detail {
-  width: 270px;
-  max-height: 100%;
+  position: fixed;
+  top: 96px;
+  right: 32px;
+  z-index: 60;
+  width: 280px;
+  max-height: min(70vh, 560px);
   overflow-y: auto;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 16px;
+  padding: 14px 16px;
   background: var(--surface);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.13);
   font-size: 13px;
   flex-shrink: 0;
 }
@@ -1461,6 +1475,12 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 6px;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.graph-detail-head:active {
+  cursor: grabbing;
 }
 .graph-type-tag {
   display: inline-block;
