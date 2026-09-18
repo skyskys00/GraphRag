@@ -317,6 +317,8 @@ export function GraphView({ focus, uploadDocs, collectionId }: GraphViewProps) {
         type: 'force',
         preventOverlap: true,
         linkDistance: layoutLinkDistance,
+        alphaDecay: 0.08,
+        velocityDecay: 0.3,
       },
       node: {
         state: {
@@ -328,6 +330,15 @@ export function GraphView({ focus, uploadDocs, collectionId }: GraphViewProps) {
             stroke: '#e67e22',
             lineWidth: 4,
           },
+          hover: {
+            halo: true,
+            haloLineWidth: 12,
+            haloStroke: 'rgba(246,185,59,0.25)',
+            stroke: '#d4a574',
+            lineWidth: 3,
+            enlarged: true,
+            scale: 1.15,
+          },
         },
       },
       behaviors: ['drag-canvas', 'zoom-canvas', 'drag-element'],
@@ -335,6 +346,23 @@ export function GraphView({ focus, uploadDocs, collectionId }: GraphViewProps) {
 
     const graph = new Graph(options)
     graphRef.current = graph
+
+    // 事件注册放在 graph 创建后立即执行，确保 graph 重建时 handler 也重新绑定
+    // （若放在独立 effect 里，hiddenGroups/hiddenRelTypes 改变导致 graph 重建但 effect 没重跑，会出现点了没反应）
+    graph.on('node:click', (evt: IPointerEvent) => {
+      const id = String((evt.target as GElement).id)
+      setSelectedId(id)
+      // 点击节点时重置浮窗位置（null → 使用 CSS 默认位置），便于再次打开回到默认位
+      setDetailPos(null)
+    })
+    graph.on('node:dblclick', (evt: IPointerEvent) => {
+      const raw = rawDataRef.current
+      if (!raw || !isDocumentData(raw)) return
+      const id = String((evt.target as GElement).id)
+      setFilterDoc(id)
+      setGraphLevel('entity')
+    })
+
     graphRenderPRef.current = graph.render().catch(() => undefined)
     setGraphReady(true)
     return () => {
@@ -393,38 +421,6 @@ export function GraphView({ focus, uploadDocs, collectionId }: GraphViewProps) {
     const graph = graphReady ? graphRef.current : null
     if (graph) void applyFocus(graph, focus)
   }, [focus, graphReady, applyFocus, graphLevel])
-
-  // 点击节点 → 选中 + 详情
-  useEffect(() => {
-    const graph = graphRef.current
-    if (!graph) return
-    const onClick = (evt: IPointerEvent) => {
-      const id = String((evt.target as GElement).id)
-      setSelectedId(id)
-    }
-    graph.on('node:click', onClick)
-    return () => {
-      graph.off('node:click', onClick)
-    }
-  }, [dataVersion])
-
-  // 双击文档节点 → 下钻到实体级
-  useEffect(() => {
-    const graph = graphRef.current
-    if (!graph) return
-    const onDblClick = (evt: IPointerEvent) => {
-      const raw = rawDataRef.current
-      if (!raw || !isDocumentData(raw)) return
-      const id = String((evt.target as GElement).id)
-      // 切到实体级 + 过滤该文档
-      setFilterDoc(id)
-      setGraphLevel('entity')
-    }
-    graph.on('node:dblclick', onDblClick)
-    return () => {
-      graph.off('node:dblclick', onDblClick)
-    }
-  }, [dataVersion])
 
   // 选中高亮
   useEffect(() => {

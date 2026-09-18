@@ -32,6 +32,25 @@
 - **M7 v9 · 实体筛选**：`collect_graph` 新增 `top_n`（>0 且节点≥40 时按 PageRank 取 top_n 核心节点，只保留节点间边）；实体类型归一化 7 大类（`normalize_entity_type`：organization/org/组织→组织、metric→概念…）。**实测**：默认库 160 节点/191 边 → top_n=60 得 60 节点/76 边，pagerank 降序、边全在集合内，核心 top3=公司/客户投诉/一级(紧急)。
 - **M8 v4.0 · 前端**：Phase 1 文档级图谱视图（`DocGraphView` 双粒度切换、双击下钻、话题 legend）；Phase 2 实体级边按关系类型着色 + 关系类型 legend 点击过滤 + 详情卡类型标签；Phase 3 核心/全部实体切换（`top_n` 参数）+ 7 类实体类型过滤 chip（视图层过滤，联动剔除悬空边）。实测 headless CDP 9/9：默认核心 60、切全部 160 节点、chips 隐藏/恢复/多选累计、回归文档视图正常。
 
+## [v4.0.2] 2026-09-18 —— 话题聚类算法升级 + 图谱交互体验优化（6项）
+
+**影响模块**：M7 交互（v9.2）、M8 前端（v4.0.2）
+
+- **M7 v9.2 · 话题聚类算法升级（问题 2）**：从 Jaccard 相似度 + greedy_modularity 改为**关键词加权余弦相似度 + 社区发现**。核心变化：
+  - 实体按类型加权（组织/产品/事件×2.0、概念×1.5、人物×1.0、地点×0.8、其他×0.5）
+  - **文档名/标题高权重（×4.0）**（用户要求：有意义的文档名应主导聚类）
+  - 关键词归一化：去标点/通用后缀/数字前缀 + 日期碎片过滤
+  - 余弦相似度构图（阈值 0.10）→ greedy_modularity_communities 社区发现
+  - 簇名去冗余：停用词（时间碎片/通用组织词）+ 去包含关系子串 → 取 top 3 拼接
+  - **效果**：4 篇文档（销售×2 + 办公用品 + 客户投诉）从 Jaccard=0 导致的 1 簇 → **3 簇**（销售业绩 / 办公用品 / 客户投诉），符合直觉。
+- **M8 v4.0.2 · 前端**：
+  - **布局收敛（问题 3）**：力导向布局加 `alphaDecay: 0.08` + `velocityDecay: 0.3`，节点 2s 内稳定不再颤动（headless 实测质心漂移 0px）。
+  - **节点 hover 状态（问题 3）**：`node.state.hover` 配置 halo（金黄色 12px）+ stroke 加深 + enlarged 1.15 倍放大，鼠标悬停有视觉反馈。
+  - **详情浮窗默认位置调整（问题 4）**：从 `right: 32px`（预览侧）移至 `right: 440px` / `top: 130px`，落在 graph 区内右上、靠近关系类型 legend 处，减少视觉跳跃。
+  - **类型过滤后点击失效修复（问题 5 / Bug 5）**：将 `node:click` / `node:dblclick` 事件 handler 从独立 effect（只依赖 `dataVersion`）移入 init effect（graph 创建后立即注册），确保 `hiddenGroups`/`hiddenRelTypes` 变化触发 graph 重建时 handler 同步重新绑定。**根因**：类型过滤改变 `hiddenGroups` → init effect 重建 graph → 旧 effect 没重跑 → 新 graph 实例无点击监听。
+  - **计数文本右边距（问题 6）**：`.graph-count` 新增 `margin-left: auto` + `margin-right: 3px`，"x节点x边" 的"边"字距右侧边栏恰好 3px。
+  - **headless CDP 验证**：话题 3 簇（销售/办公用品/投诉语义正确）、布局 2s 漂移 0px、浮窗位置在 graph 区内右上且 position=fixed、类型过滤后点击详情正常出现、计数右边距 3px。
+
 ## [v4.0.1] 2026-09-18 —— 知识图谱 4 个 bug 修复
 
 **影响模块**：M7 交互（v9.1 幽灵文档白名单对齐）、M8 前端（v4.0.1）

@@ -166,6 +166,123 @@ def _doc_entity_sets(nodes: list[dict[str, Any]]) -> dict[str, set[str]]:
     return doc_entities
 
 
+def _doc_entity_typed(nodes: list[dict[str, Any]]) -> dict[str, dict[str, str]]:
+    """从实体节点提取「文档 → {实体名: 实体大类}」映射，供话题聚类加权。"""
+    doc_entities: dict[str, dict[str, str]] = defaultdict(dict)
+    for n in nodes:
+        group = n.get("entity_group") or normalize_entity_type(n.get("entity_type") or "")
+        for doc_id in n.get("docs", []):
+            doc_entities[doc_id][n["id"]] = group
+    return doc_entities
+
+
+# 关键词聚类：不同实体类型的权重（核心概念类权重高，通用类权重低）
+_ENTITY_GROUP_WEIGHT = {
+    "组织": 2.0,
+    "产品/项目": 2.0,
+    "事件": 2.0,
+    "概念": 1.5,
+    "人物": 1.0,
+    "地点": 0.8,
+    "其他": 0.5,
+}
+# 文档名/标题关键词的额外权重（用户要求：文档名有实际意义时加权）
+_DOC_NAME_WEIGHT = 4.0
+# 话题聚类相似度阈值（低于此值的文档对不入聚类图）
+_CLUSTER_SIM_THRESHOLD = 0.10
+# 簇名停用词：时间碎片、通用组织词、过于泛化的词（不参与命名，但仍参与相似度计算）
+_CLUSTER_NAME_STOPWORDS = {
+    "年", "月", "日", "季度", "上季度", "本季度",
+    "第一季度", "第二季度", "第三季度", "第四季度",
+    "一季度", "二季度", "三季度", "四季度",
+    "上半年", "下半年", "月底", "月初",
+    "公司", "集团", "有限", "部门", "部", "组", "中心", "处", "科", "室",
+    "产品", "项目", "会议", "报告", "复盘", "方案",
+}
+
+
+def _normalize_keyword(kw: str) -> str:
+    """归一化关键词：去标点/空白/常见后缀，便于跨文档匹配近似词。"""
+    kw = kw.strip().lower()
+    # 去常见标点与空白
+    kw = re.sub(r"[，。、；：""''（）\[\]【】《》·\s\-_/\\.]+", "", kw)
+    # 纯日期词直接丢弃（如 "2024年10月"、"第三季度"、"10月5日"）
+    if re.fullmatch(r"\d*年\d*月\d*日?", kw):
+        return ""
+    if re.fullmatch(r"[第\d一二三四五六七八九十]+季度", kw):
+        return ""
+    if re.fullmatch(r"\d*月\d*[日号]?", kw) and len(kw) <= 6:
+        return ""
+    # 去通用组织/部门后缀
+    for suf in ("公司", "有限", "集团", "部", "组", "中心", "处", "科", "室"):
+        if len(kw) > 2 and kw.endswith(suf):
+            kw = kw[: -len(suf)]
+    # 去数字/百分比开头
+    kw = re.sub(r"^\d+%?", "", kw)
+    # 去掉以"年/月/日"开头的残留碎片（剥掉数字后产生）
+    if re.fullmatch(r"[年月日]\w*", kw) and len(kw) <= 6:
+        return ""
+    return kw if len(kw) >= 2 else ""
+
+
+def _keywords_from_doc_name(filename: str) -> list[str]:
+    """从文档文件名提取有意义的关键词（去扩展名、按常用分隔符切分）。"""
+    name = Path(filename).stem if "." in filename else filename
+    # 按分隔符切段
+    parts = re.split(r"[_\-\s·.]+", name)
+    kws: list[str] = []
+    for p in parts:
+        if not p:
+            continue
+        # 跳过纯数字/太短
+        if re.fullmatch(r"[\d\.%]+", p):
+            continue
+        if len(p) < 2:
+            continue
+        kws.append(p)
+        # 长词再按中文常见词切（简单 n-gram）
+        if len(p) >= 4:
+            kws.append(p[:2])
+            kws.append(p[-2:])
+    return kws
+
+
+def _doc_keyword_weights(
+    doc_id: str,
+    entities: dict[str, str],  # entity_name -> entity_group
+    doc_label: str,
+) -> Counter[str]:
+    """为单篇文档构建加权关键词计数器。"""
+    weights: Counter[str] = Counter()
+    # 1) 实体关键词（按类型加权 + 归一化）
+    for ent_name, group in entities.items():
+        kw = _normalize_keyword(ent_name)
+        if not kw:
+            continue
+        w = _ENTITY_GROUP_WEIGHT.get(group, 1.0)
+        weights[kw] += w
+    # 2) 文档名/标题关键词（高权重）
+    if doc_label and not re.fullmatch(r"[0-9a-f]{8,}", Path(doc_label).stem):
+        for kw_raw in _keywords_from_doc_name(doc_label):
+            kw = _normalize_keyword(kw_raw)
+            if kw:
+                weights[kw] += _DOC_NAME_WEIGHT
+    return weights
+
+
+def _cosine_sim(a: Counter[str], b: Counter[str]) -> float:
+    """两个权重 Counter 的余弦相似度。"""
+    keys = a.keys() & b.keys()
+    if not keys:
+        return 0.0
+    dot = sum(a[k] * b[k] for k in keys)
+    norm_a = sum(v * v for v in a.values()) ** 0.5
+    norm_b = sum(v * v for v in b.values()) ** 0.5
+    if norm_a == 0 or norm_b == 0:
+        return 0.0
+    return dot / (norm_a * norm_b)
+
+
 def _concept_edges(doc_entities: dict[str, set[str]]) -> list[dict[str, Any]]:
     """计算文档间 Jaccard 相似度，返回概念关联边列表。
 
@@ -404,22 +521,48 @@ def pagerank_scores(
 
 def _cluster_docs(
     doc_ids: list[str],
-    concept_edges: list[dict[str, Any]],
-    doc_entities: dict[str, set[str]],
+    doc_entities_typed: dict[str, dict[str, str]],
+    doc_labels: dict[str, str],
 ) -> tuple[dict[str, int], list[dict[str, Any]],
 ]:
-    """在概念关联图上跑社区发现，返回 doc→cluster_id 映射 + cluster 列表。
+    """基于关键词加权相似度的话题聚类。
 
-    cluster 列表含：id / name（自动生成：2-3 个高频实体拼接）/ doc_count / color。
+    算法：
+    1) 每篇文档构建加权关键词向量（实体按类型加权 + 文档名/标题关键词高权重，关键词归一化便于匹配近似词）。
+    2) 文档间算余弦相似度，≥阈值连边（边权=相似度）。
+    3) 在相似度图上跑 greedy_modularity_communities 社区发现。
+    4) 簇名取该簇 top 关键词（文档名关键词优先）拼接。
+
+    doc_entities_typed: doc_id -> {entity_name: entity_group}
+    doc_labels: doc_id -> filename（用于文档名加权 + 节点 label）
     """
+    # 1) 构建每篇文档的加权关键词
+    doc_kws: dict[str, Counter[str]] = {}
+    for d in doc_ids:
+        label = doc_labels.get(d, "")
+        doc_kws[d] = _doc_keyword_weights(d, doc_entities_typed.get(d, {}), label)
+
+    # 2) 构建相似度图
     g = nx.Graph()
     for d in doc_ids:
         g.add_node(d)
-    for e in concept_edges:
-        g.add_edge(e["source"], e["target"], weight=e["weight"])
 
-    # 只有一个连通图才有意义，直接全 才跑社区发现；孤立节点分到 -1（未分
-    if g.number_of_edges() == 0:
+    sim_edges: list[tuple[str, str, float]] = []
+    for i in range(len(doc_ids)):
+        a = doc_ids[i]
+        if not doc_kws[a]:
+            continue
+        for j in range(i + 1, len(doc_ids)):
+            b = doc_ids[j]
+            if not doc_kws[b]:
+                continue
+            sim = _cosine_sim(doc_kws[a], doc_kws[b])
+            if sim >= _CLUSTER_SIM_THRESHOLD:
+                g.add_edge(a, b, weight=sim)
+                sim_edges.append((a, b, sim))
+
+    # 3) 社区发现
+    if g.number_of_edges() == 0 or len(doc_ids) <= 1:
         clusters_list = [{
             "id": 0,
             "name": "全部文档",
@@ -429,18 +572,30 @@ def _cluster_docs(
         return {d: 0 for d in doc_ids}, clusters_list
 
     communities = greedy_modularity_communities(g, weight="weight")
-    # communities 是 list[frozenset]，按规模降序
     doc_to_cluster: dict[str, int] = {}
     clusters_list: list[dict[str, Any]] = []
 
     for cid, comm in enumerate(communities):
         comm_docs = list(comm)
-        # 自动命名：取该簇文档共享实体中频次最高的 2-3 个实体名
-        all_entities: Counter[str] = Counter()
-        for doc_id in comm_docs:
-            all_entities.update(doc_entities.get(doc_id, set()))
-        top_entities = [e for e, _ in all_entities.most_common(3)]
-        name = "-".join(top_entities) if top_entities else f"话题 {cid + 1}"
+        # 4) 簇命名：合并簇内所有文档关键词权重 → 去冗余 → 取 top 2-3
+        cluster_kws: Counter[str] = Counter()
+        for d in comm_docs:
+            cluster_kws.update(doc_kws.get(d, {}))
+        # 排序后过滤：去停用词 → 去被包含的短词 → 取 top 3
+        sorted_kws = sorted(cluster_kws.items(), key=lambda x: -x[1])
+        selected: list[str] = []
+        for kw, _ in sorted_kws:
+            if len(kw) < 2:
+                continue
+            if kw in _CLUSTER_NAME_STOPWORDS:
+                continue
+            # 跳过已选词的子串或超串（避免"季度"和"季度销售业绩复盘"同时出现）
+            if any(kw in s or s in kw for s in selected):
+                continue
+            selected.append(kw)
+            if len(selected) >= 3:
+                break
+        name = "-".join(selected) if selected else f"话题 {cid + 1}"
 
         clusters_list.append({
             "id": cid,
@@ -451,7 +606,7 @@ def _cluster_docs(
         for doc_id in comm_docs:
             doc_to_cluster[doc_id] = cid
 
-    # 孤立节点（无边文档）分到 -1（未分类），颜色取灰
+    # 孤立节点（相似度低于阈值的文档）归到"其他"
     unclustered = [d for d in doc_ids if d not in doc_to_cluster]
     if unclustered:
         cid = len(clusters_list)
@@ -496,10 +651,14 @@ async def collect_document_graph(
         keep_nodes.append({
             "id": n["id"],
             "docs": sorted(doc_set),
+            "entity_type": n.get("entity_type") or "unknown",
+            "entity_group": normalize_entity_type(n.get("entity_type") or ""),
         })
 
-    # 文档 → 实体集合
+    # 文档 → 实体集合（用于 Jaccard 概念边）
     doc_entities = _doc_entity_sets(keep_nodes)
+    # 文档 → {实体名: 类型大类}（用于关键词加权聚类）
+    doc_entities_typed = _doc_entity_typed(keep_nodes)
 
     # 关键修复：文档级节点只保留「文档管理可见文档」（doc_meta 注册表有记录）——
     # 幽灵文档（chunk 索引残留但从未走上传接口、注册表缺失）无法预览/删除，且与
@@ -508,13 +667,18 @@ async def collect_document_graph(
     meta_ids = set((doc_meta or {}).keys())
     if meta_ids:
         doc_entities = {d: es for d, es in doc_entities.items() if d in meta_ids}
+        doc_entities_typed = {d: es for d, es in doc_entities_typed.items() if d in meta_ids}
 
-    # 概念关联边
+    # 概念关联边（Jaccard，纯展示用；话题聚类改为关键词加权独立计算）
     concept_edges = _concept_edges(doc_entities)
 
-    # 话题聚类
+    # 话题聚类：基于关键词加权余弦相似度（实体按类型加权 + 文档名/标题高权重）
     doc_ids = sorted(doc_entities.keys())
-    doc_to_cluster, clusters = _cluster_docs(doc_ids, concept_edges, doc_entities)
+    doc_labels: dict[str, str] = {}
+    for d in doc_ids:
+        meta = (doc_meta or {}).get(d, {})
+        doc_labels[d] = meta.get("filename") or _infer_doc_filename(chunks_dir, d)
+    doc_to_cluster, clusters = _cluster_docs(doc_ids, doc_entities_typed, doc_labels)
 
     # 组装节点
     nodes: list[dict[str, Any]] = []

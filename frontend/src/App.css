@@ -1182,6 +1182,8 @@
 .graph-count {
   font-size: 12px;
   color: var(--text-mute);
+  margin-left: auto;
+  margin-right: 3px;
 }
 
 /* M8 v4.0 粒度切换 */
@@ -1456,8 +1458,8 @@
 /* 节点详情浮窗（M8 v4.0.1：fixed 可拖动，不再挤压右栏引用/预览） */
 .graph-detail {
   position: fixed;
-  top: 96px;
-  right: 32px;
+  top: 130px;
+  right: 440px;
   z-index: 60;
   width: 280px;
   max-height: min(70vh, 560px);

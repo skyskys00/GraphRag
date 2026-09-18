@@ -1,6 +1,6 @@
 # M8 模块记录：正式问答前端（React + SSE 流式 + 文档管理 + 知识图谱）—— 已落地
 
-> 状态：**v4.0.1 已落地**（2026-09-18 知识图谱 4 个 bug 修复：详情浮窗化可拖拽 + 文档ID 行、过滤下拉固定宽度、配套后端幽灵文档对齐，详见 `docs/CHANGELOG.md` v4.0.1；v4.0 双层图谱优化全部 Phase，详见 `docs/CHANGELOG.md` v4.0：Phase 1 文档级图谱视图/双粒度切换/双击下钻/话题 legend；Phase 2 实体级边按关系类型着色 + 关系类型 legend 过滤 + 详情卡类型标签；Phase 3 核心/全部实体切换 + 实体类型过滤 chip。前置 v3.0 多知识库+仪表盘 → v3.0.1 仪表盘布局修复 → v2.3.x 侧边栏/预览/过滤）。
+> 状态：**v4.0.2 已落地**（2026-09-18 话题聚类升级 + 布局稳定 + hover + 浮窗位置优化 + bug5 修复 + count 边距，详见 `docs/CHANGELOG.md` v4.0.2；v4.0.1 知识图谱 4 bug 修复见 v4.0.1；v4.0 双层图谱优化全 Phase 见 v4.0）。
 > 契约：消费 M7 交互层 API（`POST /answer`、`GET /answer/stream`(SSE)、`POST/GET /docs`、`DELETE /docs/{doc_id}`、`GET /graph`、`GET /health`）。
 > 依据：`docs/ARCHITECTURE.md` §2.8 交互层 / §6 ⑥ 前端设计与联调 ｜ `docs/modules/M7_interact.md`（后端契约）
 
