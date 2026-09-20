@@ -1,9 +1,16 @@
-# M7 模块记录：交互层（FastAPI/SSE + 轻量 WebUI）—— 已落地
+# M7 模块记录：交互层（FastAPI + SSE + 上传/调度）
 
-> 状态：**v9.2 已落地**（2026-09-18 话题聚类算法升级：从 Jaccard → 关键词加权余弦相似度 + 实体类型权重 + 文档名高权重 + 簇名去冗余，详见 `docs/CHANGELOG.md` v4.0.2；v9.1 幽灵文档白名单对齐见 v4.0.1；主体 v9 图谱导出全量见 v4.0）。
-> 契约：HTTP/SSE → 流式响应（Answer 的交互外观），消费 M6 的 Answer dict，不重写检索/生成。
-> 依据：`docs/FRAMEWORK_NOTES.md` §3 模块划分（M7 交互层/关键技术归属） ｜ `docs/ARCHITECTURE.md` §2.8 交互层、§2.7-4 流式输出、§6 步骤⑥⑦ 前端设计与联调
-> 前置：M6 生成层 v1 已落地（`answer()` 返回 query/text/citations/retrieval/meta；5 题端到端全绿，引用溯源到 textunit + file_path + page_range/anchor）。历史参照：scripts/ 时代 p2 曾规划「FastAPI/SSE 壳 + 页级引用 + span_map」（旧代码已删，此处只借用思路不回归）
+> **版本：** v9.2
+> **状态：** 已落地
+> **更新：** 2026-09-20
+> **定位：** HTTP API + SSE 流式问答 + 文档上传调度 + 图谱查询 + 多知识库
+> **契约：** REST/SSE → M5/M6 编排结果；完整接口以 **Swagger UI** 为准（代码即契约，永不过时）
+> **上游：** [M5 检索层](M5_retrieve.md) / [M6 生成层](M6_generate.md) | **下游：** [M8 前端](M8_frontend.md)
+> **依据：** [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.8 ｜ [`FRAMEWORK_NOTES.md`](../FRAMEWORK_NOTES.md) §3
+> **运行：** `cd backend && python -m app.m7_interact.api` → Swagger: http://localhost:8787/swagger
+> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md)
+
+> **关于 API 契约：** 本模块的完整接口规格（端点/请求体/响应模型/字段类型/必填项）以 **Swagger UI 为单一事实源**（FastAPI `docs_url="/swagger"` 自动生成）。启动后端后访问 `http://localhost:8787/swagger` 查看，随代码自动更新，不再另写静态 API 文档。
 
 ## 1. 定位
 

@@ -1,7 +1,14 @@
 # M2 模块记录：切分层
 
-> 状态：**闭环**（2026-09-13 补记，见 §8 说明）。blocks.jsonl → TextUnit v2，实测复现 5 文档 / 30 TextUnit（与 `data/lightrag_deepseek` 索引库 vdb_chunks 一致）。
-> 契约：`docs/modules/M0_contracts/textunit.md`（v2）｜ 上游：`docs/modules/M0_contracts/parse.md`（blocks 扩展字段）
+> **版本：** v1
+> **状态：** 已落地
+> **更新：** 2026-09-13
+> **定位：** 标题驱动切块 + 表格整块 → TextUnit v2
+> **契约：** blocks.jsonl → TextUnit v2 JSONL，见 [`M0_contracts/textunit.md`](M0_contracts/textunit.md)
+> **上游：** [M1 解析层](M1_parse.md) | **下游：** [M3 索引层](M3_index.md)
+> **依据：** [`FRAMEWORK_NOTES.md`](../FRAMEWORK_NOTES.md) §3
+> **运行：** `cd backend && python -m app.m2_chunk.runner -s data/parse -o data/chunks`
+> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md)
 
 ## 1. 定位与职责
 

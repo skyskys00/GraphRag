@@ -1,7 +1,14 @@
 # 解析器选型复核：MinerU vs Docling（源码拆解后）
 
-> 日期：2026-09-12 ｜ 目的：实施步骤 ③ 之前，基于**源码实测**（`mineru/docs/mineru.md`、`docling/docs/docling.md`）重新核对 `docs/ARCHITECTURE.md` §2.2 的选型与分工，并反过来检验我们自己的规约（`docs/modules/M0_contracts/textunit.md`）字段合理性。
-> 版本：MinerU v3.4.5（tag `mineru-3.4.5`）｜ Docling v2.126.0（docling_core 2.95.0）。
+> **版本：** v1
+> **状态：** 已落地（选型结论）
+> **更新：** 2026-09-12
+> **定位：** 基于源码实测复核解析器选型与分工，检验 textunit 契约字段合理性
+> **契约：** 选型结论 → [M1 解析层](modules/M1_parse.md) 实现依据 → [textunit 契约](modules/M0_contracts/textunit.md) 字段验证
+> **上游：** [`ARCHITECTURE.md`](ARCHITECTURE.md) §2.2 | **下游：** [M1_parse.md](modules/M1_parse.md) / [M0_contracts/textunit.md](modules/M0_contracts/textunit.md)
+> **依据：** MinerU v3.4.5 / Docling v2.126.0 源码拆解
+> **运行：** 分析文档，无运行命令
+> **变更历史：** 见 [`CHANGELOG.md`](CHANGELOG.md)
 
 ---
 

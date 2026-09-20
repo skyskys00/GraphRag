@@ -1,7 +1,14 @@
 # M3 模块记录：索引层（LightRAG 建图 + bge-m3 向量）
 
-> 状态：**DeepSeek 正式态跑通**（2026-09-13，5/5 文档，隔离库 `data/lightrag_deepseek/`）；v0.3.1 新增 `build_rag(working_dir, workspace)` 参数 + `_load_dotenv` 内联注释修复（配合 M8 v3 多知识库）。
-> 契约：`docs/modules/M0_contracts/textunit.md`（v2）｜ 关联：Xinference bge-m3（见 [[graphrag-project-env]]）
+> **版本：** v0.3.1
+> **状态：** 已落地
+> **更新：** 2026-09-17
+> **定位：** TextUnit → LightRAG 知识图谱 + bge-m3 向量索引
+> **契约：** TextUnit → 图索引（entities/relations） + 向量索引（dense + sparse）
+> **上游：** [M2 切分层](M2_chunk.md) | **下游：** [M5 检索层](M5_retrieve.md)
+> **依据：** [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.4 / §3.1
+> **运行：** `cd backend && python -m app.m3_index.runner -w data/lightrag_deepseek`
+> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md)
 
 ## 1. 定位与职责
 

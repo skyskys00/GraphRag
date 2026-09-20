@@ -1,8 +1,14 @@
-# M4 模块记录：存储层（已落地）
+# M4 模块记录：存储层
 
-> 状态：**已落地**（2026-09-13）。Postgres + pgvector 一库通吃，5 文档全量索引 + 四模式检索回归通过，持久化验证通过。
-> 目标：把 M3/M5 依赖的存储从「LightRAG 默认文件态」切换为「**Postgres + pgvector 一库通吃**」，且**后端可切换只改配置**。
-> 依据：`lightrag/docs/storage.md`（官方 PG 后端完整拆解）｜ `docs/ARCHITECTURE.md` §2.5/§3.1
+> **版本：** v1
+> **状态：** 已落地
+> **更新：** 2026-09-13
+> **定位：** Postgres + pgvector 一库通吃，可切换后端
+> **契约：** M3 写 / M5 读，统一 `Base*Storage` 抽象
+> **上游：** [M3 索引层](M3_index.md) | **下游：** [M5 检索层](M5_retrieve.md)
+> **依据：** [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.5 / §3.1
+> **运行：** `.env` 中 `STORAGE_BACKEND=pg` 切换
+> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md)
 
 ## 1. 定位与职责
 

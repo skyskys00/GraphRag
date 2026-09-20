@@ -1,8 +1,14 @@
-# 解析层产物契约 v1 —— `docs/modules/M0_contracts/parse.md`
+# 解析层产物契约 v1
 
-> 定位：模块 **M1（解析层）** 的产物规约 =「输入什么 → 走哪个引擎 → 产出什么结构」。核心是 **blocks 扩展字段**（page_label / block_type / anchor），供 M2 切分聚合进 TextUnit。
-> 版本：v1（2026-09-12），依据 MinerU/Docling 源码拆解（`mineru/docs/mineru.md`、`docling/docs/docling.md`）与 `docs/PARSER_COMPARISON.md` 的选型结论。
-> 血缘：本契约产出 → M2 聚合 → `docs/modules/M0_contracts/textunit.md` v2 的 `page_range/anchor/block_type`。
+> **版本：** v1
+> **状态：** 已落地
+> **更新：** 2026-09-12
+> **定位：** M1 解析层产物规约 = 输入什么 → 走哪个引擎 → 产出什么结构
+> **契约：** 原始文档 → blocks.jsonl（page_label / block_type / anchor 扩展字段）
+> **上游：** 原始文档（PDF / DOCX / PPTX / …） | **下游：** [M2 切分层](../M2_chunk.md) / [textunit 契约](textunit.md)
+> **依据：** MinerU/Docling 源码拆解 + [`PARSER_COMPARISON.md`](../../PARSER_COMPARISON.md) 选型结论
+> **运行：** 见 [M1_parse.md](../M1_parse.md) §复现命令
+> **变更历史：** 见 [`../CHANGELOG.md`](../CHANGELOG.md)
 
 ## 1. 引擎路由（M1 采用，终态）
 

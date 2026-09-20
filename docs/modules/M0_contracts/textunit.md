@@ -1,9 +1,14 @@
-# TextUnit 契约 v2 —— `docs/modules/M0_contracts/`
+# TextUnit 契约 v2
 
-> 定位：**我们自己的规约**（写出去），不是 LightRAG 接口记录（那在 `lightrag/docs/interfaces.md`）。
-> 状态：v2（2026-09-12）。v1 定字段结构；**v2 基于 MinerU/Docling 拆解补全 `page_range/anchor/block_type` 取值机制**。
-> 依据：LightRAG 拆解（`lightrag/docs/{interfaces,qa-notes}.md`）+ 解析器拆解（`mineru/docs/mineru.md`、`docling/docs/docling.md`）。
-> 机器校验：`textunit.schema.json`（JSON Schema draft-07，`$id`= `/textunit/v2`）。
+> **版本：** v2
+> **状态：** 已落地
+> **更新：** 2026-09-12
+> **定位：** 切分层（M2）出口统一数据模型，全系统唯一"块"标准
+> **契约：** blocks.jsonl → TextUnit v2 JSONL（必填六字段 + page_range/anchor/block_type 三扩展字段）
+> **上游：** [parse 契约](parse.md)（M1 产物） | **下游：** [M3 索引层](../M3_index.md) / [M5 检索层](../M5_retrieve.md) / [M6 生成层](../M6_generate.md)
+> **依据：** LightRAG 接口 + MinerU/Docling 源码拆解 + [`PARSER_COMPARISON.md`](../../PARSER_COMPARISON.md)
+> **运行：** `textunit.schema.json` JSON Schema 机器校验（`$id`= `/textunit/v2`）
+> **变更历史：** 见 [`../CHANGELOG.md`](../CHANGELOG.md)
 
 ## 1. 这个契约是干什么的
 

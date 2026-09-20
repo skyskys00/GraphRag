@@ -1,8 +1,14 @@
-# M8 模块记录：正式问答前端（React + SSE 流式 + 文档管理 + 知识图谱）—— 已落地
+# M8 模块记录：正式问答前端（React + TypeScript + Vite）
 
-> 状态：**v4.0.2 已落地**（2026-09-18 话题聚类升级 + 布局稳定 + hover + 浮窗位置优化 + bug5 修复 + count 边距，详见 `docs/CHANGELOG.md` v4.0.2；v4.0.1 知识图谱 4 bug 修复见 v4.0.1；v4.0 双层图谱优化全 Phase 见 v4.0）。
-> 契约：消费 M7 交互层 API（`POST /answer`、`GET /answer/stream`(SSE)、`POST/GET /docs`、`DELETE /docs/{doc_id}`、`GET /graph`、`GET /health`）。
-> 依据：`docs/ARCHITECTURE.md` §2.8 交互层 / §6 ⑥ 前端设计与联调 ｜ `docs/modules/M7_interact.md`（后端契约）
+> **版本：** v4.0.2
+> **状态：** 已落地
+> **更新：** 2026-09-20
+> **定位：** 四视图（问答 / 文档管理 / 知识图谱 / 仪表盘）+ 多知识库切换
+> **契约：** 消费 M7 REST + SSE 接口（见 Swagger UI: http://localhost:8787/swagger）
+> **上游：** [M7 交互层](M7_interact.md) | **下游：** 浏览器用户
+> **依据：** [`M8_frontend_req.md`](M8_frontend_req.md) ｜ [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.9
+> **运行：** `cd frontend && npm run dev` → http://localhost:5173
+> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md)
 
 ## 1. 定位
 

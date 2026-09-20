@@ -1,9 +1,14 @@
-# M6 模块记录：生成层（编排 + 引用标注）—— 已落地
+# M6 模块记录：生成层（编排 + 引用标注）
 
-> 状态：**v1.1 已落地**（软删 excluded_docs + 白名单 allowed_docs 双向透传 M5）。
-> 契约：query + M5 精排 context → 答案（text）+ 结构化引用（citations）。
-> 依据：`docs/FRAMEWORK_NOTES.md` §3 模块划分 ｜ `docs/ARCHITECTURE.md` §2.7 Agent 编排与上下文组装 ｜ `docs/modules/M0_contracts/textunit.md` §1（M6 引用标注消费 text_unit_id/file_path/page_range/anchor）
-> 前置：M5 检索 v1/v1.5 已落地（三路 RRF + rerank + full_doc_id 溯源）、DeepSeek v4-flash 统一链路、M2 chunk 产物含 page_range/anchor
+> **版本：** v1.1
+> **状态：** 已落地
+> **更新：** 2026-09-16
+> **定位：** 上下文组装 + DeepSeek 生成 + 引用标注 + 流式
+> **契约：** query + M5 精排 context → Answer（text + citations + meta）
+> **上游：** [M5 检索层](M5_retrieve.md) | **下游：** [M7 交互层](M7_interact.md)
+> **依据：** [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.7 ｜ [`FRAMEWORK_NOTES.md`](../FRAMEWORK_NOTES.md) §3
+> **运行：** `cd backend && python -m app.m6_generate.runner -q "问题"`
+> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md)
 
 ## 1. 定位
 

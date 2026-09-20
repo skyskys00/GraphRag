@@ -1,9 +1,14 @@
-# M5 模块记录：检索层 v1.6（三路 RRF + rerank + 白名单过滤）
+# M5 模块记录：检索层
 
-> 状态：**v1.6 已落地**（白名单 allowed_docs + 黑名单 excluded_docs 双过滤）。
-> 契约：query 输入 → 精排后 chunk 列表（带 full_doc_id / score / 来源）。
-> 依据：`docs/FRAMEWORK_NOTES.md` §3 ｜ `docs/ARCHITECTURE.md` §2.6 ｜ 版本与实测见 `docs/CHANGELOG.md`
-> 前置：M3 索引（PG，bge-m3 dense 1024d）+ M4 存储切换 + Xinference bge-m3/bge-reranker-v2-m3
+> **版本：** v1.6
+> **状态：** 已落地
+> **更新：** 2026-09-16
+> **定位：** 三路召回 + RRF + rerank + query 预处理 + 白名单过滤
+> **契约：** query + 模式 → 精排后 chunk 列表（full_doc_id / score / snippet）
+> **上游：** [M3 索引层](M3_index.md) / [M4 存储层](M4_storage.md) | **下游：** [M6 生成层](M6_generate.md)
+> **依据：** [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.6 ｜ [`FRAMEWORK_NOTES.md`](../FRAMEWORK_NOTES.md) §3
+> **运行：** `cd backend && python -m app.m5_retrieve.runner -q "问题" -m mix`
+> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md)
 
 ## 1. 定位
 

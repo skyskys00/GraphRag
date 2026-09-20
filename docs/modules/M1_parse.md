@@ -1,7 +1,14 @@
 # M1 模块记录：解析层
 
-> 状态：**初版跑通**（2026-09-12，inputs/raw 8/8）。后续迭代：A 项完善见 §7。
-> 契约：`docs/modules/M0_contracts/parse.md`（v1.2）｜ 选型依据：`docs/PARSER_COMPARISON.md`
+> **版本：** v1
+> **状态：** 已落地
+> **更新：** 2026-09-12
+> **定位：** MinerU + Docling 双引擎解析，输出统一 blocks.jsonl
+> **契约：** 原始文档 → blocks.jsonl（page_label / block_type / anchor 扩展字段），见 [`M0_contracts/parse.md`](M0_contracts/parse.md)
+> **上游：** 原始文档（PDF / DOCX / PPTX / …） | **下游：** [M2 切分层](M2_chunk.md)
+> **依据：** [`PARSER_COMPARISON.md`](../PARSER_COMPARISON.md) ｜ [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.2
+> **运行：** `cd backend && python -m app.m1_parse.run -s <源文件/目录> -o data/parse`
+> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md)
 
 ## 1. 定位与职责
 
