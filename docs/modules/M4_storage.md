@@ -69,15 +69,15 @@ PG 落库（workspace=lightrag_m4），与文件态库 `data/lightrag_deepseek` 
 - [x] 持久化：容器重启后数据不丢（卷挂载生效）；
 - [x] 文档调度表齐全（13 张表含 doc_status / entity_chunks / relation_chunks 追踪表）。
 
-## 5. 已知坑（切换时必读，摘自 storage.md §6）
+## 5. 已知坑
 
-1. **换 embedding 模型 = 数据失效**：向量表带模型名+维度后缀；换模型需手动清 `LIGHTRAG_VDB_*_<suffix>` 表，维度不匹配抛 `DataMigrationError`。M4 锁定 **bge-m3 1024d**，不混模型；
-2. **HNSW 不适合频繁删改**：删改重场景可临时换 IVFFLAT（`POSTGRES_VECTOR_INDEX_TYPE`）；
-3. **单写者不变量**：pipeline 外的 admin 写路径自担序列化；`drop`/`clear` 须持 `busy`/`destructive_busy` 预留（`clear_documents` 与在途写并发会静默丢文档）；
-4. **`index_done_callback` 异常被吞则丢数据**：调用方必须把存储层异常向上抛，否则文档标 PROCESSED 而图未落盘；
-5. **跨 worker 读可见性**：缓冲写只在写入进程内可见，其他 worker 要 `index_done_callback` 后才读到；
-6. **纯表边规范化用 Python `min/max`** 而非 SQL `LEAST/GREATEST`——两种混用会在非 C 排序规则下对非 ASCII 产生重复边；
-7. **操作便利**：开 `ENABLE_LLM_CACHE` 减抽取成本。
+PG 存储层共 7 个常见坑（向量表后缀 / HNSW 删改 / 单写者不变量 / callback 异常吞掉 / 跨 worker 可见性 / 边规范化 / workspace 行残留），**完整记录见 [`docs/pitfalls/postgres-storage-pitfalls.md`](../pitfalls/postgres-storage-pitfalls.md)**。
+
+最高频的 3 个速查：
+
+1. **换 embedding 模型 = 数据失效**——向量表带模型后缀，换模需重建；当前锁定 bge-m3 1024d。
+2. **单写者不变量**——`drop`/`clear` 与在途写入并发会静默丢文档，须持 busy 预留。
+3. **`index_done_callback` 异常被吞则丢数据**——调用方必须向上抛异常，不能静默 catch。
 
 ## 6. 遗留 / 后续
 

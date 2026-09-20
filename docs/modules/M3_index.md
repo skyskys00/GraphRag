@@ -39,22 +39,9 @@ cd backend
 /opt/anaconda3/envs/graphrag/bin/python -m app.m3_index.runner --only 7497ed75
 ```
 
-## 4. DeepSeek v4-flash 思考模式修复（关键坑）
+## 4. 关键坑：DeepSeek v4-flash 思考模式
 
-**症状**：DeepSeek 抽取反复失败/重试卡住，结果 `content` 为空。
-
-**根因**：DeepSeek v4-flash 是**推理模型**，默认开启思考模式，`reasoning_tokens` 占预算 75–100%；极端情况（`response_format=json_object`）把 `max_tokens` 全部烧在思考上，`content` 为空 → 解析失败 → 重试 → 卡住。
-
-**修复**：关闭思考 `{"thinking": {"type": "disabled"}}`。**OpenAI Python SDK 不接受 `thinking` 直接参数，必须经 `extra_body` 透传**（直接传会报 `AsyncCompletions.create() got an unexpected keyword argument 'thinking'`）：
-
-```python
-# providers.py DeepSeek 分支
-extra_kwargs: dict = {"extra_body": {"thinking": {"type": "disabled"}}}
-```
-
-- `reasoning_effort: "low"` ❌ 无效（仍占 64% reasoning）；
-- `reasoning: {effort: "none"}` ❌ 未真正关闭；
-- `thinking: {type: "disabled"}` ✅ 彻底关闭（reasoning_tokens 字段消失，全部 token 归 content）。依据 DeepSeek 思考模式文档（api-docs.deepseek.com/zh-cn/guides/thinking_mode）。
+> DeepSeek v4-flash 默认开启思考模式，JSON 抽取时 reasoning_tokens 占满预算导致 content 为空 → 必须用 `extra_body` 透传 `thinking: disabled`。**详细记录见 [`docs/pitfalls/deepseek-thinking-mode.md`](../pitfalls/deepseek-thinking-mode.md)**。
 
 ## 5. GLM vs DeepSeek 实测对比（2026-09-13）
 

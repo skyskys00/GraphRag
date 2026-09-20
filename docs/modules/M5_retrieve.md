@@ -73,12 +73,17 @@ python -m app.m5_retrieve.runner -w data/lightrag_m4 -m mix
 
 ## 5. 已知坑 / 注意事项
 
-1. **bge-m3 实例必须带 return_sparse 启动**：否则 sparse 请求会报错（BGEM3FlagModel 没算 lexical_weights）。当前已重载好；若重启 Xinference 重载入模型别忘了 `return_sparse=true`。
-2. **sparse 索引是离线构建**：`m5_sparse.json` 存在则复用；文档入库/软删后由 M7 上传管线 `build_workspace_deps` **自动重建并重载**（v1.6，见 §8），不再需要手动。
-3. **PG 表名带 embedding 后缀**：`LIGHTRAG_VDB_CHUNKS_xinference_bge_m3_1024d`——换模型=新表，和 M4 §5.1 是同一个坑。
-4. **keyword 路没走 jieba/BM25**：bge-m3 sparse 一个模型解决 dense+sparse，少一个依赖；如果以后要中文分词定制（如领域词典），可以加 BM25 备用路。
-5. **纯口语 query 无提升**：预处理只覆盖专名/缩写（§7），口语类 query 需 C 查询改写（LLM），暂不做。
-6. **文件态库没有 keyword 路**：keyword 路数据源直接读 PG；文件态库走 `--formal` 会报错（找不到 PG workspace），用默认四模式即可。
+bge-m3 + Xinference 相关配置坑（return_sparse 启动参数 / sparse 索引离线构建 / reranker 接口 / 文件态库限制），**完整记录见 [`docs/pitfalls/bge-m3-xinference.md`](../pitfalls/bge-m3-xinference.md)**。
+PG 存储相关坑（向量表名后缀等）**见 [`docs/pitfalls/postgres-storage-pitfalls.md`](../pitfalls/postgres-storage-pitfalls.md)**。
+
+速查清单：
+
+1. **bge-m3 实例必须 `return_sparse=true` 启动**——否则 sparse 请求报错；当前已重载好。
+2. **sparse 索引随上传/删除自动重建**（M7 `build_workspace_deps`），无需手动。
+3. **PG 向量表名带模型后缀**——换模=新表，同 M4 坑 1。
+4. **纯口语 query 预处理无提升**——需 C 查询改写（LLM），暂不做。
+5. **keyword 路用 bge-m3 sparse**——没走 jieba/BM25；需领域分词定制再加。
+6. **文件态库无 keyword 路**——用默认四模式，不走 `--formal`。
 
 ## 6. 验收清单（v1）
 
