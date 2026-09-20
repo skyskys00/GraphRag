@@ -147,14 +147,12 @@ async def ingest(deps: Any, src_path: Path, filename: str) -> str:
 
 
 async def ingest_task(deps: Any, src_path: Path, task_id: str, filename: str) -> None:
-    """后台任务包装：登记结果 + 失败置 failed + 清理上传临时文件。"""
+    """后台任务包装：登记结果 + 失败置 failed。上传原件保留在 uploads/ 供追溯，不删除。"""
     try:
         doc_id = await ingest(deps, src_path, filename)
         mark_doc(deps, task_id, status="ready", doc_id=doc_id)
     except Exception as e:  # noqa: BLE001 —— 边界：任务失败要落 failed 状态
         mark_doc(deps, task_id, status="failed", error=f"{type(e).__name__}: {e}")
-    finally:
-        src_path.unlink(missing_ok=True)
 
 
 # ---------- 删除（软删） ----------

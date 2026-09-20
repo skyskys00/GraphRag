@@ -1,6 +1,6 @@
 # M7 模块记录：交互层（FastAPI + SSE + 上传/调度）
 
-> **版本：** v9.2
+> **版本：** v9.3
 > **状态：** 已落地
 > **更新：** 2026-09-20
 > **定位：** HTTP API + SSE 流式问答 + 文档上传调度 + 图谱查询 + 多知识库
@@ -66,7 +66,7 @@ app/m6_generate/orchestrator.answer
 | `respond.py` | 组装请求 → 调 `answer()` → 产出 JSON 或事件流；收 M6 meta 做成事件负载 |
 | `history.py` | 多轮最小注入：`history: list[dict]` 拼进 query/生成 prompt（不建会话存储） |
 | `web/` | 轻量 WebUI：静态 HTML/JS 单页（提问 → 答案 + 引用定位），无框架依赖，后续可换 G6 工程 |
-| `documents.py` | 文档入库编排（v3）：`ingest`（M1 `process_one` → M2 `process_document` → M3 `ainsert_custom_chunks` 增量 → `build_workspace_deps` 重建 sparse/sidecar/entities）+ `documents.json` 注册表 + 软删过滤（`excluded_doc_ids`），模块级 `asyncio.Lock` 串行入库 |
+| `documents.py` | 文档入库编排（v3）：`ingest`（M1 `process_one` → M2 `process_document` → M3 `ainsert_custom_chunks` 增量 → `build_workspace_deps` 重建 sparse/sidecar/entities）+ `documents.json` 注册表 + 软删过滤（`excluded_doc_ids`），模块级 `asyncio.Lock` 串行入库；**上传原件保留 `uploads/` 供追溯**（v9.3，不再清理） |
 
 ### 4.3 契约（HTTP / SSE）
 
@@ -138,5 +138,6 @@ DELETE /docs/{doc_id}         → {deleted: doc_id}   // 软删：注册表标�
 
 ## 10. 版本
 
+- **v9.3**（2026-09-20）：上传原件保留——`ingest_task` 不再 unlink 上传临时文件，原件留 `uploads/` 供追溯（CHANGELOG v4.0.4）。
 - **v5**（2026-09-15）：文档预览 `GET /docs/{id}/preview` + 图谱按文档过滤 `GET /graph?doc_id=` + 引用置信度排序修复。
 - 变更记录：**逐条版本历史见 `docs/CHANGELOG.md`**（v0 规划 → v1 壳 → v2 真流式 → v3 文档管理 → v4 图谱导出 → v5 预览/过滤/排序）。本文件不再维护历史流水。
