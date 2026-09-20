@@ -64,6 +64,7 @@
 | [`pitfalls/deepseek-thinking-mode.md`](pitfalls/deepseek-thinking-mode.md) | DeepSeek v4-flash 思考模式导致 content 为空 | M3 / M6 |
 | [`pitfalls/postgres-storage-pitfalls.md`](pitfalls/postgres-storage-pitfalls.md) | PG 存储层 7 个坑（向量表后缀 / HNSW / 单写者 等） | M4 / M5 |
 | [`pitfalls/bge-m3-xinference.md`](pitfalls/bge-m3-xinference.md) | bge-m3 + Xinference 配置坑（return_sparse / sparse 索引 / reranker） | M3 / M5 |
+| [`pitfalls/understand-anything-dashboard.md`](pitfalls/understand-anything-dashboard.md) | UA 图谱 schema 错位 → dashboard 结构视图/导览空白（layers 缺 nodeIds / tour 字段漂移，数据可无损修） | —（第三方工具） |
 
 ### ⏱ 时序层（变更唯一权威记录）
 

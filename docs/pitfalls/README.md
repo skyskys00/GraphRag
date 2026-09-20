@@ -9,6 +9,7 @@
 | LLM | [`deepseek-thinking-mode.md`](deepseek-thinking-mode.md) | DeepSeek v4-flash 思考模式导致 content 为空，必须 `extra_body` 关闭 | M3 / M6 |
 | 存储 | [`postgres-storage-pitfalls.md`](postgres-storage-pitfalls.md) | PG 存储层 7 个坑：向量表后缀 / HNSW 删改 / 单写者 / callback 异常 / 边规范化 等 | M4 / M5 |
 | Embedding | [`bge-m3-xinference.md`](bge-m3-xinference.md) | bge-m3 在 Xinference 上的配置坑：return_sparse 启动参数 / sparse 索引构建 / reranker 接入 | M3 / M5 |
+| 工具 | [`understand-anything-dashboard.md`](understand-anything-dashboard.md) | UA 生成的图谱 schema 错位：layers 缺 nodeIds / tour 字段漂移 → dashboard 结构视图与导览空白（数据无损可修） | —（第三方工具） |
 
 ## 新增 pitfall 的流程
 

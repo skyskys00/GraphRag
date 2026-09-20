@@ -33,4 +33,11 @@ frontend/dist/
 # 本地 Claude 记忆与配置
 .claude/
 
+# 第三方工具本地数据
+.serena/
+.ua/
+
+# 单份测试输入副本（非标准语料，仅本地追溯用）
+backend/inputs/raw/季度销售业绩复盘_行动方案补充说明.pdf
+
 # 
