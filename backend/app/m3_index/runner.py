@@ -47,7 +47,7 @@ def load_rag_data(chunks_root: Path) -> list[dict]:
     return docs
 
 
-async def build_rag(working_dir: Path, workspace: str = "lightrag_m4") -> LightRAG:
+async def build_rag(working_dir: Path, workspace: str = "default_ws") -> LightRAG:
     embed = build_embedding_func()
     extract, query = build_llm_func()
     from lightrag.llm_roles import RoleLLMConfig
@@ -96,7 +96,7 @@ async def run(chunks_root: Path, working_dir: Path, limit: int | None, only: str
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="m3-index", description="M3 索引层：TextUnit -> LightRAG 图+向量")
     ap.add_argument("-c", "--chunks", default="data/chunks", help="chunks 根目录")
-    ap.add_argument("-w", "--working-dir", default="data/lightrag", help="LightRAG 存储目录")
+    ap.add_argument("-w", "--working-dir", default="data/default_ws", help="LightRAG 存储目录")
     ap.add_argument("--limit", type=int, default=None, help="只处理前 N 篇（调试）")
     ap.add_argument("--only", default=None, help="只处理指定 doc_id 前缀（调试）")
     args = ap.parse_args(argv)

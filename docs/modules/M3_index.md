@@ -1,13 +1,13 @@
 # M3 模块记录：索引层（LightRAG 建图 + bge-m3 向量）
 
-> **版本：** v0.3.1
+> **版本：** v0.3.2
 > **状态：** 已落地
-> **更新：** 2026-09-17
+> **更新：** 2026-09-20
 > **定位：** TextUnit → LightRAG 知识图谱 + bge-m3 向量索引
 > **契约：** TextUnit → 图索引（entities/relations） + 向量索引（dense + sparse）
 > **上游：** [M2 切分层](M2_chunk.md) | **下游：** [M5 检索层](M5_retrieve.md)
 > **依据：** [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.4 / §3.1
-> **运行：** `cd backend && python -m app.m3_index.runner -w data/lightrag_deepseek`
+> **运行：** `cd backend && python -m app.m3_index.runner -w data/default_ws`
 > **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md)
 
 ## 1. 定位与职责
@@ -21,7 +21,7 @@
 
 | 文件 | 职责 |
 |---|---|
-| `runner.py` | CLI 入口：`-c` chunks 根、`-w` working_dir（默认 `data/lightrag`）、`--limit`、`--only <doc_id前缀>`；逐文档隔离失败；初始化/收尾 storages |
+| `runner.py` | CLI 入口：`-c` chunks 根、`-w` working_dir（默认 `data/default_ws`）、`--limit`、`--only <doc_id前缀>`；逐文档隔离失败；初始化/收尾 storages |
 | `providers.py` | LLM（GLM/DeepSeek 可切换）+ embedding 构造器（见 §4 实测） |
 
 **关键参数**：`addon_params={"language": "zh"}`（中文实体抽取）、`llm_model_kwargs={"temperature": 0.1, "max_tokens": 8000}`、`role_llm_configs={"extract": RoleLLMConfig(max_async=2)}`。
@@ -31,10 +31,8 @@
 ```bash
 # 工作根 = backend/（2026-09-14 前后端重排：app/ data/ inputs/ lightrag/ 等移入 backend/，先 cd 再执行）
 cd backend
-# 默认工作目录（GLM 库，`backend/data/lightrag`）
+# 默认工作目录（正式库，`backend/data/default_ws`）
 /opt/anaconda3/envs/graphrag/bin/python -m app.m3_index.runner
-# DeepSeek 隔离库（效果对比用，`backend/data/lightrag_deepseek`）
-/opt/anaconda3/envs/graphrag/bin/python -m app.m3_index.runner -w data/lightrag_deepseek
 # 单文档（调试）
 /opt/anaconda3/envs/graphrag/bin/python -m app.m3_index.runner --only 7497ed75
 ```
@@ -80,7 +78,7 @@ DeepSeek：实体「ARPU」+ 关系描述写道「…提升8%」 ← 干净，�
 - DeepSeek v4-flash 抽取**克制、贴近业务对象**，图结构更规范，信息不丢；
 - GLM 免费档抽取**颗粒度粗**——表头词/状态词当实体、指标数值拼实体名，图噪声大；
 - 效率：DeepSeek 5 文档 30 块几分钟零失败；GLM ~14s/次且投诉SOP曾失败。
-- 保留 `data/lightrag`（GLM 库）作对照样本，正式数据以 `data/lightrag_deepseek` 为准。
+- 保留 `data/lightrag`（GLM 库）作对照样本，正式数据以 `data/lightrag_deepseek` 为准（2026-09-20 两库已归档 `data/archive/`，正式数据以 PG workspace=`default_ws` 为准）。
 
 ## 6. 验收清单（当前）
 

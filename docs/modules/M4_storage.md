@@ -38,13 +38,13 @@ M4 = **统一存取接口 + 可切换后端**：M3 写、M5 读，全链路只�
 - **持久化已验证**：`docker restart` 后 30 chunks / 244 nodes 数据完好。
 
 ### 3.2 切换开关（最小改动）
-- `.env` 新增：`STORAGE_BACKEND=pg`（`local`=文件态）+ `POSTGRES_HOST/PORT/USER/PASSWORD/DATABASE=postgres` + `POSTGRES_WORKSPACE=lightrag_m4`；
+- `.env` 新增：`STORAGE_BACKEND=pg`（`local`=文件态）+ `POSTGRES_HOST/PORT/USER/PASSWORD/DATABASE=postgres` + `POSTGRES_WORKSPACE=default_ws`；
 - `app/m3_index/providers.py` 新增 **`build_storage_config()`**：按 `STORAGE_BACKEND` 返回四个存储类名（local=JsonKV/NetworkX/NanoVectorDB/JsonDocStatus；pg=PGKV/PGVector/**PGTableGraphStorage**/PGDocStatus）；
 - `app/m3_index/runner.py` `build_rag()` 通过 `**build_storage_config()` 注入——**业务代码零改动，m5_retrieve 复用同一 build_rag 自动继承开关**；
 - 注意 STORAGES 注册在 lightrag `kg/__init__.py`（PG 类名在 export 列表中），构造只需传类名字符串。
 
 ### 3.3 数据对账
-PG 落库（workspace=lightrag_m4），与文件态库 `data/lightrag_deepseek` 对比：
+PG 落库（workspace=default_ws），与文件态库 `data/lightrag_deepseek` 对比：
 
 | 指标 | 文件态库 | PG 库 | 结论 |
 |---|---|---|---|
@@ -57,7 +57,7 @@ PG 落库（workspace=lightrag_m4），与文件态库 `data/lightrag_deepseek` 
 > 表名带 embedding 模型后缀（`lightrag_vdb_*_xinference_bge_m3_1024d`）——换 embedding 模型 = 新表 + 手动清爽旧表（见 §5.1）。
 
 ### 3.4 检索回归
-- `app/m5_retrieve/runner.py -w data/lightrag_m4`，投诉流程单题 × 四模式（local/global/mix/naive）全绿：图三模式实体/关系召回质量与文件态库一致（`客户投诉处理流程`→`投诉受理流程`→`客服人员`、`公司`、`一线客服人员` 等链路正确），naive 召回 5 块；
+- `app/m5_retrieve/runner.py -w data/default_ws`，投诉流程单题 × 四模式（local/global/mix/naive）全绿：图三模式实体/关系召回质量与文件态库一致（`客户投诉处理流程`→`投诉受理流程`→`客服人员`、`公司`、`一线客服人员` 等链路正确），naive 召回 5 块；
 - **兜底发现**：PG 路径 chunk 溯源表现不同——`aquery_data` 返回的 `chunk_id` 形如 `chunk-<hash>`（PG 生成），`file_path` 仍恒为 `unknown_source`（因 M3 索引时 `text_chunks` 只喂 content 未带路径，与存储后端无关）；**但 PG 表自带 `full_doc_id` 列，chunk_id→full_doc_id 回连比文件态更直接**（正式 M5 溯源可直接查库）。
 
 ## 4. 验收清单（ground truth）
@@ -65,7 +65,7 @@ PG 落库（workspace=lightrag_m4），与文件态库 `data/lightrag_deepseek` 
 - [x] docker 起 PG16+pgvector，`CREATE EXTENSION vector` 健康检查通过；
 - [x] 切换只改配置（`.env` STORAGE_BACKEND），业务代码零改动演示成立；
 - [x] PG 库 ↔ 文件态库 数据对账一致（chunks 30 / docs 5；图规模差异为 LLM 抽取非确定性）；
-- [x] 四模式检索冒烟在 PG 库全绿（复用 `app/m5_retrieve/runner.py -w data/lightrag_m4`）；
+- [x] 四模式检索冒烟在 PG 库全绿（复用 `app/m5_retrieve/runner.py -w data/default_ws`）；
 - [x] 持久化：容器重启后数据不丢（卷挂载生效）；
 - [x] 文档调度表齐全（13 张表含 doc_status / entity_chunks / relation_chunks 追踪表）。
 
@@ -83,7 +83,7 @@ PG 存储层共 7 个常见坑（向量表后缀 / HNSW 删改 / 单写者不变
 
 1. **启动脚本化**：本次为手工 docker run 一次性命令；正式环境可加 `scripts/` 启动/健康脚本（非必须，本机容器已常驻）；
 2. **增量幂等验证**：二次入库同批文档不重复实体（写前恢复锚点契约），本次未做重跑覆盖验证；
-3. **文件态库保留**：`data/lightrag_deepseek` 仍作对照样本，正式数据以 PG（workspace=lightrag_m4）为准。
+3. **文件态库保留**：`data/lightrag_deepseek` 曾作对照样本（2026-09-20 已归档 `data/archive/`），正式数据以 PG（workspace=default_ws）为准。
 
 ## 7. 版本
 

@@ -170,7 +170,7 @@ SSE 响应头：`Content-Type: text/event-stream`、`Cache-Control: no-cache`、
 ### 4.9 v3 扩展：多知识库（文档集隔离）
 
 > 背景：现在只有一个隐式「默认知识库」，所有文档/问答/图谱混在一起。多知识库让用户按主题分组文档（如「项目A」「个人笔记」），**每个知识库 = 一个独立文档集合**——问答只搜当前库、文档管理只看当前库、图谱只画当前库、仪表盘显示该库统计。这是「多人共用一份数据会乱」之前的一层隔离；真实多人登录/权限（FR-21）仍维持二期不做。
-> 后端配套：M4 存储层按**复用 LightRAG `workspace` 列**承载（一个 collection = 一个 `workspace` 值，利用 LightRAG 已有的行级隔离，而非在同 workspace 各实体表再加 `collection_id` 列）；M7 交互层新增知识库 CRUD 接口 + 现有业务接口（`/docs`、`/answer`、`/answer/stream`、`/graph`）的可选 `collection_id` 参数（缺省 `default`）。默认知识库 workspace = `lightrag_m4`（现状零迁移），新建库 id 兼作 workspace 与目录名。
+> 后端配套：M4 存储层按**复用 LightRAG `workspace` 列**承载（一个 collection = 一个 `workspace` 值，利用 LightRAG 已有的行级隔离，而非在同 workspace 各实体表再加 `collection_id` 列）；M7 交互层新增知识库 CRUD 接口 + 现有业务接口（`/docs`、`/answer`、`/answer/stream`、`/graph`）的可选 `collection_id` 参数（缺省 `default`）。默认知识库 workspace = `default_ws`（现状零迁移），新建库 id 兼作 workspace 与目录名。
 > **选型决策（2026-09-17 定）**：选「**复用 workspace 列**」方案，不选「同 workspace 加 `collection_id` 列」。理由：workspace 行级隔离是 LightRAG 原生能力（PG 全部实体表带 `workspace` 列、查询天然带 `WHERE workspace=$1`），不需要 fork 官方子模块改 DDL / 改 storage 实现，维护成本最低；每个 collection 共享同一个 ClientManager 连接池，同进程多实例 initialize 无冲突（已验证）；删库 = 清该 workspace 行 + 删目录，操作干净。若未来需要跨库检索，再考虑单 workspace 加列或 schema 分层。
 
 | 编号 | 需求 |

@@ -3,7 +3,7 @@
 复用 m6_generate.runner 的构建路径（都与 M4 PG 库、M2 chunk 产物对接），
 M7 只负责把依赖备齐后交给 orchestrator.answer，不新增检索/生成逻辑。
 
-collection = workspace 值（M8 v3）：默认库 `default` → workspace `lightrag_m4`；
+collection = workspace 值（M8 v3）：默认库 `default` → workspace `default_ws`；
 新库 id 兼作 workspace（`col_<uuid8>`）。每个库一个独立 AppDeps（自己的 rag/sparse/
 实体/上传白名单）→ 检索/图谱/文档逐库隔离，respond 零改动。
 
@@ -57,7 +57,7 @@ class AppDeps:
 
 
 # 默认库布局可用 -w/--chunks 覆盖（dev 用）；新库固定 data/collections/<id>/。
-_config: dict[str, str] = {"working_dir": "data/lightrag_m4", "chunks_dir": "data/chunks"}
+_config: dict[str, str] = {"working_dir": "data/default_ws", "chunks_dir": "data/chunks"}
 _PROJ = Path(__file__).resolve().parents[2]
 _deps_map: dict[str, AppDeps] = {}
 
@@ -90,7 +90,7 @@ async def _ensure_sparse(ws: str, path: Path) -> dict[str, Any]:
 
 
 async def build_deps(proj: Path, col_id: str) -> AppDeps:
-    ws = "lightrag_m4" if col_id == "default" else col_id
+    ws = "default_ws" if col_id == "default" else col_id
     paths = collection_paths(proj, col_id, _default_layout())
 
     rag = await build_rag(proj / paths["working_dir"], ws)

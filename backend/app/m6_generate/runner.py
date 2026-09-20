@@ -1,7 +1,7 @@
 """M6 生成层 CLI：query → 答案 + 引用（单轮，非流式）。
 
 运行：
-    python -m app.m6_generate.runner -w data/lightrag_m4 [-q 问题]
+    python -m app.m6_generate.runner -w data/default_ws [-q 问题]
 
 依赖：PG 库在跑（M4）、Xinference 9997（M0/M5）、data/chunks 产物（M2）。
 """
@@ -49,7 +49,7 @@ async def run_one(rag, q: str, sparse_doc, entities, sidecar, query_func, respon
 
 async def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="m6-generate", description="M6 生成（答案 + 引用，单轮）")
-    ap.add_argument("-w", "--working-dir", default="data/lightrag_m4", help="索引工作目录（PG ws 来自 .env）")
+    ap.add_argument("-w", "--working-dir", default="data/default_ws", help="索引工作目录（PG ws 来自 .env）")
     ap.add_argument("--chunks", default="data/chunks", help="M2 chunk 产物目录（sidecar 来源）")
     ap.add_argument("-q", "--question", default=None, help="单个查询（默认内置问题集）")
     ap.add_argument("--response", default=None, help="response_type 中文要求（覆盖默认先总后分）")
@@ -59,7 +59,7 @@ async def main(argv: list[str] | None = None) -> int:
     _load_dotenv(proj / ".env")
     rag = await build_rag(proj / args.working_dir)
 
-    ws = os.environ.get("POSTGRES_WORKSPACE", "lightrag_m4")
+    ws = os.environ.get("POSTGRES_WORKSPACE", "default_ws")
     sparse_path = proj / args.working_dir / SPARSE_FILE
     if not sparse_path.exists():
         print(f"[m6] 稀疏索引不存在，构建 -> {sparse_path}")

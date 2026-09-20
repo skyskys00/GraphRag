@@ -1,8 +1,8 @@
 # M5 模块记录：检索层
 
-> **版本：** v1.6
+> **版本：** v1.7
 > **状态：** 已落地
-> **更新：** 2026-09-16
+> **更新：** 2026-09-20
 > **定位：** 三路召回 + RRF + rerank + query 预处理 + 白名单过滤
 > **契约：** query + 模式 → 精排后 chunk 列表（full_doc_id / score / snippet）
 > **上游：** [M3 索引层](M3_index.md) / [M4 存储层](M4_storage.md) | **下游：** [M6 生成层](M6_generate.md)
@@ -49,7 +49,7 @@ PG 路径最直接：`lightrag_doc_chunks` 自带 `full_doc_id` 列，sparse 索
 | `app/m5_retrieve/rerank.py` | Xinference /v1/rerank 封装（bge-reranker-v2-m3） |
 | `app/m5_retrieve/retriever.py` | 编排：三路召回 → RRF → rerank → 溯源元数据，返回结构化结果 |
 | `app/m5_retrieve/query_preprocess.py` | query 预处理（v1.5）：A 同义词扩展 + B 专名识别加权（见 §7） |
-| `app/m5_retrieve/runner.py` | CLI：`--formal` 走正式链路（`-w data/lightrag_m4 --formal`）；默认仍保留 v0.1 四模式冒烟 |
+| `app/m5_retrieve/runner.py` | CLI：`--formal` 走正式链路（`-w data/default_ws --formal`）；默认仍保留 v0.1 四模式冒烟 |
 
 ## 3. 复现命令
 
@@ -57,12 +57,12 @@ PG 路径最直接：`lightrag_doc_chunks` 自带 `full_doc_id` 列，sparse 索
 # 工作根 = backend/（2026-09-14 前后端重排：app/ data/ inputs/ 等移入 backend/，先 cd 再执行）
 cd backend
 # 正式链路（PG 库，自动构建稀疏索引）
-python -m app.m5_retrieve.runner -w data/lightrag_m4 --formal
+python -m app.m5_retrieve.runner -w data/default_ws --formal
 # 单题
-python -m app.m5_retrieve.runner -w data/lightrag_m4 --formal -q "客户投诉的处理流程"
+python -m app.m5_retrieve.runner -w data/default_ws --formal -q "客户投诉的处理流程"
 
 # 仍可回退到 v0.1 冒烟（验证 LightRAG 内部召回）
-python -m app.m5_retrieve.runner -w data/lightrag_m4 -m mix
+python -m app.m5_retrieve.runner -w data/default_ws -m mix
 ```
 
 ## 4. 实测结论

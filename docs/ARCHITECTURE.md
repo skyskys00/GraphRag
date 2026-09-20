@@ -288,4 +288,4 @@
 ## 8. 实测附录（历史，已归档）
 
 > 2026-09-16 起：实测记录（M3 DeepSeek 抽取对比、M5 检索四题与 A/B 预处理对比、M7/M8 落地闭环与前端走查、实现期踩坑）**按时间并入 `docs/CHANGELOG.md` v1.0 各模块条目**，本节不再留存正文。
-> 数据现状：`inputs/raw` 5 文档（会议纪要.docx / 办公用品.pdf / 季度复盘.pdf / 投诉SOP.md / 产品需求.docx）已全量过 M1→M2→M3；正式库 `data/lightrag_deepseek`（DeepSeek），对照库 `data/lightrag`（GLM）。
+> 数据现状：`inputs/raw` 5 文档（会议纪要.docx / 办公用品.pdf / 季度复盘.pdf / 投诉SOP.md / 产品需求.docx）已全量过 M1→M2→M3；正式库 `data/lightrag_deepseek`（DeepSeek）与对照库 `data/lightrag`（GLM）已于 2026-09-20 归档 `data/archive/`，当前正式数据以 PG（workspace=`default_ws`）为准。

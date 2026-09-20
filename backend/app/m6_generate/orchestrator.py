@@ -140,7 +140,7 @@ async def _main() -> None:
 
     proj = Path(__file__).resolve().parents[2]
     m3runner._load_dotenv(proj / ".env")
-    ws = os.environ.get("POSTGRES_WORKSPACE", "lightrag_m4")
+    ws = os.environ.get("POSTGRES_WORKSPACE", "default_ws")
     rag = await m3runner.build_rag(proj / "data" / ws)  # type: ignore[attr-defined]
     sparse = load_sparse(proj / "data" / ws / SPARSE_FILE)
     entities = await load_entities_async(ws)

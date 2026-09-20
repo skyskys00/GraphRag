@@ -99,6 +99,6 @@ def score(query_text: str, doc: dict, top_k: int = 40) -> list[tuple[str, float]
 if __name__ == "__main__":
     import os
 
-    ws = os.environ.get("POSTGRES_WORKSPACE", "lightrag_m4")
-    out = Path("data/lightrag_m4") / SPARSE_FILE
+    ws = os.environ.get("POSTGRES_WORKSPACE", "default_ws")
+    out = Path("data/default_ws") / SPARSE_FILE
     build(ws, out)

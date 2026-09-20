@@ -4,7 +4,7 @@
 在指定索引库上验证 local/global/mix/naive 四模式召回质量，输出实体/关系/块统计。
 
 运行：
-    python -m app.m5_retrieve.runner [-w data/lightrag_deepseek] [-q 问题] [-m 模式]
+    python -m app.m5_retrieve.runner [-w data/default_ws] [-q 问题] [-m 模式]
 """
 from __future__ import annotations
 
@@ -93,7 +93,7 @@ async def run_formal(rag: LightRAG, questions: list[tuple[str, str]], sparse_doc
 
 async def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="m5-retrieve", description="M5 检索冒烟（LightRAG 召回验证）")
-    ap.add_argument("-w", "--working-dir", default="data/lightrag_deepseek", help="索引工作目录")
+    ap.add_argument("-w", "--working-dir", default="data/default_ws", help="索引工作目录")
     ap.add_argument("-q", "--question", default=None, help="单个查询（默认跑内置问题集）")
     ap.add_argument("-m", "--mode", default=None, help="检索模式 local/global/mix/naive（默认全跑）")
     ap.add_argument("--formal", action="store_true", help="正式链路：三路 RRF + rerank + 溯源（PG 库）")
@@ -111,7 +111,7 @@ async def main(argv: list[str] | None = None) -> int:
     if args.formal:
         import os
 
-        ws = os.environ.get("POSTGRES_WORKSPACE", "lightrag_m4")
+        ws = os.environ.get("POSTGRES_WORKSPACE", "default_ws")
         sparse_path = proj / args.working_dir / SPARSE_FILE
         if not sparse_path.exists():
             print(f"[formal] 稀疏索引不存在，构建 -> {sparse_path}")

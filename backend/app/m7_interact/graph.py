@@ -66,12 +66,12 @@ async def collect_graph(
     excluded_docs: set[str],
     doc_id: str | None = None,
     allowed_docs: set[str] | None = None,
-    workspace: str = "lightrag_m4",
+    workspace: str = "default_ws",
     top_n: int = 0,
 ) -> dict[str, Any]:
     """图数据导出。doc_id 指定时仅保留该文档贡献的实体（按文档维度过滤，见 M8 v2.3）。
     allowed_docs 白名单：如有，则只保留归属至少一个白名单文档的实体/边。
-    workspace 见 M8 v3：按 collection 传各自 workspace（默认 lightrag_m4）。
+    workspace 见 M8 v3：按 collection 传各自 workspace（默认 default_ws）。
     top_n：Level=entity 时有效，>0 且节点总数 >= 40 时只保留 PageRank top_n 的节点
     （及其之间的边）；0 或节点少时返回全部。
     """

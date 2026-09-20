@@ -15,7 +15,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="m7-interact", description="M7 交互层（FastAPI/SSE + WebUI）")
     ap.add_argument("--host", default="127.0.0.1")
     ap.add_argument("--port", type=int, default=8787)
-    ap.add_argument("-w", "--working-dir", default="data/lightrag_m4")
+    ap.add_argument("-w", "--working-dir", default="data/default_ws")
     ap.add_argument("--chunks", default="data/chunks")
     args = ap.parse_args(argv)
 

@@ -1,6 +1,6 @@
 """M8 v3 知识库（Collection）注册表：path 布局 + CRUD + 每库最近问答。
 
-- collection_id `default` = 现有单库（workspace `lightrag_m4`，目录沿用现状），不落盘。
+- collection_id `default` = 现有单库（workspace `default_ws`，目录沿用现状），不落盘。
 - 新库：id 兼作 workspace 与目录名 `col_<uuid8>`（满足 validate_workspace：单段、禁 / \\ . ..）。
   数据根 `data/collections/<col_id>/`。
 - 注册表落盘 `data/collections.json`（只存非默认库）：`{col_id: {name, created_at}}`。
@@ -21,7 +21,7 @@ RECENT_FILE = "recent_queries.json"
 MAX_RECENT = 20
 
 _DEFAULT_LAYOUT = {
-    "working_dir": "data/lightrag_m4",
+    "working_dir": "data/default_ws",
     "chunks_dir": "data/chunks",
     "parse_dir": "data/parse",
     "uploads_dir": "data/uploads",

@@ -23,6 +23,18 @@
 
 ---
 
+## [v4.0.3] 2026-09-20 —— 默认库改名 default_ws + 历史文件态库归档
+
+**影响模块**：M3 索引（v0.3.2）、M5 检索（v1.7）、M7 交互（命名对齐，能力不变）
+
+- **归档**：`data/lightrag`（GLM 对照库）、`data/lightrag_deepseek`（DeepSeek 文件态正式库）→ `data/archive/`。二者为 M4 PG 上线前的文件态产物，角色已被 PG 取代；决策依据（GLM vs DeepSeek 实测对比）保留在 M3 §5 / v1 条目，历史实测记录里的归档目录名不动。
+- **默认库重命名** `lightrag_m4` → `default_ws`：
+  - 目录 `backend/data/lightrag_m4` → `backend/data/default_ws`（documents.json / m5_sparse.json / recent_queries.json 原位跟随，空嵌套残留已删）；
+  - PG 13 张 `lightrag_*` 表 1670 行统一 `UPDATE workspace='default_ws'`（graph_edges 复合 FK 顺序校验冲突 → 事务内 `session_replication_role=replica` 跳过校验整体提交）；
+  - 代码 9 文件 18 处（m3/m5/m6 runner 默认目录与用法示例、bootstrap/documents/graph workspace 引用、sparse_index 输出路径）改 `default_ws`；
+  - 模块文档（M2/M3/M4/M5/M8）workspace/路径同步；「默认库 workspace = `default_ws`」写法统一。
+- **验证**：PG 全表仅剩 workspace=`default_ws`（1670 行）；`lightrag_m4` 全仓（py+md）grep 零残留。⚠️ **服务需重启后新 workspace 才生效**（当前进程仍持旧值），重启验证见收尾。
+
 ## [v4.0] 2026-09-18 —— 双层图谱优化（M8 v4.0 Phase 1/2/3）
 
 **影响模块**：M7 交互（v7/v8/v9）、M8 前端（v4.0）；规划：`docs/modules/GRAPH_OPTIMIZATION_v4.md`
