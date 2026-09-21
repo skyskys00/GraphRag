@@ -23,6 +23,17 @@
 
 ---
 
+## [v5.4] 2026-09-21 —— rerank 事件循环阻塞修复（切会话卡死，M5 v1.10）
+
+**影响模块**：M5 检索（v1.10）。
+
+**Bug**：单 worker uvicorn 下，流式问答的检索阶段 `rerank()` 是同步阻塞 HTTP（`urllib.request.urlopen` → Xinference bge-reranker，timeout=180），在 async `retrieve()` 中直接调用会占死整个事件循环 —— 期间所有并发请求（含前端切换会话的 `GET /conversations/{id}` `fetchConversation`）全部排队，表现为「流式输出中切到其它对话卡住，等当前输出结束才跳转」。
+
+- **M5 · rerank 调用包 `asyncio.to_thread`**：`retriever.py` 中 `rerank(query, candidates, top_n=RERANK_TOP)` → `await asyncio.to_thread(rerank, query, candidates, top_n=RERANK_TOP)`，rerank 在线程池执行，事件循环保持响应。生成阶段（AsyncOpenAI 流）与 PG（asyncpg）本为真异步无障碍，检索路径唯一同步阻塞点即此番修复。
+- **实测（探针法）**：流式进行中每秒打 `GET /conversations/{id}`，修复前 1 次 probe 恰好撞上 rerank 窗口耗时 **14.2s**（该切换请求全程在事件循环排队）；修复后连续 18 次 probe 全部 <2ms 零排队，SSE 事件线完整（128 条 data），多轮历史引用结果不变（PRD 0.976、SOP 被过滤，与 v5.3 一致）。
+
+**说明**：rerank 自身 ~14s（CPU 推理 top-8）耗时不做优化，本次只解并发阻塞；「切走后当前会话继续输出、可切换查看/提问」的前端链路（patchIfActive 停止渲染 + 后端照常落库）v5.2 已就位，本修复打通了最后的后端并发瓶颈。
+
 ## [v5.3] 2026-09-21 —— 检索/生成 query 分离 + rerank 排序修复（修 Bug4 根因，M5 v1.9 / M6 v1.4 / M7 v2.1）
 
 **影响模块**：M5 检索（v1.9）、M6 生成（v1.4）、M7 应答（v2.1）。

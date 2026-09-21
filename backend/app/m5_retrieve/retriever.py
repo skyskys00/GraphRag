@@ -10,6 +10,7 @@
 """
 from __future__ import annotations
 
+import asyncio
 from collections import defaultdict
 from typing import Any
 
@@ -87,7 +88,9 @@ async def retrieve(
 
     meta = sparse_doc["chunks"]
     candidates = [(cid, meta[cid]["content"]) for cid in fused_ids if cid in meta]
-    reranked = rerank(query, candidates, top_n=RERANK_TOP)
+    # rerank 是同步阻塞 HTTP（Xinference），to_thread 剥离事件循环，
+    # 否则单 worker 下并发请求（如切会话的 GET /conversations）会被排队卡住
+    reranked = await asyncio.to_thread(rerank, query, candidates, top_n=RERANK_TOP)
 
     results = []
     excluded = set(exclude_docs or [])

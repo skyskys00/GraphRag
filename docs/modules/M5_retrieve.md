@@ -1,6 +1,6 @@
 # M5 模块记录：检索层
 
-> **版本：** v1.9
+> **版本：** v1.10
 > **状态：** 已落地
 > **更新：** 2026-09-21
 > **定位：** 三路召回 + RRF + rerank + query 预处理 + 白名单过滤
@@ -116,6 +116,7 @@ PG 存储相关坑（向量表名后缀等）**见 [`docs/pitfalls/postgres-stor
 
 ## 9. 版本
 
+- **v1.10**（2026-09-21）：rerank 同步阻塞事件循环修复——`rerank()` 调用包 `asyncio.to_thread`（单 worker 下同步 urllib 占死事件循环，并发切会话请求被排队），详见 CHANGELOG v5.4。
 - **v1.6**（2026-09-14）：软删过滤 + sparse 联动重建。
 - **v1.9**（2026-09-21）：rerank 排序 bug 修复（按 relevance_score 降序，而非输入 index），详见 CHANGELOG v5.3。
 - **v1.8**（2026-09-21）：复合专名整体加权 + 泛化子串抑制（Bug4 专名检索污染，详见 CHANGELOG v5.1）。
