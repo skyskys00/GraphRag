@@ -138,6 +138,7 @@ export interface PreviewUnit {
   title_path: string | null
   page_range: number[] | null
   file_path: string | null
+  block_type?: string
 }
 
 export interface DocPreview {
@@ -165,6 +166,30 @@ export interface DashboardStats {
   node_count: number
   edge_count: number
   recent_queries: RecentQuery[]
+}
+
+// M8 v5 多会话契约镜像（GET/POST/PATCH/DELETE /conversations）
+export interface ConversationInfo {
+  conversation_id: string
+  title: string
+  created_at: string
+  updated_at: string
+  message_count: number
+  preview: string
+}
+
+export interface ConversationMessage {
+  role: 'user' | 'assistant'
+  content: string
+  ts?: string
+  citations?: Citation[] | null
+  meta?: AnswerMeta | null
+}
+
+export interface ConversationDetail {
+  conversation_id: string
+  title: string
+  messages: ConversationMessage[]
 }
 
 // 主区视图：仪表盘 / 问答 / 文档管理 / 知识图谱

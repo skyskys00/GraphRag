@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { AppView, CollectionInfo } from '../types'
+import type { AppView, CollectionInfo, ConversationInfo } from '../types'
 
 // 导航项数组：新模块（如数据分析）只需在 items 里加一项 + 提供对应 View 组件
 const NAV_ITEMS: { key: AppView; label: string; icon: string }[] = [
@@ -18,6 +18,14 @@ interface SidebarProps {
   onCreate: (name: string) => void
   onRename: (id: string, name: string) => void
   onDelete: (id: string) => void
+  conversations: ConversationInfo[]
+  activeConversationId: string | null
+  onSelectConversation: (id: string) => void
+  onNewConversation: () => void
+  onRenameConversation: (id: string) => void
+  onDeleteConversation: (id: string) => void
+  conversationsHidden: boolean
+  streamingMap?: Record<string, boolean>
 }
 
 export function Sidebar({
@@ -29,6 +37,14 @@ export function Sidebar({
   onCreate,
   onRename,
   onDelete,
+  conversations,
+  activeConversationId,
+  onSelectConversation,
+  onNewConversation,
+  onRenameConversation,
+  onDeleteConversation,
+  conversationsHidden,
+  streamingMap = {},
 }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false)
   const [open, setOpen] = useState(false)
@@ -162,6 +178,65 @@ export function Sidebar({
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {!collapsed && !conversationsHidden && (
+        <div className="conversations-section">
+          <div className="conversations-head">
+            <span className="conversations-title">对话</span>
+            <button
+              className="conversations-new"
+              onClick={onNewConversation}
+              title="新对话"
+              aria-label="新对话"
+            >
+              ＋
+            </button>
+          </div>
+          <div className="conversations-list">
+            {conversations.length === 0 ? (
+              <div className="conversations-empty">暂无对话，直接提问即可开启</div>
+            ) : (
+              conversations.map((c) => (
+                <div
+                  key={c.conversation_id}
+                  className={`conversation-row${
+                    c.conversation_id === activeConversationId ? ' active' : ''
+                  }`}
+                >
+                  <button
+                    className="conversation-name"
+                    onClick={() => onSelectConversation(c.conversation_id)}
+                    title={c.title}
+                  >
+                    {streamingMap[c.conversation_id] && (
+                      <span className="conv-streaming-dot" title="生成中" />
+                    )}
+                    {c.title}
+                  </button>
+                  <span className="conversation-actions">
+                    <button
+                      className="conversation-act"
+                      onClick={() => onRenameConversation(c.conversation_id)}
+                      title="重命名"
+                      aria-label="重命名对话"
+                    >
+                      ✎
+                    </button>
+                    <button
+                      className="conversation-act danger"
+                      onClick={() => onDeleteConversation(c.conversation_id)}
+                      title="删除"
+                      aria-label="删除对话"
+                    >
+                      ×
+                    </button>
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       )}
 

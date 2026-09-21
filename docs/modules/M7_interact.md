@@ -1,9 +1,9 @@
 # M7 模块记录：交互层（FastAPI + SSE + 上传/调度）
 
-> **版本：** v9.3
+> **版本：** v10.2
 > **状态：** 已落地
-> **更新：** 2026-09-20
-> **定位：** HTTP API + SSE 流式问答 + 文档上传调度 + 图谱查询 + 多知识库
+> **更新：** 2026-09-21
+> **定位：** HTTP API + SSE 流式问答 + 文档上传调度 + 图谱查询 + 多知识库 + 多会话
 > **契约：** REST/SSE → M5/M6 编排结果；完整接口以 **Swagger UI** 为准（代码即契约，永不过时）
 > **上游：** [M5 检索层](M5_retrieve.md) / [M6 生成层](M6_generate.md) | **下游：** [M8 前端](M8_frontend.md)
 > **依据：** [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.8 ｜ [`FRAMEWORK_NOTES.md`](../FRAMEWORK_NOTES.md) §3
@@ -91,6 +91,21 @@ DELETE /docs/{doc_id}         → {deleted: doc_id}   // 软删：注册表标�
 
 > `retrieval` 字段体积可能很大（M5 三路原始结果），HTTP JSON v1 直接透传；若实测过大再切 `meta` 摘要（决策点，落地时定）。
 
+### 4.5 多会话（v10）
+
+- **作用域**：每个 Collection 独立一套会话（注册表 + 明细），删库自动连带清空。
+- **数据布局**：注册表 `<working_dir>/conversations.json`（仅元数据：title/created_at/updated_at/message_count/preview）；明细 `<working_dir>/conversations/<conv_id>.json`（完整 messages，含 citations/meta）。
+- **命名**：`conv_<uuid8>`（与 `col_<uuid8>` 风格一致）。
+- **核心 API**（全部带 `collection_id` query，缺省 `default`）：
+  - `GET /conversations` — 列表（按 updated_at 倒序）
+  - `POST /conversations?title=` — 新建（缺省标题「新对话」）
+  - `GET /conversations/{conv_id}` — 明细（完整 messages）
+  - `PATCH /conversations/{conv_id}?title=` — 重命名
+  - `DELETE /conversations/{conv_id}` — 删除
+- **答问落库**：`POST /answer` 与 `GET /answer/stream` 新增 `conversation_id` 参数。带会话时：历史从后端会话读取（`build_query_with_history` 取最近 4 条注入 query），答完 `append_round` 原子落库（`asyncio.Lock` 防并发写）。
+- **首问自动命名**：标题仍为占位「新对话」时，用第一条 user 消息前 30 字覆盖。
+- **向后兼容**：`conversation_id` 缺省 = 无会话模式（前端透传 history），WebUI / 旧客户端行为不变。
+
 ## 5. 前置与缺口
 
 | 项 | 现状 | 缺口 |
@@ -138,6 +153,7 @@ DELETE /docs/{doc_id}         → {deleted: doc_id}   // 软删：注册表标�
 
 ## 10. 版本
 
+- **v10.2**（2026-09-21）：检索/生成 query 分离（Bug4 根因修复，方案 D，详见 CHANGELOG v5.3）。
 - **v9.3**（2026-09-20）：上传原件保留——`ingest_task` 不再 unlink 上传临时文件，原件留 `uploads/` 供追溯（CHANGELOG v4.0.4）。
 - **v5**（2026-09-15）：文档预览 `GET /docs/{id}/preview` + 图谱按文档过滤 `GET /graph?doc_id=` + 引用置信度排序修复。
 - 变更记录：**逐条版本历史见 `docs/CHANGELOG.md`**（v0 规划 → v1 壳 → v2 真流式 → v3 文档管理 → v4 图谱导出 → v5 预览/过滤/排序）。本文件不再维护历史流水。

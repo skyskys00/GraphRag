@@ -1,6 +1,8 @@
 import type {
   Answer,
   CollectionInfo,
+  ConversationDetail,
+  ConversationInfo,
   DashboardStats,
   DocPreview,
   GraphData,
@@ -24,6 +26,7 @@ export async function postAnswer(params: {
   history?: HistoryMessage[]
   response_type?: string
   collection_id?: string
+  conversation_id?: string | null
 }): Promise<Answer> {
   const res = await fetch(`${API_BASE}/answer`, {
     method: 'POST',
@@ -33,6 +36,7 @@ export async function postAnswer(params: {
       history: params.history ?? [],
       response_type: params.response_type ?? null,
       collection_id: params.collection_id ?? 'default',
+      conversation_id: params.conversation_id ?? null,
     }),
   })
   if (!res.ok) {
@@ -130,4 +134,50 @@ export async function fetchStats(collection_id = 'default'): Promise<DashboardSt
   const res = await fetch(withQuery('/stats', { collection_id }))
   if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`)
   return (await res.json()) as DashboardStats
+}
+
+// ---------- M8 v5 多会话 ----------
+
+export async function listConversations(collection_id = 'default'): Promise<ConversationInfo[]> {
+  const res = await fetch(withQuery('/conversations', { collection_id }))
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`)
+  return (await res.json()) as ConversationInfo[]
+}
+
+export async function createConversation(
+  collection_id = 'default',
+  title?: string,
+): Promise<{ conversation_id: string }> {
+  const res = await fetch(withQuery('/conversations', { collection_id, title }), { method: 'POST' })
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`)
+  return (await res.json()) as { conversation_id: string }
+}
+
+export async function fetchConversation(
+  id: string,
+  collection_id = 'default',
+): Promise<ConversationDetail> {
+  const res = await fetch(withQuery(`/conversations/${encodeURIComponent(id)}`, { collection_id }))
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`)
+  return (await res.json()) as ConversationDetail
+}
+
+export async function renameConversation(
+  id: string,
+  title: string,
+  collection_id = 'default',
+): Promise<void> {
+  const res = await fetch(
+    withQuery(`/conversations/${encodeURIComponent(id)}`, { collection_id, title }),
+    { method: 'PATCH' },
+  )
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`)
+}
+
+export async function deleteConversation(id: string, collection_id = 'default'): Promise<void> {
+  const res = await fetch(
+    withQuery(`/conversations/${encodeURIComponent(id)}`, { collection_id }),
+    { method: 'DELETE' },
+  )
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`)
 }

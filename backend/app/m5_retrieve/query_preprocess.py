@@ -59,6 +59,11 @@ _LEVEL_PATTERNS = [
     re.compile(r"[一二三四]级"),
     re.compile(r"P[0-5]"),
 ]
+# 复合专名：X系统/X平台/X产品…（连续中文 + 后缀）整体视为专名，比子串实体更具体，
+# 如「智能客服系统」应整体加权，而不是退化成「客服」「客服系统」「系统」等共享词
+_COMPOUND_SUFFIX_RE = re.compile(
+    r"([一-鿿]{2,10})(系统|平台|产品|项目|方案|引擎|中心|部门|工作组|大区|模块)"
+)
 
 
 @dataclass
@@ -141,6 +146,11 @@ def _extract_proper_nouns(query: str, entities: list[str]) -> dict[str, float]:
     for e in entities:
         if e in query and len(e) >= 2:
             weighted[e] = max(weighted.get(e, 0), 2.0)
+    # 复合专名整体加权（3.0 > 子串实体 2.0）
+    for m in _COMPOUND_SUFFIX_RE.finditer(query):
+        term = m.group(0)
+        if len(term) >= 4:
+            weighted[term] = max(weighted.get(term, 0), 3.0)
     return weighted
 
 
@@ -175,8 +185,16 @@ def preprocess(query: str, entities: list[str]) -> PreprocessedQuery:
     for e in matched_entity_hits[:8]:
         weighted[e] = max(weighted.get(e, 0), 1.8)
 
-    # ll_keywords = 加权词 top 6（给 LightRAG 图检索种子用）
-    ll_kw = [t for t, _ in sorted(weighted.items(), key=lambda kv: -kv[1])[:6]]
+    # ll_keywords = 加权词（给 LightRAG 图检索种子用）；专名优先，且把已选更具体
+    # 专名当作泛化子串丢弃（有「智能客服系统」就不再带「客服」「客服系统」「系统」）
+    ranked = sorted(weighted.items(), key=lambda kv: -kv[1])
+    ll_kw: list[str] = []
+    for t, _ in ranked:
+        if any(t in kept or kept in t for kept in ll_kw):
+            continue
+        ll_kw.append(t)
+        if len(ll_kw) >= 6:
+            break
     hl_kw: list[str] = []  # 高级关键词留给 LightRAG keyword LLM
 
     return PreprocessedQuery(

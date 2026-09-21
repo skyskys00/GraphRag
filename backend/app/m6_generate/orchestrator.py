@@ -41,12 +41,17 @@ async def answer(
     response_type: str | None = None,
     exclude_docs: list[str] | None = None,
     allowed_docs: list[str] | None = None,
+    retrieval_query: str | None = None,
 ) -> dict[str, Any]:
-    """M6 总入口。返回 Answer dict：query/text/citations/retrieval/meta。"""
+    """M6 总入口。返回 Answer dict：query/text/citations/retrieval/meta。
+
+    retrieval_query: 检索专用 query（如纯用户问题，不带历史），None 时与 query 相同。
+                     生成阶段仍用 query（可带历史上下文）。
+    """
     from app.m5_retrieve.retriever import retrieve
 
     retr = await retrieve(
-        rag, query, sparse_doc, entities=entities,
+        rag, retrieval_query or query, sparse_doc, entities=entities,
         exclude_docs=exclude_docs, allowed_docs=allowed_docs,
     )
 
@@ -88,16 +93,19 @@ async def answer_stream(
     response_type: str | None = None,
     exclude_docs: list[str] | None = None,
     allowed_docs: list[str] | None = None,
+    retrieval_query: str | None = None,
 ) -> Any:
     """answer() 的流式变体：生成走 query_stream_func（真 token 级），yield (event, payload)。
 
     事件线：retrieved -> delta（每次增量）-> citations -> done（含完整 text）。
     组装/引用复用 answer() 逻辑，仅生成段换流式，answer() 行为不变。
+
+    retrieval_query: 检索专用 query（如纯用户问题，不带历史），None 时与 query 相同。
     """
     from app.m5_retrieve.retriever import retrieve
 
     retr = await retrieve(
-        rag, query, sparse_doc, entities=entities,
+        rag, retrieval_query or query, sparse_doc, entities=entities,
         exclude_docs=exclude_docs, allowed_docs=allowed_docs,
     )
     mode = route(query, retr)

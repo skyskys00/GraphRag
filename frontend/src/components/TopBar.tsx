@@ -1,9 +1,10 @@
 interface TopBarProps {
   online: boolean | null
-  onClear: () => void
+  onNew: () => void
+  newDisabled?: boolean
 }
 
-export function TopBar({ online, onClear }: TopBarProps) {
+export function TopBar({ online, onNew, newDisabled = false }: TopBarProps) {
   return (
     <header className="topbar">
       <div className="brand">
@@ -15,8 +16,8 @@ export function TopBar({ online, onClear }: TopBarProps) {
           <span className={`led ${online === false ? 'offline' : ''}`} />
           {online === null ? '检测中…' : online ? '后端在线' : '后端离线'}
         </span>
-        <button className="link-btn" onClick={onClear}>
-          清空会话
+        <button className="link-btn" onClick={onNew} disabled={newDisabled}>
+          新对话
         </button>
       </div>
     </header>

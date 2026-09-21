@@ -29,6 +29,6 @@ def rerank(query: str, docs: list[tuple[str, str]], top_n: int) -> list[dict[str
     with urllib.request.urlopen(req, timeout=180) as r:
         resp = json.loads(r.read().decode())
     out = []
-    for item in sorted(resp["results"], key=lambda x: x["index"]):
+    for item in sorted(resp["results"], key=lambda x: x["relevance_score"], reverse=True):
         out.append({"chunk_id": docs[item["index"]][0], "score": float(item["relevance_score"])})
     return out

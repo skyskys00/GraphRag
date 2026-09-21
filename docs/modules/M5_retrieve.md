@@ -1,8 +1,8 @@
 # M5 模块记录：检索层
 
-> **版本：** v1.7
+> **版本：** v1.9
 > **状态：** 已落地
-> **更新：** 2026-09-20
+> **更新：** 2026-09-21
 > **定位：** 三路召回 + RRF + rerank + query 预处理 + 白名单过滤
 > **契约：** query + 模式 → 精排后 chunk 列表（full_doc_id / score / snippet）
 > **上游：** [M3 索引层](M3_index.md) / [M4 存储层](M4_storage.md) | **下游：** [M6 生成层](M6_generate.md)
@@ -117,4 +117,6 @@ PG 存储相关坑（向量表名后缀等）**见 [`docs/pitfalls/postgres-stor
 ## 9. 版本
 
 - **v1.6**（2026-09-14）：软删过滤 + sparse 联动重建。
+- **v1.9**（2026-09-21）：rerank 排序 bug 修复（按 relevance_score 降序，而非输入 index），详见 CHANGELOG v5.3。
+- **v1.8**（2026-09-21）：复合专名整体加权 + 泛化子串抑制（Bug4 专名检索污染，详见 CHANGELOG v5.1）。
 - 变更记录：**逐条版本历史与实测见 `docs/CHANGELOG.md`**（v0.1 冒烟 → v1 三路 RRF+rerank+溯源 → v1.5 query 预处理 A/B → v1.6 软删过滤）。本文件不再维护历史流水与实测明细。

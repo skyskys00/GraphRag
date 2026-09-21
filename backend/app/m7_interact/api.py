@@ -16,7 +16,7 @@ from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import collections, documents
+from . import collections, conversations, documents
 from .bootstrap import WEB_DIRNAME, dispose, evict_deps, get_deps
 from .events import sse
 from .graph import collect_document_graph, collect_graph
@@ -30,6 +30,13 @@ class AnswerRequest(BaseModel):
     history: list[dict[str, Any]] = []
     response_type: str | None = None
     collection_id: str = "default"
+    conversation_id: str | None = None
+
+
+def _ensure_conversation(deps: Any, conv_id: str | None) -> None:
+    """会话存在性校验；None 表示无会话模式（现状行为）。"""
+    if conv_id and conversations.get_conversation(deps, conv_id) is None:
+        raise HTTPException(status_code=404, detail=f"会话不存在: {conv_id}")
 
 
 @asynccontextmanager
@@ -53,7 +60,9 @@ async def health() -> dict[str, str]:
 async def post_answer(req: AnswerRequest) -> dict[str, Any]:
     try:
         deps = await get_deps(req.collection_id)
-        return await make_answer(deps, req.query, req.history, req.response_type)
+        _ensure_conversation(deps, req.conversation_id)
+        return await make_answer(deps, req.query, req.history,
+                                 req.response_type, req.conversation_id)
     except Exception as e:  # noqa: BLE001 —— 边界：把 LLM/检索异常转成可读 500
         raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}") from e
 
@@ -61,10 +70,13 @@ async def post_answer(req: AnswerRequest) -> dict[str, Any]:
 @app.get("/answer/stream")
 async def stream_answer_ep(
     q: str = Query(..., description="问题"),
-    history: str = Query("", description="history JSON 字符串"),
+    history: str = Query("", description="history JSON 字符串（无会话模式兼容）"),
     response: str | None = Query(None, description="response_type 中文要求"),
     collection_id: str = Query("default"),
+    conversation_id: str | None = Query(None, description="会话 id，缺省无会话模式"),
 ) -> StreamingResponse:
+    deps = await get_deps(collection_id)
+    _ensure_conversation(deps, conversation_id)
     hist: list[dict[str, Any]] = []
     if history:
         try:
@@ -74,8 +86,7 @@ async def stream_answer_ep(
 
     async def gen() -> AsyncIterator[str]:
         try:
-            deps = await get_deps(collection_id)
-            async for evt in stream_answer(deps, q, hist, response):
+            async for evt in stream_answer(deps, q, hist, response, conversation_id):
                 yield evt
         except Exception as e:  # noqa: BLE001
             yield sse("error", {"message": f"{type(e).__name__}: {e}"})
@@ -143,6 +154,7 @@ async def preview_doc(doc_id: str, collection_id: str = Query("default")) -> dic
             "title_path": u.get("title_path"),
             "page_range": u.get("page_range"),
             "file_path": u.get("file_path"),
+            "block_type": u.get("block_type") or "paragraph",
         })
         if not filename and u.get("file_path"):
             filename = Path(u["file_path"]).name
@@ -223,6 +235,53 @@ async def delete_collection(col_id: str) -> dict[str, str]:
         raise HTTPException(status_code=404, detail=f"知识库不存在: {col_id}")
     await evict_deps(col_id)
     return {"deleted": col_id}
+
+
+# ---------- M8 v5 多会话 ----------
+
+@app.get("/conversations")
+async def list_conversations(collection_id: str = Query("default")) -> list[dict[str, Any]]:
+    """会话列表（Collection 作用域），按 updated_at 倒序。"""
+    return conversations.list_conversations(await get_deps(collection_id))
+
+
+@app.post("/conversations")
+async def create_conversation(
+    collection_id: str = Query("default"),
+    title: str | None = Query(None),
+) -> dict[str, str]:
+    """新建空会话；标题缺省「新对话」（首问自动命名）。"""
+    deps = await get_deps(collection_id)
+    cid = conversations.create_conversation(deps, title.strip() if title else None)
+    return {"conversation_id": cid}
+
+
+@app.get("/conversations/{conv_id}")
+async def get_conversation(conv_id: str, collection_id: str = Query("default")) -> dict[str, Any]:
+    """会话明细（完整 messages，含 citations/meta），进会话时拉取。"""
+    deps = await get_deps(collection_id)
+    conv = conversations.get_conversation(deps, conv_id)
+    if conv is None:
+        raise HTTPException(status_code=404, detail=f"会话不存在: {conv_id}")
+    return conv
+
+
+@app.patch("/conversations/{conv_id}")
+async def rename_conversation(
+    conv_id: str, collection_id: str = Query("default"), title: str = Query(...),
+) -> dict[str, str]:
+    deps = await get_deps(collection_id)
+    if not conversations.rename_conversation(deps, conv_id, title.strip()):
+        raise HTTPException(status_code=404, detail=f"会话不存在: {conv_id}")
+    return {"conversation_id": conv_id}
+
+
+@app.delete("/conversations/{conv_id}")
+async def delete_conversation(conv_id: str, collection_id: str = Query("default")) -> dict[str, str]:
+    deps = await get_deps(collection_id)
+    if not await conversations.delete_conversation(deps, conv_id):
+        raise HTTPException(status_code=404, detail=f"会话不存在: {conv_id}")
+    return {"deleted": conv_id}
 
 
 @app.get("/stats")

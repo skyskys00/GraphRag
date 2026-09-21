@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 interface InputBarProps {
   onSend: (query: string, responseType?: string) => void
-  onUpload: (file: File) => void
+  onUpload: (files: File[]) => void
   disabled?: boolean
   uploading?: boolean
 }
@@ -35,8 +35,8 @@ export function InputBar({ onSend, onUpload, disabled, uploading }: InputBarProp
   }
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0]
-    if (f) onUpload(f)
+    const files = Array.from(e.target.files ?? [])
+    if (files.length > 0) onUpload(files)
     e.target.value = '' // 允许再次选择同一文件
   }
 
@@ -65,7 +65,7 @@ export function InputBar({ onSend, onUpload, disabled, uploading }: InputBarProp
       <div className="input-row">
         <label
           className={`attach-btn${attachDisabled ? ' disabled' : ''}`}
-          title='上传文档（pdf/docx/md，入库后可提问）'
+          title='上传文档（pdf/docx/md，可多选，入库后可提问）'
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
@@ -74,6 +74,7 @@ export function InputBar({ onSend, onUpload, disabled, uploading }: InputBarProp
             ref={fileRef}
             type="file"
             accept=".pdf,.docx,.md"
+            multiple
             hidden
             disabled={attachDisabled}
             onChange={handleFile}

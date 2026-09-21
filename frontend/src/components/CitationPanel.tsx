@@ -7,29 +7,21 @@ interface CitationPanelProps {
   onOpenPreview: (docId: string, textUnitId?: string) => void
 }
 
-const MAX_CITATIONS = 5
-
 export function CitationPanel({ citations, activeMarker, onJumpToGraph, onOpenPreview }: CitationPanelProps) {
-  // 按置信度降序展示，最多前 5 条；marker 保留回答正文中的原始编号
-  const top = [...citations].sort((a, b) => b.score - a.score).slice(0, MAX_CITATIONS)
-  const truncated = citations.length > top.length
+  // 按置信度降序展示（后端已做相对阈值过滤，前端不再固定条数截断）
+  const sorted = [...citations].sort((a, b) => b.score - a.score)
 
   return (
     <>
       <div className="cite-head">
         <h3>引用来源</h3>
         <span className="cite-count">
-          {truncated ? '前 ' + top.length + ' 条' : citations.length ? `${citations.length} 条` : '—'}
+          {sorted.length ? `${sorted.length} 条` : '—'}
         </span>
       </div>
       <div className="cite-list">
         {citations.length === 0 && <p className="cite-empty">发送问题后将展示引用来源</p>}
-        {truncated && (
-          <p className="cite-more" title="按置信度取前 5 条">
-            共 {citations.length} 条，仅展示置信度最高的 {MAX_CITATIONS} 条
-          </p>
-        )}
-        {top.map((c) => (
+        {sorted.map((c) => (
           <div
             key={c.marker}
             id={`cite-${c.marker}`}

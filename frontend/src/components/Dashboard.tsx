@@ -8,7 +8,7 @@ interface DashboardProps {
   uploading: boolean
   onRename: (id: string, name: string) => void
   onDelete: (id: string) => void
-  onUpload: (file: File) => void
+  onUpload: (files: File[]) => void
   onGoDocuments: () => void
   onGoGraph: () => void
   onAsk: (query: string) => void
@@ -63,6 +63,12 @@ export function Dashboard({
 
   const docCount = stats?.doc_count ?? 0
   const topDocs = docs.slice(0, 5)
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? [])
+    if (files.length > 0) onUpload(files)
+    e.target.value = ''
+  }
 
   const renderCards = () => {
     const cards: {
@@ -146,12 +152,9 @@ export function Dashboard({
             ref={fileRef}
             type="file"
             accept=".pdf,.docx,.md,.pptx,.txt"
+            multiple
             hidden
-            onChange={(e) => {
-              const f = e.target.files?.[0]
-              if (f) onUpload(f)
-              e.target.value = ''
-            }}
+            onChange={handleFile}
           />
         </div>
       ) : (
@@ -222,12 +225,9 @@ export function Dashboard({
               ref={fileRef}
               type="file"
               accept=".pdf,.docx,.md,.pptx,.txt"
+              multiple
               hidden
-              onChange={(e) => {
-                const f = e.target.files?.[0]
-                if (f) onUpload(f)
-                e.target.value = ''
-              }}
+              onChange={handleFile}
             />
           </section>
         </>

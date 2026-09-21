@@ -45,9 +45,17 @@ function App() {
   const {
     messages,
     send,
-    clear,
+    conversations,
+    currentConversationId,
+    loadConversations,
+    selectConversation,
+    newConversation,
+    renameConversation,
+    deleteConversation,
     backendOnline,
     setBackendOnline,
+    streamingMap,
+    isStreaming: isConvStreaming,
     activeCitation,
     setActiveCitation,
     currentCitations,
@@ -168,13 +176,16 @@ function App() {
     if (!USE_MOCK) refreshDocs()
   }, [refreshDocs])
 
-  const handleUpload = async (file: File) => {
+  const handleUpload = async (files: File[]) => {
+    if (files.length === 0) return
     setUploading(true)
     try {
-      await uploadDoc(file, current)
+      for (const file of files) {
+        await uploadDoc(file, current)
+      }
       await refreshDocs()
       await loadCollections()
-      showToast(`已开始处理「${file.name}」，入库后可对它提问`)
+      showToast(`已开始处理 ${files.length} 个文件，入库后可对它提问`)
     } catch (err) {
       showToast(`上传失败：${err instanceof Error ? err.message : String(err)}`)
     } finally {
@@ -216,10 +227,7 @@ function App() {
     }
   }
 
-  const isStreaming = useMemo(
-    () => messages.some((m) => m.state === 'streaming' || m.state === 'pending'),
-    [messages],
-  )
+  const isStreaming = isConvStreaming(currentConversationId)
 
   const handleCitationClick = (marker: number) => {
     setActiveCitation((prev) => (prev === marker ? null : marker))
@@ -267,6 +275,54 @@ function App() {
     setGraphFocus(null)
     setPreviewDoc(null)
     setRightTab('citations')
+  }
+
+  // 切库后加载该库会话列表并选中最近一个（无会话则清空当前消息）
+  useEffect(() => {
+    if (USE_MOCK) return
+    let alive = true
+    loadConversations(current).then((list) => {
+      if (!alive) return
+      void selectConversation(list.length > 0 ? list[0].conversation_id : null, current)
+    })
+    return () => {
+      alive = false
+    }
+  }, [current, loadConversations, selectConversation])
+
+  // ---------- 多对话操作 ----------
+
+  const handleNewChat = async () => {
+    setActiveView('chat')
+    try {
+      await newConversation(current)
+    } catch (err) {
+      showToast(`新建对话失败：${err instanceof Error ? err.message : String(err)}`)
+    }
+  }
+
+  const handleConvRename = async (id: string) => {
+    const cur = conversations.find((c) => c.conversation_id === id)
+    const title = window.prompt('重命名对话', cur?.title ?? '')
+    if (title == null) return
+    const t = title.trim()
+    if (!t) return
+    try {
+      await renameConversation(id, t, current)
+      showToast('已重命名')
+    } catch (err) {
+      showToast(`重命名失败：${err instanceof Error ? err.message : String(err)}`)
+    }
+  }
+
+  const handleConvDelete = async (id: string) => {
+    if (!window.confirm('删除该对话？其消息记录将不可恢复。')) return
+    try {
+      await deleteConversation(id, current)
+      showToast('对话已删除')
+    } catch (err) {
+      showToast(`删除失败：${err instanceof Error ? err.message : String(err)}`)
+    }
   }
 
   const handleCreate = async (name: string) => {
@@ -332,7 +388,7 @@ function App() {
               : ''
       }`}
     >
-      <TopBar online={backendOnline} onClear={clear} />
+      <TopBar online={backendOnline} onNew={handleNewChat} newDisabled={isStreaming} />
       <Sidebar
         activeView={activeView}
         onNav={setActiveView}
@@ -342,6 +398,17 @@ function App() {
         onCreate={handleCreate}
         onRename={handleRename}
         onDelete={handleDeleteCollection}
+        conversations={conversations}
+        activeConversationId={currentConversationId}
+        onSelectConversation={(id) => {
+          setActiveView('chat')
+          void selectConversation(id, current)
+        }}
+        onNewConversation={handleNewChat}
+        onRenameConversation={handleConvRename}
+        onDeleteConversation={handleConvDelete}
+        conversationsHidden={USE_MOCK}
+        streamingMap={streamingMap}
       />
 
       {activeView === 'dashboard' ? (

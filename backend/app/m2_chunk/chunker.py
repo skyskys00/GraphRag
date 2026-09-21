@@ -107,6 +107,7 @@ def chunk_blocks(blocks: list[dict], doc_id: str, file_path: str) -> list[dict]:
             if head_only:
                 # 标题刚开即紧接表格：标题+表格并入同一 TextUnit（保上下文）
                 cur["blocks"].append(b)
+                cur["is_table"] = True
             else:
                 _flush(cur)
                 cur = {"blocks": [b], "path": list(path), "is_table": True}

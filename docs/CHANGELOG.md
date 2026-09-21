@@ -23,6 +23,82 @@
 
 ---
 
+## [v5.3] 2026-09-21 —— 检索/生成 query 分离 + rerank 排序修复（修 Bug4 根因，M5 v1.9 / M6 v1.4 / M7 v2.1）
+
+**影响模块**：M5 检索（v1.9）、M6 生成（v1.4）、M7 应答（v2.1）。
+
+**Bug4 根因定位**：v5.2 的相对阈值过滤只是下游补救，真正根因是**多轮会话历史污染检索 query**——`build_query_with_history` 把最近 4 条历史拼进 query 后，文本量增大、引入通用术语，导致 bge-reranker 对所有候选 chunk 的分数全面虚高（SOP 从 0.03 → 0.94），相对阈值过滤的分母（max_score）被拉高，弱引用全部过关。
+
+- **M6/M7 · 检索/生成 query 分离（方案 D）**：
+  - `orchestrator.py`：`answer()` 和 `answer_stream()` 均新增 `retrieval_query: str | None = None` 参数；检索阶段用 `retrieval_query or query`（纯用户问题，不带历史），生成阶段仍用 `query`（带历史，保持多轮连贯性）。
+  - `respond.py`：`make_answer()` 和 `stream_answer()` 均改为 `q_gen = build_query_with_history(query, history)` 传给生成，`retrieval_query=query` 传给检索。
+  - **效果**：query「智能客服系统项目设定了哪些核心业务目标？」（带 2 轮历史）修复前 6 条引用、SOP 排第二 → 修复后仅 1 条引用（PRD 0.976），SOP 被相对阈值正确过滤。
+- **M5 · rerank 排序 bug 修复**：
+  - `rerank.py`：`sorted(resp["results"], key=lambda x: x["index"])` → `key=lambda x: x["relevance_score"], reverse=True`。原代码按输入时的原始 index 排序而非按相关性分数降序，导致上下文组装顺序错误（高分 chunk 可能排在低分之后）。
+  - 影响范围：M5 精排结果顺序、M6 assemble 上下文拼接顺序、引用面板排序（parse_citations 会重新按 score 排序，前端展示不受此 bug 影响，但上下文质量受影响）。
+
+## [v5.2] 2026-09-21 —— 生成期间可切会话 + 引用置信度相对阈值过滤（M6 v1.3 / M8 v5.2）
+
+**影响模块**：M6 生成（v1.3）、M8 前端（v5.2）。
+
+**规划中（P0）**：M9 评测层 v0.1 规划文档已出（`docs/modules/M9_evaluation.md`）——中文测试集 50 题 + LLM 裁判（DeepSeek flash）+ 6 项核心指标 + 7 组 ablation study，三阶段落地约 7 天。待执行。
+
+- **M8 · 生成期间可切换/新建会话（修 Bug2，方向反向）**：
+  - 原 v5.1 「流式锁定」方向做反了——用户原意不是"生成期间锁死会话"，而是正相反：**生成期间可以切到其他会话或新建会话去查看/使用，不必一直等输出**。
+  - `useChat.ts`：单 `streaming` 状态 → `streamingMap: Record<convId, boolean>` 每会话独立生成状态；`send` 按会话管理 streaming/abort；`selectConversation / newConversation` 移除 guard（解锁切换/新建）；`deleteConversation` 改为先 abort 该会话流式连接再删。
+  - 切走会话后，原会话的流式事件继续在后台跑（后端照常落库），只是不更新当前视图；切回来时看不到中间过程但最终结果已落库（刷新会话即可见完整答案——当前实现切走时停止 patch messages，最终 done 事件也不 patch，下次切回通过 `selectConversation → fetchConversation` 从后端读完整历史）。
+  - 侧边栏：移除 `streamingDisabled`，生成中的会话名前加呼吸小圆点（`.conv-streaming-dot`，脉冲动画）提示"正在生成"；新对话/重命名/删除按钮均不再禁用。
+  - 当前会话生成中时，输入框仍禁用（避免同一会话并发提问）。
+- **M6 · 引用置信度相对阈值过滤（Bug4 方案 B）**：
+  - `cite.py parse_citations` 在 sort 后、return 前新增过滤：`score < max_score × CITE_SCORE_RATIO` 的弱引用移除，避免低置信度噪音文档（如语义重叠但不相关的 SOP）凑数展示；至少保留 `CITE_MIN_KEEP=2` 条（极端情况不致空引用）。
+  - 参数：`CITE_SCORE_RATIO = 0.1`、`CITE_MIN_KEEP = 2`。
+  - **实测**：query「智能客服系统项目设定了哪些核心业务目标？」过滤前引用 1 条（PRD 0.976，LLM 本次只引了 1 条）→ 过滤后 1 条；对于 LLM 引用了 5+ 条的场景，第二梯队（0.01–0.05）的弱相关 chunk 会被过滤掉，引用面板只保留高置信度来源。
+- **M8 · 引用面板去掉固定 5 条上限**：`CitationPanel.tsx` 移除 `MAX_CITATIONS = 5` 截断，动态展示后端返回的全部引用（后端已按相对阈值过滤，条数可控）；移除 "共 N 条仅展示前 5 条" 提示。
+
+## [v5.1] 2026-09-21 —— 批量上传 + 会话流式锁定 + 引用/专名检索修复（M5 v1.8 / M6 v1.2 / M8 v5.1）
+
+**影响模块**：M5 检索（v1.8）、M6 生成（v1.2）、M8 前端（v5.1）。后端接口零改动（批量上传前端循环复用 `POST /docs`）。
+
+- **M5 · 复合专名整体加权 + 泛化子串抑制**（修 Bug4 检索污染）：
+  - `query_preprocess.py` 新增 `_COMPOUND_SUFFIX_RE`（`X系统/平台/产品/项目/方案/引擎/中心/部门/工作组/大区/模块`，整词 ≥4 字加权 3.0 > 实体子串 2.0）；`ll_keywords` 构建加子串归并：已选更具体的专名后，其泛化子串（如「客服」「客服系统」「系统」）不再进入 graph seed。
+  - **实测**：query「智能客服系统项目设定了哪些核心业务目标？」修复前 `ll_keywords=['客服','客服系统','系统']`（共享泛化词把客户服务投诉处理SOP 拉进引用位 2/3/4）→ 修复后 `['智能客服系统项目']`；端到端回答只引用 PRD DOCX 一条（score 0.976），SOP 不再出现在引用中。弱覆盖 query 不误伤：「智能硬件」→`['智能硬件']`、「三级投诉的处理时限」→`['三级','投诉']`。
+- **M6 · 引用 snippet 表格 HTML 转纯文本**（修 Bug3 html 标签裸露）：
+  - `cite.py` 新增 `_html_to_text()`：表格/富文本 chunk 先还原标签边界为空格（`</td|th|tr|p|div|li|br>`），再剥剩余标签、折叠空白 → 引用面板 snippet 展示纯文本。
+  - **实测**：PDF 表格 snippet 从 `<table><tr><td rowspan=1 colspan=1>销售区域…` → `销售区域 季度目标(万元) 实际完成(万元) … 华东大区 2,800 3,120 111.4%`。
+- **M8 · 批量上传 + 会话流式锁定**（修 Bug1/2）：
+  - **批量上传**：InputBar（pdf/docx/md）与 Dashboard（pdf/docx/md/pptx/txt）文件选择器加 `multiple`，`onUpload` 签名 `(file: File)` → `(files: File[])`，前端循环调 `POST /docs`（后端复用单文件接口零改动），toast 汇总上传数量。
+  - **会话流式锁定**：`useChat` 新增真实 `streaming` ref+state（原 UI 仅靠 message state 推断，回答完成前不可靠）；`send` 开始时置锁、`finally` 解锁；锁定期内 `selectConversation/newConversation/deleteConversation` 直接 return，且侧边栏会话切换/重命名/删除、TopBar「新对话」按钮同步 `disabled`（title 提示「回答生成中」）。
+  - **验证**：`tsc --noEmit` 零错误；Bug3/4 经 `POST /answer` 端到端实测（见上）；Bug1/2 为 UI 行为，未做浏览器走查（tsc + 逻辑审查覆盖）。
+
+## [v5.0.1] 2026-09-21 —— 表格数据全链路修复（M1 v1.1 / M2 v1.1 / M7 v10.1 / M8 v5.0.1）
+
+**影响模块**：M1 解析（v1.1）、M2 切分（v1.1）、M7 交互（v10.1）、M8 前端（v5.0.1）
+
+- **M1 · MinerU 表格内容修复**：`blocks_builder.py` 原只从 `text` 字段读内容，但 MinerU 表格数据存在 `table_body`（HTML 字符串）和 `table_footnote` 里，`text` 为 None → 表格 content 为空 → M2 过滤 → 索引/问答/预览全链路丢失。修复：`typ == "table"` 时从 `table_body` 读 HTML，拼接 `table_caption` 和 `table_footnote`，`format` 标为 `html`。修复后 MinerU PDF 表格从 0 个 TextUnit → 正常进入切分与索引。
+- **M2 · 表格并块类型修复**：标题刚开即紧接表格时标题+表格并入同一 TextUnit，但未置 `is_table=True`，`_dominant_type()` 按多数派（标题1 vs 正文0）会把 block_type 退化为 paragraph。修复：`chunker.py` 并块分支同时写 `cur["is_table"] = True`。索引内容不受影响（只有 re-parse 才触发重新索引），但对预览表格渲染与模块语义是必需的。
+- **M7 · 预览接口透传 block_type**：`GET /docs/{doc_id}/preview` 返回字段新增 `block_type`，供前端识别表格单元。
+- **M8 · 文档预览表格渲染**：`DocumentPreview.tsx` 中 `block_type === "table"` 的单元以 HTML 表格渲染（`dangerouslySetInnerHTML`，来源为自有解析器输出，可信），其他单元保持纯文本安全渲染。新增 `.preview-table-wrapper` 样式（边框合并、横向滚动、脚注小字灰、与浅暖色系一致）。
+- **实测（默认知识库 default_ws 三元重建后）**：清空旧产物与白名单，仅用 `inputs/raw/季度销售业绩复盘报告.pdf` + `客户服务投诉处理SOP.md` + `智能客服系统产品需求文档.docx` 重跑 M1→M2→M3（ok=3/3，chunks=7/15/5，含 6 个表格单元）。问答验证：PDF「华东大区实际完成销售额」→ **3,120 万元**（引用成绩表 chunk，score 0.957）；DOCX「智能问答引擎预计工期」→ **8 周**（表格内容，score 0.99）；MD 投诉升级响应时效可完整分条回答。预览验证：PDF 7 单元含 2 个 `block_type=table` 单元（`<table>` 完整渲染）。
+
+## [v5.0] 2026-09-21 —— 多对话管理（M7 v10 / M8 v5）
+
+**影响模块**：M7 交互（v10）、M8 前端（v5.0）
+
+- **M7 v10 · 后端会话持久化**：新增 `app/m7_interact/conversations.py`（注册表 + 明细分离），Collection 作用域，`conv_<uuid8>` 命名。
+  - **数据布局**：注册表 `<working_dir>/conversations.json`（title/created_at/updated_at/message_count/preview）；明细 `<working_dir>/conversations/<conv_id>.json`（完整 messages，含 citations/meta）。
+  - **API**：`GET/POST /conversations`、`GET/PATCH/DELETE /conversations/{conv_id}`，全部带 `collection_id` query（缺省 `default`）。
+  - **答问落库**：`POST /answer` 与 `GET /answer/stream` 新增 `conversation_id` 参数；带会话时历史从后端读（build_query_with_history 取最近 4 条），答完 `append_round` 落库（加 asyncio.Lock 防并发写）。
+  - **首问自动命名**：标题为占位「新对话」时，用第一条 user 消息前 30 字覆盖。
+  - **向后兼容**：`conversation_id` 缺省 = 无会话模式（前端透传 history），WebUI / 旧客户端行为不变。
+  - **验证**：会话 CRUD 全链路 curl 绿；SSE 流式答完正常落库（user + assistant 2 条，含 citations/meta），首问自动命名生效。
+
+- **M8 v5.0 · 前端多会话 UI**：
+  - **侧边栏会话区**（collection 切换器下方、导航上方）：「＋ 新对话」按钮 + 会话列表（hover 显重命名/删除，MVP 用 `window.prompt`/`confirm`）。
+  - **TopBar 行为**：「清空会话」→「新对话」（新建空会话，不再原地清消息）。
+  - **useChat 重写**：删除 localStorage 消息持久化；新增 `conversations/currentConversationId` 状态与 `loadConversations/selectConversation/newConversation/renameConversation/deleteConversation` 方法；发送时懒创建会话（无会话首问自动建）；流式期间切走会话则停止渲染（后端仍落库）。
+  - **切库联动**：切换 collection 后加载该库会话列表并选中最近一个；USE_MOCK 模式会话区隐藏。
+  - **验证**：`tsc --noEmit` 零错误；`npm run build` 通过（dist 1.68 MB）。
+
 ## [v4.0.4] 2026-09-20 —— 上传原件保留（供追溯）
 
 **影响模块**：M7 交互（v9.3）

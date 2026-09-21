@@ -1,9 +1,9 @@
 # M8 模块记录：正式问答前端（React + TypeScript + Vite）
 
-> **版本：** v4.0.2
+> **版本：** v5.2
 > **状态：** 已落地
-> **更新：** 2026-09-20
-> **定位：** 四视图（问答 / 文档管理 / 知识图谱 / 仪表盘）+ 多知识库切换
+> **更新：** 2026-09-21
+> **定位：** 四视图（问答 / 文档管理 / 知识图谱 / 仪表盘）+ 多知识库切换 + 多会话
 > **契约：** 消费 M7 REST + SSE 接口（见 Swagger UI: http://localhost:8787/swagger）
 > **上游：** [M7 交互层](M7_interact.md) | **下游：** 浏览器用户
 > **依据：** [`M8_frontend_req.md`](M8_frontend_req.md) ｜ [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.9
@@ -16,7 +16,9 @@
 - **v1**：打通「提问 → 答案逐 token 流式 → 引用 `[n]` 溯源 → 多轮追问」主链路；
 - **v2.1**：业务人员**自助上传文档**并管理（上传 → 自动入库 → 对它提问，删除后不再召回）；
 - **v2.2**：知识图谱展示（AntV G6，全图按实体类型着色）+ 问答→图谱单向下钻联动（引用「在图谱中查看」高亮引用相关实体及其 1 跳邻域）；
-- **v2.3**：左侧可折叠侧边栏（问答/文档管理/知识图谱）+ 右栏 tab 切换（引用来源/预览）+ 文档预览（最高置信度柔和高亮）+ 引用按置信度排序仅前 5 条 + 图谱按文档过滤。
+- **v5.0**：多会话（后端持久化，不再 localStorage 存消息）——侧边栏会话区（列表 / 新对话 / 重命名 / 删除）+ TopBar「新对话」按钮 + useChat 多会话重写 + 懒创建（首问自动建会话）+ 首问自动命名（后端负责）。
+- **v5.1**：批量上传（文件选择器 `multiple`，多选后前端循环调 `POST /docs`）+ 会话流式锁定（回答生成中真实 `streaming` 锁，禁会话切换 / 新建 / 删除）。
+- **v5.2**：生成期间可切换/新建会话（Bug2 方向反向，`streamingMap` 每会话独立状态 + 侧边栏呼吸小圆点指示 + 输入框当前会话仍禁用）+ 引用面板去掉固定 5 条上限（后端相对阈值过滤后动态展示全部）。
 
 设计约定：浅暖色系（米白 #FAF6F0 / 暖棕 #B36B3B / 琥珀 #E59B3C）；**纯文本渲染 LLM 输出**（`textContent`，禁止 innerHTML 注入）。
 
@@ -25,8 +27,8 @@
 | 文件 | 职责 |
 |---|---|
 | `App.tsx` | 视图切换（问答/文档管理/知识图谱）+ 健康探测 + 文档列表状态/上传/删除/2s 处理中轮询 + toast + 右栏 tab（引用/预览）+ 引用→图谱焦点透传（`graphFocus`） |
-| `components/TopBar.tsx` | 顶栏：后端状态灯 + 清空会话（导航自 v2.3 移入 Sidebar） |
-| `components/Sidebar.tsx` | 左侧可折叠导航：问答/文档管理/知识图谱（导航项数组，扩展只需 push 一项）（v2.3） |
+| `components/TopBar.tsx` | 顶栏：后端状态灯 + 新对话（v5.0 改「清空会话」→「新对话」） |
+| `components/Sidebar.tsx` | 左侧可折叠导航：知识库切换器（v3.0）+ 会话列表区（v5.0，新对话/重命名/删除）+ 导航项数组（仪表盘/问答/文档管理/图谱，扩展只需 push 一项） |
 | `components/ChatView.tsx` / `MessageBubble.tsx` | 消息流：user/assistant 气泡、流式增量渲染、引用角标 `[n]`、错误态 |
 | `components/CitationPanel.tsx` | 右栏引用列表：按置信度排序限前 5 条（score 降序）+ 每条「在图谱中查看」「原文档 #」跳预览（v2.2+v2.3） |
 | `components/DocumentPreview.tsx` | 文档预览：读 `GET /docs/{id}/preview`，按 `text_unit_id` 定位，最高置信度片段柔和高亮（v2.3） |
@@ -34,9 +36,9 @@
 | `components/DocumentManager.tsx` | 文档管理视图：列表 / 状态 badge（处理中·已入库·失败）/ 预览 / 软删 / 失败原因 / 返回问答（v2.1+v2.3 预览入口） |
 | `components/GraphView.tsx` | 知识图谱视图：G6 v5 力导向全图 + 类型着色 + 缩放/拖拽 + 节点详情侧栏 + 引用聚焦 + 按文档过滤下拉（StrictMode 安全 `graphReady` 门控；v2.2+v2.3） |
 | `components/EmptyState.tsx` | 空态建议芯片 |
-| `hooks/useChat.ts` | 会话状态机（pending/streaming/complete/error）+ SSE 订阅 + 多轮 history 自动累积 |
+| `hooks/useChat.ts` | 会话状态机（pending/streaming/complete/error）+ SSE 订阅 + 多会话管理（v5.0 重写：会话列表/选中/新建/重命名/删除，懒创建，后端持久化） |
 | `lib/sse.ts` | SSE 事件线解析（retrieved→delta→citations→done/error）；连接断开兜底文案 |
-| `lib/api.ts` | 后端 API 封装：postAnswer / checkHealth + v2.1 uploadDoc / listDocs / deleteDoc + v2.2 fetchGraph + v2.3 fetchDocPreview / fetchGraph(docId) |
+| `lib/api.ts` | 后端 API 封装：postAnswer / checkHealth + v2.1 uploadDoc / listDocs / deleteDoc + v2.2 fetchGraph + v2.3 fetchDocPreview / fetchGraph(docId) + v3.0 collections/stats + v5.0 conversations |
 | `lib/cite.ts` | 正文 `[n]` 角标正则拆分 |
 | `mocks/events.ts` | `VITE_USE_MOCK=true` 离线 mock 流（不依赖后端走查） |
 

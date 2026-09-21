@@ -110,7 +110,14 @@ export function DocumentPreview({
                 {u.page_range && (
                   <div className="preview-unit-pages">P{u.page_range[0]}–P{u.page_range[1]}</div>
                 )}
-                <div className="preview-unit-content">{u.content}</div>
+                {u.block_type === 'table' ? (
+                  <div
+                    className="preview-table-wrapper"
+                    dangerouslySetInnerHTML={{ __html: u.content }}
+                  />
+                ) : (
+                  <div className="preview-unit-content">{u.content}</div>
+                )}
               </div>
             )
           })}
