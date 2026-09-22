@@ -1,8 +1,8 @@
 # 解析器选型复核：MinerU vs Docling（源码拆解后）
 
-> **版本：** v1
-> **状态：** 已落地（选型结论）
-> **更新：** 2026-09-12
+> **版本：** v1.3
+> **状态：** 已落地（选型结论修订）+ 实测复核（2026-09-21，见 §10）
+> **更新：** 2026-09-21
 > **定位：** 基于源码实测复核解析器选型与分工，检验 textunit 契约字段合理性
 > **契约：** 选型结论 → [M1 解析层](modules/M1_parse.md) 实现依据 → [textunit 契约](modules/M0_contracts/textunit.md) 字段验证
 > **上游：** [`ARCHITECTURE.md`](ARCHITECTURE.md) §2.2 | **下游：** [M1_parse.md](modules/M1_parse.md) / [M0_contracts/textunit.md](modules/M0_contracts/textunit.md)
@@ -26,10 +26,10 @@
 
 | 维度 | MinerU v3.4.5 | Docling v2.126.0 |
 |---|---|---|
-| 定位 | PDF/扫描件/图片打通，面向中文文档解析 | 多格式统一解析（office/网页/PDF） |
-| 输入格式 | PDF（数字+扫描）、常见图片（PNG/JPG…） | **pdf、docx、pptx、xlsx、html、epub、md、txt、图片、URL** |
-| 底层 | 自研 pipeline（layout/公式/表格/OCR） | SimplePipeline（office 零模型）+ StandardPdfPipeline（PDF 重模型） |
-| 中文版式 | 强（中文界第一梯队） | 弱于 MinerU（ARCHITECTURE 原判保持） |
+| 定位 | PDF/扫描件/图片 + Office 文档解析，面向中文文档 | 多格式统一解析（office/网页/PDF/电子书/Markdown） |
+| 输入格式 | PDF（数字+扫描）、常见图片、**docx / pptx / xlsx**（原生解析，零模型） | pdf、docx、pptx、xlsx、html、epub、md、txt、图片、URL |
+| 底层 | 自研 pipeline（PDF：layout/公式/表格/OCR；Office：原生解析） | SimplePipeline（office 零模型）+ StandardPdfPipeline（PDF 重模型） |
+| 中文版式 | 强（中文界第一梯队） | 弱于 MinerU（原判保持，实测见 §10） |
 
 ## 3. 结构保真与元数据可得性（与 TextUnit 契约直接相关）
 
@@ -107,17 +107,90 @@
 | 部署依赖 | 模型权重需预收（find HF 镜像） | 仅 PDF 需要模型权重 |
 | 版本风险 | 迭代快，锁 tag | 迭代快，锁版本（含 docling_core） |
 
-## 8. 结论与分工（维持，附工作项）
+## 8. 结论与分工（修订，v1.2，附工作项）
 
-1. **分工维持原方案**：PDF → MinerU（`-b pipeline`）；非 PDF（docx/pptx/xlsx/html/…）→ Docling。
+1. **分工修订**：
+   - **PDF / 扫描件 / 图片 → MinerU**（`-b pipeline`、`-l ch`；勿用默认 hybrid-engine）；
+   - **docx / pptx / xlsx → MinerU**（office 后端，原生解析零模型，表格结构识别优于 Docling，实测见 §10）；
+   - **html / epub / md / txt / rst / doc → Docling**（MinerU 不支持）。
 2. **M1 落地要点**（自源码确认）：
    - 主线走 **content_list（JSON）+ images**，不要用裸 Markdown 做结构对接；
    - **沿用 LightRAG `parser/external/{mineru,docling}` 官方链**，在官方 IR block 上补我们的扩展字段（page_label / block_type / docx anchor），而不是重写解析器；
-   - docx 的 `anchor`：自研 paraId 定位补丁 或 暂退化为「文件+文本片段」（不影响核心链路）。
-3. **ARCHITECTURE §2.2 需修订**：OCR 表述（PP-OCRv6 → pytorchocr/RapidOCR 实测）、补充 LightRAG 双消费链事实、补充「结构信息走 JSON 不走 Markdown」的工程纪律。
+   - docx 的 `anchor`：两家都不提供 paraId → 自研补丁或暂退化为「文件+文本片段」（不影响核心链路）。
+3. **ARCHITECTURE §2.2 需修订**：OCR 表述（PP-OCRv6 → pytorchocr/RapidOCR 实测）、补充 LightRAG 双消费链事实、补充「结构信息走 JSON 不走 Markdown」的工程纪律、**补充 MinerU 原生支持 docx/pptx/xlsx**（原表述仅说 PDF/图片）。
+
+> v1.1 旧结论：「docx→Docling」已被实测推翻——MinerU office 后端表格识别更准、段落合并更合理，且同样零模型依赖。
 
 ## 9. 依据
 
 - `mineru/docs/mineru.md`：MinerU 数据流、IO、content_list 结构、`-b pipeline` 选型。
 - `docling/docs/docling.md`：DoclingDocument、prov、docx 无 paraId、OCR RapidOCR、JSON vs Markdown 信息差异。
 - `docs/modules/M0_contracts/textunit.md`：契约 v2 字段与取值机制。
+
+---
+
+## 10. 实测复核（2026-09-21）
+
+> 触发：选型落地后首次真机对比，验证 §2/§3 的断言。样本从 `backend/inputs/raw` 复制到 `backend/src_cmp/`（临时），产物落 `backend/data/parse_cmp/{mineru,docling}/`（**保留供溯源**）。MinerU 全程 `34.43s user 5.31s system 87% cpu 45.599 total`（2 PDF）；Docling office/web 零模型、PDF 走 pip 内置 RapidOCR（PP-OCRv6_small）。统计数据源为 M1 契约产物 `blocks.jsonl`。
+
+### 10.1 样本与基线
+
+| 类别 | 素材（raw） | 引擎 |
+|---|---|---|
+| PDF ×2 | 季度销售业绩复盘报告.pdf / EfficientNet-ZSR.pdf | MinerU + Docling 双向 |
+| DOCX ×2 | 农作物季度种植运维工作总结.docx / 智能客服系统产品需求文档.docx | MinerU + Docling 双向 |
+| HTML ×2 | .html / 患者月度诊疗随访报告.html | Docling 单向（MinerU 不支持） |
+
+> 注：md 不在对比内（MinerU 不支持）；素材清单中 html 两项曾写重，按「测试模板.html + 患者随访.html」执行。
+
+### 10.2 关键数据（blocks.jsonl 统计）
+
+| 文档 | 引擎 | 块数 | 去空白字符 | heading | 表格块 | 样本 |
+|---|---|---|---|---|---|---|
+| 季度复盘.pdf | MinerU | 23 | 3318 | 5 | 2 | 6×5 销售区域表 |
+| 季度复盘.pdf | Docling | 22 | 2144 | 6 | 2 | 同表（单元格 100% 一致） |
+| EfficientNet.pdf | MinerU | 83 | — | 16 | 3 | 论文多列 |
+| EfficientNet.pdf | Docling | 102 | — | 17 | 3 | 同上 |
+| 农作物总结.docx | MinerU | 21 | 2572 | 0 | 2 | 4×5 种植面积表 |
+| 农作物总结.docx | Docling | 21 | 2318 | 0 | 2 | 同表（单元格 100% 一致） |
+| 智能客服PRD.docx | MinerU | 12 | 1697 | 5 | 2 | 5×4 功能表 + 6×4 里程碑表 |
+| 智能客服PRD.docx | Docling | 23 | 1482 | 5 | 2 | 同表（但 Docling 把表头拆成 8 个独立 paragraph 块） |
+| 测试模板.html | Docling | 64 | — | 4 | 0 | — |
+| 患者随访.html | Docling | 13 | — | 5 | 2 | — |
+
+> 注：raw 字符数（含空白与 HTML 标签）对比意义不大——MinerU 表格 HTML 每格带 `rowspan=1 colspan=1` 冗余属性、heading 文本带 `**` markdown 加粗，会虚高 30–60%。**「去空白字符」列为去除空白与 HTML 标签后的纯文本量，是内容保真度的真实口径**。
+
+### 10.3 结论：分工修订（多维度总表）
+
+**原分工「PDF→MinerU、非PDF→Docling」部分推翻。修订为：PDF + docx/pptx/xlsx → MinerU；html/epub/md/txt → Docling。**
+
+下表综合 PDF（×2）、DOCX（×2）、HTML（×2）三组实测，按维度横向对比两引擎：
+
+| 维度 | MinerU v3.4.5 | Docling v2.126.0 | 胜出方 |
+|---|---|---|---|
+| **格式覆盖** | PDF / 图片 / **docx / pptx / xlsx**（office 后端） | PDF / docx / pptx / xlsx / **html / epub / md / txt / rst / doc** / URL | 覆盖各有侧重；Docling 更广 |
+| **中文 PDF 文本保真** | 全（含 bullet 列表、短行） | 长段落 ~95%，**短文/列表（bullet）易整段丢**（季度复盘「五、下季度策略建议」5 条全丢） | MinerU |
+| **DOCX 文本保真** | 完整（零模型原生解析） | 完整（零模型原生解析） | 持平 |
+| **表格结构（PDF）** | 内容完整，HTML 带冗余 `rowspan=1 colspan=1` | 内容完整，HTML 紧凑 + 表头语义化 `<th>` | 内容持平；格式 Docling 更优 |
+| **表格结构（DOCX）** | **表头在 table 块内，结构正确**（PRD 12 块） | **表头被拆成独立 paragraph 块**（PRD 23 块里 8 块是拆出来的表头 + 3 个空段，块数虚高、内容重复） | **MinerU** |
+| **标题 / heading** | PDF 两档（doc_title / paragraph_title），**图形化大标题会整丢**（当图吞）；docx 依赖 Word 原生样式 | PDF heading 有 level（版面推断），大标题能提；docx 同样依赖原生样式 | PDF：Docling 略优；docx：持平 |
+| **anchor / page_label** | **PDF 齐全**（`page:bbox`，每块都有）；docx 无 paraId | PDF 有 prov 但 adapter 未接（实现留白）；docx 无 paraId | PDF：MinerU（已落地）；docx：都没有 |
+| **模型依赖** | PDF 需 layout/OCR/table/公式模型（pipeline）；**office 零模型** | office/web 零模型；PDF 需 StandardPdfPipeline（layout/OCR/table） | office：都零模型；PDF：都重模型 |
+| **性能参考（本机 CPU）** | 2 PDF = 45.6s；2 DOCX = 13.1s（含 API 启动开销） | office 秒级；PDF 慢于 MinerU（CPU 下同份约 2–3×） | office：持平；PDF：MinerU 更快 |
+| **适用场景** | PDF（中文优先）、docx/pptx/xlsx（表格/结构优先） | html/epub/md/txt 等 MinerU 不支持的格式 | 按格式分工 |
+
+### 10.4 HTML / 其他格式（MinerU 不支持）
+
+- MinerU 代码层面仅 pdf + image + office 三类入口，**不支持** html / md / epub / txt / rst / doc。
+- 这些格式继续走 Docling（已测 html：结构完整、emoji 保留、heading 识别可用）。
+
+### 10.5 与 §8 工作项的对照
+
+- §8.1「分工」**已修订**：docx/pptx/xlsx 从 Docling 改归 MinerU（office 后端零模型、表格结构更准）。
+- §8.2「主线走 content_list(JSON) + images」✓ 验证通过：MinerU office 产物结构与 PDF 一致（content_list / _middle.json / .md / images），adapter 只需补 `office/` 目录定位。
+- §8.2「沿用官方链 + 自补 docx anchor」✓ 维持；实测确认 docx anchor 两家都不给。
+- 新注意：Docling 结构类型含 `mixed`（相邻多类型混块），MinerU 无；比对时 block_type 口径不同。M1 下游不受影响。
+
+### 10.6 数据留档
+
+- `backend/src_cmp/`（输入副本）、`backend/data/parse_cmp/`（10 份产物：mineru 4 份 + docling 6 份）已按用户要求保留，供后续 M9 评测复用或溯源。

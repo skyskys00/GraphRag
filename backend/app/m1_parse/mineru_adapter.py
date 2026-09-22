@@ -1,6 +1,8 @@
-"""MinerU adapter：PDF/图片 -> parse/<doc_id>/（content_list + blocks.jsonl + 扩展字段）。
+"""MinerU adapter：PDF/图片 + docx/pptx/xlsx -> parse/<doc_id>/（content_list + blocks.jsonl + 扩展字段）。
 
-契约：docs/modules/M0_contracts/parse.md §2-§3；实测 v3.4.5 产物结构 = <out>/<basename>/auto/<basename>_content_list.json。
+契约：docs/modules/M0_contracts/parse.md §2-§3；实测 v3.4.5：
+- PDF/图片 产物结构 = <out>/<basename>/auto/<basename>_content_list.json（pipeline 后端）
+- docx/pptx/xlsx 产物结构 = <out>/<basename>/office/<basename>_content_list.json（office 后端，零模型）
 """
 from __future__ import annotations
 
@@ -16,11 +18,14 @@ from ._util import make_doc_id, write_jsonl, write_meta
 from .blocks_builder import build_blocks_from_mineru
 
 
-def _locate_auto(tmp: Path, src_stem: str) -> Path:
-    direct = list(Path(tmp).glob(f"{src_stem}/auto"))
+def _locate_output(tmp: Path, src_stem: str) -> Path:
+    direct = list(Path(tmp).glob(f"{src_stem}/auto")) + list(Path(tmp).glob(f"{src_stem}/office"))
     if direct:
         return direct[0]
     cands = sorted(Path(tmp).rglob("auto"), key=lambda p: p.as_posix())
+    if cands:
+        return cands[0]
+    cands = sorted(Path(tmp).rglob("office"), key=lambda p: p.as_posix())
     if cands:
         return cands[0]
     raise RuntimeError(f"MinerU 产物目录未找到: {tmp}")
@@ -40,7 +45,7 @@ def parse_with_mineru(src: Path, out_root: Path) -> Path:
                 f"mineru failed rc={r.returncode}\n---stdout---\n{r.stdout[-1500:]}\n---stderr---\n{r.stderr[-1500:]}"
             )
 
-        auto = _locate_auto(Path(tmp_s), src.stem)
+        auto = _locate_output(Path(tmp_s), src.stem)
         cl = next((p for p in auto.glob("*content_list.json") if "_v2" not in p.name), None)
         mid = next(auto.glob("*_middle.json"), None)
         md = next(auto.glob("*.md"), None)

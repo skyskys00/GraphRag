@@ -1,12 +1,12 @@
 # M1 模块记录：解析层
 
-> **版本：** v1.1
-> **状态：** 已落地
+> **版本：** v1.3
+> **状态：** 已落地 + 实测复核（2026-09-21）
 > **更新：** 2026-09-21
 > **定位：** MinerU + Docling 双引擎解析，输出统一 blocks.jsonl
 > **契约：** 原始文档 → blocks.jsonl（page_label / block_type / anchor 扩展字段），见 [`M0_contracts/parse.md`](M0_contracts/parse.md)
-> **上游：** 原始文档（PDF / DOCX / PPTX / …） | **下游：** [M2 切分层](M2_chunk.md)
-> **依据：** [`PARSER_COMPARISON.md`](../PARSER_COMPARISON.md) ｜ [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.2
+> **上游：** 原始文档（PDF / DOCX / PPTX / HTML / …） | **下游：** [M2 切分层](M2_chunk.md)
+> **依据：** [`PARSER_COMPARISON.md`](../PARSER_COMPARISON.md) v1.2（§10 实测复核）｜ [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.2
 > **运行：** `cd backend && python -m app.m1_parse.run -s <源文件/目录> -o data/parse`
 > **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md)
 
@@ -14,9 +14,17 @@
 
 把原始文档（PDF/图片 + docx/pptx/xlsx/html/...）转成**统一 parse 产物**（内容结构 + 块级 blocks.jsonl + 扩展字段 page_label/block_type/anchor），供 M2 切分聚合出 TextUnit，**不依赖 LLM/Xinference**（为纯本地解析）。
 
-引擎分工（实测确定）：
+引擎分工（实测确定，v1.3 修订）：
 - **PDF / 扫描件 / 图片 → MinerU**（`-b pipeline`、`-l ch`；勿用默认 hybrid-engine）；
-- **docx / pptx / xlsx / html / epub / md / txt → Docling**（office 链零模型）。
+- **docx / pptx / xlsx → MinerU**（office 后端，原生解析零模型，表格结构优于 Docling）；
+- **html / epub / md / txt / rst / doc → Docling**（MinerU 不支持）。
+
+**实测复核（2026-09-21，PARSER_COMPARISON §10）**：
+- PDF：正文 Docling 覆盖 ~95%、表格 100% 一致，但 Docling 整段丢 bullet 列表项；MinerU 图形化大标题会整丢。
+- DOCX：MinerU 结构更准（Docling 把表格表头拆成独立 paragraph 块，块数虚高内容重复），纯文本内容一致，均零模型。
+- HTML：Docling 可用，结构完整。
+- anchor：仅 MinerU PDF 有 `page:bbox`；docx 两家都不给 paraId。
+- 产物留档 `backend/data/parse_cmp/` + `src_cmp/`。
 
 ## 2. 代码结构（`app/m1_parse/`）
 
