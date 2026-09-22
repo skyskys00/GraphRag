@@ -26,6 +26,9 @@ docling/source/
 # 运行时数据（可重建，不入库）
 backend/data/
 
+# LLM 裁判磁盘缓存（m9_eval 运行时产物，可重新生成）
+backend/app/m9_eval/cache/
+
 # 前端
 frontend/node_modules/
 frontend/dist/

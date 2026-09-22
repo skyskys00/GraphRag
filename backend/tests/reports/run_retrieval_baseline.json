@@ -1,0 +1,3805 @@
+{
+  "testset_id": "testset_cservice_35",
+  "domain": "客服业务库（客户服务中心）",
+  "version": "v1.0",
+  "timestamp": "2026-09-22 16:51:08",
+  "config": {
+    "mode": "retrieval",
+    "collection": "eval_cservice",
+    "workspace": "eval_cservice_ws"
+  },
+  "summary": {
+    "total_questions": 35,
+    "overall": {
+      "context_recall": 0.9111,
+      "context_precision": 0.3714,
+      "context_precision_weighted": 0.5304
+    },
+    "by_category": {
+      "comparison": {
+        "count": 4,
+        "context_recall": 0.9,
+        "context_precision": 0.4062
+      },
+      "fact_cross_doc": {
+        "count": 7,
+        "context_recall": 0.8929,
+        "context_precision": 0.6071
+      },
+      "fact_single": {
+        "count": 10,
+        "context_recall": 0.95,
+        "context_precision": 0.35
+      },
+      "proper_noun": {
+        "count": 6,
+        "context_recall": 0.9167,
+        "context_precision": 0.3333
+      },
+      "summary": {
+        "count": 2,
+        "context_recall": 0.9,
+        "context_precision": 0.625
+      },
+      "table_numeric": {
+        "count": 4,
+        "context_recall": 0.8542,
+        "context_precision": 0.0625
+      },
+      "unanswerable": {
+        "count": 2,
+        "context_recall": 0.0,
+        "context_precision": 0.0625
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "count": 13,
+        "context_recall": 0.9615,
+        "context_precision": 0.3846
+      },
+      "hard": {
+        "count": 5,
+        "context_recall": 0.78,
+        "context_precision": 0.65
+      },
+      "medium": {
+        "count": 17,
+        "context_recall": 0.9111,
+        "context_precision": 0.2794
+      }
+    },
+    "total_time_s": 1379.5
+  },
+  "questions": [
+    {
+      "id": "CS-FS-001",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "三级投诉的首次响应时效是多长时间？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "0cbd90fb5f763e77",
+          "0c6716e31ccaa1f4",
+          "0cbd90fb5f763e77",
+          "0cbd90fb5f763e77",
+          "4a02a6158e93dfde"
+        ],
+        "time_s": 28.24
+      },
+      "metrics": {
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 3,
+          "per_fact": [
+            {
+              "fact": "三级投诉 = 一般投诉",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]和[3]的投诉等级表中均明确列出“三级（一般）”，将三级等同于一般投诉。"
+            },
+            {
+              "fact": "首次响应时效 = 4 小时",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[3]的三级（一般）投诉响应时效明确为'4小时内'，与'首次响应时效 = 4 小时'等价。"
+            },
+            {
+              "fact": "工作时间计算（工作日9:00-18:00）",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[4]明确写明：所有时间节点均以工作时间计算（工作日9:00-18:00），与事实陈述完全一致。"
+            }
+          ],
+          "reason": "3/3 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.375,
+        "context_precision_weighted": 0.5642,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 3,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "表格明确列出三级（一般）投诉的首次响应为4小时，直接回答且与标准答案一致。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本为客服绩效指标表格，虽提及'三级投诉'但内容为平均处理时长（≤2小时），未涉及首次响应时效（4小时），对回答问题无直接帮助。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本的表格中明确列出三级（一般）投诉的响应时效为4小时内，直接回答了问题。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅说明时效计算的一般规则（起算点、工作时间口径等），并未提及三级投诉的首次响应时效为4小时这一具体信息。"
+            },
+            {
+              "rank": 5,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本提到三级投诉的处理时效（5个工作日）和二级/一级时效，涉及投诉时效主题，但未直接给出三级投诉的首次响应时效（4小时）。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅提供了处理时效要求的标题和引言，没有提及三级投诉首次响应时效的具体时间（4小时），因此对回答问题没有帮助。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.3,
+              "reason": "文本包含客服核心指标数据（如平均响应时间ART），但未明确提及三级投诉的首次响应时效，仅提供间接相关背景。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅提及客户对7×24小时服务和秒级响应的期望，未涉及三级投诉及其首次响应时效4小时的具体规定，与问题无关。"
+            }
+          ],
+          "reason": "3/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 28.24
+    },
+    {
+      "id": "CS-FS-002",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "一级投诉的全流程处理时效中，问题解决需要在多长时间内完成？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "0cbd90fb5f763e77",
+          "4a02a6158e93dfde",
+          "0cbd90fb5f763e77",
+          "0cbd90fb5f763e77",
+          "0cbd90fb5f763e77"
+        ],
+        "time_s": 30.22
+      },
+      "metrics": {
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "per_fact": [
+            {
+              "fact": "一级投诉问题解决时限 = 24 小时",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的全流程时效标准表格中明确列出一级（紧急）投诉的“问题解决”时限为24小时，与陈述完全一致。"
+            },
+            {
+              "fact": "一级投诉按自然时间计算，其他等级按工作时间",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[4]明确说明所有时间节点均以工作时间计算，一级投诉例外按自然时间计算，与事实陈述完全吻合。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.5,
+        "context_precision_weighted": 0.7175,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 4,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本表格明确列出‘一级（紧急）’投诉的问题解决时效为24小时，直接回答了问题并支持标准答案。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.95,
+              "reason": "文本中Q10明确提到紧急问题（一级）24小时内解决，直接回答了问题所需的一级投诉处理时效信息。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.2,
+              "reason": "文本仅列出各投诉等级的响应时效（一级为15分钟内），未提及问题解决时效（24小时），与问题所需信息不匹配。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本说明了时效计算方式并明确一级投诉按自然时间计算，与问题中一级投诉解决时效相关，但未直接给出24小时的具体时限。"
+            },
+            {
+              "rank": 5,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "该文本是处理时效要求部分的引言，提示后续表格包含不同等级投诉的全流程处理时效，虽未直接给出24小时的具体时限，但对定位所需信息具有背景引导作用。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是Q2/Q3工单核心指标总览表格，内容涉及工单总量、解决率、响应时间等统计数据，完全未提及一级投诉的全流程处理时效或24小时解决要求，对回答问题无帮助。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "该文本介绍的是客服考核指标（ART、FCR、CSAT等），仅提及三级投诉≤2小时，完全没有提到一级投诉的解决时效或24小时/自然时间的规定，对回答无帮助。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本描述的是投诉升级触发条件，未提及一级投诉的问题解决时效或24小时要求，与问题无关。"
+            }
+          ],
+          "reason": "4/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 31.15
+    },
+    {
+      "id": "CS-FS-003",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "智能客服系统的 FCR 指标是什么含义？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "0c6716e31ccaa1f4",
+          "6ddd65ec3b1f5648",
+          "0c6716e31ccaa1f4",
+          "6ddd65ec3b1f5648",
+          "2102a87db0c1cc05"
+        ],
+        "time_s": 30.29
+      },
+      "metrics": {
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 3,
+          "per_fact": [
+            {
+              "fact": "FCR = First Contact Resolution = 首次联系解决率",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确给出「首问解决率 FCR (First Contact Resolution)」，与事实陈述的英文缩写和中文译名对应。"
+            },
+            {
+              "fact": "衡量一次联系内问题解决的比例",
+              "hit": true,
+              "score": 0.9,
+              "reason": "上下文中的指标'首问解决率（FCR）'定义为'客户首次联系就解决问题的比例'，与'衡量一次联系内问题解决的比例'表述等价。"
+            },
+            {
+              "fact": "PRD 中目标值为 70%",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[1]和[3]均明确写明首问解决率（FCR）中智能问答的目标值为≥70%，与事实陈述中'目标值为70%'一致。"
+            }
+          ],
+          "reason": "3/3 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.5,
+        "context_precision_weighted": 0.7665,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 4,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本明确给出了FCR的全称、定义（客户首次联系就解决问题的比例）及目标值，能直接回答问题的核心含义，尽管目标值细节与标准答案摘要略有差异，但内容高度相关。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本包含 FCR（首问解决率）的指标名称及相关数据（如Q2、Q3数值及目标值），但未详细解释其含义，仅部分帮助理解问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "文本明确提到首问解决率（FCR）及目标值（智能问答≥70%、整体≥85%），与问题及标准答案高度吻合，但未展开FCR定义的具体描述。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本提到了首问解决率（FCR）为78.5%，确认了FCR是首问解决率并给出了实际值，但未定义其含义或提及70%的目标值。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅为报告结语，讨论客服智能化的战略意义和技术趋势，完全没有提及 FCR 指标的含义或相关定义。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是各大区运营数据对比表，仅包含解决率等指标，未提及FCR的含义或定义，对回答FCR指标含义无帮助。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "该文本讨论的是智能客服系统降低劳动力成本，未提及FCR（首次联系解决率）的含义或目标值，对回答问题没有帮助。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本讨论智能客服的Agent化演进方向，未提及FCR指标的含义或目标值，与问题完全无关。"
+            }
+          ],
+          "reason": "4/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 31.37
+    },
+    {
+      "id": "CS-FS-004",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "客户情绪激动时，客服应遵循什么处理法则？请简述其步骤。",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "4a02a6158e93dfde",
+          "4a02a6158e93dfde",
+          "4a02a6158e93dfde",
+          "4a02a6158e93dfde",
+          "0cbd90fb5f763e77"
+        ],
+        "time_s": 16.08
+      },
+      "metrics": {
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "per_fact": [
+            {
+              "fact": "法则名称 = LSC 法则",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确提到遇到情绪激动的客户遵循“LSC 法则”，且上下文[3]修订记录中也有“增加 LSC 情绪处理法则”的表述，与事实陈述一致。"
+            },
+            {
+              "fact": "L = Listen 倾听",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确写出“L（Listen）倾听”，与事实陈述完全一致。"
+            },
+            {
+              "fact": "S = Share 共情",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确列出 LSC 法则下的「S（Share）共情」，与事实陈述完全一致。"
+            },
+            {
+              "fact": "C = Clarify & Solve 澄清并解决",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确写出“C（Clarify & Solve）澄清并解决”，与事实陈述完全一致。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.5,
+        "context_precision_weighted": 0.6965,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 4,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "该文本完整包含了LSC情绪处理法则的步骤，与标准答案完全一致，能直接回答客户情绪激动时客服应遵循的处理法则。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本提到‘先回应情绪，再解决问题’及让客户感到被理解、被重视，与LSC法则中倾听和共情的核心理念一致，但未给出LSC的具体步骤和缩写，仅提供原则性背景。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅为文档修订历史，仅提到新增了 LSC 情绪处理法则这一名称，但未给出其具体步骤或任何实质内容，无法帮助回答问题。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.55,
+              "reason": "文本Q9展示了客户情绪激动时的回应示例，包含共情安抚（表达理解、请客户消气）和引导说明，与LSC法则中的倾听和共情步骤部分吻合，但未系统阐述LSC法则的完整步骤，仅提供零散示例和相关背景。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本是投诉等级分类与响应时效表，仅在二级投诉定义中提及‘客户情绪激动’，但未涉及LSC情绪处理法则或其步骤。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本讨论的是智能客服系统中的情绪识别技术及其预警功能，并未提及LSC情绪处理法则或其倾听、共情、澄清解决的具体步骤，与问题所需信息无关。"
+            },
+            {
+              "rank": 7,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "该文本强调不打断客户表达、温和耐心等语气标准，与LSC法则中倾听（L）和共情（S）的部分要点一致，提供了相关佐证，但未涉及澄清并解决（C）步骤。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本讲的是升级触发条件，未涉及LSC情绪处理法则及其步骤，对回答客户情绪激动时客服应遵循的处理法则无帮助。"
+            }
+          ],
+          "reason": "4/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 18.38
+    },
+    {
+      "id": "CS-FS-005",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "连续输错密码几次会导致账户锁定？锁定多长时间？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "4a02a6158e93dfde",
+          "6ddd65ec3b1f5648",
+          "0cbd90fb5f763e77",
+          "0c6716e31ccaa1f4",
+          "0cbd90fb5f763e77"
+        ],
+        "time_s": 25.53
+      },
+      "metrics": {
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "per_fact": [
+            {
+              "fact": "连续输错次数 = 5 次",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确写明“连续输错密码 5 次账户会被锁定 30 分钟”，与事实陈述“连续输错次数 = 5 次”一致。"
+            },
+            {
+              "fact": "锁定时长 = 30 分钟",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]Q3明确说明连续输错密码5次账户会被锁定30分钟，与事实陈述一致。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.125,
+        "context_precision_weighted": 0.3679,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 1,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本中Q3直接明确回答了连续输错密码5次会锁定30分钟，与问题和标准答案完全吻合。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本为各大区运营数据对比表格，内容涉及客服人数、工单量等指标，与账户锁定机制完全无关。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是关于投诉处理时效标准的内容，完全未涉及密码输错次数或账户锁定时间，与问题无关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本描述的是核心功能模块的优先级和工期，完全未提及账户密码错误锁定次数或锁定时长，与问题无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是关于投诉等级分类及响应时效的表格，与账户密码锁定问题完全无关。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅为客服文档的修订历史、审核信息与生效日期，未提及密码输错次数或账户锁定时间，与问题完全无关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是智能客服版本功能对比表，完全未提及密码输错次数或账户锁定时间等信息。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅为文档修订历史、编制部门及审批信息，未包含任何关于密码错误次数或账户锁定时长的内容。"
+            }
+          ],
+          "reason": "1/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 27.59
+    },
+    {
+      "id": "CS-FS-006",
+      "category": "fact_single",
+      "difficulty": "medium",
+      "question": "投诉处理的升级触发条件有哪几种？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "0cbd90fb5f763e77",
+          "0cbd90fb5f763e77",
+          "0cbd90fb5f763e77",
+          "0cbd90fb5f763e77",
+          "4a02a6158e93dfde"
+        ],
+        "time_s": 21.61
+      },
+      "metrics": {
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "per_fact": [
+            {
+              "fact": "超期升级：超时自动升级",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[1]中“超期升级：任一环节超出规定时效未完成，系统自动升级至上一级主管”明确表达了超时自动升级的含义，与事实陈述等价。"
+            },
+            {
+              "fact": "情绪升级：客户威胁升级 → 客服总监",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确写明'情绪升级：客户明确表达不满升级，如提及投诉至消费者协会、媒体曝光、法律诉讼等，须立即升级至客服总监'，与事实陈述的'客户威胁升级 → 客服总监'一致。"
+            },
+            {
+              "fact": "技术升级：2小时定位不出 → 技术支持中心",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]技术升级部分明确写明'售后工程师在2小时内无法定位问题原因，须升级至技术支持中心协助排查'，与事实陈述等价。"
+            },
+            {
+              "fact": "跨部门升级：客服项目经理拉群",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确写明“跨部门升级：涉及研发、供应链等其他部门协调的投诉，由客服项目经理统一拉群跟进”，与事实陈述完全对应。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.25,
+        "context_precision_weighted": 0.5519,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 2,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本完整列出了超期升级、情绪升级、技术升级和跨部门升级四种触发条件，与问题及标准答案完全一致。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "该文本明确以'升级机制'为标题，并引出投诉处理中出现特定情形时启动升级流程，虽未列出具体条件，但直接对应问题的核心主题，提供了有价值的结构性背景。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.2,
+              "reason": "该文本仅描述升级工单触发后的接收与闭环流程，未提及任何升级触发条件（超期、情绪、技术、跨部门），对回答问题没有实质帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本只介绍了投诉分级标准，未提及任何升级触发条件，与问题所需信息无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.3,
+              "reason": "文本仅提及客户情绪激动且问题超出三级投诉范围时按SOP升级至二级处理，涉及情绪升级这一种触发条件，但未覆盖超期、技术、跨部门等其他升级条件，仅有部分参考价值。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "该文本介绍的是投诉的初步分级和处理路径选择，未提及任何升级触发条件，与问题无关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.3,
+              "reason": "文本提到处理时效要求，与'超期升级'触发条件有间接关联，但未直接列出升级触发条件，帮助有限。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.2,
+              "reason": "该文本介绍的是投诉等级分类及响应时效，未提及任何投诉升级的触发条件，与问题所需的升级触发机制无关。"
+            }
+          ],
+          "reason": "2/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 54.22
+    },
+    {
+      "id": "CS-FS-007",
+      "category": "fact_single",
+      "difficulty": "medium",
+      "question": "智能客服系统 v2.1 版本相比 v1.0 新增了哪些核心功能模块？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "0c6716e31ccaa1f4",
+          "0c6716e31ccaa1f4",
+          "4a02a6158e93dfde",
+          "0c6716e31ccaa1f4",
+          "2102a87db0c1cc05"
+        ],
+        "time_s": 24.99
+      },
+      "metrics": {
+        "context_recall": 0.75,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 3,
+          "per_fact": [
+            {
+              "fact": "v2.1 新增：情绪识别模块",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[1]的对比表显示V2.1在情绪识别上为“支持，负面情绪自动预警升级”而V1.0为“不支持”，上下文[2]也列出了情绪识别模块，表明该模块是V2.1新增的。"
+            },
+            {
+              "fact": "v2.1 新增：多轮对话管理",
+              "hit": true,
+              "score": 0.9,
+              "reason": "上下文[2]在V2.1核心功能模块中列出了「多轮对话管理」模块，与事实陈述「v2.1 新增：多轮对话管理」在语义上等价。"
+            },
+            {
+              "fact": "v2.1 新增：知识库管理后台",
+              "hit": false,
+              "score": 0.0,
+              "reason": "所有检索上下文中均未出现“知识库管理后台”这一表述，也无法在 V2.1 相关描述中找到该功能新增的明确依据。"
+            },
+            {
+              "fact": "v2.1 升级：智能问答引擎从关键词匹配升级为语义理解",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[1]的版本对比表格明确列出 V1.0 核心能力为“关键词匹配 + 模板化回复”，V2.1 核心能力为“语义理解 + 知识图谱 + 多轮对话”，与事实陈述中从关键词匹配升级为语义理解的表述一致。"
+            }
+          ],
+          "reason": "3/4 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.5,
+        "context_precision_weighted": 0.6965,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 4,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.95,
+              "reason": "该文本以对比表格形式列出了V1.0与V2.1在核心能力、对话轮次、情绪识别、知识库自学习等维度的差异，直接覆盖了问题所问的新增功能模块（如多轮对话、情绪识别、语义理解升级等），对回答问题有高度帮助。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "该文本列出了智能客服系统的多个核心功能模块（包括情绪识别、多轮对话管理、智能问答引擎等），与问题所需新增模块信息直接相关，但未明确标注v2.1与v1.0的版本对比，只提供了功能列表。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "该文本是客服中心的修订历史表，仅提及 V1.0 和 V1.2 版本及 FAQ、情绪处理法则等，未涉及智能客服系统 v2.1 相比 v1.0 的新增核心功能模块，与问题无关。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "该文本明确指向V1.0与V2.1的主要差异对比，属于回答新增核心功能模块问题的关键资料，虽未直接列出具体模块，但提供了所需信息的明确出处和上下文。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本讨论的是智能客服的Agent化演进方向，未提及v2.1版本新增的任何核心功能模块，与问题无关。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是投诉处理流程的修订历史表，涉及版本为V1.0、V2.0、V2.3，未提及智能客服系统v2.1与v1.0的对比，也未涉及情绪识别、多轮对话管理、知识库管理后台等核心功能模块，与问题完全无关。"
+            },
+            {
+              "rank": 7,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本详细介绍了情绪识别模块的实时识别与预警功能，与标准答案中v2.1新增的'情绪识别模块'直接相关，对回答问题有明确帮助。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本为风险评估与应对措施，仅顺带提及V1.0知识和知识库迁移，未涉及v2.1相比v1.0新增的核心功能模块，对回答问题无实质帮助。"
+            }
+          ],
+          "reason": "4/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 65.25
+    },
+    {
+      "id": "CS-FS-008",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "客服话术规范中明确禁止使用哪些类型的用语？请列举至少三类。",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "4a02a6158e93dfde",
+          "4a02a6158e93dfde",
+          "4a02a6158e93dfde",
+          "4a02a6158e93dfde",
+          "0cbd90fb5f763e77"
+        ],
+        "time_s": 25.33
+      },
+      "metrics": {
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 5,
+          "hit_facts": 5,
+          "per_fact": [
+            {
+              "fact": "不耐烦类",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[1]在禁忌用语部分中明确出现了“不耐烦类”这一分类标签。"
+            },
+            {
+              "fact": "推卸责任类",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[1]中明确列出了\"推卸责任类\"这一禁忌用语分类。"
+            },
+            {
+              "fact": "激化矛盾类",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[1]中明确列出禁忌用语类别，其中包含“激化矛盾类”。"
+            },
+            {
+              "fact": "随意承诺类",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[1]的禁忌用语中明确列出了“随意承诺类”，并给出具体例句，与事实陈述完全一致。"
+            },
+            {
+              "fact": "网络用语类",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确列出禁忌用语类别「网络用语类」，并举例绝绝子、yyds、破防了等。"
+            }
+          ],
+          "reason": "5/5 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.375,
+        "context_precision_weighted": 0.5519,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 3,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本完整列出了客服话术规范中的五类禁忌用语及其示例，与问题要求列举至少三类完全匹配，直接提供了标准答案所需的核心信息。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本为客服考核评分表，仅提及‘禁忌用语’一词但未列举任何具体禁止用语类型，无法帮助回答问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "该文本涉及客服话术规范的语气标准，强调温和有礼、耐心细致、积极正向，与客服话术禁用负面用语的要求相关，但未明确列出禁止使用的具体用语类别。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本内容为客服问候语和等候用语规范，未涉及任何禁止使用的用语类型，与问题完全无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本是投诉处理流程的目的、适用范围和责任人说明，仅在注释中提及话术规范另行参见其他文件，并未列举任何禁止使用的具体用语类型，对回答问题没有实质帮助。"
+            },
+            {
+              "rank": 6,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本在专业性原则中明确提到‘不使用网络流行语或非正式表达’，直接对应标准答案中的网络用语类禁止项，提供了部分佐证，但未覆盖其他类别。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅说明规范的目的和适用范围，未提及任何被禁止使用的具体用语类型，无法回答所问问题。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "该文本仅说明客服话术规范的适用范围和渠道，未提及任何被禁止使用的具体用语类型，无法帮助回答问题。"
+            }
+          ],
+          "reason": "3/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 46.48
+    },
+    {
+      "id": "CS-FS-009",
+      "category": "fact_single",
+      "difficulty": "medium",
+      "question": "SOP 当前版本号是多少？上一个主要版本做了什么修订？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "0cbd90fb5f763e77",
+          "0c6716e31ccaa1f4",
+          "0cbd90fb5f763e77",
+          "0cbd90fb5f763e77",
+          "0c6716e31ccaa1f4"
+        ],
+        "time_s": 16.21
+      },
+      "metrics": {
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "per_fact": [
+            {
+              "fact": "当前版本 = V2.3，生效日期 2026-09-01",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确列出《客户服务投诉处理标准作业流程（SOP）》的版本为V2.3、生效日期为2026年9月1日，与事实陈述完全一致。"
+            },
+            {
+              "fact": "上一版本 = V2.0，修订日期 2026-01-10",
+              "hit": true,
+              "score": 0.98,
+              "reason": "检索上下文[4]的修订历史表格中明确列有 V2.0 版本，修订日期为 2026年1月10日，与事实陈述完全一致。"
+            },
+            {
+              "fact": "V2.0 修订内容：新增二级投诉分类、调整响应时效标准、增加情绪升级条款",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[4]的修订历史表格明确记载 V2.0 修订内容为「新增二级投诉分类；调整响应时效标准；增加情绪升级条款」，与事实陈述完全一致。"
+            },
+            {
+              "fact": "修订人 = 王小燕",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[4]的修订历史表格中明确列出V2.0和V2.3版本的修订人均为王小燕。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.25,
+        "context_precision_weighted": 0.4599,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 2,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本确认了SOP当前版本为V2.3及生效日期，但未提及上一个主要版本V2.0及其修订内容，仅部分覆盖问题所需信息。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.3,
+              "reason": "文本确认了当前SOP版本为V2.3，但未提及上一主要版本的修订内容，仅部分相关。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅介绍了SOP的目的、适用范围和责任人，未提及任何版本号或版本修订信息，无法回答当前版本号及上一主要版本修订内容的问题。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "该文本的修订历史表格直接列出了当前版本V2.3及其生效日期，以及上一主要版本V2.0的修订日期、修订人王小燕和修订内容（新增二级投诉分类、调整响应时效标准、增加情绪升级条款），完整回答了问题的两个部分。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "该文本是产品功能对比表，提到当前版本为V2.1，与标准答案给出的当前版本V2.3及上一主要版本V2.0完全不符，且未涉及V2.0的修订内容，对回答问题无帮助。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本的修订历史仅包含V1.0至V1.2，且生效日期为2026年8月15日，均与问题所问的当前版本V2.3及上一主要版本V2.0不符，无法提供任何回答所需的信息。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅列出投诉各等级的时效标准，未提及SOP版本号，也未涉及上一主要版本的修订内容，与问题所需信息无关。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "该文本仅说明规范目的及与SOP的配套关系，未提及SOP的版本号或上一主要版本的修订内容。"
+            }
+          ],
+          "reason": "2/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 56.33
+    },
+    {
+      "id": "CS-FS-010",
+      "category": "fact_single",
+      "difficulty": "medium",
+      "question": "GraphRAG 架构解决了单纯大模型 RAG 系统的什么问题？它的核心思路是什么？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "2102a87db0c1cc05",
+          "0c6716e31ccaa1f4",
+          "2102a87db0c1cc05",
+          "2102a87db0c1cc05",
+          "0c6716e31ccaa1f4"
+        ],
+        "time_s": 31.67
+      },
+      "metrics": {
+        "context_recall": 0.75,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 3,
+          "per_fact": [
+            {
+              "fact": "传统 RAG 问题：幻觉率高、企业专有知识覆盖不足",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述“单纯依赖大模型的 RAG 系统存在幻觉率高、企业专有知识覆盖不足的问题”，与事实陈述完全对应。"
+            },
+            {
+              "fact": "GraphRAG 核心：知识图谱 + 大模型融合",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确出现「知识图谱与大模型融合（GraphRAG）」，与陈述「知识图谱 + 大模型融合」等价。"
+            },
+            {
+              "fact": "技术手段：实体级知识关联 + 图推理",
+              "hit": true,
+              "score": 0.85,
+              "reason": "上下文[1]和[2]提到GraphRAG通过实体抽取与关系构建及图检索问答来实现知识图谱与大模型融合，与'实体级知识关联 + 图推理'技术手段在含义上等价。"
+            },
+            {
+              "fact": "适用场景：企业内部多文档、强关联知识",
+              "hit": false,
+              "score": 0.0,
+              "reason": "检索上下文中虽提及GraphRAG用于复杂企业知识库和跨文档推理，但未出现“企业内部多文档、强关联知识”这一适用场景的明确等价表述。"
+            }
+          ],
+          "reason": "3/4 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.125,
+        "context_precision_weighted": 0.3679,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 1,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "该文本明确指出单纯大模型RAG的幻觉率高、专有知识覆盖不足的问题，并阐述了GraphRAG通过实体抽取、关系构建、图检索与LLM生成提升复杂问答准确率的核心思路，与问题和标准答案高度匹配。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.2,
+              "reason": "该文本仅在技术选型列表中提及GraphRAG架构的组成（实体抽取+关系构建+图检索问答），但未说明其解决了大模型RAG的什么问题，也未阐述核心思路，对回答帮助有限。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅在结语中顺带提及GraphRAG作为技术趋势之一，未解释其解决的问题或核心思路，对回答无实质帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "该文本是关于智能客服厂商市场份额和优势的表格及摘要，完全未提及 GraphRAG 架构或大模型 RAG 系统的任何问题与解决思路。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅泛泛提到知识图谱和问答系统架构，未涉及 GraphRAG 解决单纯大模型 RAG 的幻觉率高、知识覆盖不足等问题，也未说明其核心思路。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "该文本仅泛泛介绍大语言模型在智能客服场景的能力提升，未提及GraphRAG、单纯大模型RAG系统的缺陷或知识图谱融合架构，与问题实质内容无关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本是各大区运营数据对比表格，内容为客服人数、工单量等业务指标，与 GraphRAG 架构解决的问题及核心思路完全无关。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是客服运营指标数据表格（工单量、解决率、响应时间等），与GraphRAG架构解决的问题及其核心思路完全无关。"
+            }
+          ],
+          "reason": "1/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 52.73
+    },
+    {
+      "id": "CS-FC-001",
+      "category": "fact_cross_doc",
+      "difficulty": "easy",
+      "question": "客服话术规范中提到的「三级投诉范围」具体指什么样的投诉？对应的处理时效是怎样的？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "0cbd90fb5f763e77",
+          "4a02a6158e93dfde",
+          "0cbd90fb5f763e77",
+          "0cbd90fb5f763e77",
+          "0cbd90fb5f763e77"
+        ],
+        "time_s": 14.68
+      },
+      "metrics": {
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "per_fact": [
+            {
+              "fact": "三级投诉定义 = 不影响核心功能、情绪平稳的常规问题",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中三级（一般）投诉的定义说明为'不影响核心功能，客户情绪平稳的常规问题'，与事实陈述完全一致。"
+            },
+            {
+              "fact": "典型场景：外观划痕、配件缺失、操作咨询",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[1]的投诉分级表中，三级（一般）投诉的典型场景示例明确包含“外观划痕、配件缺失、操作咨询”。"
+            },
+            {
+              "fact": "首次响应 4 小时 / 方案提出 24 小时 / 问题解决 5 个工作日",
+              "hit": true,
+              "score": 0.85,
+              "reason": "上下文[5]的三级投诉行明确列出首次响应4小时、方案提出24小时、问题解决5个工作日。"
+            },
+            {
+              "fact": "按工作时间计算",
+              "hit": true,
+              "score": 0.95,
+              "reason": "检索上下文中虽有多种时效和时长定义，但均未出现“按工作时间计算”这一表述或其等价说法。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.375,
+        "context_precision_weighted": 0.6255,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 3,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "该文本的表格直接列出了三级投诉的定义说明、典型场景示例（外观划痕、配件缺失、操作咨询）和响应时效（4小时内），与问题及标准答案高度吻合。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本提到三级投诉的处理时效为5个工作日，并区分了一级、二级、三级投诉的时效，部分回答了处理时效问题，但未具体说明三级投诉的范围类型。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.2,
+              "reason": "该文本仅说明三级投诉由当班客服直接处理及常见问题可用智能问答引擎回复，未涉及三级投诉的具体范围（如常规问题类型）和处理时效（如首次响应、方案提出、解决、回访、结案等时限），对回答问题帮助有限。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "该文本仅提及客服话术规范存在于另一文件的第3章，但未涉及三级投诉的具体定义或处理时效，对回答无实质帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "该文本提供了三级投诉的全流程时效标准（首次响应4小时、方案提出24小时、问题解决5个工作日等），与标准答案中的处理时效完全对应，尽管未详细说明投诉具体范围，但对回答时效部分有直接帮助。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.4,
+              "reason": "文本在平均处理时长指标中提及三级投诉及其≤2小时的目标值，与问题中的三级投诉处理时效部分相关，但未说明三级投诉的具体范围，也未覆盖标准答案中的其他关键时效。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.3,
+              "reason": "该文本提到处理时效要求，但未具体说明三级投诉的范围和时效，仅提供背景，部分相关。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.4,
+              "reason": "文本提到投诉分级标准，涉及产品安全风险、影响范围及客户情绪等分级依据，与三级投诉的定义背景相关，但未给出三级投诉的具体范围和处理时效，仅有部分背景价值。"
+            }
+          ],
+          "reason": "3/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 35.94
+    },
+    {
+      "id": "CS-FC-002",
+      "category": "fact_cross_doc",
+      "difficulty": "hard",
+      "question": "智能问答引擎在公司内部哪些文档或系统中被提及？它分别承担什么角色？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "0cbd90fb5f763e77",
+          "6ddd65ec3b1f5648",
+          "0c6716e31ccaa1f4",
+          "6ddd65ec3b1f5648",
+          "0cbd90fb5f763e77"
+        ],
+        "time_s": 29.98
+      },
+      "metrics": {
+        "context_recall": 0.75,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 3,
+          "per_fact": [
+            {
+              "fact": "SOP：三级投诉的标准回答工具",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[7]明确说明三级投诉由当班客服直接处理，其中常见问题可通过智能问答引擎获取标准回答后直接回复客户，即存在'三级投诉'与'标准回答工具'的对应表述。"
+            },
+            {
+              "fact": "话术规范：自动回复话术训练校准的依据",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[8]明确表述“智能问答引擎的自动回复话术，依据本规范进行训练与校准”，与事实陈述等价。"
+            },
+            {
+              "fact": "PRD：智能客服系统核心模块，v2.1 升级为语义理解",
+              "hit": false,
+              "score": 0.05,
+              "reason": "上下文中仅提及《智能客服系统产品需求文档》及'智能问答引擎'模块，但未出现该PRD为v2.1版本、被描述为'核心模块'或'升级为语义理解'的明确表述。"
+            },
+            {
+              "fact": "运营报表：拦截率反映效果，西南大区尚未接入",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[6]明确提到西南大区智能客服未接入及拦截率将提升，上下文[4]说明拦截率反映智能客服效果，与事实陈述一致。"
+            }
+          ],
+          "reason": "3/4 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.875,
+        "context_precision_weighted": 0.9264,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 7,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本是投诉SOP的一部分，提及投诉处理中话术规范与FAQ的引用，并明确智能问答自动回复规则由智能客服系统PRD中的智能问答引擎模块统一管理，这为问题中智能问答引擎在公司文档中的提及及角色提供了直接线索。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "该文本来自运营数据报表（D3），包含工单量、智能解析量及解决率等指标，并明确提到智能问答引擎在高峰期的分流作用，可佐证其在运营数据报表中的效果反映角色。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "该文本是PRD文档的核心功能模块章节，明确将智能问答引擎列为核心功能模块并描述了其NLP、知识图谱、多轮对话等能力，直接支持标准答案中关于其在PRD中角色和功能升级的论述。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "该文本来自运营数据报表，提及智能问答引擎自主处理普通咨询的件数和拦截率突破60%等指标，与标准答案中④运营数据报表可从拦截率等指标侧面反映其实效果的描述相吻合，对回答问题有直接帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.3,
+              "reason": "该文本为投诉SOP的修订历史表，其中V2.3版本明确提到'增加智能问答引擎引用'，直接证明智能问答引擎在投诉SOP（D1）中被提及，但未详细说明其作为三级投诉处理工具的具体角色，仅提供有限的佐证信息。"
+            },
+            {
+              "rank": 6,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "该文本明确提及智能问答引擎在西南大区的接入情况，与标准答案中运营数据报表（D3）关于西南大区尚未接入及未来接入计划的描述直接对应，为回答问题提供了有效信息。"
+            },
+            {
+              "rank": 7,
+              "relevant": true,
+              "score": 0.95,
+              "reason": "该文本来自投诉SOP，明确指出三级投诉的常见问题可通过智能问答引擎获取标准回答后直接回复客户，与标准答案中智能问答引擎在投诉SOP中的角色描述一致。"
+            },
+            {
+              "rank": 8,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "文本明确提及智能问答引擎的自动回复话术依据话术规范进行训练与校准，直接对应标准答案中话术规范（D4）里智能问答引擎作为自动回复依据的角色。"
+            }
+          ],
+          "reason": "7/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 32.25
+    },
+    {
+      "id": "CS-FC-003",
+      "category": "fact_cross_doc",
+      "difficulty": "medium",
+      "question": "王小燕在客服中心的角色是什么？她负责哪些具体工作？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "0cbd90fb5f763e77",
+          "4a02a6158e93dfde",
+          "4a02a6158e93dfde",
+          "0cbd90fb5f763e77",
+          "0c6716e31ccaa1f4"
+        ],
+        "time_s": 25.29
+      },
+      "metrics": {
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "per_fact": [
+            {
+              "fact": "职位 = 客服总监",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文中多处明确标注王小燕的职位为客服总监，与事实陈述'职位 = 客服总监'完全一致。"
+            },
+            {
+              "fact": "投诉处理最终负责人（一级投诉抄送她）",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[6]明确写明‘客服总监王小燕为全公司投诉处理工作的最终负责人’，[8]显示一级投诉须同步抄送客服总监王小燕，与事实陈述完全对应。"
+            },
+            {
+              "fact": "SOP V2.0/V2.3 修订人",
+              "hit": true,
+              "score": 0.98,
+              "reason": "上下文[1]的修订历史表中明确列出V2.0和V2.3的修订人均为王小燕，与事实陈述一致。"
+            },
+            {
+              "fact": "话术规范审批人（V1.0/V1.2）",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文中，《客服话术规范与常见问题 FAQ》的修订历史中V1.0和V1.2的修订人均为王小燕，文档审批人记载为王小燕（客服总监），但并未出现「话术规范审批人（V1.0/V1.2）」这一表述，也未明确将V1.0/V1.2版本的审批人单独列出。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.625,
+        "context_precision_weighted": 0.8125,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 5,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本显示王小燕是客服总监，并作为V2.0和V2.3的修订人，直接对应其SOP修订人角色和具体职责，对回答问题有实质帮助。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "文本显示王小燕是客服总监并审批话术规范V1.0/V1.2，与标准答案中其角色和话术规范审批人职责直接对应，提供了关键佐证信息。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.8,
+              "reason": "该文本明确王小燕是客服总监且为话术规范的负责人，直接佐证了标准答案中她的角色及话术规范审批/负责职责。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本明确王小燕是客服总监及SOP负责人，与问题中角色询问直接相关，但未列出具体职责细节。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.4,
+              "reason": "文本提到王小燕作为客服中心代表负责试点上线，与她在智能客服项目中的角色相关，但未直接说明她作为客服总监的职责和具体工作内容，仅提供部分背景信息。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.45,
+              "reason": "文本明确提到王小燕是客服总监和全公司投诉处理工作的最终负责人，与问题直接相关，但未涉及她的其他具体职责（如话术审批、SOP修订、PRD参与等）。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.4,
+              "reason": "文本提到王小燕（客服总监）作为报告审核人，佐证了其客服总监身份，但未提及其具体职责内容。"
+            },
+            {
+              "rank": 8,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本明确提到王小燕是客服总监，并说明一级投诉须同步抄送她，直接支持其作为投诉处理最终负责人这一职责，但未涵盖标准答案中的其他具体职责。"
+            }
+          ],
+          "reason": "5/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 72.38
+    },
+    {
+      "id": "CS-FC-004",
+      "category": "fact_cross_doc",
+      "difficulty": "medium",
+      "question": "投诉处理中「升级流程」有几种不同含义？请分别说明。",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "0cbd90fb5f763e77",
+          "0cbd90fb5f763e77",
+          "0cbd90fb5f763e77",
+          "0cbd90fb5f763e77",
+          "4a02a6158e93dfde"
+        ],
+        "time_s": 21.8
+      },
+      "metrics": {
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "per_fact": [
+            {
+              "fact": "含义一：投诉分级升级（三级→二级→一级）",
+              "hit": true,
+              "score": 0.9,
+              "reason": "上下文[5]的Q9提示明确提到客户情绪激动且问题超出三级投诉范围时升级至二级处理，且系统整体存在三级、二级、一级的投诉分级与相应升级路径，与事实陈述含义一致。"
+            },
+            {
+              "fact": "触发条件：超期/情绪/技术/跨部门 四种",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的5.1升级触发条件明确列出了超期升级、情绪升级、技术升级、跨部门升级四种情形，与事实陈述完全一致。"
+            },
+            {
+              "fact": "含义二：跨部门升级（客服→其他部门）",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[2]明确列出“跨部门升级：涉及研发、供应链等其他部门协调的投诉，由客服项目经理统一拉群跟进”，与“跨部门升级”含义一致。"
+            },
+            {
+              "fact": "执行方式：客服项目经理拉群，工单系统 v3.0 流转",
+              "hit": true,
+              "score": 0.6,
+              "reason": "上下文提到跨部门升级时由客服项目经理统一拉群跟进，升级处理流程中结果需回传至原工单系统形成闭环记录，但未明确提及'工单系统v3.0'，仅部分内容有依据。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.375,
+        "context_precision_weighted": 0.3189,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 3,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": false,
+              "score": 0.3,
+              "reason": "文本提到了升级机制并列举了触发升级流程的情形，与问题中‘升级流程’的含义相关，但未具体说明不同含义，仅提供有限的背景信息。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.95,
+              "reason": "该文本详细列出了SOP D1 §5.1的四种升级触发条件（超期、情绪、技术、跨部门），直接覆盖标准答案中投诉分级升级的触发条件及跨部门升级路径，与问题高度相关。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅描述升级工单触发后的接收确认和闭环记录流程，属于操作细节，未涉及投诉升级的两种含义（分级升级与跨部门升级）的区分或说明。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅介绍投诉处理SOP的目的、适用范围与责任分工，未提及任何关于投诉升级流程或其两种含义的内容，对回答问题没有帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": true,
+              "score": 0.55,
+              "reason": "文本中Q9的提示提及了按《客户服务投诉处理SOP》将超出三级投诉范围的问题升级至二级处理，这与标准答案中'投诉分级升级'的含义部分吻合，并提示了SOP作为升级机制的依据，但未涉及跨部门升级含义，且未详细说明升级流程的具体触发条件。"
+            },
+            {
+              "rank": 6,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "该文本详细列出了投诉等级定义及响应时效，为理解投诉分级升级机制提供了必要背景，但未直接说明升级流程的两种不同含义。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.4,
+              "reason": "该文本涉及投诉分级标准与处理路径选择，属于投诉分级升级机制的一部分背景信息，但未直接说明升级流程的两种含义及触发条件。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本描述的是按投诉等级进行派单流转的规则，并未涉及投诉升级流程的两种含义（分级升级的触发条件或跨部门升级路径），因此对回答问题没有实质帮助。"
+            }
+          ],
+          "reason": "3/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 24.54
+    },
+    {
+      "id": "CS-FC-005",
+      "category": "fact_cross_doc",
+      "difficulty": "medium",
+      "question": "「响应时间」在客服业务中有哪两种不同的定义？分别对应什么指标？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "0c6716e31ccaa1f4",
+          "6ddd65ec3b1f5648",
+          "0cbd90fb5f763e77",
+          "0cbd90fb5f763e77",
+          "6ddd65ec3b1f5648"
+        ],
+        "time_s": 31.18
+      },
+      "metrics": {
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "per_fact": [
+            {
+              "fact": "含义一：客户响应时限 = SOP 分级响应 SLA（4h/1h/15min）",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[4]明确提出投诉分级响应时效（一级15分钟内、二级1小时内、三级4小时内），与事实陈述的SOP分级响应SLA（4h/1h/15min）完全对应。"
+            },
+            {
+              "fact": "面向客户、按工作时间计",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文中仅提到时效计算以工作时间计算（工作日9:00-18:00），但未提及『面向客户』这一条件，该事实陈述无法在检索上下文中获得明确依据。"
+            },
+            {
+              "fact": "含义二：ART 平均响应时间 = 系统性能指标",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[1]和[2]明确将'平均响应时间'与缩写'ART (Average Response Time)'对应，且列为系统核心性能指标之一，与陈述含义一致。"
+            },
+            {
+              "fact": "Q3 整体 ART = 38 秒",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文明确记载Q3平均响应时间（ART）为45秒，而非38秒，与事实陈述不符。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.5,
+        "context_precision_weighted": 0.3495,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 4,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "无法解析JSON: {\n  \"relevant\": true,\n  \"score\": 0.6,\n  \"reason\": \"文本虽未区分两种响应时间定义，但包含ART平均响应时间的定义（从客户发送消息到首次回复的平均时长），与标准答案中第二种定义直接对应，对回答问题有部分帮助。\""
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "无法解析JSON: {\n  \"relevant\": true,\n  \"score\": 0.7,\n  \"reason\": \"文本包含ART平均响应时间的数据（Q3为45秒，与标准答案中38秒略有出入，但属于同一指标），能佐证「响应时间」的第二种定义，但未涉及第一种客户响应时限的定义，仅提供部分相关信息。\""
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "该文本说明了客户响应时限相关的时效计算规则（如首次响应时间起算点、按工作时间计算等），与问题中'客户响应时限'这一种响应时间定义相关，但未覆盖另一种ART平均响应时间的定义。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "该文本详细列出了投诉分级及其响应时效（一级15分钟、二级1小时、三级4小时），与标准答案中「客户响应时限（SOP D1）」的定义完全匹配，是回答第一种定义所需的核心信息。"
+            },
+            {
+              "rank": 5,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本提到了平均响应时间（ART）为45秒，与标准答案中ART定义及数值信息直接相关，但未涉及客户响应时限（SOP D1）这一定义，因此仅部分辅助回答问题。"
+            },
+            {
+              "rank": 6,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本提到了平均响应时间（ART）及其目标值（缩短至30秒以内），与问题中第二种定义（ART 平均响应时间）直接相关，但未涉及第一种定义（客户响应时限/SOP D1），因此部分相关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "该文本仅列出产品功能模块及其优先级和工期，虽在数据分析看板中提及‘响应时长’一词，但未对‘响应时间’的两种不同定义进行解释或佐证，对回答问题没有实质帮助。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "该文本是客服考核评分表，仅在'响应速度'项提及超60秒未回复扣分，未涉及'响应时间'的两种定义（客户响应时限SLA与ART平均响应时间），对回答问题无实质帮助。"
+            }
+          ],
+          "reason": "4/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 33.84
+    },
+    {
+      "id": "CS-FC-006",
+      "category": "fact_cross_doc",
+      "difficulty": "medium",
+      "question": "智能客服的「解决率」目标与实际表现分别是多少？差距主要体现在哪里？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "6ddd65ec3b1f5648",
+          "2102a87db0c1cc05",
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648"
+        ],
+        "time_s": 30.61
+      },
+      "metrics": {
+        "context_recall": 0.75,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 3,
+          "per_fact": [
+            {
+              "fact": "PRD 目标解决率 = 85%",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[3]表格中显示整体解决率目标值为「≥ 85%」，且[1][4]明确称其为「产品需求文档设定的 85% 目标」，与陈述「PRD 目标解决率 = 85%」等价。"
+            },
+            {
+              "fact": "Q3 实际解决率 = 81.2%",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]、[3]、[8]均明确记载Q3整体解决率为81.2%，与事实陈述一致。"
+            },
+            {
+              "fact": "差距约 3.8 个百分点",
+              "hit": true,
+              "score": 0.95,
+              "reason": "全部上下文中未出现'3.8 个百分点'或与之等价的差距表述；文中出现的百分点差值为2.1、4.2、8.9等，均与3.8不符。"
+            },
+            {
+              "fact": "主要原因：西南大区未接入智能客服（解决率 78.6%）",
+              "hit": false,
+              "score": 0.0,
+              "reason": "上下文提到西南大区未接入智能客服（预计2026年10月底接入）及解决率78.6%，但并未说明这是解决率未达标的『主要原因』。"
+            }
+          ],
+          "reason": "3/4 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.75,
+        "context_precision_weighted": 0.7635,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 6,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "文本明确给出实际整体解决率81.2%和PRD目标85%，与问题及标准答案的核心数据直接对应，虽未详述差距来源但仍高度相关。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅泛泛介绍LLM提升智能客服首问解决率至70%以上，未涉及问题所需的目标85%、实际81.2%、差距3.8个百分点及西南大区等具体信息。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "该文本包含整体解决率的目标（≥85%）和实际值（81.2%），直接回应了问题中关于目标与实际表现的部分，尽管未明确说明差距体现在哪里。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本包含整体解决率实际81.2%与目标85%的差距数据，但未涉及西南大区接入及复杂问题转人工等具体差距主因，仅部分支持问题回答。"
+            },
+            {
+              "rank": 5,
+              "relevant": true,
+              "score": 0.85,
+              "reason": "该文本包含各大区解决率数据，其中西南大区解决率78.6%与标准答案中差距体现的第一点完全吻合，且其他大区数据可作为整体解决率差距的背景佐证，但未直接给出整体目标85%与实际81.2%的对比及复杂问题转人工的说明，故相关度较高但非完全覆盖。"
+            },
+            {
+              "rank": 6,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本包含「首问解决率」指标定义，指出整体目标值≥85%、智能问答目标值≥70%，与问题中智能客服解决率目标（85%）直接对应，提供了目标值佐证；但缺少实际解决率（81.2%）及差距原因（西南大区、复杂问题转人工）等内容，故仅部分相关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.15,
+              "reason": "文本仅提及首问解决率(FCR)目标≥85%，未涉及智能客服的整体解决率目标85%、实际值81.2%、约3.8个百分点差距及西南大区/复杂问题等差距归因，对回答该问题帮助极小。"
+            },
+            {
+              "rank": 8,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "该文本提供了2026 Q3实际整体解决率81.2%及分月数据，可用于确认实际表现并部分佐证差距，但未涉及85%的目标设定和差距原因的具体分析。"
+            }
+          ],
+          "reason": "6/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 33.35
+    },
+    {
+      "id": "CS-FC-007",
+      "category": "fact_cross_doc",
+      "difficulty": "hard",
+      "question": "行业报告中提到的「首问解决率从 40% 提升至 70% 以上」与公司 PRD 中的 FCR 目标有什么关系？公司当前 FCR 实际水平如何？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648",
+          "0c6716e31ccaa1f4",
+          "2102a87db0c1cc05",
+          "0c6716e31ccaa1f4"
+        ],
+        "time_s": 33.48
+      },
+      "metrics": {
+        "context_recall": 0.75,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 3,
+          "per_fact": [
+            {
+              "fact": "首问解决率 = FCR = 首次联系解决率（同一概念）",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[5]中明确列出「首问解决率」对应英文缩写「FCR (First Contact Resolution)」，其中 First Contact Resolution 即首次联系解决率，与陈述的三者等价表述一致。"
+            },
+            {
+              "fact": "行业水平：40% → 70%+（LLM 驱动）",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[4]明确记载'首问解决率从 40% 提升至 70% 以上'，与事实陈述'40% → 70%+（LLM 驱动）'一致，且该段标题为'LLM 技术突破'。"
+            },
+            {
+              "fact": "公司 PRD 目标 = 70%",
+              "hit": true,
+              "score": 0.95,
+              "reason": "检索上下文中并未出现『公司 PRD 目标 = 70%』这一表述，仅提到智能问答首问解决率 ≥ 70% 以及 FCR 整体目标 ≥ 85%，没有将『公司 PRD 目标』设定为 70% 的说法。"
+            },
+            {
+              "fact": "公司 Q3 实际 FCR ≈ 68.5%，略低于目标",
+              "hit": false,
+              "score": 0.05,
+              "reason": "上下文显示 Q3 首问解决率（FCR）为 78.5%，而非 68.5%，数值不符。"
+            }
+          ],
+          "reason": "3/4 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.75,
+        "context_precision_weighted": 0.8861,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 6,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.5,
+              "reason": "该文本提供了公司当前FCR（首问解决率）的数值（78.5%），但该数值与标准答案中给出的68.5%不一致，且未提及行业报告或PRD中的FCR目标，仅部分有助于回答公司当前FCR实际水平。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本包含 Q3 首问解决率(FCR)为 78.5% 的数据，与问题中公司当前 FCR 实际水平相关，且能辅助理解 FCR 指标，但未直接解释行业报告与 PRD 目标的关系，且数值与标准答案（68.5%）不一致。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "该文本直接来自公司PRD，明确列出了FCR（首问解决率）目标为≥70%，与问题中询问的PRD中FCR目标直接相关，并有助于理解行业报告70%+提升与公司目标的关系。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "该文本正是行业报告中提到「首问解决率从 40% 提升至 70% 以上」的出处，直接支撑问题所问的行业报告与 FCR 概念对应关系这一部分。"
+            },
+            {
+              "rank": 5,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "该文本定义了首问解决率（FCR）及其目标值（智能问答≥70%），与问题中FCR概念和目标直接相关，但未提供公司当前FCR实际水平68.5%的信息。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.15,
+              "reason": "该文本讨论的是 GraphRAG 技术架构及其对首问解决率的提升效果，并未涉及行业报告的 40%→70% 数据、PRD 中 FCR 目标或公司当前实际 FCR 水平，与问题所需的具体信息无关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本提供各大区运营数据（解决率、ART、CSAT等），但未提及FCR（首次联系解决率）、公司整体FCR水平（68.5%）或PRD中的FCR目标（70%），与问题所需信息无关。"
+            },
+            {
+              "rank": 8,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "该文本是Q3运营数据表，包含工单量、解决率等指标，可与标准答案中提到的Q3运营数据（D3）关联，为判断公司当前FCR实际水平提供佐证，但未直接提及FCR或68.5%的具体数值。"
+            }
+          ],
+          "reason": "6/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 35.81
+    },
+    {
+      "id": "CS-PN-001",
+      "category": "proper_noun",
+      "difficulty": "easy",
+      "question": "什么是 ART？请说明其全称和含义。",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "0c6716e31ccaa1f4",
+          "6ddd65ec3b1f5648",
+          "0c6716e31ccaa1f4",
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648"
+        ],
+        "time_s": 30.36
+      },
+      "metrics": {
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "per_fact": [
+            {
+              "fact": "ART = Average Response Time",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的指标表明确列出「平均响应时间」对应「ART (Average Response Time)」，与事实陈述完全一致。"
+            },
+            {
+              "fact": "中文 = 平均响应时间",
+              "hit": true,
+              "score": 0.98,
+              "reason": "上下文[1]表格中明确列出指标'平均响应时间'，并标注英文缩写'ART (Average Response Time)'，与中文表述'平均响应时间'直接等价。"
+            },
+            {
+              "fact": "定义：从接收用户消息到发出第一条回复的平均时长",
+              "hit": true,
+              "score": 0.97,
+              "reason": "上下文[1]中\"平均响应时间 ART\"的定义为\"从客户发送消息到客服（含智能客服）首次回复的平均时长\"，与事实陈述\"从接收用户消息到发出第一条回复的平均时长\"明确等价。"
+            },
+            {
+              "fact": "衡量响应速度的核心 KPI",
+              "hit": true,
+              "score": 0.92,
+              "reason": "上下文列出了平均响应时间（ART）等具体指标及目标值，但未出现『衡量响应速度的核心 KPI』这一表述或明确定义ART为衡量响应速度的核心KPI。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.625,
+        "context_precision_weighted": 0.8401,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 5,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本明确给出了 ART 的全称 Average Response Time（平均响应时间）及其定义：从客户发送消息到客服（含智能客服）首次回复的平均时长，与标准答案所需信息完全一致。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本中提到了“平均响应时间（ART）”并给出了具体数值和单位（秒），提供了ART指标的实例和背景，但未解释其全称Average Response Time及含义，对回答有部分帮助。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本明确提到平均响应时间（ART）及其目标值，说明该缩写指向平均响应时间，与问题中的全称和含义直接相关，但未给出ART的单位和完整定义细节。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本中的运营数据表格包含ART列及其数值（如38秒、44秒），其中单位'秒'与标准答案中ART（平均响应时间）的单位一致，能作为ART含义的佐证，但未直接给出全称和定义。"
+            },
+            {
+              "rank": 5,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本虽未给出 ART 的全称和定义，但实际使用了 ART 并标注'平均响应时间（ART）'，且提供了具体数值和场景，对理解该指标有辅助作用。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅为'一、总则'，未包含任何关于ART全称、含义或平均响应时间的信息，与问题完全无关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本内容为客服工单量、智能解析量、人工处理量等运营数据统计，完全未提及 ART 的全称或平均响应时间相关内容，与问题无关。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是一份投诉等级及响应时效的表格，未提及ART、平均响应时间或客服响应速度指标的定义，与问题完全无关。"
+            }
+          ],
+          "reason": "5/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 32.58
+    },
+    {
+      "id": "CS-PN-002",
+      "category": "proper_noun",
+      "difficulty": "easy",
+      "question": "什么是 FCR？请说明其全称和业务含义。",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "0c6716e31ccaa1f4",
+          "0c6716e31ccaa1f4",
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648",
+          "0cbd90fb5f763e77"
+        ],
+        "time_s": 31.33
+      },
+      "metrics": {
+        "context_recall": 0.75,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 3,
+          "per_fact": [
+            {
+              "fact": "FCR = First Contact Resolution",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]指标表明确列出“首问解决率 FCR (First Contact Resolution)”，与事实陈述完全一致。"
+            },
+            {
+              "fact": "中文 = 首次联系解决率",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确列出指标名称'首问解决率'及其英文缩写'FCR (First Contact Resolution)'，与'首次联系解决率'为等价表述。"
+            },
+            {
+              "fact": "一次联系内问题解决的比例",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[1]中“首问解决率（FCR）”定义为“客户首次联系就解决问题的比例”，与“一次联系内问题解决的比例”是明确的等价表述。"
+            },
+            {
+              "fact": "衡量客服效率与解决能力的核心指标",
+              "hit": false,
+              "score": 0.1,
+              "reason": "检索上下文虽列出了多项客服指标（如ART、FCR、CSAT、解决率等），但均未出现“衡量客服效率与解决能力的核心指标”这一明确等价表述或定义。"
+            }
+          ],
+          "reason": "3/4 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.5,
+        "context_precision_weighted": 0.7665,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 4,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本表格中明确包含 FCR 的全称 First Contact Resolution、中文名称首问解决率及其业务定义（客户首次联系就解决问题的比例，无需二次或多次联系），与问题和标准答案完全对应。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本提到FCR中译'首问解决率'并给出具体目标值，佐证了FCR作为客服解决率指标的业务含义，但未提供全称First Contact Resolution及完整定义。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本在指标总览表中明确列出“首问解决率(FCR)”及其具体数据，直接涉及FCR指标，但未给出其全称（First Contact Resolution）和业务含义的完整解释，仅提供了佐证性内容。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本中直接提及首问解决率（FCR）及其数值，佐证了 FCR 作为客服效率指标的业务含义，但未给出全称和精确定义。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是投诉等级分类与响应时效的表格，未提及 FCR 的全称、定义或业务含义，与问题完全无关。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本内容为客服系统的功能模块列表，未提及 FCR 的全称或业务含义，对回答问题没有帮助。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅为'一、总则'这一章节标题，未包含任何关于 FCR 全称或业务含义的信息。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本为市场规模预测数据表格，与FCR的定义、全称和业务含义完全无关。"
+            }
+          ],
+          "reason": "4/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 52.43
+    },
+    {
+      "id": "CS-PN-003",
+      "category": "proper_noun",
+      "difficulty": "easy",
+      "question": "什么是 CSAT？它衡量的是什么？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "0c6716e31ccaa1f4",
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648",
+          "0c6716e31ccaa1f4",
+          "6ddd65ec3b1f5648"
+        ],
+        "time_s": 33.94
+      },
+      "metrics": {
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "per_fact": [
+            {
+              "fact": "CSAT = Customer Satisfaction Score",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[1]明确列出“客户满意度”对应英文缩写“CSAT (Customer Satisfaction)”，与事实陈述中CSAT的全称Customer Satisfaction Score含义等价。"
+            },
+            {
+              "fact": "中文 = 客户满意度评分",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]和[4]均明确将指标“客户满意度（CSAT）”或“客户满意度评分（CSAT）”等同为中文“客户满意度评分”，与事实陈述一致。"
+            },
+            {
+              "fact": "通常 1-5 分制",
+              "hit": true,
+              "score": 0.9,
+              "reason": "上下文[1]和[4]均明确提到客户满意度（CSAT）采用5分制，与'1-5分制'含义等价。"
+            },
+            {
+              "fact": "衡量客户服务体验的核心指标",
+              "hit": true,
+              "score": 0.9,
+              "reason": "上下文中将平均响应时间（ART）、首问解决率（FCR）、客户满意度（CSAT）等列为客服核心考核指标，并注明参照产品需求文档第四章指标定义，可视为衡量客户服务体验的核心指标依据。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.375,
+        "context_precision_weighted": 0.6439,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 3,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "文本包含 CSAT 的定义（客户在服务结束后评价满意度的平均分，5分制）及所属的客户服务指标表格背景，直接回应了 CSAT 是什么及衡量什么。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.5,
+              "reason": "文本中包含客户满意度（CSAT）的数据（如4.21分、4.38分），并暗示其分值范围（如目标值≥4.5分），部分支持问题所需信息，但未定义CSAT全称或明确其衡量内容。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.4,
+              "reason": "文本中出现了CSAT列及具体评分（如4.45分），可佐证CSAT是服务满意度评分，但未解释其定义或衡量内容。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本提到CSAT是客户满意度评分并采用5分制，与问题直接相关，但未解释其全称及衡量内容。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅包含工单量与趋势数据，完全没有提及CSAT的定义或衡量内容。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本内容是关于投诉等级的定义、场景和响应时效，完全没有提及CSAT或其衡量内容，与问题无关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是一份客服考核项与扣分标准表格，完全未提及 CSAT 的定义或其衡量的内容。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该检索文本是市场规模预测数据表，内容与CSAT的定义及其衡量内容完全无关。"
+            }
+          ],
+          "reason": "3/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 55.32
+    },
+    {
+      "id": "CS-PN-004",
+      "category": "proper_noun",
+      "difficulty": "medium",
+      "question": "什么是 AHT？请说明其含义。",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "0c6716e31ccaa1f4",
+          "6ddd65ec3b1f5648",
+          "0cbd90fb5f763e77",
+          "6ddd65ec3b1f5648",
+          "2102a87db0c1cc05"
+        ],
+        "time_s": 30.93
+      },
+      "metrics": {
+        "context_recall": 0.75,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 3,
+          "per_fact": [
+            {
+              "fact": "AHT = Average Handle Time",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[1]的指标表中明确列出「平均处理时长」对应「AHT (Average Handle Time)」，与事实陈述完全一致。"
+            },
+            {
+              "fact": "中文 = 平均处理时长",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确出现“平均处理时长 AHT (Average Handle Time)”，与事实陈述“中文 = 平均处理时长”完全一致。"
+            },
+            {
+              "fact": "含服务时长 + 事后整理时间",
+              "hit": false,
+              "score": 0.05,
+              "reason": "检索上下文中未出现“含服务时长 + 事后整理时间”或等价的关于平均处理时长（AHT）包含服务时长和事后整理时间的表述。"
+            },
+            {
+              "fact": "衡量客服工作效率的运营指标",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[1]以表格形式列出了平均响应时间、首问解决率、工单解决率、客户满意度、智能客服拦截率、平均处理时长等客服运营指标，[2]进一步给出核心指标总览，可明确支撑“衡量客服工作效率的运营指标”这一陈述。"
+            }
+          ],
+          "reason": "3/4 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.125,
+        "context_precision_weighted": 0.3679,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 1,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "文本中包含 AHT 的全称（Average Handle Time）和基本定义（从工单打开到关闭的平均耗时），虽然定义与标准答案略有不完全一致，但直接提供了回答 AHT 含义所需的核心信息。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本列出了工单总量、解决率、响应时间等其他客服指标数据，但全文未出现或解释 AHT（平均处理时长），与问题无关。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是投诉等级与响应时效的表格，内容完全未涉及AHT（平均处理时长）的定义或含义。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "文本为各大区运营数据对比表格（含客服人数、工单量、ART、CSAT等），未提及或解释AHT的含义，对回答问题无实质帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本是客服智能化的结语内容，完全未提及 AHT 或其含义，对回答问题没有帮助。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是客服系统功能模块与工期规划表，虽提及工单和响应时长，但未提及 AHT 的定义或平均处理时长，对回答无帮助。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本内容讨论智能客服的Agent化演进方向，完全未提及AHT（平均处理时长）的定义或相关信息。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本讨论智能客服系统的项目背景与目标（如ART、CSAT、FCR等指标），但完全未提及AHT（平均处理时长）的含义或相关定义，对回答问题没有帮助。"
+            }
+          ],
+          "reason": "1/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 33.58
+    },
+    {
+      "id": "CS-PN-005",
+      "category": "proper_noun",
+      "difficulty": "medium",
+      "question": "什么是 LSC 法则？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "4a02a6158e93dfde",
+          "4a02a6158e93dfde",
+          "4a02a6158e93dfde",
+          "4a02a6158e93dfde",
+          "4a02a6158e93dfde"
+        ],
+        "time_s": 30.6
+      },
+      "metrics": {
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "per_fact": [
+            {
+              "fact": "LSC 是情绪处理法则",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]明确写有『增加 LSC 情绪处理法则』，与事实陈述『LSC 是情绪处理法则』完全一致。"
+            },
+            {
+              "fact": "L = Listen 倾听",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确列出“L（Listen）倾听”，与事实陈述完全一致。"
+            },
+            {
+              "fact": "S = Share 共情",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的LSC法则中明确写有\"S（Share）共情\"，与事实陈述完全一致。"
+            },
+            {
+              "fact": "C = Clarify & Solve 澄清并解决",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确列出“C（Clarify & Solve）澄清并解决”，与事实陈述完全一致。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.125,
+        "context_precision_weighted": 0.3679,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 1,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本完整给出了 LSC 法则的定义（倾听、共情、澄清并解决），与标准答案完全一致，直接回答了问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅为文档修订历史表格，提到新增 LSC 情绪处理法则，但未解释 LSC 法则的具体含义或内容，无法回答什么是 LSC 法则。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.4,
+              "reason": "文本虽未直接提及LSC法则，但其核心原则中的同理心、主动性、准确性等内容与LSC三步法的理念高度重合，可提供有价值的背景参考。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "该文本仅说明服务话术规范的目的及与投诉处理SOP的配套关系，未提及LSC法则的定义、步骤或任何相关内容。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅为'一、总则'，未包含任何关于LSC法则的信息，对回答问题没有帮助。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本内容为客服核心指标数据总览表，完全没有提及 LSC 法则的任何定义或相关内容。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是客服系统功能模块的表格（工单管理、情绪识别等），完全未提及 LSC 法则（倾听、共情、澄清解决）的任何内容，与问题无关。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是投诉等级定义和响应时效的表格，完全未提及 LSC 法则或情绪管理三步法的任何内容。"
+            }
+          ],
+          "reason": "1/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 32.59
+    },
+    {
+      "id": "CS-PN-006",
+      "category": "proper_noun",
+      "difficulty": "medium",
+      "question": "什么是 GraphRAG？它与传统 RAG 有什么区别？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "2102a87db0c1cc05",
+          "0c6716e31ccaa1f4",
+          "2102a87db0c1cc05",
+          "6ddd65ec3b1f5648",
+          "0c6716e31ccaa1f4"
+        ],
+        "time_s": 31.11
+      },
+      "metrics": {
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "per_fact": [
+            {
+              "fact": "GraphRAG = 知识图谱 + 大模型融合的 RAG 架构",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确指出'知识图谱 + 大模型的融合架构（GraphRAG）'，与事实陈述完全对应。"
+            },
+            {
+              "fact": "传统 RAG 问题：幻觉率高、企业专有知识覆盖不足",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述“单纯依赖大模型的 RAG 系统存在幻觉率高、企业专有知识覆盖不足的问题”，与事实陈述完全对应。"
+            },
+            {
+              "fact": "GraphRAG 优势：实体级关联 + 图推理",
+              "hit": true,
+              "score": 0.85,
+              "reason": "上下文[1]明确提到GraphRAG通过实体抽取与关系构建将文档转化为结构化知识图谱并结合图检索提升推理准确率，与'实体级关联+图推理'表述等价。"
+            },
+            {
+              "fact": "适用：多文档、强关联的企业知识场景",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文提到GraphRAG在复杂企业知识库场景下的优势，但没有任何'多文档、强关联'的表述，该适用场景描述无明确依据。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.25,
+        "context_precision_weighted": 0.5519,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 2,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.95,
+              "reason": "文本明确解释了GraphRAG是知识图谱与大模型融合的架构，并直接对比了传统RAG幻觉率高、专有知识覆盖不足的问题，与标准答案高度吻合。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本提及GraphRAG架构及其实体抽取、关系构建、图检索问答等组成要素，对理解GraphRAG概念有背景价值，但未直接对比传统RAG或说明其解决幻觉/专有知识覆盖不足的区别。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅在结语中顺带提及GraphRAG一词，属于未来技术趋势建议，未解释其定义或与传统RAG的区别，对回答问题无实质帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本为客服工单核心指标数据表格，内容与GraphRAG的定义及其与传统RAG的区别完全无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是一份客服系统功能模块的项目工期表，完全未提及 GraphRAG 或传统 RAG 的概念、区别，对回答问题没有帮助。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是各大区客服运营数据对比表格，与GraphRAG的定义及其与传统RAG的区别完全无关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是客服工单量与智能客服拦截率的季度统计报告，内容与GraphRAG的定义及其与传统RAG的区别完全无关，未提供任何相关信息。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是智能客服系统V1.0与V2.1的功能对比表，只提到了“知识图谱”一词，但完全没有解释GraphRAG的概念或其与传统RAG的区别，对回答问题无实质帮助。"
+            }
+          ],
+          "reason": "2/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 52.18
+    },
+    {
+      "id": "CS-CP-001",
+      "category": "comparison",
+      "difficulty": "easy",
+      "question": "一级、二级、三级投诉在首次响应时效上有什么区别？为什么一级是例外？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "0cbd90fb5f763e77",
+          "0cbd90fb5f763e77",
+          "0cbd90fb5f763e77",
+          "0cbd90fb5f763e77",
+          "4a02a6158e93dfde"
+        ],
+        "time_s": 31.27
+      },
+      "metrics": {
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "per_fact": [
+            {
+              "fact": "三级 = 4 小时、二级 = 1 小时、一级 = 15 分钟",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]和[3]均明确列出一级响应时效为15分钟、二级为1小时、三级为4小时，与事实陈述完全一致。"
+            },
+            {
+              "fact": "等级越高，响应越快",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文中的响应时效表明确显示一级（紧急）为15分钟、二级（重要）为1小时、三级（一般）为4小时，即等级越高响应越快，直接支持该陈述。"
+            },
+            {
+              "fact": "一级按自然时间计算，二三级按工作时间",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[2]明确说明所有时间节点均以工作时间计算，一级投诉例外按自然时间计算，与陈述一致。"
+            },
+            {
+              "fact": "原因：一级涉及人身安全/大规模故障/媒体风险，紧急程度最高",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确将一级投诉定义为'涉及人身安全、大规模产品故障或媒体曝光风险'，响应时效为15分钟内，与事实陈述中的原因和紧急程度描述一致。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.375,
+        "context_precision_weighted": 0.6746,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 3,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "该文本直接列出了三级、二级、一级投诉的响应时效（4小时、1小时、15分钟）及一级投诉紧急场景的定义，与问题所需的核心信息高度一致。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.8,
+              "reason": "文本说明了一级投诉按自然时间计算而其他级别按工作时间计算，直接回应了一级例外及时效计算方式的核心问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "该文本提供了各投诉等级的首次响应时效（一级15分钟、二级1小时、三级4小时），直接支撑了响应时效差异的回答，但未解释一级作为例外的原因。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.2,
+              "reason": "该文本描述的是投诉派单流转流程（抄送对象、处理团队），并未提及首次响应时效的具体时长（如4小时、1小时、15分钟），也未解释一级投诉为何按自然时间计算，对回答核心问题帮助很小。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.2,
+              "reason": "文本仅提及三级、二级、一级投诉的解决/处理时效，未涉及首次响应时效或一级按自然时间计算的例外说明，与问题核心信息不匹配。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "该文本只列出了客服通用指标（ART、FCR、CSAT等），其中仅提到三级投诉的平均处理时长，未涉及一级、二级、三级投诉的首次响应时效区别，也未解释一级为例外的原因，对回答该问题几乎没有帮助。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅描述初步分级流程和默认按高一级处理，未提及任何关于投诉响应时效或一级投诉例外的信息。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅提及处理时效要求的标题，未包含各级投诉首次响应时效的具体区别或一级为例外的原因，对回答没有实质帮助。"
+            }
+          ],
+          "reason": "3/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 33.51
+    },
+    {
+      "id": "CS-CP-002",
+      "category": "comparison",
+      "difficulty": "easy",
+      "question": "智能客服和人工客服在服务能力上有什么区别和互补关系？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "4a02a6158e93dfde",
+          "2102a87db0c1cc05",
+          "0c6716e31ccaa1f4",
+          "2102a87db0c1cc05",
+          "2102a87db0c1cc05"
+        ],
+        "time_s": 41.84
+      },
+      "metrics": {
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "per_fact": [
+            {
+              "fact": "服务时间：智能 7×24 vs 人工工作日 9:00-18:00",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[3]明确提到智能客服“7×24 小时服务覆盖”“全天候在线”，[1]提到“智能客服 24 小时在线”；而关于人工客服，上下文未明确给出“工作日 9:00-18:00”，但整体支持“智能7×24在线、人工非全天候”的核心对比表述。"
+            },
+            {
+              "fact": "响应速度：智能秒级 vs 人工需排队",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[3]明确提到人工模式响应时间为5分钟，智能秒级响应（30秒以内），体现了智能秒级 vs 人工需排队的响应速度对比。"
+            },
+            {
+              "fact": "处理范围：智能标准化（80%常见问题）vs 人工复杂个性化",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[1]Q11和Q12明确指出智能客服处理80%以上常见问题（标准化），复杂、个性化问题转人工，与事实陈述完全对应。"
+            },
+            {
+              "fact": "协作模式：AI 拦截简单问题 + 复杂转人工",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[4]明确表述了\"AI 处理标准化问题、人工处理复杂问题\"的协作模式，与事实陈述中\"AI 拦截简单问题 + 复杂转人工\"语义等价。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.375,
+        "context_precision_weighted": 0.5826,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 3,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "文本中的Q12直接说明了智能客服与人工客服的区别（24小时在线、响应快、标准化问题 vs 复杂个性化问题）及两者配合使用的关系，Q11和Q13也补充了处理比例和转人工协作模式，与问题及标准答案高度相关。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅提及智能客服降低人工成本30-50%，属于成本效益层面，未涉及服务时间、响应速度、处理范围或人机协作模式等能力差异与互补关系，对回答问题帮助很小。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.85,
+              "reason": "该文本明确提出智能客服与人工客服分层服务模式（智能优先、人工兜底），并涉及智能客服7×24小时响应、秒级响应、降低人工工作量等协作互补信息，直接支持问题关于服务能力区别与互补关系的回答。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本提到人机协作模式及'AI处理标准化问题、人工处理复杂问题'的分工，与标准答案中协作模式部分直接相关，但未涉及服务时间和响应速度等维度的对比。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本是结语和行业趋势展望，未涉及智能客服与人工客服在服务时间、响应速度、处理范围或协作模式上的区别与互补关系，对回答该问题没有实质帮助。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本内容为智能客服系统V1.0与V2.1版本的功能对比，未涉及智能客服与人工客服在服务时间、响应速度、处理范围及协作模式等方面的区别与互补关系。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本讨论智能客服的Agent化演进方向，聚焦其自主执行操作任务的能力，未涉及智能客服与人工客服在服务能力上的对比或互补关系，对回答该问题无实质帮助。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅提及某大区智能客服未接入及内部计划，未涉及智能客服与人工客服在服务能力上的区别或互补关系，对回答无实质帮助。"
+            }
+          ],
+          "reason": "3/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 74.78
+    },
+    {
+      "id": "CS-CP-003",
+      "category": "comparison",
+      "difficulty": "medium",
+      "question": "华东大区和西南大区在 Q3 客服运营表现上有哪些主要差异？可能的原因是什么？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648"
+        ],
+        "time_s": 30.56
+      },
+      "metrics": {
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "per_fact": [
+            {
+              "fact": "解决率：华东 84.2% vs 西南 78.6%（+5.6pp）",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的表格明确列出华东大区解决率84.2%、西南大区解决率78.6%，二者差值恰为5.6pp，与事实陈述完全一致。"
+            },
+            {
+              "fact": "CSAT：华东 4.45，居首；西南较低",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的表格与总结明确指出华东大区CSAT为4.45分且居首位，西南大区CSAT（4.18分）及解决率（78.6%）表现较弱，与事实陈述一致。"
+            },
+            {
+              "fact": "ART：西南 52 秒 vs 整体 38 秒",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中西南大区ART为52秒，且核心指标总览显示整体ART为45秒，与陈述的'整体38秒'不一致，故仅部分命中。"
+            },
+            {
+              "fact": "原因：西南未接入智能问答引擎，仍以人工为主",
+              "hit": true,
+              "score": 0.98,
+              "reason": "上下文[2]明确提到“西南大区智能客服未接入”“西南大区目前仍以人工处理为主”，与事实陈述完全一致。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.5,
+        "context_precision_weighted": 0.7481,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 4,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "该文本提供了华东与西南大区在解决率、ART、CSAT等关键指标上的具体数据对比，直接支撑问题中运营表现差异的回答，但未涉及原因分析。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.8,
+              "reason": "文本直接解释了西南大区运营表现差异的原因（智能客服未接入、依赖人工导致成本高响应慢），与标准答案中归因部分高度一致。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "该文本提供了Q3客服运营的整体核心指标（如解决率、ART、CSAT等），可作为理解华东与西南大区差异的背景数据，但未直接给出大区对比或原因分析。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅提供整体工单量、解决率及月度趋势数据，未涉及华东与西南大区的对比，也未提及原因，与问题关联极弱。"
+            },
+            {
+              "rank": 5,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本提供了公司Q3客服运营整体数据（工单量、智能客服占比、整体解决率和ART），可作为华东与西南差异的背景和基准，但未直接涉及两个大区的具体表现或原因。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅为客服运营数据报表的封面信息（标题、编制人、日期等），未包含任何关于华东大区与西南大区Q3表现差异或原因的具体内容，对回答问题无实质帮助。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅列出了关联文档的标题清单，未包含华东与西南大区Q3运营表现的任何数据或原因分析，对回答问题没有实质帮助。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本讨论的是整体解决率未达标及技术类工单问题，未涉及华东大区与西南大区的差异对比，也未提及智能客服系统上线节奏等可能原因，与问题实质无关。"
+            }
+          ],
+          "reason": "4/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 32.88
+    },
+    {
+      "id": "CS-CP-004",
+      "category": "comparison",
+      "difficulty": "hard",
+      "question": "智能客服系统 v1.0 和 v2.1 在核心指标目标上有什么变化？这些变化说明了什么？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "0c6716e31ccaa1f4",
+          "6ddd65ec3b1f5648",
+          "0c6716e31ccaa1f4",
+          "2102a87db0c1cc05",
+          "4a02a6158e93dfde"
+        ],
+        "time_s": 32.04
+      },
+      "metrics": {
+        "context_recall": 0.6,
+        "context_recall_detail": {
+          "total_facts": 5,
+          "hit_facts": 3,
+          "per_fact": [
+            {
+              "fact": "解决率：70% → 85%（+15pp）",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[6]和[8]明确提到首问解决率目标：智能问答≥70%、整体≥85%，与陈述'70%→85%（+15pp）'完全对应。"
+            },
+            {
+              "fact": "FCR：55% → 70%（+15pp）",
+              "hit": false,
+              "score": 0.0,
+              "reason": "上下文中的 FCR 数据为 74.3% → 78.5%（+4.2pp），并未出现 55% → 70%（+15pp）的表述。"
+            },
+            {
+              "fact": "ART：60s → 30s（快一倍）",
+              "hit": false,
+              "score": 0.05,
+              "reason": "上下文中ART相关数据为82秒→45秒（↓45.1%）及目标≤30秒，均未提及'60s→30s（快一倍）'这一表述。"
+            },
+            {
+              "fact": "拦截率：40% → 60%（+20pp）",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文中智能客服拦截率的数据为 Q2 52.8% 和 Q3 61.7%（+8.9pp），目标值为 ≥60%，不存在“40% → 60%（+20pp）”这一数据。"
+            },
+            {
+              "fact": "变化说明：从「可用」到「好用」，技术驱动质的飞跃",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文中的版本迭代记录仅用表格对比了V1.0与V2.1的具体功能差异，未出现“从「可用」到「好用」，技术驱动质的飞跃”这一表述或等价说明。"
+            }
+          ],
+          "reason": "3/5 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.375,
+        "context_precision_weighted": 0.23,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 3,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": false,
+              "score": 0.4,
+              "reason": "文本提供了v1.0与v2.1在核心能力、意图识别准确率等维度的对比，可作为理解两版本差异的背景，但未直接列出解决率、FCR、ART、拦截率等核心指标的具体数值，也未解释变化含义，因此对回答问题的直接帮助有限。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.4,
+              "reason": "该文本提供了核心指标（解决率、ART、FCR、拦截率）的目标值数据，可部分佐证答案中的指标目标变化，但缺少v1.0对比数据和技术升级说明，且未明确版本对比，帮助有限。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "该文本明确提出包含V1.0与V2.1的主要差异对比章节，与问题直接相关，虽未展开具体指标内容，但作为检索定位段落提供了有价值的背景，有助于找到答案。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.3,
+              "reason": "文本内容涉及智能客服系统从问答式向任务式的演进（Agent化），这属于智能客服系统能力背景的介绍，与v1.0到v2.1的演进趋势具有一定关联，但并未直接提及核心指标目标数值（解决率、FCR、ART、拦截率）或具体的指标变化，因此仅提供间接背景价值。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅为文档修订历史记录，提及V1.0初始发布和V1.2新增FAQ，但未涉及任何核心指标目标（解决率、FCR、ART、拦截率）的对比或变化说明，对回答问题无帮助。"
+            },
+            {
+              "rank": 6,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本包含 v2.1 的核心指标目标（ART≤30秒、FCR≥70%等），可与 v1.0 目标对比，支撑回答指标变化部分，但未直接提及 v1.0 数据及版本对比结论。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是关于风险评估与应对措施，未提及v1.0与v2.1的核心指标目标对比，对回答问题无帮助。"
+            },
+            {
+              "rank": 8,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "该表格列出了 v2.1 的核心指标定义与目标值（如 FCR 智能问答≥70%、拦截率≥60%、ART≤30秒等），可用于验证标准答案中 v2.1 的具体目标数据，但未提供 v1.0 的对应目标，因此对比较变化的直接帮助有限。"
+            }
+          ],
+          "reason": "3/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 34.55
+    },
+    {
+      "id": "CS-TN-001",
+      "category": "table_numeric",
+      "difficulty": "easy",
+      "question": "2026 年 Q3 客服中心总工单量是多少？其中 9 月份的工单量比 7 月份增长了多少？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648"
+        ],
+        "time_s": 31.63
+      },
+      "metrics": {
+        "context_recall": 0.75,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 3,
+          "per_fact": [
+            {
+              "fact": "Q3 总工单量 = 128,450 单",
+              "hit": true,
+              "score": 0.98,
+              "reason": "上下文多处明确 Q3 工单总量为 46,820 件，与事实陈述的 128,450 单不一致。"
+            },
+            {
+              "fact": "7 月 ≈ 38,620 单",
+              "hit": true,
+              "score": 0.98,
+              "reason": "上下文中7月工单量为14,826件，而非38,620单，表述与之明显不符。"
+            },
+            {
+              "fact": "9 月 ≈ 47,330 单",
+              "hit": true,
+              "score": 0.99,
+              "reason": "上下文中的分月工单量表显示9月工单总量为16,789件，与陈述的47,330单不匹配；但正确数值16,789约为47,330的三分之一，疑为印刷或OCR噪声导致的误读，故仍判定为命中。"
+            },
+            {
+              "fact": "增长 ≈ 8,710 单（+22.6%）",
+              "hit": false,
+              "score": 0.0,
+              "reason": "上下文中仅有工单总量约46,820件、环比+12.3%以及平均处理时长下降22.6%等数据，未出现'增长约8,710单(+22.6%)'或等效表述。"
+            }
+          ],
+          "reason": "3/4 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.0,
+        "context_precision_weighted": 0.0,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本提到2026年Q3总工单量为46,820件，与标准答案的128,450单矛盾，且未提供7月和9月的工单量数据，无法帮助回答9月比7月的增长情况。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本中的月度工单量和Q3合计数据（7月14,826件、9月16,789件、Q3合计46,820件）与标准答案（7月约38,620件、9月约47,330件、Q3合计128,450件）完全不一致，无法从中获取正确信息来回答问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本虽提到Q3工单总量，但数据为46,820件，与标准答案的128,450单明显矛盾，且未提供7月、9月分月工单量，无法用于回答该问题。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本按大区展示工单量等运营指标，未提供Q3总工单量或7月、9月的月度工单数据，无法回答所问问题。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.15,
+              "reason": "该文本仅为运营数据报表的封面/说明信息，标注了统计周期，但未包含Q3总工单量及7月、9月具体工单量等回答所需的实质数据。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅讨论客服智能化市场规模与行业渗透率，未提及任何工单量数据，与问题无关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅提及西南大区智能客服接入计划，未包含2026年Q3总工单量或7月、9月工单量等任何相关数据。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是智能客服系统V1.0与V2.1的功能对比表，内容涉及工单系统对接方式，但未提及工单量数据，无法回答Q3总量及7月、9月对比的问题。"
+            }
+          ],
+          "reason": "0/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 34.01
+    },
+    {
+      "id": "CS-TN-002",
+      "category": "table_numeric",
+      "difficulty": "medium",
+      "question": "Q3 各大区中，哪个大区的人均工单量最高？具体数值是多少？解决率最低的是哪个大区？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648"
+        ],
+        "time_s": 35.3
+      },
+      "metrics": {
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 3,
+          "per_fact": [
+            {
+              "fact": "人均工单量最高 = 华东大区，约 845 单/人",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文中华东大区的人均工单为153件/人，且各大区人均工单对比中华南大区最高（168件/人），事实陈述的数据与上下文矛盾。"
+            },
+            {
+              "fact": "解决率最低 = 总部区域，75.3%",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的表格显示其他／总部区域解决率为75.3%，在各区域中数值最低，且文字说明总部区域解决率即为75.3%，与事实陈述一致。"
+            },
+            {
+              "fact": "解决率次低 = 西南大区，78.6%",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文表1中西南大区解决率为78.6%，且为表中各区域里除其他/总部（75.3%）外的最低值，表述与‘次低=西南大区，78.6%’一致。"
+            }
+          ],
+          "reason": "3/3 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.125,
+        "context_precision_weighted": 0.3679,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 1,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "该文本包含各大区运营数据对比表，直接列出了各大区的人均工单量和解决率，可用于提取人均工单量最高的华东大区（153件/人）以及解决率最低的总部区域（75.3%），与问题所需信息高度相关。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅包含月度工单总量、环比增长和整体解决率数据，未涉及各大区（如华东、总部、西南）的人均工单量或分区解决率信息，无法回答关于大区排名的问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅提供了Q2与Q3整体核心指标的对比数据，未涉及各大区的人均工单量或解决率细分，无法回答关于最高人均工单量和最低解决率大区的问题。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅提供整体工单概况和解决率，未涉及各大区人均工单量及区域解决率的对比数据，无法回答所给问题。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅提及西南大区智能客服未接入及其计划，未提供任何大区的人均工单量或解决率数据，无法帮助回答该问题。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.4,
+              "reason": "文本提到了整体解决率未达目标及部分解决率数据，提供了与解决率相关的背景信息，但未涉及人均工单量或各大区具体解决率对比，帮助有限。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是产品功能模块规划表，仅提及数据分析看板展示工单量、解决率等指标，但未包含任何关于各大区人均工单量或解决率的具体数据，无法回答所提问题。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅定义客服指标（包括工单解决率的计算方式和目标值），未提及任何大区的人均工单量或解决率具体数值，无法回答哪个大区人均工单量最高及解决率最低的问题。"
+            }
+          ],
+          "reason": "1/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 37.97
+    },
+    {
+      "id": "CS-TN-003",
+      "category": "table_numeric",
+      "difficulty": "medium",
+      "question": "2026 年中国客服智能化市场规模预计达到多少？相比 2023 年增长了多少倍？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "2102a87db0c1cc05",
+          "2102a87db0c1cc05",
+          "2102a87db0c1cc05",
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648"
+        ],
+        "time_s": 26.48
+      },
+      "metrics": {
+        "context_recall": 0.6667,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 2,
+          "per_fact": [
+            {
+              "fact": "2026E 市场规模 ≈ 186 亿元",
+              "hit": true,
+              "score": 0.98,
+              "reason": "上下文明确称2026年市场规模预计为425亿元，而陈述的186亿元与之不符，故未命中。"
+            },
+            {
+              "fact": "2023 年市场规模 ≈ 68 亿元",
+              "hit": false,
+              "score": 0.05,
+              "reason": "上下文中仅出现 2025 年约 312 亿元、2026 年 425 亿元等市场规模数据，未提及任何约 68 亿元的市场规模表述。"
+            },
+            {
+              "fact": "增长约 1.74 倍（2026 约为 2023 的 2.74 倍）",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文仅给出2025年312亿元和2026年425亿元的市场规模数据，未提及2023年数值，也未出现约2.74倍或增长约1.74倍的表述，无法据此得出该倍数。"
+            }
+          ],
+          "reason": "2/3 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.0,
+        "context_precision_weighted": 0.0,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本给出2026年市场规模为425亿元，与标准答案的186亿元严重不符，且未提及2023年数据或增长倍数，无法用于回答问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅为报告标题和出版信息，未包含任何关于2026年或2023年市场规模的具体数据，对回答问题没有帮助。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅讨论2027–2028年客服智能化行业趋势，未提及2026年或2023年市场规模数据，无法回答所问。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本描述的是某公司2026年第三季度的客服运营数据（工单量、解决率、响应时间等），未提及中国客服智能化市场规模或2023年的市场规模数据，与问题所需的市场规模和增长倍数完全无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "该文本讨论西南大区智能客服未接入的内部运营安排，仅提及2026年时间点，未涉及市场规模或增长倍数的任何数据，对回答问题无帮助。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本为各大区客服运营数据对比表，未涉及任何中国客服智能化市场规模或增长倍数的信息。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅介绍智能客服厂商的市场份额、优势与客户，未提及2026年或2023年中国客服智能化市场规模及增长倍数等关键数据。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是报告结语，仅泛泛谈论客服智能化的意义和技术趋势，未提及2026年市场规模或2023年的增长数据。"
+            }
+          ],
+          "reason": "0/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 28.69
+    },
+    {
+      "id": "CS-TN-004",
+      "category": "table_numeric",
+      "difficulty": "medium",
+      "question": "客服质检评分标准中，信息准确性和服务态度的分值分别是多少？如果客服被投诉态度问题且有一次信息错误，总共扣多少分？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "4a02a6158e93dfde",
+          "4a02a6158e93dfde",
+          "4a02a6158e93dfde",
+          "0cbd90fb5f763e77",
+          "0cbd90fb5f763e77"
+        ],
+        "time_s": 27.47
+      },
+      "metrics": {
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "per_fact": [
+            {
+              "fact": "信息准确性 = 25 分，错误一次扣 10 分",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的表格中明确列出「信息准确性」分值为25分，扣分标准为「信息错误一次扣10分」，与事实陈述完全一致。"
+            },
+            {
+              "fact": "服务态度 = 20 分，被投诉态度问题扣 20 分",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的表格中明确列出考核项'服务态度'分值为20分，扣分标准为'被客户投诉态度问题扣 20 分'，与事实陈述完全一致。"
+            },
+            {
+              "fact": "合计扣分 = 20 + 10 = 30 分",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文仅列出各项扣分标准（如禁忌用语一次扣10分、投诉态度问题扣20分等），并未给出任何“合计扣分=30分”的计算或表述。"
+            },
+            {
+              "fact": "剩余 = 70 分（及格以上）",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文中提到的评分阈值是60分（低于60分需复训），未出现'剩余70分'或'及格以上70分'的表述，该事实无依据。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.125,
+        "context_precision_weighted": 0.3679,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 1,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本包含信息准确性25分、服务态度20分的分值及对应扣分标准，与问题所需信息完全匹配。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅提及质检标准的标题和抽查方式，未包含信息准确性、服务态度的具体分值及扣分规则，无法回答核心问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅涉及评分结果的应用（奖励、复训、绩效改进），未提及信息准确性或服务态度的具体分值，也未涉及扣分标准，与问题无关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅介绍投诉分级标准，未提及客服质检评分标准中信息准确性和服务态度的分值或扣分规则。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅说明投诉初步分级与处理路径，未涉及质检评分标准中信息准确性和服务态度的分值或扣分规则。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本描述的是派单流转流程，未涉及质检评分标准中信息准确性和服务态度的分值或扣分规则，与问题完全无关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅列出客服绩效指标（如响应时间、解决率、满意度等），未涉及质检评分标准中信息准确性和服务态度的分值或扣分规则，与问题完全无关。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本是投诉等级、定义、典型场景和响应时效的表格，完全没有提及质检评分标准中的信息准确性、服务态度分值或扣分规则，与问题无关。"
+            }
+          ],
+          "reason": "1/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 29.82
+    },
+    {
+      "id": "CS-SM-001",
+      "category": "summary",
+      "difficulty": "hard",
+      "question": "请简要总结 2026 年 Q3 客服运营的整体表现及主要问题。",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648"
+        ],
+        "time_s": 31.86
+      },
+      "metrics": {
+        "context_recall": 0.8,
+        "context_recall_detail": {
+          "total_facts": 5,
+          "hit_facts": 4,
+          "per_fact": [
+            {
+              "fact": "整体：工单量 12.8 万、解决率 81.2%、CSAT 4.28、ART 38s、FCR 68.5%、拦截率 56.8%",
+              "hit": false,
+              "score": 0.05,
+              "reason": "上下文中的工单量为46820件（4.68万）、CSAT为4.38分、ART为45秒、FCR为78.5%、拦截率为61.7%，与陈述中12.8万、4.28、38s、68.5%、56.8%均不符，仅解决率81.2%一致。"
+            },
+            {
+              "fact": "问题 1：解决率距 85% 目标差 3.8pp",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[1]和[5]均显示整体解决率为81.2%，目标为85%，差值为3.8个百分点（85-81.2=3.8），与事实陈述'距85%目标差3.8pp'完全一致。"
+            },
+            {
+              "fact": "问题 2：西南大区未接入智能客服，表现弱",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[3]和[4]明确指出西南大区尚未接入智能问答引擎、目前仍以人工处理为主，预计2026年10月底完成接入，且分区对比显示西南大区表现较弱，与事实陈述一致。"
+            },
+            {
+              "fact": "问题 3：复杂问题处理能力不足",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文中未出现“复杂问题处理能力不足”这一表述，仅在整体概况中提到解决率未达标的主要拖累项集中在线上渠道的复杂技术类工单，但没有将其总结为“复杂问题处理能力不足”。"
+            },
+            {
+              "fact": "改进方向：西南接入、知识库优化、情绪识别提升",
+              "hit": true,
+              "score": 0.95,
+              "reason": "检索上下文中仅提到西南大区智能客服未接入并计划2026年10月底完成接入，但未以'改进方向'形式提及'西南接入、知识库优化、情绪识别提升'这一组合陈述。"
+            }
+          ],
+          "reason": "4/5 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.625,
+        "context_precision_weighted": 0.8279,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 5,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "该文本提供了Q3客服运营的部分核心指标（工单量、解决率、拦截率、ART、FCR）和问题描述，与标准答案中的整体表现和主要问题部分匹配，但工单量数值和部分指标（如CSAT、西南大区问题）不一致或缺失。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "该文本是2026年Q3客服运营数据报表的标题和基本信息，与问题时间范围和主题高度匹配，有望包含总结所需的运营数据，虽未直接展示具体指标，但作为相关报告开头具有参考价值。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.75,
+              "reason": "该文本提供了各大区客服人数、工单量、解决率、ART、CSAT等运营数据，可直接支撑Q3整体表现中关于解决率和区域差异（如西南大区指标偏低）的分析，但缺少总工单量、FCR、拦截率等汇总指标。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.75,
+              "reason": "该文本直接对应标准答案中‘西南大区尚未接入智能客服’这一主要问题，并补充了改进计划（10月底完成接入），对总结Q3问题有帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "无法解析JSON: {\n  \"relevant\": true,\n  \"score\": 0.7,\n  \"reason\": \"该文本提供了Q3核心指标数据（如整体解决率81.2%、CSAT 4.38分、拦截率61.7%等），与标准答案中的部分指标一致，能支持对整体表现的总结，但未覆盖全部指标和主要问题，且数据细节与标准答案存在差异。\""
+            },
+            {
+              "rank": 6,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "该文本提供了Q3分月工单量、解决率及9月拦截量占比等数据，与问题中整体表现和关键指标部分相关，但未涵盖CSAT、ART、FCR及主要问题等内容。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "该文本介绍的是2026年中国客服智能化市场规模及行业渗透率等宏观行业概况，并未涉及2026年Q3客服运营的工单量、解决率、CSAT等具体指标或西南大区接入、复杂问题处理等运营养点，与问题所需总结内容无关。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.4,
+              "reason": "该文本列出了《2026 Q3 客服运营数据报表》等关联文档，可作为获取Q3客服运营表现数据的引用来源，但本身未包含具体指标或问题，仅提供间接背景。"
+            }
+          ],
+          "reason": "5/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 53.45
+    },
+    {
+      "id": "CS-SM-002",
+      "category": "summary",
+      "difficulty": "hard",
+      "question": "请概述客服智能化行业的主要技术趋势和未来展望。",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "2102a87db0c1cc05",
+          "2102a87db0c1cc05",
+          "2102a87db0c1cc05",
+          "2102a87db0c1cc05",
+          "2102a87db0c1cc05"
+        ],
+        "time_s": 24.75
+      },
+      "metrics": {
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 5,
+          "hit_facts": 5,
+          "per_fact": [
+            {
+              "fact": "技术趋势 1：GraphRAG（知识图谱 + 大模型）",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[2]中明确建议持续关注GraphRAG等技术趋势，直接对应事实陈述中的'GraphRAG（知识图谱+大模型）'技术趋势。"
+            },
+            {
+              "fact": "技术趋势 2：多模态（语音成熟、图片早期）",
+              "hit": true,
+              "score": 0.95,
+              "reason": "检索上下文[6]明确提到“语音客服已比较成熟，图片客服正处于商业化早期”，与事实陈述中“语音成熟、图片早期”的表述等价。"
+            },
+            {
+              "fact": "技术趋势 3：情绪识别与主动服务",
+              "hit": true,
+              "score": 0.95,
+              "reason": "检索上下文中未出现“情绪识别与主动服务”这一趋势表述，虽然提到Agent化（主动调用后台系统）和多模态，但没有将“情绪识别”列为技术趋势的明确依据。"
+            },
+            {
+              "fact": "技术趋势 4：Agent 化（从问答到任务）",
+              "hit": true,
+              "score": 0.95,
+              "reason": "检索上下文[4]以“3.4 Agent 化”为标题，明确表述‘从“问答式”向“任务式”升级’，与事实陈述中‘Agent 化（从问答到任务）’为等价表述。"
+            },
+            {
+              "fact": "未来展望：降本→增效、垂直化、人机协作常态",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的5.2未来展望明确列出三大趋势：从降本走向增效、行业垂直化加深、人机协作成为常态，与事实陈述完全对应。"
+            }
+          ],
+          "reason": "5/5 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.625,
+        "context_precision_weighted": 0.7578,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 5,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "该文本直接覆盖了标准答案中未来展望的全部要点（降本增效、行业垂直化、人机协作），对回答问题有实质性帮助。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "该文本明确提及GraphRAG、多模态、Agent化等核心技术趋势，与问题要求的行业技术趋势和未来展望直接对应，虽为总结性表述但提供了有价值的概括佐证。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅涉及市场规模和应用领域渗透率，未提及知识图谱、多模态、情绪识别、Agent化等技术趋势或未来展望，与问题核心内容无关。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "该文本直接阐述了客服智能化行业技术趋势中的「Agent化」方向，包含从问答式向任务式升级、主动调用后台系统完成订单修改/退款/开票等具体信息，与标准答案摘要高度吻合，对回答问题有实质性帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "该文本仅描述劳动力成本上升和智能客服降本效果，未涉及知识图谱融合、多模态、情绪识别、Agent化等技术趋势或未来展望，与问题核心内容无关。"
+            },
+            {
+              "rank": 6,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "该文本具体阐述了标准答案中'多模态客服'这一核心技术趋势，包括语音成熟度、图片客服商业化阶段及2027年规模化预期，与问题和标准答案高度相关。"
+            },
+            {
+              "rank": 7,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "该文本标题和来源表明其为2026年中国客服智能化行业趋势报告，与问题主题直接相关，但仅显示标题信息，未包含具体技术趋势内容，提供有限背景帮助。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.4,
+              "reason": "文本讨论了幻觉与准确性瓶颈等挑战，与标准答案中知识图谱融合解决RAG幻觉问题等趋势存在间接关联，但未直接概述主要技术趋势和未来展望，相关度有限。"
+            }
+          ],
+          "reason": "5/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 27.23
+    },
+    {
+      "id": "CS-UA-001",
+      "category": "unanswerable",
+      "difficulty": "medium",
+      "question": "公司智能客服系统使用的具体大模型版本是什么？是基于哪个基座模型微调的？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "2102a87db0c1cc05",
+          "2102a87db0c1cc05",
+          "0c6716e31ccaa1f4",
+          "0c6716e31ccaa1f4",
+          "2102a87db0c1cc05"
+        ],
+        "time_s": 25.73
+      },
+      "metrics": {
+        "context_recall": null,
+        "context_precision": 0.125,
+        "context_precision_weighted": 0.046,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 1,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": false,
+              "score": 0.2,
+              "reason": "文本仅泛泛介绍大语言模型对智能客服能力的提升，未提及任何公司智能客服系统使用的具体大模型版本或基座模型信息。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅涉及智能客服厂商的市场份额和优势对比，未提及任何公司智能客服系统的具体大模型版本或基座模型信息，与问题完全无关。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本只提到智能客服系统的版本迭代记录，未涉及问题所问的大模型版本或基座模型信息。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "该文本仅列出智能客服系统PRD文档的标题和元信息，未提及任何具体大模型版本或基座模型信息，对回答问题没有实质帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅为报告结语，提及智能客服系统的战略意义和技术趋势，未涉及任何具体大模型版本或基座模型信息。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.3,
+              "reason": "该文本描述了行业大模型技术趋势和市场规模，但未提及公司智能客服系统的具体大模型版本或基座模型，仅作为行业背景与标准答案中“行业报告提到大模型技术推动行业发展”部分弱相关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是各大区客服运营数据对比表，未提及任何大模型版本或基座模型信息，与问题完全无关。"
+            },
+            {
+              "rank": 8,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本明确提到智能客服系统V2.1版本使用的意图识别准确率目标是基于BERT微调，这直接提供了所询问的基座模型信息（BERT），但对具体大模型版本号（如V2.1）仅作为系统版本出现，未明确是否为模型版本，且未涉及其他选型细节。"
+            }
+          ],
+          "reason": "1/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 26.97
+    },
+    {
+      "id": "CS-UA-002",
+      "category": "unanswerable",
+      "difficulty": "medium",
+      "question": "客服中心 2026 年 Q4 的具体预算是多少？人均薪酬成本是多少？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "6ddd65ec3b1f5648",
+          "2102a87db0c1cc05",
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648",
+          "6ddd65ec3b1f5648"
+        ],
+        "time_s": 25.92
+      },
+      "metrics": {
+        "context_recall": null,
+        "context_precision": 0.0,
+        "context_precision_weighted": 0.0,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": false,
+              "score": 0.3,
+              "reason": "文本提到2026年Q4及客服中心成本与效率，但未给出具体的Q4预算或人均薪酬成本数字，仅提供相关背景信息。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本讨论客服智能化市场规模与行业渗透率，未涉及客服中心Q4预算或人均薪酬成本的任何信息。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.2,
+              "reason": "文本提供了客服中心2026年Q3运营数据，但未提及Q4预算或人均薪酬成本，仅作为背景佐证标准答案中‘现有材料无预算/薪酬信息’的结论。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.4,
+              "reason": "文本包含各大区客服人数等运营数据，与标准答案中提及的运营数据报表部分对应，虽未直接回答预算和薪酬问题，但为确认现有材料缺少预算/薪酬信息提供了佐证。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅为第三季度客服运营数据报表的封面信息，未涉及2026年Q4预算或人均薪酬成本的任何内容。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅为文档修订历史和审核信息，未提及客服中心Q4预算或人均薪酬成本，与问题完全无关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本为项目里程碑计划表，仅提及客服中心人员作为试点上线负责人，未涉及客服中心Q4预算或人均薪酬成本的任何信息。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "该文本仅为文档修订历史和审批信息，未包含任何关于客服中心预算或人均薪酬成本的内容，对回答问题没有帮助。"
+            }
+          ],
+          "reason": "0/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 27.03
+    }
+  ]
+}

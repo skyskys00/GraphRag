@@ -1,0 +1,139 @@
+{
+  "testset_id": "testset_cservice_35",
+  "domain": "客服业务库（客户服务中心）",
+  "version": "v1.0",
+  "timestamp": "2026-09-22 16:27:46",
+  "config": {
+    "mode": "retrieval",
+    "collection": "eval_cservice",
+    "workspace": "eval_cservice_ws"
+  },
+  "summary": {
+    "total_questions": 1,
+    "overall": {
+      "context_recall": 1.0,
+      "context_precision": 0.375,
+      "context_precision_weighted": 0.5642
+    },
+    "by_category": {
+      "fact_single": {
+        "count": 1,
+        "context_recall": 1.0,
+        "context_precision": 0.375
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "count": 1,
+        "context_recall": 1.0,
+        "context_precision": 0.375
+      }
+    },
+    "total_time_s": 30.6
+  },
+  "questions": [
+    {
+      "id": "CS-FS-001",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "三级投诉的首次响应时效是多长时间？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "0cbd90fb5f763e77",
+          "0c6716e31ccaa1f4",
+          "0cbd90fb5f763e77",
+          "0cbd90fb5f763e77",
+          "4a02a6158e93dfde"
+        ],
+        "time_s": 29.45
+      },
+      "metrics": {
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 3,
+          "per_fact": [
+            {
+              "fact": "三级投诉 = 一般投诉",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]和[3]的投诉等级表中均明确列出“三级（一般）”，将三级等同于一般投诉。"
+            },
+            {
+              "fact": "首次响应时效 = 4 小时",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[3]的三级（一般）投诉响应时效明确为'4小时内'，与'首次响应时效 = 4 小时'等价。"
+            },
+            {
+              "fact": "工作时间计算（工作日9:00-18:00）",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[4]明确写明：所有时间节点均以工作时间计算（工作日9:00-18:00），与事实陈述完全一致。"
+            }
+          ],
+          "reason": "3/3 个事实点被检索结果覆盖"
+        },
+        "context_precision": 0.375,
+        "context_precision_weighted": 0.5642,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 3,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "表格明确列出三级（一般）投诉的首次响应为4小时，直接回答且与标准答案一致。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本为客服绩效指标表格，虽提及'三级投诉'但内容为平均处理时长（≤2小时），未涉及首次响应时效（4小时），对回答问题无直接帮助。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本的表格中明确列出三级（一般）投诉的响应时效为4小时内，直接回答了问题。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅说明时效计算的一般规则（起算点、工作时间口径等），并未提及三级投诉的首次响应时效为4小时这一具体信息。"
+            },
+            {
+              "rank": 5,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本提到三级投诉的处理时效（5个工作日）和二级/一级时效，涉及投诉时效主题，但未直接给出三级投诉的首次响应时效（4小时）。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅提供了处理时效要求的标题和引言，没有提及三级投诉首次响应时效的具体时间（4小时），因此对回答问题没有帮助。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.3,
+              "reason": "文本包含客服核心指标数据（如平均响应时间ART），但未明确提及三级投诉的首次响应时效，仅提供间接相关背景。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅提及客户对7×24小时服务和秒级响应的期望，未涉及三级投诉及其首次响应时效4小时的具体规定，与问题无关。"
+            }
+          ],
+          "reason": "3/8 个 chunk 与问题相关"
+        }
+      },
+      "time_s": 30.59
+    }
+  ]
+}

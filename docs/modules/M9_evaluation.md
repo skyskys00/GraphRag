@@ -1,14 +1,14 @@
 # M9 模块规划：评测层
 
-> **版本：** v0.1（规划中）
-> **状态：** 规划待落地（P0）
-> **更新：** 2026-09-21
+> **版本：** v1.1
+> **状态：** 可用（retrieval 模式）；Phase 2/3 待执行
+> **更新：** 2026-09-22
 > **定位：** 中文 RAG 系统量化评测——测试集 + 指标 + ablation + 回归
 > **契约：** 测试集（question + contexts + ground_truth）→ 评测报告（各指标分数 + 对比基线）
 > **上游：** [M5 检索层](M5_retrieve.md) / [M6 生成层](M6_generate.md) / [M7 交互层](M7_interact.md) | **下游：** 回归门禁 / 作品集量化数据 / README 展示
-> **依据：** [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.7 ｜ [`FRAMEWORK_NOTES.md`](../FRAMEWORK_NOTES.md) §3
+> **依据：** [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.7 ｜ [`FRAMEWORK_NOTES.md`](../FRAMEWORK_NOTES.md) §3 ｜ [`M9_testset.md`](M9_testset.md)（测试语料与测试集设计规范）
 > **运行：** `cd backend && python -m app.m9_eval.runner --testset testsets/default.json --report reports/run_xxx.json`
-> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md)
+> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md) v5.6（Phase 1 落地）/ v5.7（裁判稳定性 + 测试集 GT 修正 + 表格双表示后新基线）
 
 ---
 
@@ -84,6 +84,7 @@
 ## 3. 中文测试集设计
 
 > 测试集质量直接决定评测可信度。宁少勿滥——30 道高质量题 > 300 道随便凑的题。
+> 测试语料（知识库文档）与测试题集的详细设计规范见 [M9_testset.md](M9_testset.md)。以下为概要。
 
 ### 3.1 测试集规模与分类（v1.0 = 50 题）
 
