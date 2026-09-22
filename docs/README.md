@@ -45,7 +45,7 @@
 | M6 生成层 | [`modules/M6_generate.md`](modules/M6_generate.md) | 上下文组装 + DeepSeek 生成 + 引用标注 |
 | M7 交互层 | [`modules/M7_interact.md`](modules/M7_interact.md) | FastAPI + SSE + 文档管理 + 图谱 API |
 | M8 前端 | [`modules/M8_frontend.md`](modules/M8_frontend.md) | React + TS + Vite + AntV G6 |
-| M9 评测层 | [`modules/M9_evaluation.md`](modules/M9_evaluation.md) | 中文测试集 + LLM 裁判 + ablation 回归 |
+| M9 评测层 | [`modules/M9_evaluation.md`](modules/M9_evaluation.md) ｜ [`modules/M9_testset.md`](modules/M9_testset.md) | 中文测试集 + LLM 裁判 + ablation 回归 |
 
 ### 📋 需求与参考层
 

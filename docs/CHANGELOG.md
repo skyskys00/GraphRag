@@ -23,6 +23,79 @@
 
 ---
 
+## [v5.7] 2026-09-22 —— 表格双表示全链路打通 + M9 裁判稳定性改进（M2 v1.2 / M9 v1.1）
+
+**影响模块**：M2（v1.2 表格行级切分+双表示）、M7（v10.3 预览透传 html）、M8（v5.3 PreviewUnit.html + 表格渲染）、M9（v1.1 裁判稳定性 + 测试集修正 + 新基线）。M1 不动。
+
+**1. M9 裁判稳定性（对应 Q1 优化项 3/4/1）**：
+- `judge.py`：全局并发信号量 `CONCURRENCY=5`（每题 20+ chunk 并发直连不再互相踩）；非重试错误名单（4xx 类名 + 状态码 400/401/403/404/409/413/422）立即失败不空耗退避；指数退避 + 抖动（2→4→8s，上限 20s ±0.5s）；重试循环 `await asyncio.sleep`。
+- 失败识别：`context_recall` / `context_precision` 中裁判失败的 fact/chunk 标记 `error` 并 **排除出均分**（不按 0 分计污染 precision/recall），单独计数 `failed_facts` / `failed_chunks`；`report.py` 汇总 `judge_failed_questions`（Markdown 摘要含失败数）。
+- **验证**：全量 35 题 judge 失败 = 0；总耗时 1379s（v5.6）→ **580s**（v5.7），主要收益来自并发限流 + 退避重试（不再整批同步失败）。
+
+**2. 表格双表示全链路（对应 Q2 层级 0 + 层级 2）**：
+- M2 `chunker.py`：表格 TextUnit **content 从 HTML 转为 Markdown**（embedding/生成用干净文本），新增 `html` 字段存重建的 HTML（预览用）。HTML 解析用标准库 `html.parser`（不新增依赖），兼容 MinerU（`table_body` + caption/footnote）与 Docling（`export_to_html`）产物。
+- 行级切分：大表按 `TABLE_SPLIT_ROWS=5` 拆成多组，每组**重复表头**；标题紧接表格时「标题 + 首个切分组」并入同一 TextUnit（保上下文），其余独立。
+- M7 `api.py` 预览接口 `units` 追加 `html` 字段；M8 `types.ts` `PreviewUnit.html`、`DocumentPreview.tsx` 表格分支改渲染 `u.html ?? u.content`（旧库无 html 时回退，兼容）。
+- 重建 `eval_cservice_ws`：全文重切（M2 94 units，含 20 个表格单元）+ 清 13 表 PG 行 + M3 重索引 + M5 稀疏重建。
+
+**3. 测试集 GT 修正**：`testset_cservice_35.json` 的 CS-TN-001/002/003 标准答案数字与文档冲突（文档自洽正确，GT 系构造时编造/张冠李戴）——如 CS-TN-001 文档 Q3 工单 46,820 件 vs GT 128,450；CS-TN-003 文档 2026E 市场 425 亿 vs GT 186 亿（186 实为 2023 值）；CS-TN-002 人均最高是华南 168 件/人而非华东 845。已按文档修正。
+
+**新基线（v5.7，35 题 retrieval，报告 `tests/reports/run_retrieval_v5.7_table_dual.json`）**：
+- 总体：Context Recall **0.9035** / Context Precision **0.4143** / Precision 加权 **0.5872**（v5.6 baseline：0.9111 / 0.3714 / 0.5304；recall 微降系 GT 修正后裁判判定更严，weighted 净升 +0.057）。
+- **table_numeric precision 0.0625 → 0.2188（3.5×）**——表格 Markdown 化后数据被稳定检索（top1-3 即含全部所需数字的表格单元），不再受 HTML 标签噪音干扰；GT 修正后裁判不再「与数字矛盾」误判。CS-TN-001 达 0.5（相关 ranks [1,2,3,5]）。
+- 其余题型：fact_cross_doc precision 0.61→0.70 / recall 0.89→0.93；comparison precision 0.41→0.44；fact_single precision 0.35→0.41；unanswerable precision 0（该类语义上应低，检索出的弱相关干扰项被判不相关属正确行为）。
+
+**遗留**：table_numeric 绝对精度仍低（4 题里 3 题仅 1 个相关 chunk 进 top8）——下一步优化方向为 Q2 层级 3（针对数字型问题的检索权重/排序），Phase 2 再推进。
+
+**文档更新**：[`M2_chunk.md`](modules/M2_chunk.md) v1.2 ｜ [`M7_interact.md`](modules/M7_interact.md) v10.3 ｜ [`M8_frontend.md`](modules/M8_frontend.md) v5.3 ｜ [`M9_evaluation.md`](modules/M9_evaluation.md) v1.1。
+
+## [v5.6] 2026-09-22 —— M9 评测层 Phase 1 落地：骨架 + 检索指标（M9 v1.0）
+
+**影响模块**：M9 评测（v1.0，Phase 1 完成；从「规划中」转「可用」）。
+
+**定位**：M9 是 bypass/离线评测层——量化 RAG 检索/生成质量，为 Phase 3 回归门禁打基础。三阶段路线：Phase 1（骨架 + 检索指标）→ Phase 2（生成指标 + 完整测试集）→ Phase 3（ablation + 回归门禁）。
+
+**新增代码**（`backend/app/m9_eval/`，8 个文件）：
+- `runner.py`：CLI 入口，`--testset / --mode / --collection / --report / --limit`。retrieval 模式逐题跑 `m5_retrieve.retrieve()`（模块直调，无 HTTP 开销）+ 双指标计算，输出 JSON + Markdown 报告。workspace 映射：default→default_ws / eval_cservice→eval_cservice_ws / eval_admin→eval_admin_ws。
+- `testset.py`：测试集加载 + 校验（必填字段 / 唯一 ID / 合法题型与难度）+ 统计。
+- `judge.py`：LLM 裁判封装——DeepSeek v4-flash 当裁判，提示词中文化，0-1 连续打分，内存 + 磁盘双层缓存（SHA256 key），失败重试 2 次。
+- `metrics/context_recall.py`：每个 key_fact 独立让裁判判断能否在检索上下文中找到依据 → 命中数/总数 = recall（细粒度事实点计数）。unanswerable 类题跳过。
+- `metrics/context_precision.py`：裁判逐 chunk 判断相关性 → 相关数/总数 = precision；另算排名加权 precision（1/rank 权重）。
+- `report.py`：逐题结果 → 总报告（overall + by_category + by_difficulty），JSON 落盘 + Markdown 摘要。
+
+**建库**：`eval_cservice_ws` 独立 workspace（M3 LightRAG 图+向量索引 + M5 稀疏索引，81 chunks/5 文档），与 default_ws 互不干扰。
+
+**首次全量评测（35 题，2026-09-22）**：
+- 总体：Context Recall **0.9111** / Context Precision **0.3714** / Precision 加权 **0.5304**。
+- 按题型：fact_cross_doc recall 0.89·precision 0.61（图检索跨文档最有效）；fact_single recall 0.95；summary precision 0.63；proper_noun recall 0.92·precision 0.33；comparison recall 0.90·precision 0.41；**table_numeric 最弱（precision 0.06）**——表格类问题检索噪音大（表格 HTML 标签影响 embedding），列为后续优化项；unanswerable recall 0 符合预期（该跳过）。
+- 总耗时 1379s（23 分钟）——主要消耗在裁判 LLM（DeepSeek API）连接不稳定导致的失败重试，非检索本身瓶颈。
+- 已知待改进：`judge.py` 重试用同步 `time.sleep`（async 中阻塞事件循环），Phase 2 顺手改 `asyncio.sleep`。
+
+**文档更新**：[`M9_evaluation.md`](modules/M9_evaluation.md) v1.0（Phase 1 完成）；[`M9_testset.md`](modules/M9_testset.md) 不变。
+
+## [v5.5] 2026-09-21 —— 解析器双引擎实测复核 + 分工修订（docx 改走 MinerU，PARSER_COMPARISON v1.3 / M1 v1.3）
+
+**影响模块**：M1 解析（v1.3）。
+
+**做法**：raw 样本（PDF×2、DOCX×2、HTML×2）→ `data/parse_cmp/{mineru,docling}/` 产物（已保留供溯源），对比 `blocks.jsonl`。
+
+**核心发现（修订选型结论）**：
+- **MinerU v3.4.5 原生支持 docx/pptx/xlsx**（office 后端，纯解析零模型），之前选型漏看了。
+- **DOCX 改走 MinerU**：表格结构识别更准（Docling 会把表头单元格拆成独立 paragraph 块，PRD 23 块里 8 块是拆出来的表头 + 3 个空段，内容重复且块数虚高）；heading 数量一致；纯文本内容一致；同样零模型、耗时接近。
+- **PDF 维持 MinerU**：正文段落 Docling 覆盖 ~95%、表格 100% 一致，但 Docling 整段丢 bullet 列表项（季度复盘「五、下季度策略建议」5 条全丢）；MinerU 图形化大标题会整丢（当图吞）。表格内容等价，Docling HTML 更紧凑语义化、MinerU 带冗余属性。
+- **HTML / EPUB / MD / TXT 仍走 Docling**：MinerU 不支持。
+- anchor：仅 MinerU PDF 有 `page:bbox`；Docling PDF 的 prov 未接（实现留白）；docx 两家都不给 paraId。
+
+**文档更新（v1.3）**：PARSER_COMPARISON §10 实测复核重构——删 10.3.1/10.3.2/10.3.3 分节大段分析，综合两轮结果为 **10 维度横向对比总表**（格式覆盖 / PDF文本保真 / DOCX文本保真 / 表格结构-PDF / 表格结构-DOCX / 标题heading / anchor / 模型依赖 / 性能 / 适用场景）。
+
+**代码变更**：
+- `m1_parse/config.py`：MINERU_EXTS 加 `.docx/.pptx/.xlsx`；DOCLING_EXTS 去掉这三个。
+- `m1_parse/mineru_adapter.py`：`_locate_auto` → `_locate_output`，同时找 `auto/`（PDF）与 `office/`（docx/pptx/xlsx）目录。
+
+**时间参考**：MinerU 45.6s / 2 PDF（pipeline，CPU）+ 13.1s / 2 DOCX（office 后端，含 API 启动开销）。
+
+**文档更新（规划中，P0）**：M9 评测层新增 [`M9_testset.md`](modules/M9_testset.md) v0.1——测试语料与测试集设计规范落地。2 个知识库（客服业务库 5 篇最小集 + 办公行政库 3 篇最小集），35+15 题，含 7 类题型，内容设计原则（共享实体 / 易混淆点 / 跨文档引用 / 版本痕迹 / 干扰项），文档构造流程与质检清单。方案 A（客服中心场景），最小集先行。**办公行政库最小集已构造完成**：3 篇文档（A1 办公用品领用管理办法.pdf / A2 员工差旅报销管理制度.docx / A3 IT设备管理与领用规范.md），覆盖 PDF+DOCX+MD 三种格式，设计了 12 个跨文档共享实体、3 处交叉引用、2 组易混淆概念、版本迭代痕迹；配套测试集 15 题（fact_single×6 / fact_cross_doc×2 / proper_noun×2 / comparison×2 / table_numeric×2 / unanswerable×1），存放 `backend/tests/testsets/testset_admin_15.json`。语料存放 `backend/inputs/testset_corpus/eval_admin/`。**客服业务库最小集已构造完成**：5 篇文档（D1 投诉SOP.md / D2 智能客服PRD.docx / D3 Q3运营数据报表.pdf / D4 话术规范+FAQ.md / D5 行业趋势报告.pdf），覆盖 MD+DOCX+PDF 三种格式，设计了三级投诉/智能问答引擎/ART/FCR/工单系统v3.0/王小燕等跨文档共享实体、3 组易混淆概念（响应时间/升级流程/解决率）、多处交叉引用、版本迭代痕迹（SOP v1.0→v2.3 / PRD v1.0→v2.1）、D5 作为弱相关干扰项文档。配套测试集 35 题（fact_single×10 / fact_cross_doc×7 / proper_noun×6 / comparison×4 / table_numeric×4 / summary×2 / unanswerable×2），每题含 ground_truth / key_facts / must_have_docs / must_not_have_docs / difficulty / source_docs / tags，存放 `backend/tests/testsets/testset_cservice_35.json`。语料存放 `backend/inputs/testset_corpus/eval_cservice/`。
+
 ## [v5.4] 2026-09-21 —— rerank 事件循环阻塞修复（切会话卡死，M5 v1.10）
 
 **影响模块**：M5 检索（v1.10）。

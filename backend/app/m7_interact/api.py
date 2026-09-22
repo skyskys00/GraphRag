@@ -155,6 +155,7 @@ async def preview_doc(doc_id: str, collection_id: str = Query("default")) -> dic
             "page_range": u.get("page_range"),
             "file_path": u.get("file_path"),
             "block_type": u.get("block_type") or "paragraph",
+            "html": u.get("html") or None,
         })
         if not filename and u.get("file_path"):
             filename = Path(u["file_path"]).name

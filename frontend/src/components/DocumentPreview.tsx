@@ -113,7 +113,7 @@ export function DocumentPreview({
                 {u.block_type === 'table' ? (
                   <div
                     className="preview-table-wrapper"
-                    dangerouslySetInnerHTML={{ __html: u.content }}
+                    dangerouslySetInnerHTML={{ __html: u.html ?? u.content }}
                   />
                 ) : (
                   <div className="preview-unit-content">{u.content}</div>

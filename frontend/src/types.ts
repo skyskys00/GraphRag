@@ -139,6 +139,7 @@ export interface PreviewUnit {
   page_range: number[] | null
   file_path: string | null
   block_type?: string
+  html?: string | null
 }
 
 export interface DocPreview {

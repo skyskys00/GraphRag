@@ -1,9 +1,9 @@
 # M2 模块记录：切分层
 
-> **版本：** v1.1
+> **版本：** v1.2
 > **状态：** 已落地
-> **更新：** 2026-09-21
-> **定位：** 标题驱动切块 + 表格整块 → TextUnit v2
+> **更新：** 2026-09-22
+> **定位：** 标题驱动切块 + 表格整块（层级 0 双表示 content=MD/html + 层级 2 行级切分）→ TextUnit v2
 > **契约：** blocks.jsonl → TextUnit v2 JSONL，见 [`M0_contracts/textunit.md`](M0_contracts/textunit.md)
 > **上游：** [M1 解析层](M1_parse.md) | **下游：** [M3 索引层](M3_index.md)
 > **依据：** [`FRAMEWORK_NOTES.md`](../FRAMEWORK_NOTES.md) §3
@@ -16,14 +16,14 @@
 
 三个核心决策：
 - **标题驱动分组**：`heading`/`title`（`block_id` 带 `level>=1`）开新块，正文归入当前标题链并维护 `title_path`；
-- **表格整块**：`block_type=table` 单独成块（仍带当前标题上下文）；标题刚开即紧接表格时，标题+表格并入同一 TextUnit 保上下文；
+- **表格整块**：`block_type=table` 单独成块（仍带当前标题上下文）；标题刚开即紧接表格时，标题+表格并入同一 TextUnit 保上下文。**v1.2 起双表示**：content 为 Markdown（embedding/生成用干净文本）+ 新增 `html` 字段（重建 `<table>`，预览用）；大表按 `TABLE_SPLIT_ROWS=5` 行级切分组，每组重复表头，caption 附首组、footnote 附末组；
 - **聚合扩展字段**：`page_range`（PDF 块列表页码 min/max）、`anchor`（取首个）、`block_type`（主导类型多数派，平票取先出现者）。
 
 ## 2. 代码结构（`app/m2_chunk/`）
 
 | 文件 | 职责 |
 |---|---|
-| `chunker.py` | 核心切分 `chunk_blocks()`（遍历 blocks、维护标题路径、表格旁路）+ 字段聚合 `_build_textunit()` + `approx_tokens`（中文 1 字≈1 token 粗估） |
+| `chunker.py` | 核心切分 `chunk_blocks()`（遍历 blocks、维护标题路径、表格旁路）+ 表格双表示 `split_table_block()` / `_build_split_unit()`（**层级 0** content=Markdown + html 字段、**层级 2** 行级切分组）+ 字段聚合 `_build_textunit()` + `approx_tokens`（中文 1 字≈1 token 粗估） |
 | `runner.py` | CLI 入口：`-s data/parse`、`-o data/chunks`；逐文档失败隔离，返回码聚合 |
 | `textunit.py` | 契约序列化 + 校验 `validate()`（REQUIRED 六字段 / content 非空 / page_range 长度 2）；不合规单元跳过并 raise |
 
