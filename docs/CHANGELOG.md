@@ -80,6 +80,40 @@ gold_rank（词汇模式）：平均 1.95 / 中位 1.97 / top1 35.9% / top3 47.8
 
 **结论——top5 够用吗？** v5.9 和 v5.10 两个版本下 **top5 都完全够用**。33 道有答案题中没有任何一道的关键事实在 top8 有但 top5 没有（recall 零损失），top8 多出的 3 块全是噪音，把 precision 从 0.566 拉到 0.425。top5 是当前检索质量下的最优窗口。
 
+## [v5.13] 2026-09-24 —— 表格 NL 摘要注入 rerank 文本（M5 v1.13）
+
+**影响模块**：M5（v1.13，`table_summary.py` + retriever  rerank 输入增强）。
+
+**动机**：v5.10 列名前缀解决了 Recall 维度的表格语义问题，但 cross-encoder reranker 对纯数字表格行仍然失明（CS-TN-003 市场规模表在 RRF 池第 7，rerank 后落到第 13，目标块完全无法进入 top5）。尝试给表格块加自然语言摘要，让 reranker 通过 NL 描述理解表格语义，从而提升相关表格块的 rerank 分。
+
+**改动**：
+- 新增 `table_summary.py`：规则模板生成表格 NL 摘要——提取 caption + 列名 + 首行/末行数据，拼成一段自然语言描述（零成本、零索引重建）。
+- `retriever.py`：rerank 前对表格块的文本 = 摘要 + 原 content，仅影响 rerank 输入，不影响 dense/sparse 召回、不影响最终返回的 content。
+
+**全量评测（35 题 eval_cservice_v510_ws，报告 `run_retrieval_v513_table_nl_summary.json`）**：
+
+| 指标 | v5.10 基线 | v5.13 NL 摘要 | Δ |
+|---|---|---|---|
+| Context Recall | 0.9323 | 0.9520 | +0.020 |
+| Context Precision | 0.5543 | 0.5600 | +0.006 |
+| CP（加权） | 0.6753 | 0.6884 | +0.013 |
+| nDCG@5 | 0.8968 | 0.9028 | +0.006 |
+| gold_rank avg | 1.89 | 1.85 | -0.04 |
+
+**table_numeric 类目**：
+
+| 指标 | v5.10 | v5.13 | Δ |
+|---|---|---|---|
+| Recall | 0.917 | 0.917 | ±0.000 |
+| Precision | 0.400 | 0.400 | ±0.000 |
+| nDCG@5 | 0.942 | 0.937 | -0.005 |
+
+**结论**：
+- **核心目标（table_numeric）未达成**——NL 摘要对 rerank 分确实有提升（单题探针：CS-TN-003 市场规模表 rerank 分 0.133→0.352，融合排名 13→10），但提升幅度不足以把目标块拉进 top5。
+- **整体微升**：总体 recall +0.02、precision +0.006、nDCG +0.006，幅度在 judge 随机波动 + 排序微调的叠加范围内，无显著副作用。
+- **规则版接近天花板**：纯数字+规则手段对 table_numeric 类目的优化已近极限——列名前缀（v5.10）把 Recall 从 0.792 拉到 0.917，后续 v5.11/5.12 numeric_match boost、v5.13 NL 摘要都未能再推进。剩余缺口（CS-TN-003 的 2023 年市场规模表）属于 reranker 语义理解问题，规则手段难以突破。
+- **未来方向**：LLM 生成更高质量的表格摘要（建库时一次性生成），或从召回层提升表格块的位次（dense/sparse 端注入摘要）。本轮检索优化到此阶段性收尾。
+
 **v5.10 复测（列名前缀 + 新评测工具，报告 `run_retrieval_v5.10_goldrank.json`）**：
 
 | 指标 | top5 | top8 | 差 |

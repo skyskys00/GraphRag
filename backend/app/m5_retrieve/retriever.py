@@ -20,6 +20,7 @@ from .feature_fusion import fuse_and_rank
 from .query_preprocess import PreprocessedQuery, is_numeric_query, numeric_terms, preprocess as preprocess_query
 from .rerank import rerank
 from .sparse_index import score as sparse_score
+from .table_summary import build_rerank_text
 
 RRF_K = 60
 FUSED_TOP = 40
@@ -97,7 +98,7 @@ async def retrieve(
     fused_ids = [cid for cid, _ in fused]
     rrf_score_map = dict(fused)
     meta = sparse_doc["chunks"]
-    candidates = [(cid, meta[cid]["content"]) for cid in fused_ids if cid in meta]
+    candidates = [(cid, build_rerank_text(cid, meta[cid])) for cid in fused_ids if cid in meta]
     # reranker 返回全部候选的分数（不只 topN），供特征融合使用
     reranked_all = await asyncio.to_thread(rerank, query, candidates, top_n=len(candidates))
     rerank_score_map = {item["chunk_id"]: item["score"] for item in reranked_all}
