@@ -31,11 +31,14 @@ def _pg_chunks(workspace: str) -> list[dict]:
         )
         try:
             rows = await conn.fetch(
-                "SELECT id, content, full_doc_id FROM lightrag_doc_chunks "
+                "SELECT id, content, full_doc_id, chunk_order_index FROM lightrag_doc_chunks "
                 "WHERE workspace = $1 AND content <> '' ORDER BY full_doc_id, chunk_order_index",
                 workspace,
             )
-            return [{"id": r["id"], "content": r["content"], "full_doc_id": r["full_doc_id"]} for r in rows]
+            return [
+                {"id": r["id"], "content": r["content"], "full_doc_id": r["full_doc_id"], "chunk_order_index": r["chunk_order_index"]}
+                for r in rows
+            ]
         finally:
             await conn.close()
 
@@ -55,11 +58,29 @@ def _sparse_encode(texts: list[str]) -> list[dict[str, float]]:
     return [{k: float(v) for k, v in row["embedding"].items()} for row in rows]
 
 
-def build(workspace: str, out_path: Path) -> dict:
-    """构建稀疏索引并落盘，返回索引元数据。"""
+def build(workspace: str, out_path: Path, chunks_dir: Path | None = None) -> dict:
+    """构建稀疏索引并落盘，返回索引元数据。
+
+    chunks_dir: 可选的 M2 输出目录（每文档一个 jsonl），传了则从 jsonl 读 block_type
+                等元数据，按 full_doc_id + chunk_order_index 对齐写进 chunks meta。
+    """
     chunks = _pg_chunks(workspace)
     if not chunks:
         raise SystemExit(f"[sparse] workspace={workspace} 无 chunk，检查 STORAGE/POSTGRES_WORKSPACE")
+
+    # 从 M2 jsonl 加载元数据（block_type 等），按 (full_doc_id, chunk_order_index) 索引
+    extra_meta: dict[tuple[str, int], dict] = {}
+    if chunks_dir and chunks_dir.exists():
+        for jf in chunks_dir.glob("*.jsonl"):
+            with jf.open(encoding="utf-8") as f:
+                for line in f:
+                    u = json.loads(line)
+                    key = (u["full_doc_id"], u["chunk_order_index"])
+                    extra_meta[key] = {
+                        "block_type": u.get("block_type", "paragraph"),
+                    }
+        print(f"[sparse] loaded block_type from {chunks_dir}: {len(extra_meta)} units")
+
     index: dict[str, dict[str, float]] = {}
     meta: dict[str, dict] = {}
     B = 16
@@ -68,7 +89,11 @@ def build(workspace: str, out_path: Path) -> dict:
         sp = _sparse_encode([c["content"] for c in batch])
         for c, s in zip(batch, sp):
             index[c["id"]] = s
-            meta[c["id"]] = {"content": c["content"], "full_doc_id": c["full_doc_id"]}
+            entry = {"content": c["content"], "full_doc_id": c["full_doc_id"]}
+            extra = extra_meta.get((c["full_doc_id"], c["chunk_order_index"]))
+            if extra:
+                entry.update(extra)
+            meta[c["id"]] = entry
     doc = {"index": index, "chunks": meta}
     out_path.write_text(json.dumps(doc, ensure_ascii=False), encoding="utf-8")
     print(f"[sparse] built {len(index)} chunks -> {out_path}")
@@ -79,9 +104,21 @@ def load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def score(query_text: str, doc: dict, top_k: int = 40) -> list[tuple[str, float]]:
-    """query sparse 与索引内积排序，返回 [(chunk_id, score)]。"""
+def score(query_text: str, doc: dict, top_k: int = 40, boost: dict[str, float] | None = None) -> list[tuple[str, float]]:
+    """query sparse 与索引内积排序，返回 [(chunk_id, score)]。
+
+    boost: 可选的额外 term→权重映射，这些 term 单独编码后乘以权重加到 query 向量上，
+           用于数字感知检索等场景（精确数字 token 加权提升表格行匹配度）。
+    """
     q = _sparse_encode([query_text])[0]
+    if boost:
+        boost_terms = list(boost.keys())
+        if boost_terms:
+            boost_vecs = _sparse_encode(boost_terms)
+            for term, vec in zip(boost_terms, boost_vecs):
+                w = boost.get(term, 1.0)
+                for tid, val in vec.items():
+                    q[tid] = q.get(tid, 0.0) + val * w
     qn = sum(x * x for x in q.values()) ** 0.5
     scored = []
     for cid, w in doc["index"].items():
@@ -91,7 +128,6 @@ def score(query_text: str, doc: dict, top_k: int = 40) -> list[tuple[str, float]
                 mi += qv * w[token]
         scored.append((cid, mi))
     scored.sort(key=lambda kv: kv[1], reverse=True)
-    # 归一化到 [0,1]（稀疏模归一），防 RRF 无界
     norm = qn or 1.0
     return [(cid, s / norm) for cid, s in scored[:top_k]]
 

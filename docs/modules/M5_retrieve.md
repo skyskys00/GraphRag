@@ -1,9 +1,9 @@
 # M5 模块记录：检索层
 
-> **版本：** v1.10
+> **版本：** v1.12
 > **状态：** 已落地
-> **更新：** 2026-09-21
-> **定位：** 三路召回 + RRF + rerank + query 预处理 + 白名单过滤
+> **更新：** 2026-09-23
+> **定位：** 三路召回（graph/vector/keyword）+ RRF(k=60) + bge-reranker + 五特征融合排序 + query 预处理 + 白名单过滤
 > **契约：** query + 模式 → 精排后 chunk 列表（full_doc_id / score / snippet）
 > **上游：** [M3 索引层](M3_index.md) / [M4 存储层](M4_storage.md) | **下游：** [M6 生成层](M6_generate.md)
 > **依据：** [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.6 ｜ [`FRAMEWORK_NOTES.md`](../FRAMEWORK_NOTES.md) §3

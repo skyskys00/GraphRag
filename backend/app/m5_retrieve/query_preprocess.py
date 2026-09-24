@@ -154,6 +154,37 @@ def _extract_proper_nouns(query: str, entities: list[str]) -> dict[str, float]:
     return weighted
 
 
+# 数字感知检索（v5.8，配合 TABLE_SPLIT_ROWS=3 提升表格题精度）
+# query 中的精确数字 token（如 2026年 / 425亿 / 46,820件 / 7月）对稀疏路是强信号——
+# 正文段落常提关键词却无精确数字，表格单元数字完整；数字型 query 时把这些 token
+# 追加进 keyword 路，让含同数字的表格行内积分显著抬升。
+_NUMERIC_TERM_RE = re.compile(
+    r"(?:\d{1,4}\s*(?:年|月|日|季度|第[一二三四]季度|\d{1,2}月))"
+    r"|(?:\d[\d,]*(?:\.\d+)?\s*(?:亿|万|%|件|元|分|秒|人|分钟|小时|倍|家))"
+)
+# 数字型问题的语义线索词（无数字也能触发，如「哪个大区人均最高」）
+_NUMERIC_HINT_WORDS = (
+    "多少", "最高", "最低", "最大", "最小", "最多", "最少", "占比", "比例",
+    "增长率", "同比增长", "环比", "相比", "涨幅", "跌幅", "排名", "人均", "高于", "低于",
+)
+
+
+def is_numeric_query(query: str) -> bool:
+    """是否数字型问题（含精确数字/单位 token，或命中数字语义线索词）。"""
+    if _NUMERIC_TERM_RE.search(query):
+        return True
+    return any(w in query for w in _NUMERIC_HINT_WORDS)
+
+
+def numeric_terms(query: str) -> list[str]:
+    """提取 query 中的精确数字 token 列表（去重）。"""
+    found: list[str] = []
+    for pat in _NUMERIC_TERM_RE.finditer(query):
+        term = pat.group(0).strip()
+        if term and term not in found:
+            found.append(term)
+    return found
+
 def preprocess(query: str, entities: list[str]) -> PreprocessedQuery:
     """主入口：原 query + 实体名列表 → 预处理结果。"""
     # A1. 词典同义词扩展

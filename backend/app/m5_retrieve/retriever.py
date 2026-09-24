@@ -16,13 +16,14 @@ from typing import Any
 
 from lightrag import LightRAG, QueryParam
 
-from .query_preprocess import PreprocessedQuery, preprocess as preprocess_query
+from .feature_fusion import fuse_and_rank
+from .query_preprocess import PreprocessedQuery, is_numeric_query, numeric_terms, preprocess as preprocess_query
 from .rerank import rerank
 from .sparse_index import score as sparse_score
 
 RRF_K = 60
 FUSED_TOP = 40
-RERANK_TOP = 8
+RERANK_TOP = 5
 
 
 def _rrf(ranked_lists: list[list[str]]) -> list[tuple[str, float]]:
@@ -81,16 +82,39 @@ async def retrieve(
 
     g_chunks = [c.get("chunk_id") for c in graph_data.get("chunks", []) if c.get("chunk_id")]
     v_chunks = [c.get("chunk_id") for c in vector_data.get("chunks", []) if c.get("chunk_id")]
-    kw_chunks = [cid for cid, _ in sparse_score(q_kw, sparse_doc, top_k=FUSED_TOP)]
+    # 数字感知检索（v5.8）：数字型问题把精确数字 token 追加进 keyword 路 query，
+    # 提升含同数字表格行的稀疏点积得分；数字 token 是精确强信号，1x 权重不引入噪声
+    kw_query = q_kw
+    if is_numeric_query(query):
+        nums = numeric_terms(query)
+        if nums:
+            kw_query = q_kw + " " + " ".join(nums)
+    kw_chunks_with_score = sparse_score(kw_query, sparse_doc, top_k=FUSED_TOP)
+    kw_chunks = [cid for cid, _ in kw_chunks_with_score]
+    kw_score_map = dict(kw_chunks_with_score)
 
     fused = _rrf([g_chunks, v_chunks, kw_chunks])[:FUSED_TOP]
     fused_ids = [cid for cid, _ in fused]
-
+    rrf_score_map = dict(fused)
     meta = sparse_doc["chunks"]
     candidates = [(cid, meta[cid]["content"]) for cid in fused_ids if cid in meta]
-    # rerank 是同步阻塞 HTTP（Xinference），to_thread 剥离事件循环，
-    # 否则单 worker 下并发请求（如切会话的 GET /conversations）会被排队卡住
-    reranked = await asyncio.to_thread(rerank, query, candidates, top_n=RERANK_TOP)
+    # reranker 返回全部候选的分数（不只 topN），供特征融合使用
+    reranked_all = await asyncio.to_thread(rerank, query, candidates, top_n=len(candidates))
+    rerank_score_map = {item["chunk_id"]: item["score"] for item in reranked_all}
+
+    # 多特征融合排序（v5.9）：在 cross-encoder 语义分基础上，
+    # 融合数字匹配度、sparse 内积、RRF 位次等特征，
+    # 解决 cross-encoder 对表格/数值型数据理解弱的问题
+    fused_results = fuse_and_rank(
+        query=query,
+        chunk_ids=fused_ids,
+        chunk_meta=meta,
+        rerank_scores=rerank_score_map,
+        sparse_scores=kw_score_map,
+        rrf_scores=rrf_score_map,
+        top_n=FUSED_TOP,
+    )
+    reranked = fused_results[:RERANK_TOP]
 
     results = []
     excluded = set(exclude_docs or [])
@@ -111,6 +135,7 @@ async def retrieve(
                 "content": meta[cid]["content"],
                 "full_doc_id": meta[cid]["full_doc_id"],
                 "score": item["score"],
+                "features": item.get("features", {}),
             }
         )
     return {
@@ -122,6 +147,14 @@ async def retrieve(
             "weighted_terms": prep.weighted_terms if prep else {},
         } if prep else None,
         "routes": {"graph": g_chunks, "vector": v_chunks, "keyword": kw_chunks},
-        "fusion": {"scores": dict(fused)},
+        "fusion": {
+            "rrf_scores": dict(fused),
+            "rerank_scores": rerank_score_map,
+            "sparse_scores": kw_score_map,
+            "fused_top40": [
+                {"chunk_id": r["chunk_id"], "score": r["score"], "features": r["features"]}
+                for r in fused_results
+            ],
+        },
         "results": results,
     }

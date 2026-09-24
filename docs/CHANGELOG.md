@@ -55,6 +55,71 @@
 
 **文档更新**：[`M2_chunk.md`](modules/M2_chunk.md) v1.3。
 
+## [v5.9] 2026-09-23 —— 多特征融合精排 + RERANK_TOP=5（M5 v1.12）
+
+**影响模块**：M5（v1.12，五特征融合排序）。
+
+**动机**：v5.8 数字感知检索后 table_numeric CP 仍仅 0.28，cross-encoder reranker 对表格/数值型数据理解弱——语义相似≠数字匹配。纯靠 rerank 分数排序浪费了数字匹配、sparse 内积等强信号。
+
+**改动**：
+- 新增 `feature_fusion.py`：五特征加权线性融合排序。
+  - rerank_score（0.50）：cross-encoder 语义相似度（主特征）
+  - numeric_match（0.15）：query 数字 token 在 chunk 中的命中比例（完整 token 命中 1.0，纯数字命中 0.5）
+  - sparse_score（0.15）：bge-m3 sparse 内积
+  - numeric_density（0.10）：chunk 中数字字符占比（数字型问题中表格行 > 普通段落）
+  - rrf_score（0.10）：三路召回 RRF 融合分
+- `retriever.py`：reranker 返回全部 40 候选的分数（不只 topN），经 `fuse_and_rank` 融合后取 top5。`RERANK_TOP` 从 8 降到 5（减少噪音、提升 precision）。
+- `sparse_index.py`：`score()` 归一化逻辑调整；`build()` 支持从 M2 jsonl 读 block_type 元数据。
+
+**方向 1 探底（numeric_match 提权 0.15→0.25）**：已验证**无效且有害**，table_numeric CP 从 0.400 降到 0.350 — 数字相同不代表内容相关，非相关段落被提权。回滚到基线权重。
+
+**全量评测（35 题 eval_cservice，报告 `tests/reports/run_retrieval_v5.9_top5.json`）**：
+
+| 指标 | v5.8 | v5.9 | Δ |
+|---|---|---|---|
+| Context Precision | 0.4250 | **0.5657** | **+0.141** |
+| CP（加权） | 0.6053 | **0.6817** | **+0.076** |
+| Context Recall | 0.9399 | 0.9202 | -0.020 |
+
+**按类目 Precision 变化**：
+- table_numeric: 0.281 → **0.400**（**+0.119** ⬆）
+- fact_cross_doc: 0.629 → 0.771（+0.143 ⬆）
+- fact_single: 0.375 → 0.580（+0.205 ⬆）
+- proper_noun: 0.400 → 0.500（+0.100 ⬆）
+- comparison: 0.450 → 0.700（+0.250 ⬆）
+
+**结论**：特征融合 + RERANK_TOP=5 带来全面提升，总体 CP +0.141，table_numeric 从 0.28 跃升到 0.40。Recall 略降（-0.020）是 top 收窄的正常代价。
+
+**文档更新**：[`M5_retrieve.md`](modules/M5_retrieve.md) v1.12。
+
+## [v5.8] 2026-09-23 —— 数字感知检索 + 表格行级切分收窄（M5 v1.11 / M2 v1.2.1）
+
+**影响模块**：M5（v1.11，数字感知 keyword 路）、M2（行切分阈值 5→3）。
+
+**动机**：table_numeric precision 仅 0.22，表格行太粗（5 行一组）导致数字噪音多；keyword 路缺少精确数字信号（表格行数字密集但语义词少，sparse 内积被正文段落压制）。
+
+**改动**：
+- M2 `chunker.py`：`TABLE_SPLIT_ROWS` 从 5 → 3，单条数字行更易成为独立检索单元。
+- M5 `query_preprocess.py`：新增 `is_numeric_query()` + `numeric_terms()`，识别含精确数字/单位的问题（如「2026 年」「46820 件」「7 月」）及数字语义线索词（「多少」「最高」「占比」等）。
+- M5 `retriever.py`：数字型问题把精确数字 token 追加进 keyword 路 query，提升含同数字表格行的稀疏点积得分。
+- M5 `sparse_index.py`：`score()` 新增 `boost` 参数支持 term 加权；`build()` 支持 `chunks_dir` 读 block_type 元数据。
+- `RERANK_TOP` 从 8 → 5（减少返回噪音，配合 precision 导向）。
+
+**v5.8.2 / v5.8.2b block_type boost 探底**：尝试给 table 类型 chunk 在 sparse 路加 1.5x / 2x 权重 boost，结果与 v5.8 基线完全一致（CP 0.425 / TN CP 0.281）——sparse 路模归一化后 block_type boost 不影响排序，方案无效。
+
+**全量评测（35 题 eval_cservice，报告 `tests/reports/run_retrieval_v5.8_numeric.json`）**：
+
+| 指标 | v5.7 | v5.8 | Δ |
+|---|---|---|---|
+| Context Precision | 0.4143 | 0.4250 | +0.011 |
+| CP（加权） | 0.5872 | 0.6053 | +0.018 |
+| Context Recall | 0.9035 | 0.9399 | +0.036 |
+
+- table_numeric CP: 0.219 → 0.281（+0.062 ⬆）
+- 结论：数字感知检索 + 行切分收窄有正向收益但幅度有限，主要瓶颈在排序端（reranker 对数字不敏感）。
+
+**文档更新**：[`M5_retrieve.md`](modules/M5_retrieve.md) v1.11。
+
 ## [v5.7] 2026-09-22 —— 表格双表示全链路打通 + M9 裁判稳定性改进（M2 v1.2 / M9 v1.1）
 
 **影响模块**：M2（v1.2 表格行级切分+双表示）、M7（v10.3 预览透传 html）、M8（v5.3 PreviewUnit.html + 表格渲染）、M9（v1.1 裁判稳定性 + 测试集修正 + 新基线）。M1 不动。
