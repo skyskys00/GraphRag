@@ -59,6 +59,38 @@
 
 **文档更新**：[`M2_chunk.md`](modules/M2_chunk.md) v1.3。
 
+**评测工具升级（M9，非检索版本变化）**：
+
+新增 gold_rank 诊断维度 + 双窗口评测（`gold_rank.py` / `runner.py` / `report.py`）。
+
+- **gold_rank**：每个 gold fact 最早出现在检索结果第几名，输出 min/median/avg/max + top1/3/5/8 覆盖率曲线。双模式——词汇模式（默认，零 LLM 成本，基于数字 token + 关键词子串匹配，数值型事实较准、推导型漏检多）+ LLM 精确模式（flag 可选）。
+- **双窗口评测**：一次评测同时出 top5 和 top8 两套 recall/precision 指标，零额外检索成本，recall 约 +50% LLM 调用。回答「top5 够用吗」。
+- **CLI 新增**：`--workspace` 参数直接指定 workspace，绕过 collection 映射；`--limit` 冒烟测试。
+
+**v5.9 基线复测（新评测工具，报告 `run_retrieval_v5.9_goldrank.json`）**：
+
+| 指标 | top5 | top8 | 差 |
+|---|---|---|---|
+| Context Recall | 0.9202 | 0.9202 | 0 |
+| Context Precision | 0.5657 | 0.4250 | -0.141 |
+| CP（加权） | 0.6817 | 0.6036 | -0.078 |
+
+gold_rank（词汇模式）：平均 1.95 / 中位 1.97 / top1 35.9% / top3 47.8% / top5 51.9% / top8 55.3%。
+
+**结论——top5 够用吗？** v5.9 和 v5.10 两个版本下 **top5 都完全够用**。33 道有答案题中没有任何一道的关键事实在 top8 有但 top5 没有（recall 零损失），top8 多出的 3 块全是噪音，把 precision 从 0.566 拉到 0.425。top5 是当前检索质量下的最优窗口。
+
+**v5.10 复测（列名前缀 + 新评测工具，报告 `run_retrieval_v5.10_goldrank.json`）**：
+
+| 指标 | top5 | top8 | 差 |
+|---|---|---|---|
+| Context Recall | 0.9323 | 0.9323 | 0 |
+| Context Precision | 0.5543 | 0.4107 | -0.144 |
+| CP（加权） | 0.6753 | 0.5953 | -0.080 |
+
+gold_rank（词汇模式）：平均 1.89 / 中位 1.89 / top1 35.1% / top3 49.0% / top5 52.7% / top8 55.3%。
+
+v5.9 → v5.10 的 gold_rank 变化：avg_rank 1.95→1.89（-0.06），top3 覆盖率 47.8%→49.0%（+1.2pp）——列名前缀让命中的事实排得稍靠前，幅度较小（词汇模式下，对 table_numeric 类目的 gold_rank 无变化，因为原本排名就靠前）。
+
 ## [v5.9] 2026-09-23 —— 多特征融合精排 + RERANK_TOP=5（M5 v1.12）
 
 **影响模块**：M5（v1.12，五特征融合排序）。

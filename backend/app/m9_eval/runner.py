@@ -64,104 +64,184 @@ async def evaluate_retrieval(
     entities: list[str] | None = None,
     allowed_docs: list[str] | None = None,
     exclude_docs: list[str] | None = None,
+    *,
+    gold_rank_mode: str = "lexical",
+    eval_top_n: int = 8,
 ) -> list[dict[str, Any]]:
-    """逐题跑检索 + 评测 context recall / precision。"""
+    """逐题跑检索 + 评测 context recall / precision + gold_rank。
+
+    Args:
+        gold_rank_mode: 'lexical'（默认，零成本）或 'llm'（精确）
+        eval_top_n: 检索取多少块用于评测（默认 8，可同时出 top5/top8 两套指标）
+    """
+    from app.m5_retrieve import retriever as ret_mod
     from app.m5_retrieve.retriever import retrieve
     from .metrics.context_precision import compute_context_precision
     from .metrics.context_recall import compute_context_recall
+    from .metrics.gold_rank import compute_gold_rank
+
+    # 评测用更大的候选窗口，便于同时出 top5/top8 两套指标
+    orig_rerank_top = ret_mod.RERANK_TOP
+    ret_mod.RERANK_TOP = eval_top_n
 
     questions = testset["questions"]
     total = len(questions)
     results: list[dict[str, Any]] = []
 
-    for i, q in enumerate(questions):
-        qid = q["id"]
-        question_text = q["question"]
-        print(f"[{i+1}/{total}] {qid} - {q['category']} - {question_text[:50]}...", flush=True)
+    try:
+        for i, q in enumerate(questions):
+            qid = q["id"]
+            question_text = q["question"]
+            print(f"[{i+1}/{total}] {qid} - {q['category']} - {question_text[:50]}...", flush=True)
 
-        t0 = time.time()
+            t0 = time.time()
 
-        # 1. 检索
-        try:
-            retr = await retrieve(
-                rag, question_text, sparse,
-                entities=entities,
-                allowed_docs=allowed_docs,
-                exclude_docs=exclude_docs,
-            )
-            contexts = retr.get("results", [])
-        except Exception as e:
-            print(f"  ⚠️  检索失败: {e}", flush=True)
-            contexts = []
-
-        retrieval_time = round(time.time() - t0, 2)
-
-        # 2. 计算指标
-        metrics: dict[str, Any] = {}
-
-        # context_recall：跳过 unanswerable 类（本来就不该有答案）
-        if q["category"] != "unanswerable" and q.get("key_facts"):
+            # 1. 检索（取 eval_top_n 块）
             try:
-                cr = await compute_context_recall(
-                    query_func, question_text, q["key_facts"], contexts,
+                retr = await retrieve(
+                    rag, question_text, sparse,
+                    entities=entities,
+                    allowed_docs=allowed_docs,
+                    exclude_docs=exclude_docs,
                 )
-                metrics["context_recall"] = cr["score"]
-                metrics["context_recall_detail"] = {
-                    "total_facts": cr["total_facts"],
-                    "hit_facts": cr["hit_facts"],
-                    "failed_facts": cr.get("failed_facts", 0),
-                    "per_fact": cr["per_fact"],
-                    "reason": cr["reason"],
-                }
+                contexts = retr.get("results", [])
             except Exception as e:
-                print(f"  ⚠️  context_recall 计算失败: {e}", flush=True)
+                print(f"  ⚠️  检索失败: {e}", flush=True)
+                contexts = []
+
+            retrieval_time = round(time.time() - t0, 2)
+
+            # top5 / top8 切片（不足则取全部）
+            contexts_top5 = contexts[:5]
+            contexts_top8 = contexts[:8]
+
+            # 2. 计算指标（只跑 top8 一套 LLM 调用，top5 指标从结果推导，接近零额外成本）
+            metrics: dict[str, Any] = {}
+
+            # gold_rank（词汇模式零 LLM 成本，跨窗口诊断）
+            if q["category"] != "unanswerable" and q.get("key_facts"):
+                try:
+                    gr = await compute_gold_rank(
+                        q["key_facts"], contexts_top8,
+                        mode=gold_rank_mode, query_func=query_func,
+                    )
+                    metrics["gold_rank"] = gr
+                except Exception as e:
+                    print(f"  ⚠️  gold_rank 计算失败: {e}", flush=True)
+                    metrics["gold_rank"] = None
+
+            # context_recall：top5 和 top8 各跑一遍（LLM 调用量约 +50%，35题≈+100次）
+            # 无法从 top8 推导 top5，因为 judge 不记录 fact 命中在第几块
+            if q["category"] != "unanswerable" and q.get("key_facts"):
+                # top8 recall（完整窗口）
+                try:
+                    cr8 = await compute_context_recall(
+                        query_func, question_text, q["key_facts"], contexts_top8,
+                    )
+                    metrics["context_recall_top8"] = cr8["score"]
+                    metrics["context_recall_detail"] = {
+                        "total_facts": cr8["total_facts"],
+                        "hit_facts": cr8["hit_facts"],
+                        "failed_facts": cr8.get("failed_facts", 0),
+                        "per_fact": cr8["per_fact"],
+                        "reason": cr8["reason"],
+                        "window": "top8",
+                    }
+                except Exception as e:
+                    print(f"  ⚠️  context_recall top8 计算失败: {e}", flush=True)
+                    metrics["context_recall_top8"] = None
+
+                # top5 recall（窄窗口，回答"top5 够用吗"）
+                try:
+                    cr5 = await compute_context_recall(
+                        query_func, question_text, q["key_facts"], contexts_top5,
+                    )
+                    metrics["context_recall_top5"] = cr5["score"]
+                    metrics["context_recall"] = cr5["score"]  # 兼容字段默认 top5
+                    if metrics.get("context_recall_detail"):
+                        metrics["context_recall_detail"]["per_fact_top5"] = cr5["per_fact"]
+                        metrics["context_recall_detail"]["hit_facts_top5"] = cr5["hit_facts"]
+                except Exception as e:
+                    print(f"  ⚠️  context_recall top5 计算失败: {e}", flush=True)
+                    metrics["context_recall_top5"] = None
+                    metrics["context_recall"] = None
+            else:
                 metrics["context_recall"] = None
-        else:
-            metrics["context_recall"] = None
+                metrics["context_recall_top5"] = None
+                metrics["context_recall_top8"] = None
 
-        # context_precision
-        try:
-            cp = await compute_context_precision(
-                query_func, question_text,
-                q.get("ground_truth", ""), q.get("key_facts", []),
-                contexts,
-            )
-            metrics["context_precision"] = cp["score"]
-            metrics["context_precision_weighted"] = cp["weighted_score"]
-            metrics["context_precision_detail"] = {
-                "total_chunks": cp["total_chunks"],
-                "relevant_chunks": cp["relevant_chunks"],
-                "failed_chunks": cp.get("failed_chunks", 0),
-                "per_chunk": cp["per_chunk"],
-                "reason": cp["reason"],
+            # context_precision：只跑 top8（8 次 LLM 调用，top5 从 per_chunk 切片）
+            try:
+                cp8 = await compute_context_precision(
+                    query_func, question_text,
+                    q.get("ground_truth", ""), q.get("key_facts", []),
+                    contexts_top8,
+                )
+                metrics["context_precision_top8"] = cp8["score"]
+                metrics["context_precision_weighted_top8"] = cp8["weighted_score"]
+                metrics["context_precision_detail"] = {
+                    "total_chunks": cp8["total_chunks"],
+                    "relevant_chunks": cp8["relevant_chunks"],
+                    "failed_chunks": cp8.get("failed_chunks", 0),
+                    "per_chunk": cp8["per_chunk"],
+                    "reason": cp8["reason"],
+                    "window": "top8",
+                }
+
+                # top5 precision 从 per_chunk 切片推导
+                per_chunk_top5 = [c for c in cp8["per_chunk"] if c.get("rank") and c["rank"] <= 5]
+                evaluated5 = [c for c in per_chunk_top5 if c.get("relevant") is not None]
+                failed5 = len(per_chunk_top5) - len(evaluated5)
+                if evaluated5:
+                    rel_count5 = sum(1 for c in evaluated5 if c["relevant"])
+                    cp5_score = round(rel_count5 / len(evaluated5), 4)
+                    n5 = len(evaluated5)
+                    weights5 = [1.0 / (i + 1) for i in range(n5)]
+                    total_w5 = sum(weights5)
+                    cp5_weighted = round(
+                        sum(w * (1.0 if c["relevant"] else 0.0)
+                            for w, c in zip(weights5, evaluated5))
+                        / total_w5 if total_w5 else 0.0, 4
+                    )
+                else:
+                    cp5_score = None
+                    cp5_weighted = None
+                metrics["context_precision_top5"] = cp5_score
+                metrics["context_precision_weighted_top5"] = cp5_weighted
+                metrics["context_precision"] = cp5_score  # 兼容字段默认 top5
+                metrics["context_precision_weighted"] = cp5_weighted
+            except Exception as e:
+                print(f"  ⚠️  context_precision 计算失败: {e}", flush=True)
+                metrics["context_precision"] = None
+
+            total_time = round(time.time() - t0, 2)
+
+            result = {
+                "id": qid,
+                "category": q["category"],
+                "difficulty": q["difficulty"],
+                "question": question_text,
+                "retrieval": {
+                    "num_results": len(contexts),
+                    "top_docs": [c.get("full_doc_id", "?") for c in contexts[:5]],
+                    "time_s": retrieval_time,
+                },
+                "metrics": metrics,
+                "time_s": total_time,
             }
-        except Exception as e:
-            print(f"  ⚠️  context_precision 计算失败: {e}", flush=True)
-            metrics["context_precision"] = None
 
-        total_time = round(time.time() - t0, 2)
+            cr_val = metrics.get("context_recall")
+            cp_val = metrics.get("context_precision")
+            gr = metrics.get("gold_rank")
+            gr_info = f"  gr_avg={gr['avg_rank']}" if gr and gr.get('avg_rank') else ""
+            print(f"  recall={cr_val:.2f}" if cr_val is not None else "  recall=N/A",
+                  f"precision={cp_val:.2f}" if cp_val is not None else "precision=N/A",
+                  f"({total_time}s){gr_info}", flush=True)
 
-        result = {
-            "id": qid,
-            "category": q["category"],
-            "difficulty": q["difficulty"],
-            "question": question_text,
-            "retrieval": {
-                "num_results": len(contexts),
-                "top_docs": [c.get("full_doc_id", "?") for c in contexts[:5]],
-                "time_s": retrieval_time,
-            },
-            "metrics": metrics,
-            "time_s": total_time,
-        }
-
-        cr_val = metrics.get("context_recall")
-        cp_val = metrics.get("context_precision")
-        print(f"  recall={cr_val:.2f}" if cr_val is not None else "  recall=N/A",
-              f"precision={cp_val:.2f}" if cp_val is not None else "precision=N/A",
-              f"({total_time}s)", flush=True)
-
-        results.append(result)
+            results.append(result)
+    finally:
+        # 恢复原值
+        ret_mod.RERANK_TOP = orig_rerank_top
 
     return results
 
@@ -181,15 +261,19 @@ async def main_async(args: argparse.Namespace) -> None:
     print()
 
     # 确定 workspace
-    collection = args.collection or testset.get("collection", "default")
-    if collection == "default":
-        workspace = "default_ws"
-    elif collection == "eval_cservice":
-        workspace = "eval_cservice_ws"
-    elif collection == "eval_admin":
-        workspace = "eval_admin_ws"
+    if args.workspace:
+        workspace = args.workspace
+        collection = args.collection or workspace.rstrip("_ws")
     else:
-        workspace = collection  # 假设 collection id 即 workspace 名
+        collection = args.collection or testset.get("collection", "default")
+        if collection == "default":
+            workspace = "default_ws"
+        elif collection == "eval_cservice":
+            workspace = "eval_cservice_ws"
+        elif collection == "eval_admin":
+            workspace = "eval_admin_ws"
+        else:
+            workspace = collection  # 假设 collection id 即 workspace 名
 
     print(f"评测模式: {args.mode}")
     print(f"Collection: {collection} → workspace: {workspace}")
@@ -237,6 +321,8 @@ def main() -> None:
                         help="评测模式：retrieval=仅检索指标（Phase 1）；e2e=端到端（Phase 2）")
     parser.add_argument("--collection", default=None,
                         help="评测的 collection（缺省从测试集元数据读）")
+    parser.add_argument("--workspace", default=None,
+                        help="直接指定 workspace 名（绕过 collection→workspace 映射）")
     parser.add_argument("--report", default=None, help="报告输出路径")
     parser.add_argument("--limit", type=int, default=None,
                         help="只跑前 N 题（冒烟用）")
