@@ -23,6 +23,38 @@
 
 ---
 
+## [v5.10] 2026-09-24 —— 表格行列名上下文增强（M2 v1.3）
+
+**影响模块**：M2（v1.3，表格块 content 前置列名摘要行）。
+
+**动机**：table_numeric 类目的检索 Precision 卡在 0.40，方向 1（numeric_match 提权）已验证无效且有害。换思路从表示端入手——给表格行块加自然语言列名前缀，让 dense embedding 和 sparse 索引同时受益（Recall 维度）。
+
+**改动**：
+- M2 `chunker.py` `split_table_block()`：在表格 Markdown content 最前面插入列名增强行 `【表格：caption | 列：列名1 | 列名2 | ...】`，caption 有则加、列名必加。
+- HTML 预览字段（`html`）不受影响，不改 `_group_table_html`。
+- 行级切分后每个子块都带列名前缀（每组重复表头的同时，额外用自然语言列名摘要做语义前缀）。
+
+**全量评测（35 题 eval_cservice，报告 `tests/reports/run_retrieval_v5.10_col_prefix.json`）**：
+
+| 指标 | v5.9 基线 | v5.10 列名前缀 | Δ |
+|---|---|---|---|
+| Context Precision | 0.5657 | 0.5543 | -0.011 |
+| CP（加权） | 0.6817 | 0.6753 | -0.006 |
+| Context Recall | 0.9202 | 0.9323 | **+0.012** |
+
+**按类目 Recall 变化**：
+- table_numeric: 0.792 → 0.917（**+0.125** ⬆）
+- comparison: 0.738 → 0.900（**+0.163** ⬆）
+- fact_single: 0.975 → 0.925（-0.050）
+- fact_cross_doc: 0.929 → 0.893（-0.036）
+
+**结论**：
+- ✅ 列名前缀显著提升 Recall（table_numeric +0.125），相关表格行更容易被召回。
+- ⚠️ Precision 持平或微降——排序端（rerank + 五特征融合）没有能力把新增召回的正确答案排进 top-5。
+- 方向正确，后续收益在排序端：Recall 天花板被抬高了，下一步应优化数字型问题的排序策略（如表格块 numeric_match 增益、block_type 偏置等）。
+
+**文档更新**：[`M2_chunk.md`](modules/M2_chunk.md) v1.3。
+
 ## [v5.7] 2026-09-22 —— 表格双表示全链路打通 + M9 裁判稳定性改进（M2 v1.2 / M9 v1.1）
 
 **影响模块**：M2（v1.2 表格行级切分+双表示）、M7（v10.3 预览透传 html）、M8（v5.3 PreviewUnit.html + 表格渲染）、M9（v1.1 裁判稳定性 + 测试集修正 + 新基线）。M1 不动。

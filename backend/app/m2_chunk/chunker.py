@@ -141,6 +141,15 @@ def split_table_block(block: dict, max_rows: int = TABLE_SPLIT_ROWS) -> list[dic
     n = len(groups)
     for gi, (h, g_rows) in enumerate(groups):
         md_lines: list[str] = []
+        # 列名上下文增强（v5.10）：给表格行块前置自然语言列名摘要，
+        # 提升 dense embedding 和 sparse 索引对表格行的语义理解
+        col_prefix_parts = []
+        if caps:
+            col_prefix_parts.append("表格：" + "、".join(caps))
+        if h:
+            col_prefix_parts.append("列：" + " | ".join(h))
+        if col_prefix_parts:
+            md_lines.append("【" + " | ".join(col_prefix_parts) + "】")
         if gi == 0 and caps:
             md_lines.append(f"**{'、'.join(caps)}**")
         md_lines.append(_table_markdown(h, g_rows))

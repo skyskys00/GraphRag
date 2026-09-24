@@ -1,9 +1,9 @@
 # M2 模块记录：切分层
 
-> **版本：** v1.2
+> **版本：** v1.3
 > **状态：** 已落地
-> **更新：** 2026-09-22
-> **定位：** 标题驱动切块 + 表格整块（层级 0 双表示 content=MD/html + 层级 2 行级切分）→ TextUnit v2
+> **更新：** 2026-09-24
+> **定位：** 标题驱动切块 + 表格整块（层级 0 双表示 content=MD/html + 层级 2 行级切分 + v1.3 列名前缀增强）→ TextUnit v2
 > **契约：** blocks.jsonl → TextUnit v2 JSONL，见 [`M0_contracts/textunit.md`](M0_contracts/textunit.md)
 > **上游：** [M1 解析层](M1_parse.md) | **下游：** [M3 索引层](M3_index.md)
 > **依据：** [`FRAMEWORK_NOTES.md`](../FRAMEWORK_NOTES.md) §3
