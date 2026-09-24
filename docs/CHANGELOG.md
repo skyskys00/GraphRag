@@ -53,6 +53,10 @@
 - ⚠️ Precision 持平或微降——排序端（rerank + 五特征融合）没有能力把新增召回的正确答案排进 top-5。
 - 方向正确，后续收益在排序端：Recall 天花板被抬高了，下一步应优化数字型问题的排序策略（如表格块 numeric_match 增益、block_type 偏置等）。
 
+**v5.11 / v5.12 排序端探底（A+C 方案，无效，未占用版本号）**：基于 v5.10 尝试提升 CP——数字型问题中表格块 `numeric_match ×2.0` 增益（v5.11），并修复 numeric_match 两个 bug（1 位数字被过滤、空格不匹配「9 月 vs 9月」，v5.12）。全量评测结果与 v5.10 **逐字节一致**（CP 0.5543 / TN CP 0.400 / TN Recall 0.917，含逐题）。根因：4 题中 3 题 Recall 已满（1.0），numeric_match 类特征只调整已在 top5 内相关块的相对排序，无法把噪音块（CP 分母）替换掉，故对 CP/Recall 均无影响。**方向 A+C 关闭**。报告 `run_retrieval_v5.11_table_nm_boost.json` / `run_retrieval_v5.12_nm_fix_boost.json`。
+
+**v5.10 生成端实测（QA 补充）**：4 题 table_numeric 走完整 M5→M6 生成链路，CS-TN-001/002/004 答案完全正确（数值全对、无幻觉，噪音块不干扰），CS-TN-003 部分正确（2026E=425 亿答对，2023 年表未进 top5，如实说明未编造）。唯一缺陷题恰是 Recall=0.667 的 CS-TN-003——**CP 0.4 级噪音不影响生成质量，Recall 才是实际可用性约束**。报告 `qa_v510_table_numeric.json`。
+
 **文档更新**：[`M2_chunk.md`](modules/M2_chunk.md) v1.3。
 
 ## [v5.9] 2026-09-23 —— 多特征融合精排 + RERANK_TOP=5（M5 v1.12）
