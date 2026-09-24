@@ -61,10 +61,11 @@
 
 **评测工具升级（M9，非检索版本变化）**：
 
-新增 gold_rank 诊断维度 + 双窗口评测（`gold_rank.py` / `runner.py` / `report.py`）。
+新增 gold_rank 诊断维度 + 双窗口评测 + nDCG 排序质量指标（`gold_rank.py` / `ndcg.py` / `runner.py` / `report.py`）。
 
 - **gold_rank**：每个 gold fact 最早出现在检索结果第几名，输出 min/median/avg/max + top1/3/5/8 覆盖率曲线。双模式——词汇模式（默认，零 LLM 成本，基于数字 token + 关键词子串匹配，数值型事实较准、推导型漏检多）+ LLM 精确模式（flag 可选）。
 - **双窗口评测**：一次评测同时出 top5 和 top8 两套 recall/precision 指标，零额外检索成本，recall 约 +50% LLM 调用。回答「top5 够用吗」。
+- **nDCG@k**：排序质量的标准化单一对比数字，从 context_precision 的 per-chunk score（相关度 0~1）推导，零额外 LLM 成本。替代原规划的 MRR（MRR 从未实现，信息密度低于 nDCG）。
 - **CLI 新增**：`--workspace` 参数直接指定 workspace，绕过 collection 映射；`--limit` 冒烟测试。
 
 **v5.9 基线复测（新评测工具，报告 `run_retrieval_v5.9_goldrank.json`）**：

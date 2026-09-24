@@ -67,6 +67,10 @@ def build_report(
         "gold_rank_top3_recall": _avg_topk_recall(results, "3"),
         "gold_rank_top5_recall": _avg_topk_recall(results, "5"),
         "gold_rank_top8_recall": _avg_topk_recall(results, "8"),
+        # nDCG（排序质量，从 CP 的 per_chunk score 推导，零额外 LLM 成本）
+        "ndcg_top5": _avg(results, "ndcg_top5"),
+        "ndcg_top8": _avg(results, "ndcg_top8"),
+        "ndcg": _avg(results, "ndcg"),
     }
 
     # LLM 裁判失败统计（失败项已从均分排除，单列供追溯）
@@ -94,6 +98,8 @@ def build_report(
             "gold_rank_median": _avg_gr(lst, "median_rank"),
             "gold_rank_top5_recall": _avg_topk_recall(lst, "5"),
             "gold_rank_top8_recall": _avg_topk_recall(lst, "8"),
+            "ndcg_top5": _avg(lst, "ndcg_top5"),
+            "ndcg_top8": _avg(lst, "ndcg_top8"),
         }
 
     cat_stats = {}
@@ -152,6 +158,7 @@ def to_markdown(report: dict[str, Any]) -> str:
     lines.append(f"| Context Recall | {overall['context_recall_top5']:.4f} | {overall['context_recall_top8']:.4f} |")
     lines.append(f"| Context Precision | {overall['context_precision_top5']:.4f} | {overall['context_precision_top8']:.4f} |")
     lines.append(f"| Context Precision (加权) | {overall['context_precision_weighted_top5']:.4f} | {overall['context_precision_weighted_top8']:.4f} |")
+    lines.append(f"| nDCG | {overall['ndcg_top5']:.4f} | {overall['ndcg_top8']:.4f} |")
     gjf = overall.get('judge_failed_judgments', 0)
     if gjf:
         lines.append(f"| 裁判失败调用数 | {gjf} | — |")
@@ -178,14 +185,15 @@ def to_markdown(report: dict[str, Any]) -> str:
     lines.append("")
     lines.append("## 按题型分布")
     lines.append("")
-    lines.append("| 题型 | 题数 | Recall@5 | Recall@8 | Prec@5 | Prec@8 | GoldRank avg |")
-    lines.append("|---|---|---|---|---|---|---|")
+    lines.append("| 题型 | 题数 | Recall@5 | Recall@8 | Prec@5 | Prec@8 | nDCG@5 | GoldRank avg |")
+    lines.append("|---|---|---|---|---|---|---|---|")
     for cat, st in s["by_category"].items():
         gr_avg = st.get("gold_rank_avg", "—")
         gr_str = f"{gr_avg:.2f}" if isinstance(gr_avg, (int, float)) else "—"
+        ndcg5 = st.get("ndcg_top5", 0.0)
         lines.append(
             f"| {cat} | {st['count']} | {st['context_recall_top5']:.4f} | {st['context_recall_top8']:.4f} | "
-            f"{st['context_precision_top5']:.4f} | {st['context_precision_top8']:.4f} | {gr_str} |"
+            f"{st['context_precision_top5']:.4f} | {st['context_precision_top8']:.4f} | {ndcg5:.4f} | {gr_str} |"
         )
     lines.append("")
     lines.append("## 按难度分布")

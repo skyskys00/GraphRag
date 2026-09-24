@@ -79,6 +79,7 @@ async def evaluate_retrieval(
     from .metrics.context_precision import compute_context_precision
     from .metrics.context_recall import compute_context_recall
     from .metrics.gold_rank import compute_gold_rank
+    from .metrics.ndcg import compute_ndcg, ndcg_at_k
 
     # 评测用更大的候选窗口，便于同时出 top5/top8 两套指标
     orig_rerank_top = ret_mod.RERANK_TOP
@@ -210,6 +211,15 @@ async def evaluate_retrieval(
                 metrics["context_precision_weighted_top5"] = cp5_weighted
                 metrics["context_precision"] = cp5_score  # 兼容字段默认 top5
                 metrics["context_precision_weighted"] = cp5_weighted
+
+                # nDCG：从 per_chunk 的 score（相关度 0~1）推导，零额外 LLM 成本
+                # top8 nDCG 直接用完整 per_chunk 算
+                ndcg8 = ndcg_at_k(cp8["per_chunk"], 8)
+                metrics["ndcg_top8"] = ndcg8
+                # top5 nDCG 用 rank ≤5 的切片（按原始 rank）
+                ndcg5 = ndcg_at_k(cp8["per_chunk"], 5)
+                metrics["ndcg_top5"] = ndcg5
+                metrics["ndcg"] = ndcg5  # 兼容字段默认 top5
             except Exception as e:
                 print(f"  ⚠️  context_precision 计算失败: {e}", flush=True)
                 metrics["context_precision"] = None

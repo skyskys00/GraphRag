@@ -1,8 +1,8 @@
 # M9 模块规划：评测层
 
-> **版本：** v1.1
-> **状态：** 可用（retrieval 模式）；Phase 2/3 待执行
-> **更新：** 2026-09-22
+> **版本：** v1.3
+> **状态：** 可用（retrieval 模式 + gold_rank 诊断 + 双窗口 + nDCG）；Phase 2/3 待执行
+> **更新：** 2026-09-24
 > **定位：** 中文 RAG 系统量化评测——测试集 + 指标 + ablation + 回归
 > **契约：** 测试集（question + contexts + ground_truth）→ 评测报告（各指标分数 + 对比基线）
 > **上游：** [M5 检索层](M5_retrieve.md) / [M6 生成层](M6_generate.md) / [M7 交互层](M7_interact.md) | **下游：** 回归门禁 / 作品集量化数据 / README 展示
@@ -49,8 +49,9 @@
 |---|---|---|---|
 | **Context Recall** | 标准答案所需信息在检索结果中的覆盖率 | ground_truth 中有多少事实点出现在 retrieved contexts 里 | 召回够不够，会不会漏关键信息 |
 | **Context Precision** | 检索结果中相关 chunk 的比例 | top-k 里有多少 chunk 是真正相关的 | 噪音多不多，会不会把无关文档塞给 LLM |
+| **nDCG@k** | 排序质量的标准化单一数字 | 用 per-chunk 相关度（LLM 裁判给的 score）算 DCG/IDCG，零额外成本 | 整体排序好不好，相关块排得够不够靠前 |
 | **Hit Rate@k** | 标准答案至少出现在 top-k 中的比例 | 对每个问题，ground_truth 所在 chunk 是否在 top-k | 粗粒度召回能力 |
-| **MRR** | 第一个相关结果的倒数排名 | 1 / rank_of_first_relevant_chunk | 相关结果排得够不够靠前 |
+| **Gold Rank**（诊断） | 每个 gold fact 最早出现在第几块 | 对每个 key_fact，在检索结果中找第一个命中的 chunk，记录其排名；输出 avg/median/min/max + top-K 覆盖率曲线 | **排序质量诊断**——事实排得够不够靠前，top5 是否够用 |
 
 > 参考：RAGAS Context Precision / Context Recall。但 RAGAS 默认用英文模型判分，**中文场景需要自己接 DeepSeek flash 当裁判**（见 §4）。
 
@@ -188,6 +189,8 @@ reports/                      # 评测输出（gitignore，关键版本存档）
 | `metrics/` | 各指标实现 |
 | `metrics/context_recall.py` | 检索召回率（LLM 裁判 + key_facts 对照） |
 | `metrics/context_precision.py` | 检索精确度 |
+| `metrics/gold_rank.py` | Gold Rank 诊断（每个 fact 最早出现的排名，词汇模式 + LLM 模式） |
+| `metrics/ndcg.py` | nDCG@k 排序质量指标（从 CP 的 per_chunk score 推导，零额外成本） |
 | `metrics/faithfulness.py` | 答案忠实度 |
 | `metrics/answer_relevance.py` | 答案相关性 |
 | `metrics/correctness.py` | 答案正确性（需 ground_truth） |
@@ -342,6 +345,36 @@ RAGAS 是好工具，但**不直接用**，核心原因：
 - **每个版本发布前**（如 v5.3 / v6.0）：跑 50 题全量 + 记录到 CHANGELOG；
 - **ablation study**：v1.0 做一次完整的，后续大改检索策略时再重跑。
 
+### 7.5 Gold Rank 的定位：诊断工具，不是精确指标
+
+**Gold Rank 是排序质量诊断工具，不用于版本间的精确对比。** 原因：
+
+- **双模式设计**：词汇模式（默认，零成本）+ LLM 精确模式（flag 可选）。
+- **词汇模式的能力边界**：对数值型事实（含明确数字 token）命中率高，对推导型/纯文本事实大量漏检。实测 v5.9 基线 top5 覆盖率仅 52%（而 LLM recall 是 92%）。
+- **正确用法**：
+  - ✅ 看版本间 gold_rank 的**趋势变化**（avg_rank 降了/升了）
+  - ✅ 看 top-K 覆盖率曲线的**形状**（top1/top3/top5 分别多少，判断窗口是否够用）
+  - ✅ 定位「哪些 fact 排得靠后」，指导排序优化方向
+  - ❌ 不要拿 gold_rank top5 覆盖率当 recall 用（严重低估）
+  - ❌ 不要跨题型比较绝对值（数字型 vs 文本型命中率差异巨大）
+- **双窗口评测（top5 + top8）**：一次评测同时出两套 recall/precision，零额外检索成本，recall 约 +50% LLM 调用。用于回答「top5 够用吗」这类窗口敏感性问题。
+
+### 7.6 nDCG：排序质量的标准化单一对比数字
+
+**nDCG 是版本间排序质量对比的首选单一数字。** 与 Gold Rank 的定位互补：
+
+| 维度 | nDCG | Gold Rank |
+|---|---|---|
+| 粒度 | 查询级（一个 query 一个分数） | 事实级（每个 fact 一个排名） |
+| 计算方式 | 从 CP 的 per-chunk 相关度算 DCG/IDCG | 逐 fact 找最早命中 chunk |
+| 成本 | 零额外 LLM（纯后处理） | 词汇模式零成本，LLM 模式贵 |
+| 用途 | 版本间排序质量的单一对比数字 | 诊断排序细节，定位哪些 fact 排得靠后 |
+| 对推导型事实 | 准确（基于 LLM 裁判的相关度） | 词汇模式漏检多，LLM 模式才准 |
+
+**不做 MRR 的原因**：MRR 只看第一个相关块的倒数排名，信息太少——nDCG 考虑所有相关块的位置 + 相关度分级，是更全面的排序质量指标。MRR 从未在代码中实现，直接用 nDCG 替代。
+
+**公式**：DCG@k = Σ(2^rel_i - 1) / log2(i+1)，nDCG@k = DCG@k / IDCG@k（理想排序下的 DCG）。相关度直接用 LLM 裁判给的 per-chunk score（0~1 连续值）。
+
 ---
 
 ## 8. 遗留 / 后续（v2.0 及以后）
@@ -357,3 +390,6 @@ RAGAS 是好工具，但**不直接用**，核心原因：
 ## 9. 版本
 
 - **v0.1**（2026-09-21）：初始规划。定义定位、6 个核心指标、50 题测试集方案、7 组 ablation 设计、三阶段实施路线。
+- **v1.1**（2026-09-22）：Phase 1 落地。retrieval 模式可用，context_recall + context_precision + LLM 裁判缓存 + 35 题客服业务测试集。
+- **v1.2**（2026-09-24）：新增 gold_rank 诊断维度 + 双窗口评测（top5/top8 同跑）。gold_rank 双模式（词汇/LLM），定位为排序质量诊断工具而非精确指标。
+- **v1.3**（2026-09-24）：新增 nDCG@k 排序质量指标。从 CP 的 per_chunk score 推导，零额外 LLM 成本；MRR 不实现，由 nDCG 替代。
