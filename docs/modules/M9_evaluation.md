@@ -45,15 +45,20 @@
 
 ### 2.1 检索层指标（M5 输出）
 
-| 指标 | 含义 | 计算方式 | 关注点 |
-|---|---|---|---|
-| **Context Recall** | 标准答案所需信息在检索结果中的覆盖率 | ground_truth 中有多少事实点出现在 retrieved contexts 里 | 召回够不够，会不会漏关键信息 |
-| **Context Precision** | 检索结果中相关 chunk 的比例 | top-k 里有多少 chunk 是真正相关的 | 噪音多不多，会不会把无关文档塞给 LLM |
-| **nDCG@k** | 排序质量的标准化单一数字 | 用 per-chunk 相关度（LLM 裁判给的 score）算 DCG/IDCG，零额外成本 | 整体排序好不好，相关块排得够不够靠前 |
-| **Hit Rate@k** | 标准答案至少出现在 top-k 中的比例 | 对每个问题，ground_truth 所在 chunk 是否在 top-k | 粗粒度召回能力 |
-| **Gold Rank**（诊断） | 每个 gold fact 最早出现在第几块 | 对每个 key_fact，在检索结果中找第一个命中的 chunk，记录其排名；输出 avg/median/min/max + top-K 覆盖率曲线 | **排序质量诊断**——事实排得够不够靠前，top5 是否够用 |
+四个核心指标，各司其职：
+
+| 指标 | 含义 | 计算方式 | 关注点 | 主要用途 |
+|---|---|---|---|---|
+| **Context Recall** | 标准答案所需信息在检索结果中的覆盖率 | ground_truth 中有多少事实点出现在 retrieved contexts 里 | 召回够不够，会不会漏关键信息 | 召回层改动的核心对比指标 |
+| **Context Precision** | 检索结果中相关 chunk 的比例 | top-k 里有多少 chunk 是真正相关的 | 噪音多不多，会不会把无关文档塞给 LLM | 窗口大小 / 召回质量的辅助指标 |
+| **nDCG@k** | 排序质量的标准化单一数字 | 用 per-chunk 相关度（LLM 裁判给的 score）算 DCG/IDCG，零额外成本 | 整体排序好不好，相关块排得够不够靠前 | **排序层改动的核心对比指标** |
+| **Gold Rank**（诊断） | 每个 gold fact 最早出现在第几块 | 对每个 key_fact，在检索结果中找第一个命中的 chunk，记录其排名；输出 avg/median/min/max + top-K 覆盖率曲线 | 排序质量诊断——事实排得够不够靠前，top5 是否够用 | 定位问题、指导优化方向 |
 
 > 参考：RAGAS Context Precision / Context Recall。但 RAGAS 默认用英文模型判分，**中文场景需要自己接 DeepSeek flash 当裁判**（见 §4）。
+
+**不做的指标**：
+- **Hit Rate@k**：信息密度低于 Context Recall（只看有没有、不管覆盖率），冗余，不实现。
+- **MRR**：只看第一个相关块，信息太少，由 nDCG 替代（考虑所有相关块位置 + 相关度分级）。
 
 ### 2.2 生成层指标（M6 输出）
 
