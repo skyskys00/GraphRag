@@ -2,7 +2,14 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from typing import Any
+
+# 章级 strong marker：匹配「第一章/第3章/第一篇/第六部分」式标题。
+# MinerU pipeline（PDF 链路）用模型推断 text_level，实测常把「第X章」误判为与「X.Y」
+# 节同级（都=2），导致 chunker 弹栈策略丢掉章、title_path 退化为「文档名/节」、
+# sibling 展开为整文档目录；docx（office 后端读 Word 大纲）章值本来就是 1，恒等不变。
+_CHAPTER_RE = re.compile(r"^第(?:[一二三四五六七八九十百千万]+|[0-9０-９]+)[章节篇卷]")
 
 
 def _blockid(doc_id: str, i: int, text: str) -> str:
@@ -33,6 +40,9 @@ def build_blocks_from_mineru(data: list[dict], doc_id: str) -> list[dict]:
         bbox = it.get("bbox")
         typ = it.get("type") or "text"
         is_heading = bool(tl and tl >= 1)
+        # 标题层级再校准：章级 marker 强制为 1（PDF 模型误判章=节的修复点，
+        # 见 _CHAPTER_RE 注释；对 docx 无影响）。
+        level = 1 if (is_heading and _CHAPTER_RE.match(text)) else tl
 
         # MinerU 表格的 text 为 None，实际内容在 table_body（HTML）和 table_footnote 里
         if typ == "table":
@@ -68,7 +78,7 @@ def build_blocks_from_mineru(data: list[dict], doc_id: str) -> list[dict]:
             "content": content,
             "heading": text if is_heading else None,
             "parent_headings": [],
-            "level": tl,
+            "level": level,
             "session_type": "body",
             "table_slice": "none",
             "positions": positions,

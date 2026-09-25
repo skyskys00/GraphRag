@@ -1,8 +1,8 @@
 # M1 模块记录：解析层
 
-> **版本：** v1.3
-> **状态：** 已落地 + 实测复核（2026-09-21）
-> **更新：** 2026-09-21
+> **版本：** v1.4
+> **状态：** 已落地 + 实测复核（2026-09-21）+ 章级校准（2026-09-26，v5.20）
+> **更新：** 2026-09-26
 > **定位：** MinerU + Docling 双引擎解析，输出统一 blocks.jsonl
 > **契约：** 原始文档 → blocks.jsonl（page_label / block_type / anchor 扩展字段），见 [`M0_contracts/parse.md`](M0_contracts/parse.md)
 > **上游：** 原始文档（PDF / DOCX / PPTX / HTML / …） | **下游：** [M2 切分层](M2_chunk.md)
@@ -73,7 +73,7 @@ conda run -n graphrag python -m app.m1_parse.run -s inputs/raw/Mini-OpenClaw.pdf
 
 1. ✅ **表格 content 渲染**：docx 表格块 content 用 `TableItem.export_to_html(doc)` 渲染为完整 `<table>` HTML（实测已含表头/单元格内容）；兜底从 `data_table` 拼文本行。
 2. **docx anchor 降级**（已定）：不写 paraId 补丁，anchor 保持 null，引用退化为「文件 + 文本片段」；后续按实际效果再决定是否补 `msword_backend` 插桩。
-3. **text_level 深标题校准（暂缓）**：先以跑通为目标（标题=2 / 正文=null）；若切分/检索效果不足或需细分层级，再在多文档上校准 0/1/2 语义。
+3. **text_level 深标题校准（PDF 章级已落地，v5.20）**：MinerU PDF 链路模型推断 text_level 常把「第X章」误判为与「X.Y」节同级（都=2），`blocks_builder` 已用 `_CHAPTER_RE`（`^第[…]…[章节篇卷]`）强制 level=1，chunker 弹栈后 title_path 恢复章→节结构；docx 章值本为 1 不参与。多级深标题（节下再分层）仍是模型推断，未做进一步细分——待切分/检索效果不足时再校准 0/1/2 语义。
 
 ## 8. 版本
 

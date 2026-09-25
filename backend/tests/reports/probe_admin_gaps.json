@@ -1,0 +1,114 @@
+[
+  {
+    "qid": "adm_q004",
+    "query": "出差到上海，普通员工的住宿标准是多少元一晚？",
+    "routes_summary": "graph[20] vector[20] keyword[40]",
+    "rows": [
+      {
+        "chunk": "chunk-47930c608e5f8ce0fb",
+        "label": "A2 3.1 城市分级表（上海=一类）",
+        "in_graph": false,
+        "in_vector": false,
+        "in_keyword": false,
+        "rrf_score": null,
+        "rrf_has": false,
+        "rerank_score": null,
+        "fused_rank(0-based)": null,
+        "fused_score": null,
+        "final_rank(top8)": null
+      },
+      {
+        "chunk": "chunk-4d323af7021bf93884",
+        "label": "A2 3.2 住宿费标准表（普通员工 一类=350）",
+        "in_graph": true,
+        "in_vector": true,
+        "in_keyword": true,
+        "rrf_score": 0.04918,
+        "rrf_has": true,
+        "rerank_score": 0.8718,
+        "fused_rank(0-based)": 0,
+        "fused_score": 0.78578,
+        "final_rank(top8)": 1
+      }
+    ]
+  },
+  {
+    "qid": "adm_q008",
+    "query": "员工出差期间，公司配备的笔记本电脑如果丢失了，应该怎么处理？涉及哪些制度？",
+    "routes_summary": "graph[20] vector[20] keyword[40]",
+    "rows": [
+      {
+        "chunk": "chunk-522ca76443e15487b3",
+        "label": "A3 6.2 赔偿标准表（疏忽大意30%）",
+        "in_graph": false,
+        "in_vector": false,
+        "in_keyword": false,
+        "rrf_score": null,
+        "rrf_has": false,
+        "rerank_score": null,
+        "fused_rank(0-based)": null,
+        "fused_score": null,
+        "final_rank(top8)": null
+      },
+      {
+        "chunk": "chunk-6a37820369f8b15dce",
+        "label": "A3 6.2 赔偿比例明细表（故意100%）",
+        "in_graph": false,
+        "in_vector": false,
+        "in_keyword": false,
+        "rrf_score": null,
+        "rrf_has": false,
+        "rerank_score": null,
+        "fused_rank(0-based)": null,
+        "fused_score": null,
+        "final_rank(top8)": null
+      },
+      {
+        "chunk": "chunk-771d3fbdcab9e0fd9e",
+        "label": "A3 第六章 遗失损坏赔偿（章节块）",
+        "in_graph": true,
+        "in_vector": true,
+        "in_keyword": true,
+        "rrf_score": 0.04918,
+        "rrf_has": true,
+        "rerank_score": 0.9683,
+        "fused_rank(0-based)": 0,
+        "fused_score": 0.75,
+        "final_rank(top8)": 1
+      }
+    ]
+  },
+  {
+    "qid": "adm_q013",
+    "query": "一个25人的部门，每月可以领多少箱A4打印纸？",
+    "routes_summary": "graph[20] vector[20] keyword[40]",
+    "rows": [
+      {
+        "chunk": "chunk-bb0c843f8a60019920",
+        "label": "A1 配纸量表（20-50人=4箱）",
+        "in_graph": true,
+        "in_vector": true,
+        "in_keyword": true,
+        "rrf_score": 0.04813,
+        "rrf_has": true,
+        "rerank_score": 0.6292,
+        "fused_rank(0-based)": 1,
+        "fused_score": 0.56398,
+        "final_rank(top8)": 2
+      },
+      {
+        "chunk": "chunk-163119c008a647d0d2",
+        "label": "A1 每箱=5包=2500张（换算注）",
+        "in_graph": true,
+        "in_vector": true,
+        "in_keyword": true,
+        "rrf_score": 0.04918,
+        "rrf_has": true,
+        "rerank_score": 0.9609,
+        "fused_rank(0-based)": 0,
+        "fused_score": 0.78626,
+        "final_rank(top8)": 1
+      }
+    ]
+  }
+]

@@ -23,6 +23,28 @@
 
 ---
 
+## [v5.20] 2026-09-26 —— PDF 章级标题层级校准（M1 v1.3→v1.4）+ 表格语义注入探针结论归档
+
+**影响模块**：M1 解析层（`blocks_builder.py`，PDF 链路章误判修复）。检索/生成业务代码无改动。
+
+**修复（chapter fix）**：MinerU pipeline（PDF 链路）用模型推断 text_level，实测常把「第X章 / 第3节」式章级标题误判为 level=2（与「X.Y」节同级），导致 chunker 弹栈策略把章标题丢弃、title_path 退化为「文档名/节」、章下块的 sibling 展开为整文档目录；docx（office 后端读 Word 大纲）章值本来=1，恒等不受影响。修复：`blocks_builder.build_blocks_from_mineru` 对 `_CHAPTER_RE`（`^第[一二三四五六七八九十百千万]+|[0-9０-９]+[章节篇卷]`）匹配的标题强制 level=1。
+
+**验证**（`tests/reports/run_retr_admin_30_v520.json`，30 题检索基线）：重建 eval_admin 6 文档后 title_path 分层恢复（章→节），检索指标 recall 0.9524 / prec 0.46 / nDCG@5 **0.8567** —— 与 v5.19 baseline 逐题完全一致（q002/q009/q013 等对得上）。双重证明：(a) chapter fix 是纯解析正确性修正，检索语义零回归；(b) eval_admin 重建后 PG dense/graph 与重建前等价、无重复块污染，后续对比可放心以 v5.19/v5.20 为基线。
+
+**探针结论归档（M2 表格语义注入，全部三连收尾，不落地）**：`sib`（父标题+兄弟小节）前缀注入 sparse、`genmeta` 通用启发式元表跳过、`NL_SUM` 表格 NL 摘要进 sparse，三个方向独立探测 30 题全量：
+
+| 变体 | nDCG@5 | Rec@5 | 判定 |
+|---|---|---|---|
+| v5.19/v5.20 baseline（无注入） | **0.8567** | 0.9524 | — |
+| 注入（sib+genmeta） | 0.8473 | 0.9613 | **-0.94pt，真实排序回归** |
+| 注入 + NL_SUM（摘要进 sparse） | 0.8499 | 0.9613 | +0.0026，杯水车薪 |
+
+- 注入只稳定增益 3 题查全（q010 rec5 0.5→0.75、q020 q024 小升），代价是 q002 0.919→0.748 / q009 0.989→0.911 / q012 0.988→0.902 / q013 0.760→0.698，三个注入变体完全一致 → **排序层改动，非 judge 噪声**。
+- 注入对 title_path 结构敏感：旧（错误）title_path 下 #+0.0006、正确 title_path 下 -0.94pt。
+- 探针脚本留档 `backend/scripts/probe_m2_inject_all.py / probe_m2_inject_rank.py`（可复跑），报告归档 `tests/reports/probe_*`。表格进不了候选集的缺口**留给后续方案**（结构化/专用 reranker），本次不落地。
+
+---
+
 ## [v5.19] 2026-09-25 —— 行政库完整版：6 文档 / 30 题测试集 + 首轮全量检索与 e2e 评测 + 裁判一致性抽检（M9 v1.8→v1.9）
 
 **影响模块**：M9 评测层（admin 30 题检索基线 + e2e 四指标）+ 建库脚本（`build_eval_admin.py`）+ 测试集（`testset_admin_30.json` v0.2）。无检索/生成业务代码改动。

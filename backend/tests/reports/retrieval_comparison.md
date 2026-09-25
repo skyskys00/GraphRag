@@ -119,3 +119,44 @@
 - 数据来源：`tests/reports/run_retrieval_*.json`（机器可读原始数据）
 - Recall / Precision 由 LLM 裁判判分；v5.9-top5 对应 `run_retrieval_v5.9_top5.json`
 - unanswerable 类 recall=0 符合预期（材料中无答案，检索系统不应召回）
+
+---
+
+# 行政库（eval_admin）表格语义注入与 title_path 校准（v5.19→v5.20，2026-09-26）
+
+> 测试集：`testset_admin_30.json`（行政库 30 题） | 探索目标：**表格块因 content 无 query 词汇重叠而进不了候选集**的 M2 层修复探索。
+> 本轮所有指标为**同测试集、同裁判、同配置**的横向对比；nDCG 为排序层唯一权威指标（judge 的 context_precision 波动大）。基准线：v5.19 baseline + 本轮的 「chapfix 数据无注入」复现（两者逐题一致 = 数据链干净）。
+
+## 关键前提验证（confound 排除）
+
+- PG 重建后各 doc chunk 数 = 磁盘 chunks.jsonl 行数（40/25/42/35/21/40，零重复）→ dense/graph 无重建残留污染。
+- **chapter fix 数据下「无注入」纯检索 = 0.8567 / recall 0.9524，与 v5.19 baseline 逐题完全一致**（q002/q009/q013 对得上）→ 证明 (a) chapter fix 零检索伤害、(b) 重建前后 PG 完全等价。
+
+## 已落地：chapter fix（M1 解析正确性，v5.20）
+
+- **改什么**：`blocks_builder._CHAPTER_RE` 对 `第X章/第3节/第一篇/卷` 式标题在 PDF 链路强制 level=1。MinerU 模型推断 text_level 常把章误判为与「X.Y」节同级（=2），导致 chunker 弹栈丢章、title_path 退化为「文档名/节」、sibling 展开为整文档目录。docx（读 Word 大纲）章值本为 1，恒等不变。
+- **效果**：title_path 分层恢复（章→节）；检索指标与 baseline 完全一致（0.8567）——**纯解析修复，语义零回归**。
+- 报告：`tests/reports/run_retr_admin_30_v520.json`。
+
+## 已确定无效（探底三连收尾，不落地）
+
+| 变体 | nDCG@5 | Rec@5 | 判定与根因 |
+|---|---|---|---|
+| baseline / chapfix 无注入 | **0.8567** | 0.9524 | — |
+| 注入 sib+genmeta（全量表块前缀「父标题+本表章节含…」重编码 sparse） | 0.8473 | 0.9613 | **-0.94pt**：q002 0.919→0.748 / q009 0.989→0.911 / q012 0.988→0.902 / q013 0.760→0.698，三个注入变体完全一致 → **真实排序回归，非 judge 噪声** |
+| 注入 + NL_SUM（表格 NL 摘要进 sparse 向量） | 0.8499 | 0.9613 | **+0.0026 杯水车薪**：摘要进不进召回池不是瓶颈 |
+
+- **注入对 title_path 结构敏感**：旧（错误）title_path 下 #×0.0006、正确 title_path 下 -0.94pt——全量 sibling 前缀在正确层级下过曝回吐。
+- 探针脚本留档：`scripts/probe_m2_inject_all.py`（全量）、`scripts/probe_m2_inject_rank.py`（排序级判定）；报告 `tests/reports/probe_m2_inject_*`。
+
+## 可能有效的线索（数据指向，暂不落地）
+
+- 注入的**唯一稳定增益是 3 题查全**：q010 rec5 0.5→0.75、q020 0.773→0.866、q024 0.949→0.975——确凿证明「语义前缀能把表块拉进 top5」对特定 query 有效，且这 3 题全部是表块此前进不了候选集的缺口题。
+- **可挖方向**：不做全量 sibling 展开，改为「只加父标题」（扁平退化 FLAT_DEGRADE 已在探针中验证无大碍但未细测）、或按 query 类型定向注入。当前未达落地门槛（全局 -1pt 不抵 3 题增益），留待更优口径。
+- **共同教训（与客服库 v5.13 呼应）**：表格语义缺口可发生在召回层（表进不了候选集）也可在 reranker 层（表在池内但 cross-encoder 失明）。admin 探针证明召回层缺陷能靠前缀打开（q010/q020/q024），但全量展开的代价是过曝——**缺口真实存在，手段需精准**。
+
+## 遗留缺口（表格进候选集）的后续候选方向
+
+1. **表格结构化专用索引/检索**（列名→语义、行值→数值匹配），绕过 sparse 词汇失明。
+2. **LLM 生成高质量表摘要**（v5.13 规则版升级路径，`table_summary.py` 已留接口）。
+3. **注入口径精准化**（父标题 only / 题型定向），在保住 q010/q020/q024 增益的同时消除过曝回归。
