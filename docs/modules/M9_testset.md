@@ -1,7 +1,7 @@
 # M9 测试语料与测试集设计规范
 
-> **版本：** v0.4
-> **状态：** 客服业务库 50 题完整版已落地（2026-09-24）+ 5 题 GT 修正（2026-09-25）+ 裁判校准（v1.5，2026-09-25）；**办公行政库 15 题最小集已落地（2026-09-25，已建库 + 首轮检索基线评测）**
+> **版本：** v0.7
+> **状态：** 客服业务库 50 题完整版已落地（2026-09-24）+ 5 题 GT 修正（2026-09-25）+ 裁判校准（v1.5，2026-09-25）；**办公行政库 15 题最小集已落地（2026-09-25，已建库 + 检索基线评测 + 表格 NL 摘要复用激活 + e2e 生成四指标评测）**
 > **更新：** 2026-09-25
 > **定位：** M9 评测层的测试语料（知识库文档）与测试题集的设计标准、清单与构造流程
 > **契约：** 评测语料 → 测试集 JSON → 供 [M9_evaluation.md](M9_evaluation.md) runner 使用
@@ -424,7 +424,9 @@ backend/
 
 ## 10. 版本
 
-- **v0.5**（2026-09-25）：**办公行政库 15 题最小集落地（eval_admin）**。`testset_admin_15.json` 审查通过（14 题 GT 对照语料通过，难度 7/7/1），修正 adm_q010（FAS）GT——该缩写仅以固定资产办法编号 FIN-FAS-2024-002 片段出现、无业务定义，「船边交货/财务会计准则」系写题臆造。语料建库 3 篇 117 chunks，首轮检索基线评测出值（见 [M9_evaluation.md §8.1](M9_evaluation.md#81-办公行政库eval_admin首轮检索基线2026-09-25m9-v15--v16) 与 [CHANGELOG](../CHANGELOG.md) v5.16）。
+- **v0.7**（2026-09-25）：**行政库 e2e 生成四指标首次出值**。15 题全量 e2e（`tests/reports/run_e2e_admin_15.json`，judge_failed=0，9.3 分钟）：faithfulness 0.9277 / answer_relevance 0.9000 / correctness 0.9373 / citation_accuracy 0.8928。拒答验证通过（adm_q015 正确拒答）、干扰题行为正确（adm_q010 如实答「FAS 无业务定义」）、检索缺口传导到生成（adm_q004 跨表依赖 correctness 0.5）。详见 [M9_evaluation.md §8.1b](M9_evaluation.md#81b-行政库e2e生成质量评测2026-09-25m9-v17--v18) 与 [CHANGELOG](../CHANGELOG.md) v5.18。
+- **v0.6**（2026-09-25）：**行政库表格链路复用表格 NL 摘要**。排查修正 v5.16 结论（q013 非「建库未套用摘要」，真因是稀疏索引缺 block_type 元数据：M7 `build_workspace_deps` 重建 sparse 漏传 `chunks_dir`）。M7 修复 + admin sparse 重建后检索复测出值（Rec@5 0.9405→0.9583 / Prec@5 加权 0.5878→0.6122 / nDCG@5 0.8518→0.8649，`adm_q012` nDCG 0.83→0.99）；q013/q014 排序不变确认表格碎片化为 M2 行级切分独立问题。详见 [CHANGELOG](../CHANGELOG.md) v5.17 与 [M9_evaluation.md §8.1a](M9_evaluation.md#81a-表格-nl-摘要激活后复测2026-09-25m9-v16--v17)。
+- **v0.5**（2026-09-25）：**办公行政库 15 题最小集落地（eval_admin）**。`testset_admin_15.json` 审查通过（14 题 GT 对照语料通过，难度 7/7/1），修正 adm_q010（FAS）GT——该缩写仅以固定资产办法编号 FIN-FAS-2024-002 片段出现、无业务定义，「船边交货/财务会计准则」系写题臆造。语料建库 3 篇 117 chunks，首轮检索基线评测出值（见 [M9_evaluation.md §8.1](M9_evaluation.md) 与 [CHANGELOG](../CHANGELOG.md) v5.16）。
 - **v0.4**（2026-09-25）：**裁判校准**。correctness 裁判 prompt 校准（分母改标准答案事实点 + 语义对齐含译名 + 额外不扣分 + 比例分），judge 透传 total_facts/correct_facts/incorrect，新增重判脚本 `scripts/rejudge_correctness.py`。全量重判后 correctness 0.8321→**0.8353**（详见 §8 与 [CHANGELOG](../CHANGELOG.md) v5.15）。
 - **v0.3**（2026-09-25）：**Phase 2 生成质量评测落地 + GT 修正 6 处**。50 题全量 e2e 生成四指标首次出值（faithfulness/answer_relevance/correctness/citation_accuracy，终值见 §8），裁判一致性人工抽检执行（7/10）。测试集纠错（先改 `testset_cservice_35.json` 源 → 重跑 `build_testset_50.py` 同步 50 题）。修正清单：
   - `CS-FC-005`（**两次修正**）：①Q3 整体 ART「38 秒」→「45 秒」（38 秒是华东大区，整体 45 秒）；②题目改为「「响应时间」在客服业务中有哪几种不同的定义？」，GT 重写为**三概念全列**（①客户响应时限=SOP 分级响应 SLA，4h/1h/15min，面向客户按工作时间计；②ART 平均响应时间=系统性能/KPI 指标，目标 ≤30 秒、Q3 实际 45 秒；③AHT 平均处理时长=工单打开到关闭平均耗时，目标三级投诉 ≤2 小时、Q3 实际 2.4 小时），key_facts 6 条，must_have_docs 增补 D3。correctness 0.25→**0.643**（修正前答案选对了全部三个概念，只是组合/数字表述受限）。

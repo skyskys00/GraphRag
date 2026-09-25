@@ -1,7 +1,7 @@
 # M9 模块规划：评测层
 
-> **版本：** v1.6
-> **状态：** 可用（retrieval 模式 + gold_rank 诊断 + 双窗口 + nDCG + **e2e 生成四指标** + **行政库检索基线**）；Phase 3 待执行
+> **版本：** v1.8
+> **状态：** 可用（retrieval 模式 + gold_rank 诊断 + 双窗口 + nDCG + **e2e 生成四指标** + **行政库检索基线 / NL 摘要激活复测 / e2e 生成质量评测**）；Phase 3 待执行
 > **更新：** 2026-09-25
 > **定位：** 中文 RAG 系统量化评测——测试集 + 指标 + ablation + 回归
 > **契约：** 测试集（question + contexts + ground_truth）→ 评测报告（各指标分数 + 对比基线）
@@ -384,7 +384,7 @@ RAGAS 是好工具，但**不直接用**，核心原因：
 
 ## 8. 评测结果快照（按库）
 
-### 8.1 办公行政库（eval_admin）首轮检索基线（2026-09-25，M9 v1.5 → v1.6）
+### 8.1 办公行政库（eval_admin）检索基线（2026-09-25，M9 v1.5 → v1.7）
 
 15 题最小集（`testsets/testset_admin_15.json`，建库 3 篇 117 chunks）retrieval 模式评测（`tests/reports/run_retr_admin_baseline.json`，双窗口 top5/top8）：
 
@@ -406,6 +406,45 @@ gold_rank top5 覆盖率仅 0.261（客服库 v5.9 基线 52%）——行政库�
 
 报告：`backend/tests/reports/run_retr_admin_baseline.json`。e2e 生成四指标评测留待下一轮。
 
+### 8.1a 表格 NL 摘要激活后复测（2026-09-25，M9 v1.6 → v1.7）
+
+**背景**：v5.16 对 q013 的「建库未套用 table_nl_summary」推断经排查**修正**——真正根因是稀疏索引缺 `block_type` 元数据（M7 `build_workspace_deps` 重建 sparse 漏传 `chunks_dir`，`sparse_index.build` 从不读 chunk jsonl 顶层的 block_type），导致 `build_rerank_text` 对 admin 表格块从未触发 NL 摘要注入。修复 + 重建后复测（`tests/reports/run_retr_admin_nl.json`）：
+
+| 指标 | v5.16 基线 | v5.17（NL 摘要激活） | Δ |
+|---|---|---|---|
+| Context Recall@5 | 0.9405 | **0.9583** | +0.0178 |
+| Context Precision（加权）@5 | 0.5878 | **0.6122** | +0.0244 |
+| nDCG@5 | 0.8518 | **0.8649** | +0.0131 |
+| gold_rank avg | 1.67 | **1.50** | -0.17 |
+
+- **最大受益题** `adm_q012`（comparison，城市分级↔住宿标准关联）：nDCG@5 **0.8291 → 0.9877**、加权 Prec@5 0.3285 → 0.6569——NL 摘要注入后 cross-encoder 对表格块语义匹配显著提升，是能力已激活的直接证据。
+- **边界**：`adm_q013`/`adm_q014`（table_numeric）排序逐项不变——q013 碎片化的本质是 **M2 行级切分**（配纸量表拆成 3 行 + 1 行的块），NL 摘要提供的是每个碎片的局部摘要，不跨行补全；recall@5 均 1.0 证明事实未被漏掉，属排序质量问题。与客服库 v5.13 探底结论一致。
+
+详见 [CHANGELOG](../CHANGELOG.md) v5.17。
+
+### 8.1b 行政库 e2e 生成质量评测（2026-09-25，M9 v1.7 → v1.8）
+
+15 题最小集全量 e2e（`tests/reports/run_e2e_admin_15.json`，judge_failed=0，耗时 556.4s≈9.3 分钟 < 10 分钟验收线），生成输入为 v5.17 NL 摘要激活后的检索结果：
+
+| 指标 | e2e 值 | 客服库 50 题参考 | 说明 |
+|---|---|---|---|
+| Faithfulness | **0.9277** | 0.9194 | 答案对检索上下文的忠实度 |
+| Answer Relevance | **0.9000** | 0.9390 | 答案与问题的相关度 |
+| Correctness | **0.9373** | 0.8353 | 与标准答案的事实一致性 |
+| Citation Accuracy | **0.8928** | 0.8465 | [n] 引用支撑对应陈述的准确率 |
+| Context Recall@5 | 0.9583 | 0.9601 | 关键事实覆盖率（检索侧，与 v5.17 复测一致） |
+| Context Precision（加权）@5 | 0.6122 | 0.5120 | top5 相关块占比（加权） |
+
+> 两库题型/题数不同，数值不作横向排名——仅作为「同一套系统参数在第二垂直域端到端表现正常」的泛化信号。
+
+**逐题要点**：
+- **拒答验证通过** `adm_q015`（unanswerable）：材料无年假天数事实（v5.16 检索诊断 prec@5 0.0「拒答前提成立」→ e2e 正确拒答），correctness **1.0**。
+- **干扰题行为正确** `adm_q010`（FAS）：材料仅含编号片段无业务定义，系统如实作答（correctness 1.0），answer_relevance 0.2 属该题设计预期（检索不被字符命中骗到即达标）。
+- **检索缺口传导** `adm_q004`（跨表依赖）：城市分级表未随住宿表召回 → correctness **0.5**（缺「上海属一类城市」），检索缺口如实反映到生成分数，指标链路有效。
+- **faithfulness 最低 `adm_q011` 0.57**：剩余短板，待人工抽检区分「裁判严判 vs 真实幻觉」。
+
+详见 [CHANGELOG](../CHANGELOG.md) v5.18。
+
 ---
 
 ## 9. 遗留 / 后续（v2.0 及以后）
@@ -426,4 +465,6 @@ gold_rank top5 覆盖率仅 0.261（客服库 v5.9 基线 52%）——行政库�
 - **v1.3**（2026-09-24）：新增 nDCG@k 排序质量指标。从 CP 的 per_chunk score 推导，零额外 LLM 成本；MRR 不实现，由 nDCG 替代。
 - **v1.4**（2026-09-25）：Phase 2 落地。e2e 生成四指标：faithfulness / answer_relevance / correctness / citation_accuracy（各自 LLM 裁判 + 缓存）；50 题客服业务测试集全量跑通 + 逐题可追溯（ground_truth/key_facts/retrieval/gen_meta）；裁判一致性人工抽检（10 题，LLM 判定与人工一致性约 7/10，偏差集中在「表述不同但实质覆盖」被裁判低估）。测试集 GT 修正 5 题（CS-FC-005/007、CS-CP-003/004、CS-SM-001，含 CS-CP-004 人工抽检发现 v1.0 指标目标纯属幻觉→GT 改为「不可比」）。
 - **v1.5**（2026-09-25）：裁判校准。correctness 裁判 prompt 校准（分母改标准答案事实点 + 语义对齐含中文译名 + 额外正确信息不计入分母 + 部分覆盖按比例），judge 透传 total_facts/correct_facts/incorrect。全量重判 correctness 0.8321→**0.8353**（详见 [CHANGELOG](../CHANGELOG.md) v5.15）。
-- **v1.6**（2026-09-25）：行政库（eval_admin）首轮检索基线。15 题最小集 retrieval 模式评测出值（Recall@5 0.9405 / Prec@5 0.5878 / nDCG@5 0.8518），逐题检索质量诊断定位四大问题（q013 表碎片化、q004 跨表依赖、q010 字符串命中、q015 拒答前提成立），gold_rank 词汇模式 top5 覆盖率 0.261 印证 [§7.5](M9_evaluation.md) 文档型事实边界。详见 [CHANGELOG](../CHANGELOG.md) v5.16 与本文 [§8.1](#81-办公行政库eval_admin首轮检索基线2026-09-25m9-v15--v16)。
+- **v1.7**（2026-09-25）：行政库表格 NL 摘要激活。排查并修正 v5.16 推断（q013 非「建库未套用摘要」，真因是稀疏索引缺 block_type → M7 `build_workspace_deps` 漏传 `chunks_dir`）；M7 修复 + admin sparse 重建后复测（`tests/reports/run_retr_admin_nl.json`），Recall@5 0.9405→0.9583、加权 Prec@5 0.5878→0.6122、nDCG@5 0.8518→0.8649，`adm_q012` nDCG 0.83→0.99（能力生效直接证据）；q013/q014 排序不变——表格碎片化确认为 M2 行级切分独立问题。详见 [§8.1a](#81a-表格-nl-摘要激活后复测2026-09-25m9-v16--v17) 与 [CHANGELOG](../CHANGELOG.md) v5.17。
+- **v1.6**（2026-09-25）：行政库（eval_admin）首轮检索基线。15 题最小集 retrieval 模式评测出值（Recall@5 0.9405 / Prec@5 0.5878 / nDCG@5 0.8518），逐题检索质量诊断定位四大问题（q013 表碎片化、q004 跨表依赖、q010 字符串命中、q015 拒答前提成立），gold_rank 词汇模式 top5 覆盖率 0.261 印证 [§7.5](M9_evaluation.md) 文档型事实边界。详见 [CHANGELOG](../CHANGELOG.md) v5.16 与本文 §8.1。
+- **v1.8**（2026-09-25）：行政库 e2e 生成质量评测。15 题全量四指标首次出值（faithfulness 0.9277 / answer_relevance 0.9000 / correctness 0.9373 / citation_accuracy 0.8928，judge_failed=0，耗时 9.3 分钟），拒答验证通过（q015 正确拒答）、干扰题行为正确（q010）、检索缺口传导到生成（q004 correctness 0.5）。详见 [§8.1b](#81b-行政库e2e生成质量评测2026-09-25m9-v17--v18) 与 [CHANGELOG](../CHANGELOG.md) v5.18。

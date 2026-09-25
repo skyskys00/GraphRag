@@ -23,6 +23,64 @@
 
 ---
 
+## [v5.18] 2026-09-25 —— 行政库（eval_admin）e2e 生成质量评测：15 题四指标首次出值 + 拒答验证（M9 v1.7→v1.8）
+
+**影响模块**：M9 评测层（admin e2e 生成四指标落地）。无业务代码改动，纯评测消费已有检索/生成链路。
+
+**背景**：v5.17 激活表格 NL 摘要后跑过的 admin 检索基线（`run_retr_admin_nl.json`）作为生成输入的检索结果，跑 15 题全量 e2e，作为「第二域泛化」证据（同一套系统参数在另一个垂直域的端到端表现）。
+
+**评测结果**（`tests/reports/run_e2e_admin_15.json`，15 题全量，judge_failed=0，耗时 **556.4s ≈ 9.3 分钟** < 10 分钟验收线）：
+
+| 指标 | e2e 值 | 客服库 50 题参考 |
+|---|---|---|
+| Faithfulness | **0.9277** | 0.9194 |
+| Answer Relevance | **0.9000** | 0.9390 |
+| Correctness | **0.9373** | 0.8353 |
+| Citation Accuracy | **0.8928** | 0.8465 |
+| Context Recall@5 | 0.9583 | 0.9601 |
+| Context Precision（加权）@5 | 0.6122 | 0.5120 |
+> 两库题型/题数不同，不横向排名，仅作「同一参数另一域表现正常」的泛化信号。
+
+**逐题亮点**：
+- **拒答验证通过** `adm_q015`（unanswerable，年假天数）：材料无此事实（v5.16 检索诊断 prec@5 0.0「拒答前提成立」），e2e 系统正确以「材料未提供相关信息」拒答，correctness **1.0**。
+- **干扰题行为正确** `adm_q010`（proper_noun，FAS）：材料中 FAS 仅以固定资产办法编号片段出现、无业务定义，系统如实作答（correctness 1.0）；answer_relevance 0.2 系题目本身探知「无定义」、系统答法与提问意图错位，属预期内（该题设计即验证检索不被字符命中骗到）。
+- **检索缺口传导到生成** `adm_q004`（fact_single，跨表依赖）：城市分级表未随住宿表召回（v5.16 诊断 recall 0.5），e2e correctness **0.5**（缺「上海属一类城市」事实）——检索缺口如实反映在生成分数上，指标链路有效。
+- **faithfulness 最低题 `adm_q011`（comparison）0.57**：剩余短板，待人工抽检区分「裁判严判 vs 真实幻觉」（v1.8 遗留）。
+
+**后续**：裁判一致性人工抽检（验收线 ≥80%）待做；q004 跨表依赖 / q013 表格碎片化仍为 M2 表格链路优化方向（检索侧修复不影响 e2e 结论——recall@5 0.9583 与客服库 0.9601 同级，证明 admin 检索本身无系统缺陷）。
+
+---
+
+## [v5.17] 2026-09-25 —— M7 稀疏索引补传 chunks_dir + 表格 NL 摘要复用到行政库（M9 v1.6→v1.7）
+
+**影响模块**：M7 建库（`app/m7_interact/documents.py`）＋ M5 检索（表格 NL 摘要对 admin 生效）＋ M9 评测层（admin 检索基线复测）。
+
+**背景**：v5.16 行政库首轮检索基线标注 q013「表格块碎片化」时，推断「行政库建库未套用 table_nl_summary」。本轮排查证实**推断不准确**——真正的根因是**稀疏索引缺 `block_type` 元数据**：
+
+- `build_rerank_text`（M5 table_summary）依据 `chunk_meta.get("block_type")` 决定是否给表格块注入 NL 摘要注入 rerank 文本；而 meta 来自 `m5_sparse.json` 的 chunks。
+- 实测 `eval_admin_ws/m5_sparse.json` 的 chunks **只有 `content`+`full_doc_id`、无 `block_type`**（table 块数 0），而客服库有（25 个 table 块）——所以客服库的 NL 摘要链路活的、admin 从未激活。
+- 根因：`build_workspace_deps`（M7）重建稀疏索引时**漏传 `chunks_dir`**（`build_sparse(ws, path)` 只有两参），导致 `sparse_index.build` 从不读 chunk jsonl 顶层的 `block_type`。chunk jsonl 侧 `block_type` 一直存在（admin A1/A2/A3 均含，非 M2 缺失）。
+
+**修复**：[documents.py:123](backend/app/m7_interact/documents.py#L123) 补传 `deps.chunks_dir`（`build_sparse(ws, path, chunks_dir)`）。M7 ingest 链路产出的所有稀疏索引自此携带 block_type；bootstrap/M5/M6 runner 三处同根因漏传仅「稀疏文件缺失时首次构建」触发、缺之无害，本次不动。
+
+**重建与验证**：对 `eval_admin_ws` 重建稀疏索引（117 units 全部读入 block_type，30 个 table 块），`build_rerank_text` 对 admin 表格块已注入「本表展示…共 N 行…」摘要（含配纸量表 `bb0c843f`）。
+
+**admin 检索基线复测**（`tests/reports/run_retr_admin_nl.json`，15 题，181.6s；对比 v5.16 基线）：
+
+| 指标 | v5.16 基线 | v5.17（NL 摘要激活） | Δ |
+|---|---|---|---|
+| Context Recall@5 | 0.9405 | **0.9583** | +0.0178 |
+| Context Precision（加权）@5 | 0.5878 | **0.6122** | +0.0244 |
+| nDCG@5 | 0.8518 | **0.8649** | +0.0131 |
+| gold_rank avg | 1.67 | **1.50** | -0.17 |
+
+- **最大受益题**：`adm_q012`（comparison，城市分级↔住宿标准关联）nDCG@5 **0.8291 → 0.9877（+0.159）**、加权 Prec@5 0.3285 → 0.6569（翻倍）——NL 摘要注入后 cross-encoder 对表格块语义匹配显著提升，是「能力已激活」的直接证据。`adm_q009`（+0.022）/`adm_q005`（+0.021）小涨。
+- **边界（预期内）**：`adm_q013`/`adm_q014`（table_numeric）排序逐项不变——q013 碎片化（配纸量表被 M2 按行拆成 3 行 + 1 行的块）是 **M2 行级切分的独立问题**，NL 摘要注入的是「每个碎片各自的小摘要」，不跨行补全；与客服库 v5.13 探底结论一致（NL 摘要改善 rerank score 但不足以把表格目标推动到 top5）。两题 recall@5 均 1.0，事实未被漏掉，是排序质量问题。
+
+**遗留**：q013/q004 的表格碎片化 / 跨表依赖仍为 M2 表格链路优化方向，不在本次检索侧修复范围。e2e 生成四指标基于 NL 摘要激活后的检索跑（见 v5.18 或同条目补记）。
+
+---
+
 ## [v5.16] 2026-09-25 —— 行政库（eval_admin）最小集落地 + 首轮检索基线评测（M9 v1.5→v1.6）
 
 **影响模块**：M9 评测层（行政库检索基线 + 测试集 GT 修正）＋ M7 建库（新增 `scripts/build_eval_admin.py`）。

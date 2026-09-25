@@ -120,7 +120,7 @@ async def build_workspace_deps(deps: Any) -> None:
     """
     ws = deps.workspace
     sparse_path = deps.working_dir / SPARSE_FILE
-    await asyncio.to_thread(build_sparse, ws, sparse_path)
+    await asyncio.to_thread(build_sparse, ws, sparse_path, deps.chunks_dir)
     deps.sparse = load_sparse(sparse_path)
     deps.sidecar = load_sidecar(deps.chunks_dir)
     try:
