@@ -79,15 +79,36 @@ def _cache_read(key: str, metric: str) -> dict | None:
     return None
 
 
-def _cache_write(key: str, metric: str, score: float, reason: str, raw: str = "") -> None:
+_EXTRA_FIELDS = ("total_facts", "correct_facts", "incorrect")
+
+
+def _cache_write(key: str, metric: str, result: dict[str, Any]) -> None:
+    score = result["score"]
+    reason = result["reason"]
     _mem_cache[key] = score
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     p = _cache_path(key, metric)
+    payload = {"score": score, "reason": reason}
+    for f in _EXTRA_FIELDS:
+        if f in result:
+            payload[f] = result[f]
+    payload["raw"] = result.get("raw", "")
     try:
         with open(p, "w", encoding="utf-8") as f:
-            json.dump({"score": score, "reason": reason, "raw": raw}, f, ensure_ascii=False, indent=2)
+            json.dump(payload, f, ensure_ascii=False, indent=2)
     except OSError:
         pass
+
+
+def _use_cached(cached: dict) -> dict[str, Any]:
+    """把磁盘缓存展开回 judge 的返回结构（score/reason + 额外字段）。"""
+    payload = {"score": cached["score"], "reason": cached.get("reason", ""), "cached": True}
+    for f in _EXTRA_FIELDS:
+        if f in cached:
+            payload[f] = cached[f]
+    if "raw" in cached:
+        payload["raw"] = cached["raw"]
+    return payload
 
 
 async def judge(
@@ -98,16 +119,17 @@ async def judge(
     cache_key_parts: list[str] | None = None,
     system_prompt: str | None = None,
 ) -> dict[str, Any]:
-    """调用 LLM 裁判，返回 {score, reason, cached}。
+    """调用 LLM 裁判，返回 {score, reason, cached, 额外字段...}。
 
-    约定：裁判 prompt 要求模型输出 JSON 格式 {"score": 0-1 float, "reason": "..."}。
+    约定：裁判 prompt 要求模型输出 JSON 格式 {"score": 0-1 float, "reason": "..."}，
+    可附带 total_facts / correct_facts / incorrect 等诊断字段。
     如果解析失败，返回 score=0 + raw_text 供排查。
     """
     key = _hash(*(cache_key_parts or [prompt]))
 
     cached = _cache_read(key, metric)
     if cached is not None:
-        return {"score": cached["score"], "reason": cached.get("reason", ""), "cached": True}
+        return _use_cached(cached)
 
     async with _semaphore:
         last_err: Exception | None = None
@@ -115,7 +137,8 @@ async def judge(
             try:
                 raw = await query_func(prompt, system_prompt=system_prompt)
                 result = _parse_judge_output(raw)
-                _cache_write(key, metric, result["score"], result["reason"], raw)
+                result["raw"] = raw
+                _cache_write(key, metric, result)
                 result["cached"] = False
                 return result
             except Exception as e:
@@ -167,7 +190,11 @@ def _parse_judge_output(raw: str) -> dict[str, Any]:
     score = max(0.0, min(1.0, score))
     reason = str(data.get("reason", ""))
 
-    return {"score": score, "reason": reason}
+    payload: dict[str, Any] = {"score": score, "reason": reason}
+    for f in _EXTRA_FIELDS:
+        if f in data:
+            payload[f] = data[f]
+    return payload
 
 
 def clear_cache(metric: str | None = None) -> int:

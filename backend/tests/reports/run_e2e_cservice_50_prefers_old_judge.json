@@ -33,7 +33,7 @@
       "ndcg": 0.8898,
       "faithfulness": 0.9194,
       "answer_relevance": 0.939,
-      "correctness": 0.8353,
+      "correctness": 0.8321,
       "citation_accuracy": 0.8465,
       "judge_failed_judgments": 0
     },
@@ -54,7 +54,7 @@
         "ndcg_top8": 0.9324,
         "faithfulness": 0.9522,
         "answer_relevance": 0.95,
-        "correctness": 0.7023,
+        "correctness": 0.6622,
         "citation_accuracy": 0.8265
       },
       "fact_cross_doc": {
@@ -73,7 +73,7 @@
         "ndcg_top8": 0.9089,
         "faithfulness": 0.795,
         "answer_relevance": 0.9944,
-        "correctness": 0.7346,
+        "correctness": 0.7203,
         "citation_accuracy": 0.7718
       },
       "fact_single": {
@@ -92,7 +92,7 @@
         "ndcg_top8": 0.9687,
         "faithfulness": 1.0,
         "answer_relevance": 1.0,
-        "correctness": 0.9179,
+        "correctness": 0.8586,
         "citation_accuracy": 0.9207
       },
       "proper_noun": {
@@ -111,7 +111,7 @@
         "ndcg_top8": 0.9675,
         "faithfulness": 0.9791,
         "answer_relevance": 0.925,
-        "correctness": 0.825,
+        "correctness": 0.875,
         "citation_accuracy": 0.9018
       },
       "summary": {
@@ -130,7 +130,7 @@
         "ndcg_top8": 0.8986,
         "faithfulness": 0.8333,
         "answer_relevance": 1.0,
-        "correctness": 0.83,
+        "correctness": 0.8767,
         "citation_accuracy": 0.8667
       },
       "table_numeric": {
@@ -149,7 +149,7 @@
         "ndcg_top8": 0.9738,
         "faithfulness": 0.9167,
         "answer_relevance": 0.9,
-        "correctness": 0.8333,
+        "correctness": 0.9167,
         "citation_accuracy": 0.7232
       },
       "unanswerable": {
@@ -189,7 +189,7 @@
         "ndcg_top8": 0.9394,
         "faithfulness": 0.9365,
         "answer_relevance": 1.0,
-        "correctness": 0.9006,
+        "correctness": 0.9049,
         "citation_accuracy": 0.8766
       },
       "hard": {
@@ -208,7 +208,7 @@
         "ndcg_top8": 0.8896,
         "faithfulness": 0.7483,
         "answer_relevance": 0.95,
-        "correctness": 0.5817,
+        "correctness": 0.54,
         "citation_accuracy": 0.7202
       },
       "medium": {
@@ -227,7 +227,7 @@
         "ndcg_top8": 0.9484,
         "faithfulness": 0.946,
         "answer_relevance": 0.9052,
-        "correctness": 0.854,
+        "correctness": 0.8549,
         "citation_accuracy": 0.8571
       }
     },
@@ -451,10 +451,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 1,
-          "correct_facts": 1,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案明确给出三级投诉首次响应时效为4小时，完整覆盖标准答案的唯一关键事实点。"
+          "reason": "答案中唯一关键事实点“三级投诉的首次响应时效为4小时”与标准答案一致，事实正确。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -693,17 +693,12 @@
         "answer_relevance_detail": {
           "reason": "答案直接给出了一级投诉问题解决需在24小时内完成的明确时效，完全回应了问题所问的具体内容。"
         },
-        "correctness": 0.67,
+        "correctness": 0.5,
         "correctness_detail": {
-          "total_facts": 3,
-          "correct_facts": 2,
-          "incorrect": [
-            {
-              "fact": "按自然时间计算（一级投诉例外，不按工作时间）",
-              "reason": "答案遗漏，未提及自然时间计算这一时效口径"
-            }
-          ],
-          "reason": "答案正确覆盖了「一级（紧急）投诉」和「24小时内解决问题」两个事实点，但遗漏了「按自然时间计算」这一关键限定条件。"
+          "total_facts": 0,
+          "correct_facts": 0,
+          "incorrect": [],
+          "reason": "答案正确指出24小时，但遗漏了按自然时间计算这一关键事实点，因此部分正确。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -982,17 +977,12 @@
         "answer_relevance_detail": {
           "reason": "答案直接解释了FCR的含义（首问解决率），并围绕该指标的定义、目标值和实际数据展开，完全回应了问题所问的内容。"
         },
-        "correctness": 0.75,
+        "correctness": 0.6,
         "correctness_detail": {
-          "total_facts": 4,
-          "correct_facts": 3,
-          "incorrect": [
-            {
-              "fact": "PRD 中定义的 FCR 目标值为 70%",
-              "reason": "答案将 FCR 目标值写为整体 ≥85%、智能问答 ≥70%，与标准答案的关键数值不一致"
-            }
-          ],
-          "reason": "答案覆盖了 FCR 的定义、英文全称及客户一次联系解决问题的含义，但目标值只部分对应，且引入了标准答案未提及的 85% 目标，导致该关键事实点判定为不覆盖。"
+          "total_facts": 0,
+          "correct_facts": 0,
+          "incorrect": [],
+          "reason": "答案正确解释了 FCR 的含义（首次联系解决率），但目标值表述与标准答案不符，且加入了标准答案中不存在且与之矛盾的实际数据，导致部分关键事实点不正确。"
         },
         "citation_accuracy": 0.8571,
         "citation_accuracy_detail": {
@@ -1278,10 +1268,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 4,
-          "correct_facts": 4,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案完整覆盖了 LSC 情绪处理法则的名称及 L 倾听、S 共情、C 澄清并解决三个步骤的全部关键事实点，且无矛盾或虚构内容。"
+          "reason": "答案完整复述了LSC情绪处理法则及其三个步骤（倾听、共情、澄清并解决），所有关键事实点均与标准答案一致。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -1510,10 +1500,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 2,
-          "correct_facts": 2,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案准确覆盖了标准答案中的两个关键事实点：连续输错5次导致锁定，锁定时长为30分钟。"
+          "reason": "答案准确复述了连续输错密码5次导致锁定以及锁定30分钟这两个关键事实，与标准答案完全一致。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -1782,10 +1772,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 11,
-          "correct_facts": 11,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案完整覆盖了标准答案中的四种升级触发条件及其关键细节，无遗漏或矛盾。"
+          "reason": "答案完整准确地列出了四种升级触发条件及其关键细节，与标准答案完全一致。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -2084,21 +2074,12 @@
         "answer_relevance_detail": {
           "reason": "答案直接列举了智能客服系统v2.1相比v1.0新增的核心功能模块，完全围绕问题所问内容展开。"
         },
-        "correctness": 0.6,
+        "correctness": 0.17,
         "correctness_detail": {
-          "total_facts": 5,
-          "correct_facts": 3,
-          "incorrect": [
-            {
-              "fact": "知识库管理后台（支持运营人员自助维护知识条目）",
-              "reason": "答案未提及该模块；答案中的「知识库自学习」是自动学习人工客服优质问答对，与“运营人员自助维护知识条目”不是同一事实点。"
-            },
-            {
-              "fact": "对智能问答引擎做算法升级（从关键词匹配升级为语义理解）",
-              "reason": "答题中“从关键词匹配 + 模板化回复，升级为语义理解 + 知识图谱 + 多轮对话”覆盖了关键词匹配→语义理解，因此覆盖；若将其计入，则覆盖 4 点。但按标准答案五点为：情绪识别、多轮对话管理、知识库管理后台、算法升级语义理解、实时识别客户情绪并预警。答案覆盖了情绪识别、实时负面情绪预警、多轮对话、算法升级语义理解。实际覆盖 4 点，未覆盖知识库管理后台。"
-            }
-          ],
-          "reason": "答案覆盖了情绪识别/预警、多轮对话、语义理解算法升级等核心点，但将知识库管理后台误作“知识库自学习”，遗漏了运营人员自助维护知识条目这一事实点，因此未完全覆盖标准答案。"
+          "total_facts": 0,
+          "correct_facts": 0,
+          "incorrect": [],
+          "reason": "答案仅“新增情绪识别”与标准答案中的情绪识别模块基本一致，但未覆盖多轮对话管理、知识库管理后台等核心新增模块，且多处事实与标准答案不一致。"
         },
         "citation_accuracy": 0.7,
         "citation_accuracy_detail": {
@@ -2434,10 +2415,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 5,
-          "correct_facts": 5,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案完整覆盖标准答案中列出的五类禁用用语（不耐烦、推卸责任、激化矛盾、随意承诺、网络用语），各类中的示例也一一对应，未出现矛盾信息。"
+          "reason": "答案完整列举了标准答案中的五类禁用用语及示例，均与标准答案一致，额外补充的“产品就是这样的”“您听我说行不行”及扣分说明不与标准答案矛盾，事实全部正确。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -2732,25 +2713,12 @@
         "answer_relevance_detail": {
           "reason": "答案直接回应了问题所问的两个具体内容：当前版本号和上一个主要版本的修订内容。"
         },
-        "correctness": 0.83,
+        "correctness": 0.75,
         "correctness_detail": {
-          "total_facts": 6,
-          "correct_facts": 5,
-          "incorrect": [
-            {
-              "fact": "当前版本 V2.3 的生效日期为 2026年9月1日",
-              "reason": "答案遗漏，未提及生效日期"
-            },
-            {
-              "fact": "上一个主要版本 V2.0 的日期为 2026年1月10日",
-              "reason": "答案遗漏，未提及版本日期"
-            },
-            {
-              "fact": "V2.0 由王小燕修订",
-              "reason": "答案遗漏，未提及修订人"
-            }
-          ],
-          "reason": "答案正确覆盖了当前版本号 V2.3、上一个主要版本 V2.0 及其三项修订内容（新增二级投诉分类、调整响应时效标准、增加情绪升级条款），共5个事实点；但遗漏了 V2.3 生效日期、V2.0 日期及修订人王小燕，覆盖率为5/6。"
+          "total_facts": 0,
+          "correct_facts": 0,
+          "incorrect": [],
+          "reason": "答案正确指出了当前版本号及三项修订内容，但遗漏了上一个主要版本的修订人信息。"
         },
         "citation_accuracy": 0.3333,
         "citation_accuracy_detail": {
@@ -3008,10 +2976,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 4,
-          "correct_facts": 4,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案完整覆盖了标准答案的全部关键事实点：问题（幻觉率高、企业专有知识覆盖不足）、核心思路（实体级别知识关联与图推理/实体抽取关系构建+结构化知识图谱+图检索与LLM生成）、提升目标（复杂问题回答准确性与知识覆盖率）、适用场景（企业内部多文档、强关联知识场景）；额外信息（首问解决率、15-20个百分点）为标准答案未涉及但不矛盾，不计入评价。"
+          "reason": "答案完整准确地指出了GraphRAG解决的幻觉率高与企业专有知识覆盖不足的问题，并正确阐述了通过实体关系构建知识图谱与图推理提升复杂问题准确性的核心思路，所有关键事实点均与标准答案一致。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -3301,17 +3269,12 @@
         "answer_relevance_detail": {
           "reason": "答案直接回应了问题所问的三级投诉的具体范围和对应处理时效，并给出了明确的具体内容和来源说明，高度相关。"
         },
-        "correctness": 0.875,
+        "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 8,
-          "correct_facts": 7,
-          "incorrect": [
-            {
-              "fact": "所有时效按工作时间（工作日9:00-18:00）计算",
-              "reason": "答案遗漏，未说明时效的计算口径是按工作时间计算"
-            }
-          ],
-          "reason": "答案完整覆盖了三级投诉的定义、典型场景及各项处理时效，仅遗漏『所有时效按工作时间(工作日9:00-18:00)计算』这一关键口径说明。"
+          "total_facts": 0,
+          "correct_facts": 0,
+          "incorrect": [],
+          "reason": "答案准确复述了标准答案中三级投诉的定义、典型场景及全部处理时效，所有关键事实点均与标准答案一致。"
         },
         "citation_accuracy": 0.6667,
         "citation_accuracy_detail": {
@@ -3657,37 +3620,12 @@
         "answer_relevance_detail": {
           "reason": "答案直接回应问题，明确列出了智能问答引擎被提及的具体文档与系统，并分项说明其在各处的角色，内容完全围绕问题所问的“哪些文档或系统”及“分别承担什么角色”展开。"
         },
-        "correctness": 0.5,
+        "correctness": 0.36,
         "correctness_detail": {
-          "total_facts": 12,
-          "correct_facts": 6,
-          "incorrect": [
-            {
-              "fact": "投诉 SOP（D1）中作为三级投诉的处理工具",
-              "reason": "答案未提及投诉SOP或三级投诉处理这一文档/角色，只提PRD和话术规范"
-            },
-            {
-              "fact": "常见问题可通过智能问答引擎获取标准回答后直接回复客户",
-              "reason": "答案未覆盖这一具体处理动作"
-            },
-            {
-              "fact": "PRD（D2）中是智能客服系统的核心模块",
-              "reason": "答案部分覆盖（提到列为P0核心功能模块），但未明确'智能客服系统的核心模块'，按严格标准属于部分遗漏"
-            },
-            {
-              "fact": "v2.1 从关键词匹配升级为语义理解",
-              "reason": "答案未提及v2.1版本及从关键词匹配到语义理解的升级"
-            },
-            {
-              "fact": "运营数据报表（D3）中可从拦截率等指标侧面反映其效果",
-              "reason": "答案给出了拦截量占比61.8%等数据，但未指出这是运营数据报表(D3)中反映效果的指标，来源与角色对不上"
-            },
-            {
-              "fact": "华东华北华南均已接入，西南大区尚未接入",
-              "reason": "答案完全未提及区域接入情况"
-            }
-          ],
-          "reason": "答案覆盖了话术规范训练校准、核心模块、自动回复等约一半事实点，但遗漏了投诉SOP三级投诉工具、v2.1关键词到语义升级、区域接入情况等关键事实，且有来源张冠李戴和额外数据，故判0.5。"
+          "total_facts": 0,
+          "correct_facts": 0,
+          "incorrect": [],
+          "reason": "答案包含了部分正确事实，但大量关键事实与标准答案不符，且遗漏了标准答案中关于投诉SOP、PRD具体升级内容、运营数据报表区域接入情况等核心信息，整体正确率较低。"
         },
         "citation_accuracy": 0.4286,
         "citation_accuracy_detail": {
@@ -4100,37 +4038,12 @@
         "answer_relevance_detail": {
           "reason": "答案明确回答了王小燕在客服中心的角色（客服总监）并详细列出其具体负责工作，与问题高度相关。"
         },
-        "correctness": 0.5,
+        "correctness": 0.43,
         "correctness_detail": {
-          "total_facts": 8,
-          "correct_facts": 4,
-          "incorrect": [
-            {
-              "fact": "王小燕是投诉处理工作的最终负责人（SOP D1）",
-              "reason": "已覆盖，答案明确写出『全公司投诉处理工作的最终负责人』，与标准答案一致。"
-            },
-            {
-              "fact": "一级投诉须同步抄送她",
-              "reason": "已覆盖，答案写出『一级投诉须同步抄送客服总监王小燕与质量负责人』。"
-            },
-            {
-              "fact": "她是话术规范审批人（D4），审批话术规范 V1.0/V1.2",
-              "reason": "部分覆盖，答案写到她是话术规范负责人并作为审批人参与审批，但未覆盖具体版本 V1.0/V1.2。"
-            },
-            {
-              "fact": "她是服务之星等考核结果的负责人",
-              "reason": "遗漏，答案未提及服务之星或相关考核结果负责人。"
-            },
-            {
-              "fact": "她是SOP修订人（D1），V2.0和V2.3均由她修订",
-              "reason": "遗漏，答案未提及她修订SOP V2.0/V2.3。"
-            },
-            {
-              "fact": "她是PRD项目相关方（D2），作为业务方代表参与智能客服系统需求评审",
-              "reason": "遗漏，答案未提及PRD项目相关方或智能客服系统需求评审。"
-            }
-          ],
-          "reason": "答案覆盖了客服总监、投诉最终负责人、一级投诉抄送和部分审批职责，但遗漏了版本号、服务之星负责人、SOP修订和PRD项目相关方等关键事实，按比例得0.5。"
+          "total_facts": 0,
+          "correct_facts": 0,
+          "incorrect": [],
+          "reason": "答案中正确识别了客服总监、全公司投诉处理最终负责人以及一级投诉抄送职责，但其余关键事实点与标准答案不符，整体正确性较低。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -4467,29 +4380,12 @@
         "answer_relevance_detail": {
           "reason": "答案直接回应了问题，明确说明「升级流程」有触发条件分类和触发后处理流程两种含义，并对每种含义进行了具体解释，与问题高度相关。"
         },
-        "correctness": 0.5,
+        "correctness": 0.25,
         "correctness_detail": {
-          "total_facts": 8,
-          "correct_facts": 4,
-          "incorrect": [
-            {
-              "fact": "投诉升级有两种含义：①投诉分级升级（SOP D1）；②跨部门升级（SOP D1 §5.1 第 4 条 + PRD D2 跨部门协作模块）",
-              "reason": "遗漏。答案将升级流程理解并表述为「升级触发条件」和「升级后处理流程」两层含义，未覆盖标准答案的两种含义框架。"
-            },
-            {
-              "fact": "投诉分级升级按投诉等级（三级→二级→一级）的常规升级机制",
-              "reason": "遗漏。答案列举了四类触发条件，但未说明三级到一级的投诉分级常规升级机制。"
-            },
-            {
-              "fact": "跨部门升级由客服项目经理统一拉群跟进",
-              "reason": "覆盖。答案提到「由客服项目经理统一拉群跟进」。"
-            },
-            {
-              "fact": "跨部门升级对应工单系统 v3.0 支持跨部门工单流转",
-              "reason": "遗漏。答案未提及工单系统 v3.0 或跨部门工单流转能力。"
-            }
-          ],
-          "reason": "答案正确覆盖了四类升级触发条件（其中跨部门升级的项目经理拉群跟进亦可对应），但完全遗漏了标准答案最核心的「两种含义」框架（分级升级 vs 跨部门升级），且未说明三级→二级→一级的等级机制及工单系统v3.0跨部门流转。"
+          "total_facts": 0,
+          "correct_facts": 0,
+          "incorrect": [],
+          "reason": "答案仅正确复述了四类触发条件中的名称，却将其错误归纳为“升级流程”的两层含义之一，遗漏了标准答案核心的“投诉分级升级（按等级三级→二级→一级）”和“跨部门升级（跨部门工单流转）”两种含义，多个关键事实点与标准答案不一致。"
         },
         "citation_accuracy": 0.75,
         "citation_accuracy_detail": {
@@ -4859,25 +4755,12 @@
         "answer_relevance_detail": {
           "reason": "答案直接列举了「响应时间」在客服业务中的多种定义和对应指标，包括平均响应时间、首次响应时间及等级时效，并补充说明了与响应时间口径不同的平均处理时长，内容紧扣问题核心，回答充分且相关。"
         },
-        "correctness": 0.82,
+        "correctness": 0.643,
         "correctness_detail": {
-          "total_facts": 17,
-          "correct_facts": 14,
-          "incorrect": [
-            {
-              "fact": "①客户响应时限（SOP D1）——面向客户的 SLA",
-              "reason": "答案将其拆分为「首次响应时间」和「相关时效说明」，未明确概括为「客户响应时限」或「面向客户的 SLA」，但投诉分级承诺已覆盖部分内容，此概括性标签未覆盖"
-            },
-            {
-              "fact": "③AHT 平均处理时长（PRD D2 + 运营报表 D3）——属于「响应时间」的一种定义",
-              "reason": "答案将 AHT 列为「补充说明」并明确区分其与「响应时间」口径不同，未承认其是「响应时间」的第三种含义，与标准答案的归类矛盾"
-            },
-            {
-              "fact": "ART 目标 ≤ 30 秒，Q3 实际 45 秒",
-              "reason": "答案覆盖了目标 ≤ 30 秒，但遗漏了 Q3 实际 45 秒"
-            }
-          ],
-          "reason": "答案覆盖了各类时效定义、目标值、分级响应时限和工作时间计算等大部分事实点，但遗漏了 AHT 的 Q3 实际值，且将 AHT 排除在「响应时间」定义之外，与标准答案的第三种含义归类存在矛盾，故扣分。"
+          "total_facts": 0,
+          "correct_facts": 0,
+          "incorrect": [],
+          "reason": "答案覆盖了ART、客户响应时限（主要数值）和AHT，但将部分高时效内容错误归为「首次响应时间」，并遗漏了ART和AHT的部分关键数据，导致整体正确性约六成。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -5192,21 +5075,12 @@
         "answer_relevance_detail": {
           "reason": "答案直接围绕智能客服的解决率目标（≥85%）和实际表现（81.2%）展开，并详细说明了差距主要体现在线上复杂技术类工单、区域表现等方面，完全回应了问题的两个部分。"
         },
-        "correctness": 0.6667,
+        "correctness": 0.8,
         "correctness_detail": {
-          "total_facts": 6,
-          "correct_facts": 4,
-          "incorrect": [
-            {
-              "fact": "差距原因②：复杂问题仍需转人工，智能客服在复杂场景下的解决能力有待提升",
-              "reason": "答案提到复杂技术类工单拖累、人工处理硬件故障能力不足，但未明确对应标准答案中“复杂问题仍需转人工、复杂场景解决能力待提升”这一完整事实点，属于部分遗漏"
-            },
-            {
-              "fact": "西南大区尚未接入智能问答引擎",
-              "reason": "答案说西南大区预计2026年10月底完成接入、上线节奏晚于其他大区，未直接说明当前尚未接入；与标准答案的“尚未接入”存在表述差异，未完全覆盖"
-            }
-          ],
-          "reason": "答案覆盖了目标85%、实际81.2%、约3.8个百分点差距、西南大区解决率78.6%等核心事实，但未完整覆盖“复杂问题仍需转人工”和“西南大区尚未接入智能问答引擎”两点，整体正确性约为三分之二。"
+          "total_facts": 0,
+          "correct_facts": 0,
+          "incorrect": [],
+          "reason": "答案中关于智能客服整体解决率目标85%、实际81.2%以及差距约3.8个百分点的核心事实正确，并补充了西南大区尚未接入智能问答引擎等正确信息，但关于差距主要体现的表述与标准答案的重点不完全一致。"
         },
         "citation_accuracy": 0.6429,
         "citation_accuracy_detail": {
@@ -5594,10 +5468,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 6,
-          "correct_facts": 6,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案完整覆盖了标准答案的全部关键事实点：首问解决率与FCR为同一概念、行业从40%到70%+代表LLM驱动的行业进步、PRD分层目标整体≥85%与智能问答≥70%、公司整体实际FCR为78.5%且未达85%目标，并额外补充Q2对比数据，不与标准答案矛盾。"
+          "reason": "答案准确指出行业报告首问解决率即PRD中的FCR，PRD分层目标整体≥85%、智能问答≥70%，以及当前实际78.5%未达整体目标，关键事实均与标准答案一致。"
         },
         "citation_accuracy": 0.8333,
         "citation_accuracy_detail": {
@@ -5874,17 +5748,12 @@
         "answer_relevance_detail": {
           "reason": "答案明确给出了ART的全称（Average Response Time）和含义（平均响应时间），并补充了相关细节，直接回应了问题所问的全部内容。"
         },
-        "correctness": 0.75,
+        "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 4,
-          "correct_facts": 3,
-          "incorrect": [
-            {
-              "fact": "单位通常为秒，数值越小表示响应越快",
-              "reason": "答案遗漏了该事实点（单位与数值含义），未提及"
-            }
-          ],
-          "reason": "答案正确覆盖了 ART 全称、平均响应时间含义及起止范围（客户发送消息到首次回复），但遗漏了标准答案中关于单位与数值越小越快的说明；额外给出的目标值 ≤ 30 秒不矛盾，不计入。"
+          "total_facts": 0,
+          "correct_facts": 0,
+          "incorrect": [],
+          "reason": "答案正确说明了ART的全称Average Response Time及平均响应时间的含义，与标准答案一致；额外提到的目标值≤30秒不与标准答案矛盾，不扣分。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -6135,15 +6004,10 @@
         },
         "correctness": 0.75,
         "correctness_detail": {
-          "total_facts": 4,
-          "correct_facts": 3,
-          "incorrect": [
-            {
-              "fact": "指客户在一次联系（一通电话或一次在线对话）中问题就得到解决、无需再次联系客服的比例",
-              "reason": "答案覆盖了「首次联系解决、无需二次联系」的核心含义，但遗漏了「一次联系」具体指「一通电话或一次在线对话」这一限定说明"
-            }
-          ],
-          "reason": "答案正确覆盖了 FCR 的全称、核心业务含义及「首次联系即解决、无需再次联系」这一要点，仅遗漏了「一次联系（一通电话或一次在线对话）」的具体限定，整体基本正确。"
+          "total_facts": 0,
+          "correct_facts": 0,
+          "incorrect": [],
+          "reason": "答案正确说明了 FCR 的全称、中文含义和业务含义，但额外给出了标准答案中没有的目标值，因此按事实点计算为 3/4 正确。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -6453,10 +6317,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 4,
-          "correct_facts": 4,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案完整覆盖了 CSAT 的全称（Customer Satisfaction/客户满意度）、定义（服务后对服务体验的满意度）、衡量对象（客户对服务体验的满意程度）及 1-5 分制（5 分制）四个关键事实点，并额外补充了目标值等不矛盾的运营数据。"
+          "reason": "答案正确指出CSAT全称为Customer Satisfaction（客户满意度）、采用5分制、衡量客户服务满意程度，与标准答案核心事实一致。"
         },
         "citation_accuracy": 0.5,
         "citation_accuracy_detail": {
@@ -6735,19 +6599,10 @@
         },
         "correctness": 0.5,
         "correctness_detail": {
-          "total_facts": 4,
-          "correct_facts": 2,
-          "incorrect": [
-            {
-              "fact": "AHT 指客服处理每通客户联系（含通话/对话时间与后续整理/工单记录时间）的平均总时长",
-              "reason": "答案将定义表述为「从工单打开到关闭的平均耗时」，未覆盖标准答案中通话/对话时间及后续整理/工单记录时间这一核心定义，属于定义偏差/遗漏"
-            },
-            {
-              "fact": "AHT 是衡量客服工作效率的重要运营指标",
-              "reason": "答案未提及该指标的性质与作用，属于遗漏"
-            }
-          ],
-          "reason": "答案仅正确覆盖 AHT 全称及平均处理时长这一核心名称，但对标准答案的具体定义和指标性质覆盖不足，且以工单打开到关闭的耗时代替，未完整覆盖关键事实点。"
+          "total_facts": 0,
+          "correct_facts": 0,
+          "incorrect": [],
+          "reason": "答案正确指出了 AHT 全称 Average Handle Time（平均处理时长），但对其含义的解释与标准答案不符，且有标准答案中未出现的额外事实。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -7009,10 +6864,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 7,
-          "correct_facts": 7,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案完整覆盖了 LSC 法则的定义（情绪管理三步法/沟通法则）、三个步骤 L/S/C 的名称与含义（倾听不打断、共情表达理解歉意让客户被重视、澄清并解决给出方案与时间预期），与标准答案语义一致；额外补充的版本修订信息不与标准答案矛盾，不计入评分。"
+          "reason": "答案完整准确地复述了LSC法则的定义、三个步骤及其含义，与标准答案完全一致，补充的版本信息未与标准答案矛盾，不影响正确性。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -7294,17 +7149,12 @@
         "answer_relevance_detail": {
           "reason": "答案明确给出了 GraphRAG 的定义并针对与传统 RAG 的区别进行了对比说明（指出对比对象为纯向量 RAG，并提及效果差异），直接回应了问题所问的两个核心方面。"
         },
-        "correctness": 0.8,
+        "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 5,
-          "correct_facts": 4,
-          "incorrect": [
-            {
-              "fact": "GraphRAG 通过图推理能力解决传统 RAG 的问题",
-              "reason": "答案提到跨文档推理表现更优，但没有明确说是靠图推理能力解决传统 RAG 的问题，仅部分覆盖，按缺失处理"
-            }
-          ],
-          "reason": "答案覆盖了 GraphRAG 是知识图谱与大模型融合的架构、解决传统 RAG 幻觉率高与企业专有知识覆盖不足、适合企业内部多文档强关联场景等核心事实，但未明确覆盖“图推理能力”这一解决机制，按比例扣分。"
+          "total_facts": 0,
+          "correct_facts": 0,
+          "incorrect": [],
+          "reason": "答案正确识别了GraphRAG是知识图谱与大模型融合的架构、传统RAG幻觉率高和企业知识覆盖不足的问题，以及GraphRAG在复杂场景下提升准确率的优势，所有关键事实点均与标准答案一致。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -7603,21 +7453,12 @@
         "answer_relevance_detail": {
           "reason": "答案明确回答了一级、二级、三级投诉的首次响应时效分别为15分钟、1小时、4小时，并解释了一级为按自然时间计算而其他级别按工作时间计算的例外原因，完全回应了问题所问的两部分内容。"
         },
-        "correctness": 0.714,
+        "correctness": 0.8333333333333334,
         "correctness_detail": {
-          "total_facts": 7,
-          "correct_facts": 5,
-          "incorrect": [
-            {
-              "fact": "一级投诉是例外，因为它涉及人身安全、大规模产品故障或媒体曝光风险，紧急程度最高",
-              "reason": "答案未提及一级投诉为何是例外的原因（人身安全、大规模故障、媒体曝光风险等），仅说明其按自然时间计算"
-            },
-            {
-              "fact": "二、三级按工作时间（工作日9:00-18:00）计算",
-              "reason": "答案将二、三级的时间计算方式表述为“所有时间节点均以工作时间计算”，虽然包含了二、三级按工作时间计算的信息，但“所有时间节点”的表述不够精确，未明确排除一级，且与标准答案的表述略有出入，但核心意思覆盖，此处不视为错误。实际缺失的是对一级例外原因的解释。"
-            }
-          ],
-          "reason": "答案正确覆盖了三级、二级、一级的响应时效（4小时、1小时、15分钟）以及一级按自然时间、二三级按工作时间计算的规则，但未解释一级投诉为何是例外（涉及人身安全、大规模故障或媒体曝光风险）。"
+          "total_facts": 0,
+          "correct_facts": 0,
+          "incorrect": [],
+          "reason": "答案正确指出了三个等级的响应时效及等级越高响应越快，但错误表述了时间计算规则，仅二、三级按工作时间计算，一级按自然时间计算。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -7908,12 +7749,12 @@
         "answer_relevance_detail": {
           "reason": "答案从智能客服和人工客服的服务特点出发，明确阐述了两者在能力上的区别以及互补关系，并给出了协作模式与整体效果，全面回应了问题所问的内容。"
         },
-        "correctness": 1.0,
+        "correctness": 0.89,
         "correctness_detail": {
-          "total_facts": 8,
-          "correct_facts": 8,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案完整覆盖标准答案的全部关键事实点，包括服务时间（7×24 小时、工作日 9:00-18:00）、响应速度、处理范围（80% 常见问题、复杂问题）、协作模式（自动转人工、AI 处理标准化问题、人工处理复杂问题）及人机互补关系，且无矛盾内容。"
+          "reason": "答案准确覆盖了标准答案中的服务时间、响应速度、处理范围、协作模式等核心区别与互补关系，关键事实点基本正确。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -8306,10 +8147,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 7,
-          "correct_facts": 7,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案完整覆盖了标准答案中所有关键事实点：华东解决率84.2%、西南78.6%、华东高5.6个百分点（由两数值隐含）、CSAT华东4.45分、西南相对较低（答案给出4.18分，属合理细化）、ART华东38秒、西南52秒，以及原因——西南智能客服系统接入晚、2026年10月底才完成接入、目前仍以人工处理为主、成本高响应慢，均与标准答案一致。"
+          "reason": "答案中的关键事实点均与标准答案一致，包括解决率、CSAT、ART、智能客服接入节奏及原因解释等，事实层面完全正确。"
         },
         "citation_accuracy": 0.5,
         "citation_accuracy_detail": {
@@ -8749,31 +8590,10 @@
         },
         "correctness": 0.0,
         "correctness_detail": {
-          "total_facts": 5,
+          "total_facts": 0,
           "correct_facts": 0,
-          "incorrect": [
-            {
-              "fact": "v1.0 与 v2.1 的核心指标目标无法直接比较",
-              "reason": "答错。答案直接给出了 V1.0 与 V2.1 的指标目标对比，而标准答案明确说二者无法直接比较。"
-            },
-            {
-              "fact": "D2《四、核心指标定义》只给出当前 V2.1 的目标值（解决率 ≥ 85%、整体 FCR ≥ 85% 且智能问答 ≥ 70%、ART ≤ 30 秒、拦截率 ≥ 60%）",
-              "reason": "部分答错。答案提到了 ART ≤ 30 秒、智能问答 FCR ≥ 70%、整体 FCR ≥ 85%，但漏掉解决率 ≥ 85%、拦截率 ≥ 60%，且错误地将其用于 V1.0 对比。"
-            },
-            {
-              "fact": "《五、版本迭代记录》对比的是核心能力、意图识别准确率、支持对话轮次、工单系统对接、情绪识别、知识库自学习、支持渠道七个维度，其中不含任何指标目标",
-              "reason": "答错。答案把这些维度中的部分内容（意图识别准确率、对话轮次、核心能力、情绪识别、知识库自学习、渠道）当作指标目标变化，违背了「版本迭代表不含指标目标」这一关键事实。"
-            },
-            {
-              "fact": "文档中不存在 v1.0 的指标目标记录",
-              "reason": "答错。答案虚构了 V1.0 的意图识别准确率约 75% 等指标目标。"
-            },
-            {
-              "fact": "「v1.0→v2.1 指标目标提升（解决率 70%→85% 等）」没有文档依据；描述版本演进应基于版本迭代表的七个维度",
-              "reason": "答错。答案正是以「指标目标提升」的方式来描述版本演进，且虚构大量指标变化。"
-            }
-          ],
-          "reason": "答案核心结论与标准答案相反：标准答案强调 v1.0 与 v2.1 指标目标无法比较、文档无 v1.0 指标记录，而答案虚构了 V1.0 指标并将其与 V2.1 比较，未覆盖标准答案关键事实点。"
+          "incorrect": [],
+          "reason": "答案错误地将版本迭代表中的能力维度当作核心指标目标，并虚构或误用 V1.0 指标目标及多项文档中不存在的目标变化，而标准答案明确指出 v1.0 与 v2.1 的核心指标目标无法直接比较、文档中不存在 v1.0 的指标目标记录。"
         },
         "citation_accuracy": 0.55,
         "citation_accuracy_detail": {
@@ -9183,10 +9003,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 5,
-          "correct_facts": 5,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案完整覆盖了Q3总工单量46,820件、7月14,826件、9月16,789件、9月比7月增长1,963件以及环比约+13.2%全部关键事实点。"
+          "reason": "答案中所有关键事实点（Q3总工单量46,820件、7月14,826件、9月16,789件、9月比7月增长1,963件/13.2%）均与标准答案完全一致。"
         },
         "citation_accuracy": 0.125,
         "citation_accuracy_detail": {
@@ -9483,10 +9303,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 4,
-          "correct_facts": 4,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案正确覆盖了所有关键事实点：华南大区人均工单量最高（约168件/人）、总部/其他区域解决率最低（75.3%），并额外正确列出西南大区78.6%作为次低，无矛盾或错答。"
+          "reason": "答案正确指出人均工单量最高为华南大区（168件/人），解决率最低为其他/总部区域（75.3%），与标准答案完全一致。"
         },
         "citation_accuracy": 0.7143,
         "citation_accuracy_detail": {
@@ -9752,25 +9572,12 @@
         "answer_relevance_detail": {
           "reason": "答案准确回答了2026年市场规模，但明确表示缺少2023年数据而无法回答增长倍数，因此只回应了问题的一半。"
         },
-        "correctness": 0.25,
+        "correctness": 0.5,
         "correctness_detail": {
-          "total_facts": 4,
-          "correct_facts": 1,
-          "incorrect": [
-            {
-              "fact": "2023 年市场规模约为 186 亿元",
-              "reason": "答案遗漏，并称材料未提供 2023 年数据，无法计算"
-            },
-            {
-              "fact": "2026 年比 2023 年增长约 239 亿元",
-              "reason": "答案遗漏，因未提供 2023 年数据"
-            },
-            {
-              "fact": "2026 年相比 2023 年增长约 1.29 倍（即 2026 年约为 2023 年的 2.29 倍）",
-              "reason": "答案遗漏，并明确表示无法计算增长倍数"
-            }
-          ],
-          "reason": "答案正确覆盖了 2026 年市场规模约 425 亿元这一事实点，但遗漏了 2023 年基数、增长绝对量和增长倍数，并错误声称材料没有 2023 年数据，因此正确性较低。"
+          "total_facts": 0,
+          "correct_facts": 0,
+          "incorrect": [],
+          "reason": "答案正确给出2026年约425亿元，但错误否认2023年基准数据和增长倍数，因此部分正确。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -10019,17 +9826,12 @@
         "answer_relevance_detail": {
           "reason": "答案直接回应了问题所问的两个具体数值和扣分计算，虽然具体分值数字可能不准确，但相关性判断只关注是否回应问题内容，答案完整覆盖了问题的所有要点。"
         },
-        "correctness": 0.75,
+        "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 4,
-          "correct_facts": 3,
-          "incorrect": [
-            {
-              "fact": "满分100分的情况下剩余70分，仍处于及格线以上",
-              "reason": "答案遗漏，未提及剩余分数和及格线判断"
-            }
-          ],
-          "reason": "答案正确覆盖了信息准确性25分、服务态度20分、投诉态度扣20分加信息错误扣10分共扣30分这三个事实点，但遗漏了剩余70分仍及格的结论。"
+          "total_facts": 0,
+          "correct_facts": 0,
+          "incorrect": [],
+          "reason": "答案完整且正确地列出了信息准确性25分、服务态度20分，并正确计算投诉态度加一次信息错误共扣30分，关键事实全部正确。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -10337,81 +10139,12 @@
         "answer_relevance_detail": {
           "reason": "答案全面总结了2026年Q3客服运营的整体表现和主要问题，与问题要求完全吻合。"
         },
-        "correctness": 0.82,
+        "correctness": 0.92,
         "correctness_detail": {
-          "total_facts": 17,
-          "correct_facts": 14,
-          "incorrect": [
-            {
-              "fact": "总工单量 46,820 件",
-              "reason": "已覆盖（答案写为 46,820 件）"
-            },
-            {
-              "fact": "总工单量环比 +12.3%",
-              "reason": "已覆盖"
-            },
-            {
-              "fact": "整体解决率 81.2%（+2.1pp）",
-              "reason": "已覆盖"
-            },
-            {
-              "fact": "CSAT 4.38 分（+0.17）",
-              "reason": "已覆盖"
-            },
-            {
-              "fact": "ART 45 秒（↓45.1%）",
-              "reason": "答案给出 ART 45 秒，但未覆盖同比下降 45.1%，属于部分遗漏"
-            },
-            {
-              "fact": "FCR 78.5%（+4.2pp）",
-              "reason": "已覆盖"
-            },
-            {
-              "fact": "拦截率 61.7%（+8.9pp，首次突破 60% 目标达标）",
-              "reason": "已覆盖"
-            },
-            {
-              "fact": "解决率距 85% 目标差 3.8pp",
-              "reason": "答案说明 81.2% 未达 85% 目标，但未明确计算差 3.8pp，基本覆盖目标差距"
-            },
-            {
-              "fact": "FCR 78.5% 未达目标 85%",
-              "reason": "已覆盖"
-            },
-            {
-              "fact": "CSAT 4.38 分未达目标 4.5 分",
-              "reason": "已覆盖"
-            },
-            {
-              "fact": "ART 45 秒距 30 秒目标仍有差距",
-              "reason": "已覆盖"
-            },
-            {
-              "fact": "西南大区未接入智能客服",
-              "reason": "已覆盖（答案称西南大区智能问答引擎接入晚、仍以人工处理为主，预计 10 月底完成接入）"
-            },
-            {
-              "fact": "西南大区效率和解决率偏低",
-              "reason": "已覆盖"
-            },
-            {
-              "fact": "改进方向：加快西南大区智能客服接入",
-              "reason": "已覆盖"
-            },
-            {
-              "fact": "改进方向：优化复杂问题知识库",
-              "reason": "未覆盖"
-            },
-            {
-              "fact": "改进方向：提升情绪识别能力",
-              "reason": "未覆盖"
-            },
-            {
-              "fact": "改进方向相关事实点按标准答案第 3 项整体计算为“改进方向”",
-              "reason": "部分覆盖：仅覆盖加快西南大区智能客服接入，遗漏优化复杂问题知识库、提升情绪识别能力"
-            }
-          ],
-          "reason": "答案覆盖了 Q3 核心指标、主要未达标问题及西南大区问题，整体正确；但遗漏 ART 同比下降 45.1%、问题①中明确的 3.8pp 差距，以及两项改进方向，故扣分。"
+          "total_facts": 0,
+          "correct_facts": 0,
+          "incorrect": [],
+          "reason": "答案覆盖了标准答案中的绝大多数关键事实，整体表现指标和主要问题基本正确，但关于西南大区智能客服接入状态的补充描述与标准答案“未接入”不一致，因此扣除部分分数。"
         },
         "citation_accuracy": 0.6,
         "citation_accuracy_detail": {
@@ -10789,25 +10522,12 @@
         "answer_relevance_detail": {
           "reason": "答案全面围绕客服智能化行业的技术趋势和未来展望展开，涵盖了Agent化、多模态、行业垂直化、人机协作等核心要点，直接且完整地回应了问题所问的内容。"
         },
-        "correctness": 0.67,
+        "correctness": 0.71,
         "correctness_detail": {
-          "total_facts": 9,
-          "correct_facts": 6,
-          "incorrect": [
-            {
-              "fact": "知识图谱与大模型融合（GraphRAG）——通过实体级关联与图推理解决传统 RAG 幻觉率高、企业知识覆盖不足的问题",
-              "reason": "答案仅建议'持续关注GraphRAG'，未将其作为核心技术趋势说明，也未提及实体级关联、图推理或解决RAG幻觉问题等机制"
-            },
-            {
-              "fact": "情绪识别与主动服务——实时情绪识别从概念走向落地，可主动预警并转人工，降低投诉升级率",
-              "reason": "答案遗漏该事实点，未提及情绪识别与主动服务"
-            },
-            {
-              "fact": "多模态客服——图片客服预计 2027 年规模化",
-              "reason": "答案覆盖了图片客服处于商业化早期及2027年规模化，但未明确区分语音已成熟这一要点，作为整体该点部分覆盖；本项计入未覆盖部分主要为语音成熟度表述缺失，实际主项已覆盖"
-            }
-          ],
-          "reason": "答案覆盖了Agent化、多模态客服（含2027规模化）、降本增效、行业垂直化、人机协作等6个事实点，但遗漏了GraphRAG融合与情绪识别两大技术趋势，多模态中语音成熟度表述不完整，故按比例扣分。"
+          "total_facts": 0,
+          "correct_facts": 0,
+          "incorrect": [],
+          "reason": "答案覆盖了 Agent 化、多模态客服、情绪/主动服务缺失、未来从降本到增效、行业垂直化、人机协作等多数核心点，但遗漏或弱化了知识图谱与 GraphRAG 融合、情绪识别与主动服务，并加入标准答案未支持的市场规模和渗透率数据。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -11039,10 +10759,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 2,
-          "correct_facts": 2,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案准确指出材料中未提及公司智能客服系统所使用的大模型版本及基座模型信息，与标准答案的核心结论一致。"
+          "reason": "答案正确指出检索材料中没有公司智能客服系统所用大模型版本及基座模型信息，与标准答案一致。"
         },
         "citation_accuracy": 0.5,
         "citation_accuracy_detail": {
@@ -11229,10 +10949,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 2,
-          "correct_facts": 2,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案正确指出材料未提供Q4预算和人均薪酬成本，与标准答案一致，仅额外补充了不矛盾的细节说明。"
+          "reason": "答案正确指出材料无法回答客服中心2026年Q4预算和人均薪酬成本，与标准答案一致。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -11483,10 +11203,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 3,
-          "correct_facts": 3,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案完整、准确地覆盖了标准答案中一级2小时、二级8小时、三级24小时的全部时效事实点。"
+          "reason": "答案中三个等级投诉的方案提出时效（一级2小时、二级8小时、三级24小时）均与标准答案完全一致，正确性满分。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -11733,10 +11453,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 3,
-          "correct_facts": 3,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案完整覆盖了标准答案的三个关键事实点：基于 BERT-base-chinese 微调、支持 50+ 意图分类、准确率目标 ≥ 92%。"
+          "reason": "答案中的三个关键事实点（基于 BERT-base-chinese 微调、支持 50+ 意图分类、准确率目标 ≥ 92%）均与标准答案完全一致，正确性为 100%。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -11962,10 +11682,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 3,
-          "correct_facts": 3,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案完整覆盖了标准答案的三个关键事实点：月度评分前10%评为服务之星并给予奖金、月度评分低于60分需参加话术复训、连续两个月低于60分启动PIP，无事实错误或遗漏。"
+          "reason": "答案完整且准确地包含了标准答案中的所有关键事实点：服务之星评定条件（月度评分前10%并给予奖金）、连续两个月低于60分启动PIP，以及补充的低于60分需参加话术复训。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -12205,10 +11925,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 2,
-          "correct_facts": 2,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案正确覆盖了试点上线时间（2026年12月25日）和全量上线时间（2027年1月15日）两个关键事实点，与标准答案一致。"
+          "reason": "答案准确列出了试点上线时间（2026年12月25日）和全量上线时间（2027年1月15日），与标准答案完全一致。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -12446,10 +12166,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 4,
-          "correct_facts": 4,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案正确指出话术FAQ与投诉处理SOP在三级（一般）投诉问题解决时效上均为5个工作日，两者一致，完整覆盖标准答案全部关键事实点。"
+          "reason": "答案正确指出话术FAQ与投诉处理SOP关于三级（一般）投诉的时效要求一致，均为5个工作日，核心事实点与标准答案完全吻合，补充信息也未造成矛盾。"
         },
         "citation_accuracy": 0.625,
         "citation_accuracy_detail": {
@@ -12745,17 +12465,12 @@
         "answer_relevance_detail": {
           "reason": "答案直接回应了问题的两个具体问点：西南大区预计完成接入的时间和智能问答引擎在D2中的优先级。"
         },
-        "correctness": 0.75,
+        "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 4,
-          "correct_facts": 3,
-          "incorrect": [
-            {
-              "fact": "智能问答引擎配套 ART 目标 ≤ 30 秒",
-              "reason": "答案遗漏，未提及 ART 目标或 ≤30 秒指标"
-            }
-          ],
-          "reason": "答案正确覆盖了西南大区2026年10月底完成接入及智能问答引擎为D2 P0最高优先级两个关键事实，但遗漏了接入后拦截率与大区效率提升、以及配套ART目标≤30秒这两个事实点。"
+          "total_facts": 0,
+          "correct_facts": 0,
+          "incorrect": [],
+          "reason": "答案中两个关键事实点（完成接入时间、智能问答引擎优先级）均与标准答案一致，无错误。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -13029,10 +12744,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 4,
-          "correct_facts": 4,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案完整覆盖定义、目标值、Q3实际值及达成目标等全部关键事实点，无遗漏或矛盾。"
+          "reason": "答案完整且准确地覆盖了标准答案中的定义、目标值、Q3实际值及达成目标等关键事实点，未出现与标准答案矛盾的内容。"
         },
         "citation_accuracy": 0.7143,
         "citation_accuracy_detail": {
@@ -13309,17 +13024,12 @@
         "answer_relevance_detail": {
           "reason": "答案明确了槽位填充在智能客服系统中使用的模块（多轮对话管理），但坦承材料未解释其定义，因此只回应了问题的一半，相关性中等。"
         },
-        "correctness": 0.8,
+        "correctness": 0.75,
         "correctness_detail": {
-          "total_facts": 5,
-          "correct_facts": 4,
-          "incorrect": [
-            {
-              "fact": "槽位填充用于在对话中提取并填充用户的关键信息槽位",
-              "reason": "答案明确表示材料未解释槽位填充的具体定义或工作原理，因此未覆盖此定义性事实点"
-            }
-          ],
-          "reason": "答案覆盖了槽位填充所属模块（多轮对话管理）、配合状态机使用、支持上下文关联多轮问答、最大8轮等4个事实点，但未覆盖其具体定义（提取并填充用户关键信息槽位）。"
+          "total_facts": 0,
+          "correct_facts": 0,
+          "incorrect": [],
+          "reason": "答案正确识别了槽位填充的使用模块、配套状态机及对话轮次限制，但错误地声称无法解释其含义，而标准答案提供了明确定义。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -13559,10 +13269,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 4,
-          "correct_facts": 4,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案与标准答案完全一致，覆盖了金融68%、电商62%、通信57%、消费电子约53%且处于中上游水平、仍有提升空间全部事实点。"
+          "reason": "答案中金融、电商、通信三大行业的渗透率（68%、62%、57%）以及消费电子行业渗透率（约53%）和行业地位（中上游、有提升空间）均与标准答案完全一致。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -13826,25 +13536,12 @@
         "answer_relevance_detail": {
           "reason": "答案直接回应了增速比较问题，指出材料不足无法严格比较，并给出了驱动因素，但未得出明确比较结论，部分回应了问题。"
         },
-        "correctness": 0.5,
+        "correctness": 0.25,
         "correctness_detail": {
-          "total_facts": 6,
-          "correct_facts": 3,
-          "incorrect": [
-            {
-              "fact": "2026E 增速更快，高于 2025 年",
-              "reason": "答案错误地认为材料不足以判断两者快慢，未明确给出标准答案中的对比结论"
-            },
-            {
-              "fact": "2025 年增速为 +23.8%",
-              "reason": "答案遗漏该数值，并声称材料未提供 2025 年增速"
-            },
-            {
-              "fact": "客户对 7×24 服务与秒级响应的体验要求升级",
-              "reason": "答案未覆盖该驱动因素"
-            }
-          ],
-          "reason": "答案覆盖了2026E增速数值、市场规模及部分驱动因素，但错误否认了2025年增速数据，未给出两年增速对比结论，并遗漏一个驱动因素。"
+          "total_facts": 0,
+          "correct_facts": 0,
+          "incorrect": [],
+          "reason": "答案正确复述了2026E增速+36.2%及部分驱动因素，但错误地声称无法比较两年增速，未确认2026E增速更快，且关键驱动因素覆盖不完整，整体正确性较低。"
         },
         "citation_accuracy": 0.9091,
         "citation_accuracy_detail": {
@@ -14122,10 +13819,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 3,
-          "correct_facts": 3,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案完整覆盖了标准答案中的三个关键事实点：8月工单量15,205件、7月工单量14,826件以及环比增长2.6%。"
+          "reason": "答案中的8月工单量15205件和环比7月增长+2.6%均与标准答案一致，虽然表述上略有矛盾但最终结论正确。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -14369,10 +14066,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 3,
-          "correct_facts": 3,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案正确覆盖了2028年市场规模810亿元、2025年基准312亿元、以及约2.6倍增长关系这三个关键事实点。"
+          "reason": "答案的 2028 年 810 亿元、2025 年 312 亿元及约 2.6 倍的倍数关系均与标准答案一致。"
         },
         "citation_accuracy": 0.5,
         "citation_accuracy_detail": {
@@ -14605,10 +14302,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 3,
-          "correct_facts": 3,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案完整覆盖标准答案中的三大挑战及其关键细节，与标准答案语义一致。"
+          "reason": "答案完整覆盖标准答案中的三大挑战及其关键事实点，所有事实均与标准答案一致。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -14797,10 +14494,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 3,
-          "correct_facts": 3,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案完整覆盖标准答案关键事实：明确无法回答、Q1无数据，并列出Q2 41,692件与Q3 46,820件（额外提到7—9月分月数据与标准答案不矛盾）。"
+          "reason": "答案准确指出材料中无2026年Q1客服工单数据、无法回答，并正确列出Q2、Q3及7—9月分月数据，与标准答案完全一致。"
         },
         "citation_accuracy": 1.0,
         "citation_accuracy_detail": {
@@ -15043,10 +14740,10 @@
         },
         "correctness": 1.0,
         "correctness_detail": {
-          "total_facts": 3,
-          "correct_facts": 3,
+          "total_facts": 0,
+          "correct_facts": 0,
           "incorrect": [],
-          "reason": "答案正确判定材料不足无法回答，并与标准答案一致：均指出无2027年人员编制或招聘计划、材料仅覆盖其他内容（如Q3运营数据、上线计划等）。"
+          "reason": "答案准确判断现有材料无法回答该问题，且未包含任何与标准答案矛盾的内容，核心事实完全正确。"
         },
         "citation_accuracy": 0.875,
         "citation_accuracy_detail": {

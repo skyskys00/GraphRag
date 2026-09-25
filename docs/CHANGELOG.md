@@ -23,6 +23,34 @@
 
 ---
 
+## [v5.15] 2026-09-25 —— M9 裁判 prompt 校准（correctness 语义对齐 + judge 明细字段透传）
+
+**影响模块**：M9 评测层（`metrics/correctness.py` 裁判 prompt + `judge.py` 额外字段透传 + `rejudge_correctness.py` 重判脚本）。
+
+**背景**：v5.14 抽检发现裁判**系统性低估「表述不同但实质覆盖」的答案**（CS-FS-007 判 0.17 vs 人工 0.9+；CS-FC-004 判 0.25 vs 人工倾向 0.5），一致性 7/10 未达标 80%。
+
+**correctness 裁判校准**（[correctness.py](backend/app/m9_eval/metrics/correctness.py) SYSTEM_PROMPT）：
+- 判分分母从「答案事实点」改为「**标准答案事实点**」——漏答才算漏，避免「少说不扣分」的虚高。
+- 强化三条规则：①措辞/顺序/概括粒度不同但信息等价＝覆盖（含同一概念不同中文译名、别名），示例逐条列出；②额外正确不矛盾信息不计入分母不稀释；③部分覆盖按比例（覆盖过半通常 ≥0.6）。
+- PROMPT_TEMPLATE 步骤改为「先拆标准答案事实点 → 逐一语义对齐 → 再打分」，并输出 total_facts/correct_facts/incorrect 供核验。
+
+**judge.py 透传**：`_parse_judge_output` 只回 score/reason，丢弃裁判输出的 total_facts/correct_facts/incorrect——已改为透传并写入缓存，correctness_detail 首次有真实事实计数（改 prompt 后旧缓存命中，须 `clear_cache('correctness')` 才生效）。
+
+**10 题抽检重判对照**（新增脚本 `scripts/rejudge_correctness.py`，可 --full 全量）：
+
+| 题 | 旧 | 新 | 备注 |
+|---|---|---|---|
+| CS-FS-007 | 0.17 | 0.60 | 人工 0.9+，漏对齐修复（多轮对话并入核心能力升级） |
+| CS-FC-004 | 0.25 | 0.50 | 人工倾向 0.5，贴近 |
+| CS-PN-002 | 0.75 | 1.0→0.75 | 译名「首问解决率」vs「首次联系解决率」校准有效但**单题有 ±0.15~0.25 采样波动** |
+| CS-CP-004 | 0.00 | 0.00 | 虚构 v1.0 指标，保持严判 ✓ |
+
+**50 题全量重判**（仅 correctness，merge 回 `run_e2e_cservice_50.json`）：overall correctness **0.8321 → 0.8353**。涨 11 题（系统性低估修复）／跌 10 题（按 key_fact 收紧漏答，均有依据）／持平 29 题。faithfulness/answer_relevance/citation_accuracy 未动，保持 v5.14 值。
+
+**遗留**：单题分数仍有 LLM 采样波动（同 prompt 两次判分可能差 0.1-0.25），靠整体均值 + 相对比较使用；严格人工一致性回测（≥80%）待下轮 v5.x 数据重做。
+
+---
+
 ## [v5.14] 2026-09-25 —— M9 Phase 2 生成质量评测（M9 v1.4，评测层非检索版本）
 
 **影响模块**：M9 评测层（4 个生成指标 + runner e2e 模式 + 测试集 GT 修正 6 处）。
