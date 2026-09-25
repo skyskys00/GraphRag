@@ -23,6 +23,97 @@
 
 ---
 
+## [v5.14] 2026-09-25 —— M9 Phase 2 生成质量评测（M9 v1.4，评测层非检索版本）
+
+**影响模块**：M9 评测层（4 个生成指标 + runner e2e 模式 + 测试集 GT 修正 6 处）。
+
+**Phase 2 落地：e2e 生成四指标**（each LLM 裁判 via `judge.py`，复用缓存 + 并发控制）：
+
+- **faithfulness**（忠实度）：答案陈述能否在检索上下文中找到依据。句子级分句 + 逐句裁判，`factfulness / completeness` 双维度。
+- **answer_relevance**（相关性）：答案是否切题、回应问题要素。分步打分 + 解释。
+- **correctness**（正确性）：对比标准答案逐事实点判定（对/部分/错），输出 reason 供人工核验。
+- **citation_accuracy**（引用准确率）：答案中每个 `[n]` 引用的陈述能否在被引 chunk 中找到依据。两修复——①引用语句提取由整段改为**句子级边界**（`_sentence_bounds`，连续引用/句尾引用都归属同一句）；②引用上下文优先用**完整块 content**（marker n = results[n-1]，M6 assemble 约定），缺失才回退 citations snippet。
+- **可追溯性**：runner e2e result 落盘 `question / ground_truth / key_facts / answer / citations / retrieval.top_docs / gen_meta`，报告能逐题复盘裁判判定（新增 `build_human_checklist.py` 生成人工抽检表）。
+
+**50 题全量（`testset_cservice_50.json` e2e，报告 `tests/reports/run_e2e_cservice_50.json`）**：
+
+| 指标 | 均值 |
+|---|---|
+| correctness | 0.832 |
+| faithfulness | 0.919 |
+| answer_relevance | 0.939 |
+| citation_accuracy | 0.846 |
+| context_recall | 0.960 |
+| context_precision | 0.512 |
+
+> 上表为 6 处 GT 修正 merge 后的终值（correctness 0.8321 / faithfulness 0.9194 / answer_relevance 0.9390 / citation_accuracy 0.8465 / context_recall 0.9601）。CS-FC-007 摘除推断句后续跑：correctness 维持 1.0（答案本不含行业对比表述），citation_accuracy 0.357→0.833；CS-FC-005 三含义修正后续跑：correctness 0.25→0.643。
+
+全量总耗时 **1565 秒（≈26 分钟）**，超「<10 分钟」验收线——主要因评测期间 judge 服务端连接错误触发指数退避重试拖慢（不影响结果正确性）。judge_failed_questions = 0。
+
+**测试集 GT 修正 6 处**（人工抽检发现，先改 35 源 → 重跑 `build_testset_50.py` 同步，CS-FC-005 含两次修正）：
+
+- CS-FC-005：Q3 整体 ART「38 秒」→「45 秒」（38 秒是华东大区）。**再修正（2026-09-25 同日）：** 原标准答案只列两种含义（SLA + ART），但库内「响应时间」实为三种（另含 AHT 平均处理时长，D2/D3 均有原文定义与数值）。按用户「枚举多义词全部含义、不漏信息」原则，GT/key_facts 扩为三种全列，question「哪两种」→「哪几种」，must_have_docs 加 D3。修正后 correctness 0.25→**0.643**（系统答案本已正确给出 AHT 定义，原 0.25 是「选了与标准答案不同组合」所致，非知识错误）。
+- CS-FC-007：GT 重写为「首问解决率 = FCR = 首次联系解决率，同一概念」+「PRD 分层目标」+「Q3 实际 78.5% 未达 85%」。去掉「高于行业平均、接近头部」——D5 全文无公司与行业水平对比，该表述是写 GT 时的推断（用户核验确认）。
+- CS-CP-003：「西南 ART 高于整体平均 38 秒」→「西南 52 秒 vs 华东 38 秒」（无「整体平均 38 秒」依据）。
+- CS-CP-004：原 GT 四条指标目标（70%→85% 等）**纯属幻觉**——D2 全文无 v1.0 指标目标记录，版本迭代表仅 7 个能力维度。GT 改为「v1.0 与 v2.1 的核心指标目标无法直接比较」。
+- CS-SM-001：GT 全面重写为真实 Q3 数据（46,820/81.2%/4.38/45s/78.5%/61.7%），原 12.8 万/38s 等全错。
+
+修正后关键题逆转：CS-FC-007 correctness **0.2→1.0**、CS-SM-001 **0.33→0.92**、CS-FC-005 **0.25→0.643**、CS-CP-004 断言不变（0.0，理由从「答错 GT」变为「答案虚构 V1.0 指标」）。overall correctness 0.799→**0.832**。
+
+**裁判一致性人工抽检（10 题，验收线 ≥80%）**：LLM 裁判与人工判定约 **7/10 一致**，未硬达标。已知偏差模式：**裁判系统性低估「表述不同但实质覆盖」的答案**（CS-FS-007 判 0.17，人工 0.9+；CS-FC-004 判 0.25 人工倾向 0.5）。方向性判断（正/误）一致率高于分数一致率。缓解：文档已在 M9_evaluation.md §5 强调「每个版本核心数据人工抽检 20%」。
+
+**关键决策记录**：测试集 GT 修正是**先改 35 源 → 重跑 build → 单题重跑 → merge 回全量报告**四步流水线（`merge_eval_questions.py` 支持逐 id 替换 + 重聚 summary）。教训：写 GT 数值必须逐项核对 chunk 原文，已两次踩坑（CS-SM-001 等 4 题 → CS-CP-004）。
+
+**文档更新**：[`M9_evaluation.md`](modules/M9_evaluation.md) v1.4 / [`M9_testset.md`](modules/M9_testset.md) v0.3。
+
+---
+
+## [v5.13] 2026-09-24 —— 表格 NL 摘要注入 rerank 文本（M5 v1.13）
+
+**影响模块**：M5（v1.13，`table_summary.py` + retriever  rerank 输入增强）。
+
+**动机**：v5.10 列名前缀解决了 Recall 维度的表格语义问题，但 cross-encoder reranker 对纯数字表格行仍然失明（CS-TN-003 市场规模表在 RRF 池第 7，rerank 后落到第 13，目标块完全无法进入 top5）。尝试给表格块加自然语言摘要，让 reranker 通过 NL 描述理解表格语义，从而提升相关表格块的 rerank 分。
+
+**改动**：
+- 新增 `table_summary.py`：规则模板生成表格 NL 摘要——提取 caption + 列名 + 首行/末行数据，拼成一段自然语言描述（零成本、零索引重建）。
+- `retriever.py`：rerank 前对表格块的文本 = 摘要 + 原 content，仅影响 rerank 输入，不影响 dense/sparse 召回、不影响最终返回的 content。
+
+**全量评测（35 题 eval_cservice_v510_ws，报告 `run_retrieval_v513_table_nl_summary.json`）**：
+
+| 指标 | v5.10 基线 | v5.13 NL 摘要 | Δ |
+|---|---|---|---|
+| Context Recall | 0.9323 | 0.9520 | +0.020 |
+| Context Precision | 0.5543 | 0.5600 | +0.006 |
+| CP（加权） | 0.6753 | 0.6884 | +0.013 |
+| nDCG@5 | 0.8968 | 0.9028 | +0.006 |
+| gold_rank avg | 1.89 | 1.85 | -0.04 |
+
+**table_numeric 类目**：
+
+| 指标 | v5.10 | v5.13 | Δ |
+|---|---|---|---|
+| Recall | 0.917 | 0.917 | ±0.000 |
+| Precision | 0.400 | 0.400 | ±0.000 |
+| nDCG@5 | 0.942 | 0.937 | -0.005 |
+
+**结论**：
+- **核心目标（table_numeric）未达成**——NL 摘要对 rerank 分确实有提升（单题探针：CS-TN-003 市场规模表 rerank 分 0.133→0.352，融合排名 13→10），但提升幅度不足以把目标块拉进 top5。
+- **整体微升**：总体 recall +0.02、precision +0.006、nDCG +0.006，幅度在 judge 随机波动 + 排序微调的叠加范围内，无显著副作用。
+- **规则版接近天花板**：纯数字+规则手段对 table_numeric 类目的优化已近极限——列名前缀（v5.10）把 Recall 从 0.792 拉到 0.917，后续 v5.11/5.12 numeric_match boost、v5.13 NL 摘要都未能再推进。剩余缺口（CS-TN-003 的 2023 年市场规模表）属于 reranker 语义理解问题，规则手段难以突破。
+- **未来方向**：LLM 生成更高质量的表格摘要（建库时一次性生成），或从召回层提升表格块的位次（dense/sparse 端注入摘要）。本轮检索优化到此阶段性收尾。
+
+**v5.10 复测（列名前缀 + 新评测工具，报告 `run_retrieval_v5.10_goldrank.json`）**：
+
+| 指标 | top5 | top8 | 差 |
+|---|---|---|---|
+| Context Recall | 0.9323 | 0.9323 | 0 |
+| Context Precision | 0.5543 | 0.4107 | -0.144 |
+| CP（加权） | 0.6753 | 0.5953 | -0.080 |
+
+gold_rank（词汇模式）：平均 1.89 / 中位 1.89 / top1 35.1% / top3 49.0% / top5 52.7% / top8 55.3%。
+
+v5.9 → v5.10 的 gold_rank 变化：avg_rank 1.95→1.89（-0.06），top3 覆盖率 47.8%→49.0%（+1.2pp）——列名前缀让命中的事实排得稍靠前，幅度较小（词汇模式下，对 table_numeric 类目的 gold_rank 无变化，因为原本排名就靠前）。
+
 ## [v5.10] 2026-09-24 —— 表格行列名上下文增强（M2 v1.3）
 
 **影响模块**：M2（v1.3，表格块 content 前置列名摘要行）。
@@ -79,52 +170,6 @@
 gold_rank（词汇模式）：平均 1.95 / 中位 1.97 / top1 35.9% / top3 47.8% / top5 51.9% / top8 55.3%。
 
 **结论——top5 够用吗？** v5.9 和 v5.10 两个版本下 **top5 都完全够用**。33 道有答案题中没有任何一道的关键事实在 top8 有但 top5 没有（recall 零损失），top8 多出的 3 块全是噪音，把 precision 从 0.566 拉到 0.425。top5 是当前检索质量下的最优窗口。
-
-## [v5.13] 2026-09-24 —— 表格 NL 摘要注入 rerank 文本（M5 v1.13）
-
-**影响模块**：M5（v1.13，`table_summary.py` + retriever  rerank 输入增强）。
-
-**动机**：v5.10 列名前缀解决了 Recall 维度的表格语义问题，但 cross-encoder reranker 对纯数字表格行仍然失明（CS-TN-003 市场规模表在 RRF 池第 7，rerank 后落到第 13，目标块完全无法进入 top5）。尝试给表格块加自然语言摘要，让 reranker 通过 NL 描述理解表格语义，从而提升相关表格块的 rerank 分。
-
-**改动**：
-- 新增 `table_summary.py`：规则模板生成表格 NL 摘要——提取 caption + 列名 + 首行/末行数据，拼成一段自然语言描述（零成本、零索引重建）。
-- `retriever.py`：rerank 前对表格块的文本 = 摘要 + 原 content，仅影响 rerank 输入，不影响 dense/sparse 召回、不影响最终返回的 content。
-
-**全量评测（35 题 eval_cservice_v510_ws，报告 `run_retrieval_v513_table_nl_summary.json`）**：
-
-| 指标 | v5.10 基线 | v5.13 NL 摘要 | Δ |
-|---|---|---|---|
-| Context Recall | 0.9323 | 0.9520 | +0.020 |
-| Context Precision | 0.5543 | 0.5600 | +0.006 |
-| CP（加权） | 0.6753 | 0.6884 | +0.013 |
-| nDCG@5 | 0.8968 | 0.9028 | +0.006 |
-| gold_rank avg | 1.89 | 1.85 | -0.04 |
-
-**table_numeric 类目**：
-
-| 指标 | v5.10 | v5.13 | Δ |
-|---|---|---|---|
-| Recall | 0.917 | 0.917 | ±0.000 |
-| Precision | 0.400 | 0.400 | ±0.000 |
-| nDCG@5 | 0.942 | 0.937 | -0.005 |
-
-**结论**：
-- **核心目标（table_numeric）未达成**——NL 摘要对 rerank 分确实有提升（单题探针：CS-TN-003 市场规模表 rerank 分 0.133→0.352，融合排名 13→10），但提升幅度不足以把目标块拉进 top5。
-- **整体微升**：总体 recall +0.02、precision +0.006、nDCG +0.006，幅度在 judge 随机波动 + 排序微调的叠加范围内，无显著副作用。
-- **规则版接近天花板**：纯数字+规则手段对 table_numeric 类目的优化已近极限——列名前缀（v5.10）把 Recall 从 0.792 拉到 0.917，后续 v5.11/5.12 numeric_match boost、v5.13 NL 摘要都未能再推进。剩余缺口（CS-TN-003 的 2023 年市场规模表）属于 reranker 语义理解问题，规则手段难以突破。
-- **未来方向**：LLM 生成更高质量的表格摘要（建库时一次性生成），或从召回层提升表格块的位次（dense/sparse 端注入摘要）。本轮检索优化到此阶段性收尾。
-
-**v5.10 复测（列名前缀 + 新评测工具，报告 `run_retrieval_v5.10_goldrank.json`）**：
-
-| 指标 | top5 | top8 | 差 |
-|---|---|---|---|
-| Context Recall | 0.9323 | 0.9323 | 0 |
-| Context Precision | 0.5543 | 0.4107 | -0.144 |
-| CP（加权） | 0.6753 | 0.5953 | -0.080 |
-
-gold_rank（词汇模式）：平均 1.89 / 中位 1.89 / top1 35.1% / top3 49.0% / top5 52.7% / top8 55.3%。
-
-v5.9 → v5.10 的 gold_rank 变化：avg_rank 1.95→1.89（-0.06），top3 覆盖率 47.8%→49.0%（+1.2pp）——列名前缀让命中的事实排得稍靠前，幅度较小（词汇模式下，对 table_numeric 类目的 gold_rank 无变化，因为原本排名就靠前）。
 
 ## [v5.9] 2026-09-23 —— 多特征融合精排 + RERANK_TOP=5（M5 v1.12）
 

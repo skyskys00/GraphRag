@@ -71,6 +71,11 @@ def build_report(
         "ndcg_top5": _avg(results, "ndcg_top5"),
         "ndcg_top8": _avg(results, "ndcg_top8"),
         "ndcg": _avg(results, "ndcg"),
+        # 生成质量指标（Phase 2）
+        "faithfulness": _avg(results, "faithfulness"),
+        "answer_relevance": _avg(results, "answer_relevance"),
+        "correctness": _avg(results, "correctness"),
+        "citation_accuracy": _avg(results, "citation_accuracy"),
     }
 
     # LLM 裁判失败统计（失败项已从均分排除，单列供追溯）
@@ -100,6 +105,11 @@ def build_report(
             "gold_rank_top8_recall": _avg_topk_recall(lst, "8"),
             "ndcg_top5": _avg(lst, "ndcg_top5"),
             "ndcg_top8": _avg(lst, "ndcg_top8"),
+            # 生成质量指标（Phase 2）
+            "faithfulness": _avg(lst, "faithfulness"),
+            "answer_relevance": _avg(lst, "answer_relevance"),
+            "correctness": _avg(lst, "correctness"),
+            "citation_accuracy": _avg(lst, "citation_accuracy"),
         }
 
     cat_stats = {}
@@ -162,6 +172,27 @@ def to_markdown(report: dict[str, Any]) -> str:
     gjf = overall.get('judge_failed_judgments', 0)
     if gjf:
         lines.append(f"| 裁判失败调用数 | {gjf} | — |")
+
+    # 生成质量指标（Phase 2，有数值才展示）
+    gen_keys = ["faithfulness", "answer_relevance", "correctness", "citation_accuracy"]
+    if any(overall.get(k) is not None and overall[k] > 0 for k in gen_keys):
+        lines.append("")
+        lines.append("## 生成质量")
+        lines.append("")
+        lines.append("| 指标 | 得分 |")
+        lines.append("|---|---|")
+        labels = {
+            "faithfulness": "Faithfulness（忠实度）",
+            "answer_relevance": "Answer Relevance（答案相关性）",
+            "correctness": "Correctness（正确性）",
+            "citation_accuracy": "Citation Accuracy（引用准确率）",
+        }
+        for k in gen_keys:
+            v = overall.get(k)
+            if v is not None:
+                lines.append(f"| {labels[k]} | {v:.4f} |")
+            else:
+                lines.append(f"| {labels[k]} | — |")
     lines.append("")
     lines.append("## Gold Rank（事实最早出现的排名）")
     lines.append("")

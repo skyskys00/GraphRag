@@ -1,12 +1,16 @@
-"""M9 评测 runner：CLI 入口，支持 retrieval 模式（Phase 1）。
+"""M9 评测 runner：CLI 入口，支持 retrieval / answer 两种模式。
 
 用法：
     cd backend
     python -m app.m9_eval.runner \
-        --testset tests/testsets/testset_cservice_35.json \
+        --testset tests/testsets/testset_cservice_50.json \
         --mode retrieval \
         --collection eval_cservice \
         --report tests/reports/run_baseline.json
+
+模式：
+    retrieval — 仅检索指标（Phase 1，context_recall/precision/nDCG/gold_rank）
+    e2e / answer — 端到端（Phase 2，检索 + 生成 + 生成质量指标）
 """
 from __future__ import annotations
 
@@ -256,6 +260,265 @@ async def evaluate_retrieval(
     return results
 
 
+async def evaluate_answer(
+    testset: dict[str, Any],
+    rag,
+    sparse: dict,
+    query_func,
+    entities: list[str] | None = None,
+    allowed_docs: list[str] | None = None,
+    exclude_docs: list[str] | None = None,
+    *,
+    gold_rank_mode: str = "lexical",
+    eval_top_n: int = 8,
+) -> list[dict[str, Any]]:
+    """逐题跑 M6 answer + 检索指标 + 生成质量指标。
+
+    Phase 2 骨架：先打通 M6 answer 调用链路，生成指标留空（Step 2 实现）。
+    检索指标复用 retrieval 模式的全套（双窗口 + gold_rank + nDCG）。
+    """
+    from app.m5_retrieve import retriever as ret_mod
+    from app.m6_generate.orchestrator import answer as m6_answer
+
+    # 评测用更大的候选窗口，便于同时出 top5/top8 两套指标
+    orig_rerank_top = ret_mod.RERANK_TOP
+    ret_mod.RERANK_TOP = eval_top_n
+
+    questions = testset["questions"]
+    total = len(questions)
+    results: list[dict[str, Any]] = []
+
+    try:
+        for i, q in enumerate(questions):
+            qid = q["id"]
+            question_text = q["question"]
+            print(f"[{i+1}/{total}] {qid} - {q['category']} - {question_text[:50]}...", flush=True)
+
+            t0 = time.time()
+
+            # 1. 调用 M6 answer（内部会自己做检索）
+            try:
+                ans = await m6_answer(
+                    rag, question_text, sparse,
+                    entities=entities,
+                    query_func=query_func,
+                    allowed_docs=allowed_docs,
+                    exclude_docs=exclude_docs,
+                )
+                answer_text = ans.get("text", "")
+                citations = ans.get("citations", [])
+                retr = ans.get("retrieval", {})
+                contexts = retr.get("results", [])
+                gen_meta = ans.get("meta", {})
+            except Exception as e:
+                print(f"  ⚠️  answer 失败: {e}", flush=True)
+                answer_text = ""
+                citations = []
+                contexts = []
+                retr = {}
+                gen_meta = {}
+
+            answer_time = round(time.time() - t0, 2)
+
+            # top5 / top8 切片（不足则取全部）
+            contexts_top5 = contexts[:5]
+            contexts_top8 = contexts[:8]
+
+            # 2. 检索指标（同 retrieval 模式，复用同一套）
+            metrics: dict[str, Any] = {}
+
+            # gold_rank
+            if q["category"] != "unanswerable" and q.get("key_facts"):
+                try:
+                    from .metrics.gold_rank import compute_gold_rank
+                    gr = await compute_gold_rank(
+                        q["key_facts"], contexts_top8,
+                        mode=gold_rank_mode, query_func=query_func,
+                    )
+                    metrics["gold_rank"] = gr
+                except Exception as e:
+                    print(f"  ⚠️  gold_rank 计算失败: {e}", flush=True)
+                    metrics["gold_rank"] = None
+
+            # context_recall（top5 + top8）
+            if q["category"] != "unanswerable" and q.get("key_facts"):
+                try:
+                    from .metrics.context_recall import compute_context_recall
+                    cr8 = await compute_context_recall(
+                        query_func, question_text, q["key_facts"], contexts_top8,
+                    )
+                    metrics["context_recall_top8"] = cr8["score"]
+                    metrics["context_recall_detail"] = {
+                        "total_facts": cr8["total_facts"],
+                        "hit_facts": cr8["hit_facts"],
+                        "failed_facts": cr8.get("failed_facts", 0),
+                        "per_fact": cr8["per_fact"],
+                        "reason": cr8["reason"],
+                        "window": "top8",
+                    }
+                    cr5 = await compute_context_recall(
+                        query_func, question_text, q["key_facts"], contexts_top5,
+                    )
+                    metrics["context_recall_top5"] = cr5["score"]
+                    metrics["context_recall"] = cr5["score"]
+                    if metrics.get("context_recall_detail"):
+                        metrics["context_recall_detail"]["per_fact_top5"] = cr5["per_fact"]
+                        metrics["context_recall_detail"]["hit_facts_top5"] = cr5["hit_facts"]
+                except Exception as e:
+                    print(f"  ⚠️  context_recall 计算失败: {e}", flush=True)
+                    metrics["context_recall"] = None
+                    metrics["context_recall_top5"] = None
+                    metrics["context_recall_top8"] = None
+            else:
+                metrics["context_recall"] = None
+                metrics["context_recall_top5"] = None
+                metrics["context_recall_top8"] = None
+
+            # context_precision + nDCG（top8 跑，top5 推导）
+            try:
+                from .metrics.context_precision import compute_context_precision
+                from .metrics.ndcg import ndcg_at_k
+                cp8 = await compute_context_precision(
+                    query_func, question_text,
+                    q.get("ground_truth", ""), q.get("key_facts", []),
+                    contexts_top8,
+                )
+                metrics["context_precision_top8"] = cp8["score"]
+                metrics["context_precision_weighted_top8"] = cp8["weighted_score"]
+                metrics["context_precision_detail"] = {
+                    "total_chunks": cp8["total_chunks"],
+                    "relevant_chunks": cp8["relevant_chunks"],
+                    "failed_chunks": cp8.get("failed_chunks", 0),
+                    "per_chunk": cp8["per_chunk"],
+                    "reason": cp8["reason"],
+                    "window": "top8",
+                }
+                per_chunk_top5 = [c for c in cp8["per_chunk"] if c.get("rank") and c["rank"] <= 5]
+                evaluated5 = [c for c in per_chunk_top5 if c.get("relevant") is not None]
+                if evaluated5:
+                    rel_count5 = sum(1 for c in evaluated5 if c["relevant"])
+                    cp5_score = round(rel_count5 / len(evaluated5), 4)
+                    n5 = len(evaluated5)
+                    weights5 = [1.0 / (i + 1) for i in range(n5)]
+                    total_w5 = sum(weights5)
+                    cp5_weighted = round(
+                        sum(w * (1.0 if c["relevant"] else 0.0)
+                            for w, c in zip(weights5, evaluated5))
+                        / total_w5 if total_w5 else 0.0, 4
+                    )
+                else:
+                    cp5_score = None
+                    cp5_weighted = None
+                metrics["context_precision_top5"] = cp5_score
+                metrics["context_precision_weighted_top5"] = cp5_weighted
+                metrics["context_precision"] = cp5_score
+                metrics["context_precision_weighted"] = cp5_weighted
+
+                ndcg8 = ndcg_at_k(cp8["per_chunk"], 8)
+                ndcg5 = ndcg_at_k(cp8["per_chunk"], 5)
+                metrics["ndcg_top8"] = ndcg8
+                metrics["ndcg_top5"] = ndcg5
+                metrics["ndcg"] = ndcg5
+            except Exception as e:
+                print(f"  ⚠️  context_precision 计算失败: {e}", flush=True)
+                metrics["context_precision"] = None
+
+            # 3. 生成质量指标
+            try:
+                from .metrics.faithfulness import compute_faithfulness
+                fai = await compute_faithfulness(
+                    query_func, question_text, answer_text, contexts_top5,
+                )
+                metrics["faithfulness"] = fai["score"]
+                metrics["faithfulness_detail"] = {
+                    "total_statements": fai.get("total_statements", 0),
+                    "supported_statements": fai.get("supported_statements", 0),
+                    "unsupported": fai.get("unsupported", []),
+                    "reason": fai["reason"],
+                }
+            except Exception as e:
+                print(f"  ⚠️  faithfulness 计算失败: {e}", flush=True)
+                metrics["faithfulness"] = None
+
+            try:
+                from .metrics.answer_relevance import compute_answer_relevance
+                ar = await compute_answer_relevance(query_func, question_text, answer_text)
+                metrics["answer_relevance"] = ar["score"]
+                metrics["answer_relevance_detail"] = {"reason": ar["reason"]}
+            except Exception as e:
+                print(f"  ⚠️  answer_relevance 计算失败: {e}", flush=True)
+                metrics["answer_relevance"] = None
+
+            try:
+                from .metrics.correctness import compute_correctness
+                crr = await compute_correctness(
+                    query_func, question_text,
+                    q.get("ground_truth", ""), answer_text,
+                )
+                metrics["correctness"] = crr["score"]
+                metrics["correctness_detail"] = {
+                    "total_facts": crr.get("total_facts", 0),
+                    "correct_facts": crr.get("correct_facts", 0),
+                    "incorrect": crr.get("incorrect", []),
+                    "reason": crr["reason"],
+                }
+            except Exception as e:
+                print(f"  ⚠️  correctness 计算失败: {e}", flush=True)
+                metrics["correctness"] = None
+
+            try:
+                from .metrics.citation_accuracy import compute_citation_accuracy
+                ca = await compute_citation_accuracy(
+                    query_func, question_text, answer_text,
+                        contexts_top8, citations,
+                )
+                metrics["citation_accuracy"] = ca["score"]
+                metrics["citation_accuracy_detail"] = {
+                    "total_cites": ca.get("total_cites", 0),
+                    "supported_cites": ca.get("supported_cites", 0),
+                    "details": ca.get("details", []),
+                    "reason": ca["reason"],
+                }
+            except Exception as e:
+                print(f"  ⚠️  citation_accuracy 计算失败: {e}", flush=True)
+                metrics["citation_accuracy"] = None
+
+            total_time = round(time.time() - t0, 2)
+
+            result = {
+                "id": qid,
+                "category": q["category"],
+                "difficulty": q["difficulty"],
+                "question": question_text,
+                "ground_truth": q.get("ground_truth", ""),
+                "key_facts": q.get("key_facts", []),
+                "answer": answer_text,
+                "citations": citations,
+                "retrieval": {
+                    "num_results": len(contexts),
+                    "top_docs": [c.get("full_doc_id", "?") for c in contexts[:5]],
+                },
+                "gen_meta": gen_meta,
+                "metrics": metrics,
+                "time_s": total_time,
+                "answer_time_s": answer_time,
+            }
+
+            cr_val = metrics.get("context_recall")
+            cp_val = metrics.get("context_precision")
+            gr = metrics.get("gold_rank")
+            gr_info = f"  gr_avg={gr['avg_rank']}" if gr and gr.get('avg_rank') else ""
+            print(f"  recall={cr_val:.2f}" if cr_val is not None else "  recall=N/A",
+                  f"precision={cp_val:.2f}" if cp_val is not None else "precision=N/A",
+                  f"({total_time}s){gr_info}", flush=True)
+
+            results.append(result)
+    finally:
+        ret_mod.RERANK_TOP = orig_rerank_top
+
+    return results
+
+
 async def main_async(args: argparse.Namespace) -> None:
     _load_dotenv()
 
@@ -297,7 +560,10 @@ async def main_async(args: argparse.Namespace) -> None:
 
     # 执行评测
     t_start = time.time()
-    results = await evaluate_retrieval(testset, rag, sparse, query_func)
+    if args.mode in ("answer", "e2e"):
+        results = await evaluate_answer(testset, rag, sparse, query_func)
+    else:
+        results = await evaluate_retrieval(testset, rag, sparse, query_func)
     total_time = round(time.time() - t_start, 1)
 
     # 汇总报告

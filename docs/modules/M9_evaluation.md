@@ -1,14 +1,14 @@
 # M9 模块规划：评测层
 
-> **版本：** v1.3
-> **状态：** 可用（retrieval 模式 + gold_rank 诊断 + 双窗口 + nDCG）；Phase 2/3 待执行
-> **更新：** 2026-09-24
+> **版本：** v1.4
+> **状态：** 可用（retrieval 模式 + gold_rank 诊断 + 双窗口 + nDCG + **e2e 生成四指标**）；Phase 3 待执行
+> **更新：** 2026-09-25
 > **定位：** 中文 RAG 系统量化评测——测试集 + 指标 + ablation + 回归
 > **契约：** 测试集（question + contexts + ground_truth）→ 评测报告（各指标分数 + 对比基线）
 > **上游：** [M5 检索层](M5_retrieve.md) / [M6 生成层](M6_generate.md) / [M7 交互层](M7_interact.md) | **下游：** 回归门禁 / 作品集量化数据 / README 展示
 > **依据：** [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.7 ｜ [`FRAMEWORK_NOTES.md`](../FRAMEWORK_NOTES.md) §3 ｜ [`M9_testset.md`](M9_testset.md)（测试语料与测试集设计规范）
 > **运行：** `cd backend && python -m app.m9_eval.runner --testset testsets/default.json --report reports/run_xxx.json`
-> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md) v5.6（Phase 1 落地）/ v5.7（裁判稳定性 + 测试集 GT 修正 + 表格双表示后新基线）
+> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md) v5.6（Phase 1 落地）/ v5.7（裁判稳定性 + 测试集 GT 修正 + 表格双表示后新基线）/ v5.14（Phase 2 生成四指标 + 50 题全量）
 
 ---
 
@@ -398,3 +398,4 @@ RAGAS 是好工具，但**不直接用**，核心原因：
 - **v1.1**（2026-09-22）：Phase 1 落地。retrieval 模式可用，context_recall + context_precision + LLM 裁判缓存 + 35 题客服业务测试集。
 - **v1.2**（2026-09-24）：新增 gold_rank 诊断维度 + 双窗口评测（top5/top8 同跑）。gold_rank 双模式（词汇/LLM），定位为排序质量诊断工具而非精确指标。
 - **v1.3**（2026-09-24）：新增 nDCG@k 排序质量指标。从 CP 的 per_chunk score 推导，零额外 LLM 成本；MRR 不实现，由 nDCG 替代。
+- **v1.4**（2026-09-25）：Phase 2 落地。e2e 生成四指标：faithfulness / answer_relevance / correctness / citation_accuracy（各自 LLM 裁判 + 缓存）；50 题客服业务测试集全量跑通 + 逐题可追溯（ground_truth/key_facts/retrieval/gen_meta）；裁判一致性人工抽检（10 题，LLM 判定与人工一致性约 7/10，偏差集中在「表述不同但实质覆盖」被裁判低估）。测试集 GT 修正 5 题（CS-FC-005/007、CS-CP-003/004、CS-SM-001，含 CS-CP-004 人工抽检发现 v1.0 指标目标纯属幻觉→GT 改为「不可比」）。
