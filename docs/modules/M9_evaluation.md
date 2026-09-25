@@ -1,7 +1,7 @@
 # M9 模块规划：评测层
 
-> **版本：** v1.4
-> **状态：** 可用（retrieval 模式 + gold_rank 诊断 + 双窗口 + nDCG + **e2e 生成四指标**）；Phase 3 待执行
+> **版本：** v1.6
+> **状态：** 可用（retrieval 模式 + gold_rank 诊断 + 双窗口 + nDCG + **e2e 生成四指标** + **行政库检索基线**）；Phase 3 待执行
 > **更新：** 2026-09-25
 > **定位：** 中文 RAG 系统量化评测——测试集 + 指标 + ablation + 回归
 > **契约：** 测试集（question + contexts + ground_truth）→ 评测报告（各指标分数 + 对比基线）
@@ -382,20 +382,48 @@ RAGAS 是好工具，但**不直接用**，核心原因：
 
 ---
 
-## 8. 遗留 / 后续（v2.0 及以后）
+## 8. 评测结果快照（按库）
+
+### 8.1 办公行政库（eval_admin）首轮检索基线（2026-09-25，M9 v1.5 → v1.6）
+
+15 题最小集（`testsets/testset_admin_15.json`，建库 3 篇 117 chunks）retrieval 模式评测（`tests/reports/run_retr_admin_baseline.json`，双窗口 top5/top8）：
+
+| 指标 | top5 | top8 | 说明 |
+|---|---|---|---|
+| Context Recall | **0.9405** | 0.9487 | 关键事实在检索结果中的覆盖率 |
+| Context Precision（加权） | **0.5878** | 0.5767 | top-k 中相关块占比（按答案相关度加权） |
+| nDCG | **0.8518** | 0.8712 | 排序质量的标准化单一数字 |
+| gold_rank avg | 1.67 | — | 命中 fact 最早出现在第几块的平均值 |
+| gold_rank top1/3/5 覆盖率 | — | 0.176 / 0.240 / 0.261 | **词汇模式诊断，不混用为 recall** |
+
+gold_rank top5 覆盖率仅 0.261（客服库 v5.9 基线 52%）——行政库事实以纯文本为主（「以旧换新」「台账管理」等），数字 token 少，词汇模式漏检多，符合 [§7.5](M9_evaluation.md) 已知边界。
+
+**逐题检索质量发现（四大问题，均为检索/语料层问题，非评分问题）**：
+- **q013（表碎片化）**：A1 部门配纸量表被切分到多个 chunk，「20-50 人=4 箱」行与「50 人以上」行错位，nDCG@5 0.76。与客服库 v5.13 table_nl_summary 解决的问题同源——行政库表格链路待补表格语义摘要。
+- **q004（跨表依赖）**：城市分级表未被随住宿表召回，recall 0.5（缺「上海属于一类城市」fact）。城市分级（表 A）与住宿标准（表 B）是两张表，需跨表关联。
+- **q010（字符串命中）**：抓到 A3「关联文件」块（FIN-FAS-2024-002 字符命中），prec 0.2——正是该干扰题想验证的场景，系统确实会被字符命中骗到，但凭此块不足以作答，不影响 GT 判断。
+- **q015（拒答前提）**：prec 0.0（无相关块）→ 拒答前提成立，e2e 时验证系统正确拒答。
+
+报告：`backend/tests/reports/run_retr_admin_baseline.json`。e2e 生成四指标评测留待下一轮。
+
+---
+
+## 9. 遗留 / 后续（v2.0 及以后）
 
 1. **更多维度**：latency benchmark（文档量上去后做）、token 成本统计、抗扰动测试（同义改写问题看答案稳定性）。
-2. **多库评测**：每个 collection 可以有自己的测试集，评测按库隔离。
+2. **多库评测**：每个 collection 可以有自己的测试集，评测按库隔离。（行政库已建 own workspace + 测试集，评测 runner 已支持 `--collection`；客服库 / 行政库各自独立跑。）
 3. **CI 集成**：接入 GitHub Actions，PR 自动跑冒烟集（当前单机项目不急）。
 4. **可视化报告**：把评测结果做成简单的 HTML 仪表盘（当前 JSON + Markdown 够用）。
 5. **垂直场景评测**：等 P1 落地垂直场景后，针对该场景建专属测试集（如学术论文 / 产品文档）。
 
 ---
 
-## 9. 版本
+## 10. 版本
 
 - **v0.1**（2026-09-21）：初始规划。定义定位、6 个核心指标、50 题测试集方案、7 组 ablation 设计、三阶段实施路线。
 - **v1.1**（2026-09-22）：Phase 1 落地。retrieval 模式可用，context_recall + context_precision + LLM 裁判缓存 + 35 题客服业务测试集。
 - **v1.2**（2026-09-24）：新增 gold_rank 诊断维度 + 双窗口评测（top5/top8 同跑）。gold_rank 双模式（词汇/LLM），定位为排序质量诊断工具而非精确指标。
 - **v1.3**（2026-09-24）：新增 nDCG@k 排序质量指标。从 CP 的 per_chunk score 推导，零额外 LLM 成本；MRR 不实现，由 nDCG 替代。
 - **v1.4**（2026-09-25）：Phase 2 落地。e2e 生成四指标：faithfulness / answer_relevance / correctness / citation_accuracy（各自 LLM 裁判 + 缓存）；50 题客服业务测试集全量跑通 + 逐题可追溯（ground_truth/key_facts/retrieval/gen_meta）；裁判一致性人工抽检（10 题，LLM 判定与人工一致性约 7/10，偏差集中在「表述不同但实质覆盖」被裁判低估）。测试集 GT 修正 5 题（CS-FC-005/007、CS-CP-003/004、CS-SM-001，含 CS-CP-004 人工抽检发现 v1.0 指标目标纯属幻觉→GT 改为「不可比」）。
+- **v1.5**（2026-09-25）：裁判校准。correctness 裁判 prompt 校准（分母改标准答案事实点 + 语义对齐含中文译名 + 额外正确信息不计入分母 + 部分覆盖按比例），judge 透传 total_facts/correct_facts/incorrect。全量重判 correctness 0.8321→**0.8353**（详见 [CHANGELOG](../CHANGELOG.md) v5.15）。
+- **v1.6**（2026-09-25）：行政库（eval_admin）首轮检索基线。15 题最小集 retrieval 模式评测出值（Recall@5 0.9405 / Prec@5 0.5878 / nDCG@5 0.8518），逐题检索质量诊断定位四大问题（q013 表碎片化、q004 跨表依赖、q010 字符串命中、q015 拒答前提成立），gold_rank 词汇模式 top5 覆盖率 0.261 印证 [§7.5](M9_evaluation.md) 文档型事实边界。详见 [CHANGELOG](../CHANGELOG.md) v5.16 与本文 [§8.1](#81-办公行政库eval_admin首轮检索基线2026-09-25m9-v15--v16)。

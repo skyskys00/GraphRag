@@ -23,6 +23,36 @@
 
 ---
 
+## [v5.16] 2026-09-25 —— 行政库（eval_admin）最小集落地 + 首轮检索基线评测（M9 v1.5→v1.6）
+
+**影响模块**：M9 评测层（行政库检索基线 + 测试集 GT 修正）＋ M7 建库（新增 `scripts/build_eval_admin.py`）。
+
+**背景**：办公行政库测试集 `testset_admin_15.json` 于 v5.5 已构造，但语料一直未切块建索引。本轮完成三件事：测试集逐题审查、建库、首轮检索评测。
+
+**测试集逐题审查**（15 题全部对照语料原文核验）：14/15 一致；发现 1 处 GT 事实冲突并修正——
+- `adm_q010`（FAS）：原 GT 断言「公司制度中没有直接出现『FAS』缩写或术语」，与 A3 §8.3 关联文件《固定资产管理办法》（FIN-FAS-2024-002）中「FAS」编号片段冲突。改为「未将『FAS』定义为独立术语；仅以 FIN-FAS-2024-002 编号片段出现（FIN-FAS=财务-固定资产）」，key_facts 同步 4 条、note 更新。
+- 难度分布记录：7 easy / 7 medium / 1 hard（仅 q008 跨文档丢失题）。hard 偏少，完整版 30 题时补。
+
+**建库**：新增 `scripts/build_eval_admin.py`，复用 `m7_interact.documents.ingest` 生产链路（M1→M2→M3→sparse/sidecar/entities），三份语料入库：A1 35 chunks / A2 40 / A3 42，合计 117 chunks。产物：`data/eval_admin_ws/` + `data/chunks/eval_admin/` + `data/parse/eval_admin/`。脚本幂等可复跑（LightRAG `ainsert_custom_chunks` 对同 doc 同 chunk 集 no-op）。图构建阶段有若干 LLM 关系抽取连接抖动重试，未阻断入库。
+
+**首轮检索基线**（`tests/reports/run_retr_admin_baseline.json`，15 题，309.7s）：
+
+| 指标 | top5 | top8 |
+|---|---|---|
+| Context Recall | 0.9405 | 0.9405 |
+| Context Precision（加权） | 0.5878 | 0.5009 |
+| nDCG | 0.8518 | 0.8712 |
+
+- **Gold Rank**：avg 1.67；top1/3/5/8 事实覆盖率 0.175/0.223/0.261/0.261（词汇模式，明显低于客服库 top5 52%——行政库以纯文本事实为主、数字 token 少，词汇弱匹配大量漏检，属已知低估，诊断用不混用）
+- **暴露的检索问题**（后续优化方向，本次只记录不探底）：
+  - `adm_q013`（25 人→4 箱）nDCG@5 仅 0.76：**表格块纵向碎片化**——同一张「部门人数|配纸量」表被切成多个 chunk（top1 是「50 人以上」行，关键 20-50 行错位）。客服库已用 table_nl_summary（v5.13）解决，行政库建库未套用。
+  - `adm_q004`（上海 350）Recall@5 0.5：**跨表依赖**——「城市分级」表（上海=一类）与「住宿标准」表分开，检索命中住宿表但未召回城市分级表，judge 判「上海属于一类城市」fact 未覆盖。
+  - `adm_q010`（FAS）Prec@5 0.2：字符串命中把 A3「8.3 关联文件」块拉进 top（正是干扰项设计想测的场景）；e2e 阶段需验证模型能正确澄清「未定义」。
+  - `adm_q015`（年假，拒答）Prec@5 0.0：检索无相关块返回，拒答前提成立。
+- **未做**：e2e 生成四指标（faithfulness/answer_relevance/correctness/citation_accuracy）——留待下一轮跑。
+
+---
+
 ## [v5.15] 2026-09-25 —— M9 裁判 prompt 校准（correctness 语义对齐 + judge 明细字段透传）
 
 **影响模块**：M9 评测层（`metrics/correctness.py` 裁判 prompt + `judge.py` 额外字段透传 + `rejudge_correctness.py` 重判脚本）。

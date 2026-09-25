@@ -164,18 +164,19 @@
       "id": "adm_q010",
       "category": "proper_noun",
       "question": "什么是FAS？在什么语境下使用？",
-      "ground_truth": "公司制度中没有直接出现「FAS」这一缩写或术语。在财务领域，FAS 通常指 Free Alongside Ship（船边交货）或 Financial Accounting Standards（财务会计准则），但与公司的办公行政/差旅/IT制度无关。",
+      "ground_truth": "公司行政/差旅/IT制度中未将「FAS」定义为一个独立术语。它仅在《固定资产管理办法》的文件编号（FIN-FAS-2024-002）中以代号片段出现（FIN-FAS 指财务-固定资产），本知识库未对「FAS」作任何业务意义上的定义或解释。",
       "key_facts": [
-        "公司行政制度中未定义FAS",
-        "FAS常见含义：船边交货 / 财务会计准则",
-        "与本知识库内容无关"
+        "公司行政/差旅/IT制度中未将FAS定义为独立术语",
+        "FAS仅以固定资产管理办法编号FIN-FAS-2024-002的片段出现",
+        "FIN-FAS指财务-固定资产",
+        "本知识库未对FAS作业务定义"
       ],
       "must_have_docs": [],
       "must_not_have_docs": ["A1_办公用品领用管理办法.pdf", "A2_员工差旅报销管理制度.docx", "A3_IT设备管理与领用规范.md"],
       "difficulty": "medium",
       "source_docs": [],
       "tags": ["术语", "易混淆"],
-      "note": "本题为干扰项测试：材料中无FAS定义，考察系统是否会误匹配到F类或S类相关内容"
+      "note": "本题为干扰项测试：材料中无FAS术语定义，仅作为固定资产办法编号（FIN-FAS-2024-002）的片段出现；考察系统是否会被字符命中骗到或编造定义"
     },
     {
       "id": "adm_q011",
