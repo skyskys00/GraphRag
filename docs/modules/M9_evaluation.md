@@ -1,7 +1,7 @@
 # M9 模块规划：评测层
 
-> **版本：** v1.8
-> **状态：** 可用（retrieval 模式 + gold_rank 诊断 + 双窗口 + nDCG + **e2e 生成四指标** + **行政库检索基线 / NL 摘要激活复测 / e2e 生成质量评测**）；Phase 3 待执行
+> **版本：** v1.9
+> **状态：** 可用（retrieval 模式 + gold_rank 诊断 + 双窗口 + nDCG + **e2e 生成四指标** + **行政库完整版 30 题检索基线 / NL 摘要激活复测 / 30 题全量 e2e / 裁判一致性抽检 10/10**）；Phase 3 待执行
 > **更新：** 2026-09-25
 > **定位：** 中文 RAG 系统量化评测——测试集 + 指标 + ablation + 回归
 > **契约：** 测试集（question + contexts + ground_truth）→ 评测报告（各指标分数 + 对比基线）
@@ -445,6 +445,39 @@ gold_rank top5 覆盖率仅 0.261（客服库 v5.9 基线 52%）——行政库�
 
 详见 [CHANGELOG](../CHANGELOG.md) v5.18。
 
+### 8.1c 行政库 30 题全量检索基线（2026-09-25，M9 v1.9）
+
+六篇文档完整版（203 chunks）+ 30 题测试集 v0.2 全量 retrieval 模式（`tests/reports/run_retr_admin_30_baseline.json`，733.4s）。top8 窗口与 gold_rank 同跑（零额外检索成本）：
+
+| 指标 | 30 题 | 15 题 NL 摘要基线（v5.17） | 说明 |
+|---|---|---|---|
+| Context Recall@5 / @8 | 0.9524 / 0.9524 | 0.9583 | 双窗口同值，30 题中关键事实早入 top5 |
+| Context Precision（加权）@5 / @8 | 0.619 / 0.536 | 0.6122 | @8 加权下降 = 扩展窗口引入更多噪声块 |
+| nDCG@5 / @8 | 0.8567 / 0.9019 | 0.8649 | @8 排序好于 @5，长窗口允许后续相关块归位 |
+| gold_rank avg / median | 2.04 / 1.98 | 1.50 | 上升系题型结构变化（新增跨文档/表格题），非检索回归 |
+
+**拒答前提成立**：unanswerable 题（q029 年度经营目标 / q030 CEO 姓名）prec@5 = 0.0，检索未召回任何可答片段，与 e2e 拒答行为自洽。
+
+### 8.1d 行政库 30 题全量 e2e + 裁判一致性抽检（2026-09-25，M9 v1.9）
+
+30 题全量 e2e（`tests/reports/run_e2e_admin_30.json`，1298.9s ≈ 21.6 分钟，judge_failed=0），与 15 题基线 / 客服库 50 题参考：
+
+| 指标 | 30 题 | 15 题基线 | 客服库 50 题参考 | 说明 |
+|---|---|---|---|---|
+| Faithfulness | **0.884** | 0.9277 | 0.9194 | 新题含更多跨文档/数值题，简短答案内引用易漏 |
+| Answer Relevance | **0.9333** | 0.9000 | 0.9390 | 与客服库同级 |
+| Correctness | **0.9713** | 0.9373 | 0.8353 | 当前三个库/版本最高 |
+| Citation Accuracy | **0.8187** | 0.8928 | 0.8465 | 表格拆碎 + 跨文档交叉引用增多拉低 |
+
+**裁判一致性人工抽检（10 题样本，验收线 ≥80%）= 10/10 = 100% 达标**（`tests/reports/human_checklist_run_e2e_admin_30.md`）：
+- 平均 |人工−裁判| 0.049、最大 0.15（adm_q010），与客服库校准后抽检（0.043/0.15）同级。
+- **低分题评价一致**：adm_q016（裁判 0.60 / 人工 0.50——制度名+适用岗位全对，但标准/弹性/综合工时制的量化要求 3 处缺失）；adm_q008（0.89 / 0.75——5 事实点缺赔偿标准）。
+- **拒答与干扰题评价一致**：adm_q029 正确拒答 1.0、adm_q010 干扰项正确拒答 1.0（裁判与人工同判）。
+- **检索缺口暴露（记录供检索优化）**：① q008 差旅设备丢失的赔偿标准（A3 6.2 表格 chunk [30][31]）未召回 top8 → 系统诚实拒答该细节；② q013「每箱=5 包=2500 张」换算事实未随答召回；③ q004 系统误称「材料未直接标注上海城市类别」（实际 [A2] 城市分级表已列），生成层对检索结果利用不充分。
+- 残留：人工判定由 Claude（与裁判同源）执行，建议用户抽看 q004/q008/q016 复核。
+
+详见 [CHANGELOG](../CHANGELOG.md) v5.19。
+
 ---
 
 ## 9. 遗留 / 后续（v2.0 及以后）
@@ -464,7 +497,8 @@ gold_rank top5 覆盖率仅 0.261（客服库 v5.9 基线 52%）——行政库�
 - **v1.2**（2026-09-24）：新增 gold_rank 诊断维度 + 双窗口评测（top5/top8 同跑）。gold_rank 双模式（词汇/LLM），定位为排序质量诊断工具而非精确指标。
 - **v1.3**（2026-09-24）：新增 nDCG@k 排序质量指标。从 CP 的 per_chunk score 推导，零额外 LLM 成本；MRR 不实现，由 nDCG 替代。
 - **v1.4**（2026-09-25）：Phase 2 落地。e2e 生成四指标：faithfulness / answer_relevance / correctness / citation_accuracy（各自 LLM 裁判 + 缓存）；50 题客服业务测试集全量跑通 + 逐题可追溯（ground_truth/key_facts/retrieval/gen_meta）；裁判一致性人工抽检（10 题，LLM 判定与人工一致性约 7/10，偏差集中在「表述不同但实质覆盖」被裁判低估）。测试集 GT 修正 5 题（CS-FC-005/007、CS-CP-003/004、CS-SM-001，含 CS-CP-004 人工抽检发现 v1.0 指标目标纯属幻觉→GT 改为「不可比」）。
-- **v1.5**（2026-09-25）：裁判校准。correctness 裁判 prompt 校准（分母改标准答案事实点 + 语义对齐含中文译名 + 额外正确信息不计入分母 + 部分覆盖按比例），judge 透传 total_facts/correct_facts/incorrect。全量重判 correctness 0.8321→**0.8353**（详见 [CHANGELOG](../CHANGELOG.md) v5.15）。
+- **v1.5**（2026-09-25）：裁判校准。correctness 裁判 prompt 校准（分母改标准答案事实点 + 语义对齐含中文译名 + 额外正确信息不计入分母 + 部分覆盖按比例），judge 透传 total_facts/correct_facts/incorrect。全量重判 correctness 0.8321→**0.8353**（详见 [CHANGELOG](../CHANGELOG.md) v5.15）。校准后重做人工一致性抽检 **10/10 达标**（|diff|≤0.25 判一致，平均 0.043、最大 0.15；报告 `tests/reports/human_checklist_run_e2e_cservice_50_v2.md`）。
 - **v1.7**（2026-09-25）：行政库表格 NL 摘要激活。排查并修正 v5.16 推断（q013 非「建库未套用摘要」，真因是稀疏索引缺 block_type → M7 `build_workspace_deps` 漏传 `chunks_dir`）；M7 修复 + admin sparse 重建后复测（`tests/reports/run_retr_admin_nl.json`），Recall@5 0.9405→0.9583、加权 Prec@5 0.5878→0.6122、nDCG@5 0.8518→0.8649，`adm_q012` nDCG 0.83→0.99（能力生效直接证据）；q013/q014 排序不变——表格碎片化确认为 M2 行级切分独立问题。详见 [§8.1a](#81a-表格-nl-摘要激活后复测2026-09-25m9-v16--v17) 与 [CHANGELOG](../CHANGELOG.md) v5.17。
 - **v1.6**（2026-09-25）：行政库（eval_admin）首轮检索基线。15 题最小集 retrieval 模式评测出值（Recall@5 0.9405 / Prec@5 0.5878 / nDCG@5 0.8518），逐题检索质量诊断定位四大问题（q013 表碎片化、q004 跨表依赖、q010 字符串命中、q015 拒答前提成立），gold_rank 词汇模式 top5 覆盖率 0.261 印证 [§7.5](M9_evaluation.md) 文档型事实边界。详见 [CHANGELOG](../CHANGELOG.md) v5.16 与本文 §8.1。
+- **v1.9**（2026-09-25）：行政库 30 题完整版评测。六文档 203 chunks 建库 + 测试集 v0.2（30 题），全量检索基线（Rec@5/8 0.9524、Prec@5 加权 0.619 / @8 0.5359、nDCG@5 0.8567 / @8 0.9019、gold_rank avg 2.04）+ 全量 e2e（faithfulness 0.884 / answer_relevance 0.9333 / correctness 0.9713 / citation_accuracy 0.8187，judge_failed=0）+ 裁判一致性抽检 **10/10 达标**（平均 |diff| 0.049、最大 0.15）。详见 [§8.1c/8.1d](#81c-行政库30题全量检索基线2026-09-25m9-v19) 与 [CHANGELOG](../CHANGELOG.md) v5.19。
 - **v1.8**（2026-09-25）：行政库 e2e 生成质量评测。15 题全量四指标首次出值（faithfulness 0.9277 / answer_relevance 0.9000 / correctness 0.9373 / citation_accuracy 0.8928，judge_failed=0，耗时 9.3 分钟），拒答验证通过（q015 正确拒答）、干扰题行为正确（q010）、检索缺口传导到生成（q004 correctness 0.5）。详见 [§8.1b](#81b-行政库e2e生成质量评测2026-09-25m9-v17--v18) 与 [CHANGELOG](../CHANGELOG.md) v5.18。

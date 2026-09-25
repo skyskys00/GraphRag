@@ -1,4 +1,4 @@
-"""办公行政库（eval_admin）建库脚本：把测试语料三份文档完整入库。
+"""办公行政库（eval_admin）建库脚本：把测试语料六份文档完整入库。
 
 复用 m7 documents.ingest 生产链路（M1 解析 → M2 切分 → M3 图/向量入库 →
 稀疏索引重建 → sidecar/实体表），与客服库（eval_cservice）建库方式一致。
@@ -20,7 +20,8 @@ from pathlib import Path
 PROJ = Path(__file__).resolve().parents[1]
 
 CORPUS = PROJ / "inputs" / "testset_corpus" / "eval_admin"
-FILES = ["A1_办公用品领用管理办法.pdf", "A2_员工差旅报销管理制度.docx", "A3_IT设备管理与领用规范.md"]
+FILES = ["A1_办公用品领用管理办法.pdf", "A2_员工差旅报销管理制度.docx", "A3_IT设备管理与领用规范.md",
+         "A4_员工考勤管理制度.pdf", "A5_公司会议室使用预约规范.md", "A6_新员工入职办理指南.docx"]
 
 
 async def main() -> None:
