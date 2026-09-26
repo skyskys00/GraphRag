@@ -48,7 +48,7 @@
 **维护方案落地（无代码/库改动，仅文档/流程）**：**客服库构建时序错位排查结论 + 索引版本纪律**。
 
 - **已归档评测结果全部有效，无需重测**：v5.6~v5.9 系在 `eval_cservice_ws`（9-22 建、无前缀）、v5.10~v5.13 系在旁路 `eval_cservice_v510_ws`（9-24 建、25/99 带前缀，临时脚本 build_v510_* 已删），每版都测在与其代码时代匹配的库上，报告 `config.workspace` 自证。
-- **真正的坑**：(a) 标准命令 `--collection eval_cservice` 硬编码映射旧 `eval_cservice_ws`，重跑复现不出 v5.13 数字；(b) `default_ws` sparse 停在 9-21（未吃 v5.7 表格双表示），**先忽略，等评测结束、优化完全落地后再全链路重建**。
+- **真正的坑**：(a) 标准命令 `--collection eval_cservice` 硬编码映射旧 `eval_cservice_ws`，重跑复现不出 v5.13 数字；(b) `default_ws` sparse 停在 9-21（未吃 v5.7 表格双表示），**先忽略，等评测结束、优化完全落地后再全链路重建**；**`eval_cservice_v510_ws` 是含列名前缀的唯一实体（v5.13 评测可复现实体），保留到评测结束、客服库重建到最终代码后删除（届时 rm data/eval_cservice_v510_ws + wipe PG 对应行）**。
 - **根因**：sparse 一次性构建产物冻结 content（机制层）/ v5.10 验证走旁路库未回落（流程层）/ runner 硬编码映射固化分叉（命令层）。
 - **纪律写入**：M3_index v0.3.3 §3.5 全链路重建命令链（M2 重切→wipe PG→build_rag+ainsert→sparse，禁旁路库）；M9_evaluation v1.9.1 §4.6 评测 workspace 纪律（显式 `--workspace` + 报告自证）；项目根 CLAUDE.md 探底纪律第 4 条「临时验证库即建即收」。
 
