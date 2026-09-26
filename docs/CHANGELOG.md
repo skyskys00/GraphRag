@@ -43,6 +43,8 @@
 - 注入对 title_path 结构敏感：旧（错误）title_path 下 #+0.0006、正确 title_path 下 -0.94pt。
 - 探针脚本留档 `backend/scripts/probe_m2_inject_all.py / probe_m2_inject_rank.py`（可复跑），报告归档 `tests/reports/probe_*`。表格进不了候选集的缺口**留给后续方案**（结构化/专用 reranker），本次不落地。
 
+**探底：structured 补召回（B 方案，M5 层，无效，已整体回滚）**：给「进不了候选集」的表格块补候选资格——`struct_table.py` 从内存 chunks 解析表块为「列名+行 cell」，query 侧三信号打分（score=3×value + 2×num + 1×col，`token in query` 值匹配 + `(n,单位)` 数值区间 + 列语义），score≥2 的缺口表块追加进 RRF 池，随 rerank+五特征融合竞争 top5（进池≠进 top5 命题验证）。**机制全部按设计生效**：q004 城市分级表（sparse 专名盲区真缺口，`上海` ∈ cell 值「北京、上海、广州、深圳」）与 q013 配纸量表（`25 ∈ [20-50人]` 数值区间）都被补进池，col=1 弱信号（6.2 赔偿标准等）被阈值正确拦下；q020 会议室块本就在三路池内（非真缺口，零操作）。**但 rerank 把补块全部压出 top5**——30 题全量 nDCG@5 **0.8567** / Rec@5 0.9524 / Prec@5 0.4600 与 v5.20 baseline **逐位完全一致**（补块 sparse/rrf 特征为 0，排名只由 rerank 分决定，cross-encoder 对数字/专名表失明，v5.13 CS-TN-003 已证同因）。**判定：结构化补召回只解决「进池」，最终名次仍卡在 reranker 失明，无任何指标收益 → 不落地**。报告归档 `tests/reports/run_retr_admin_30_structB.json`；检索三路与候选池逻辑已 git 回滚，`struct_table.py` 未接线删除。与 v5.11/12/13 结论一脉相承：召回层手段（结构化/前缀/摘要）都无法抵消 rerank 对表格语义的失明，缺口需 reranker 侧或 LLM 高质摘要才能突破。
+
 ---
 
 ## [v5.19] 2026-09-25 —— 行政库完整版：6 文档 / 30 题测试集 + 首轮全量检索与 e2e 评测 + 裁判一致性抽检（M9 v1.8→v1.9）
