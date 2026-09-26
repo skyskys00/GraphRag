@@ -1,8 +1,8 @@
 # M3 模块记录：索引层（LightRAG 建图 + bge-m3 向量）
 
-> **版本：** v0.3.2
+> **版本：** v0.3.3
 > **状态：** 已落地
-> **更新：** 2026-09-20
+> **更新：** 2026-09-26
 > **定位：** TextUnit → LightRAG 知识图谱 + bge-m3 向量索引
 > **契约：** TextUnit → 图索引（entities/relations） + 向量索引（dense + sparse）
 > **上游：** [M2 切分层](M2_chunk.md) | **下游：** [M5 检索层](M5_retrieve.md)
@@ -36,6 +36,24 @@ cd backend
 # 单文档（调试）
 /opt/anaconda3/envs/graphrag/bin/python -m app.m3_index.runner --only 7497ed75
 ```
+
+## 3.5 全链路索引重建（索引层改动后）
+
+> **触发场景**：M2 切分逻辑、chunker 参数、表格双表示、列名前缀、NL 摘要等**索引层改动**后必须重建索引，否则新旧内容错位。**`m5_sparse.json` 是一次性构建产物，建完即冻结 content，不会随代码/ chunk jsonl 前进**（2026-09-26 时序错位事故根源）。
+
+**命令链（backend/ 下执行）：**
+
+```bash
+cd backend
+# 1. M2 重切：chunks jsonl（每个 doc_id 一行一 unit）
+/opt/anaconda3/envs/graphrag/bin/python -m app.m2_chunk.runner -s data/parse/<lib> -o data/chunks/<lib>
+# 2. wipe PG workspace 行（13 表）
+#    → build_rag(working_dir, workspace="<ws>") + rag.ainsert_custom_chunks（M3 建图入库）
+# 3. M5 sparse 重建（须 async 内 asyncio.to_thread(build_sparse, ...)）
+```
+
+- **生产链路参照** `backend/scripts/build_eval_admin.py`（ingest → build_workspace_deps，M1→M2→M3→M5 sparse 全链自动）。
+- **规则**：索引层改动落库时必须走完整重建链重建标准库，**禁止为验证另建旁路 workspace**（如 v5.10 曾建 `eval_cservice_v510_ws`）；验证用临时库即建即收（见项目根 CLAUDE.md 探底纪律第 4 条）。
 
 ## 4. 关键坑：DeepSeek v4-flash 思考模式
 
@@ -90,4 +108,5 @@ DeepSeek：实体「ARPU」+ 关系描述写道「…提升8%」 ← 干净，�
 ## 7. 版本
 
 - **v0.3**（2026-09-14）：增量建图 `ainsert_custom_chunks` 被 M7 上传管线复用。
+- **v0.3.3**（2026-09-26）：新增 §3.5 全链路索引重建命令链（M2→M3→M5），索引层改动后重建标准库、禁旁路 workspace。
 - 变更记录：**逐条版本历史见 `docs/CHANGELOG.md`**（v0.1 GLM 冒烟 → v0.2 DeepSeek 定案+思考模式修复 → v0.3 联动复用）。本文件不再维护历史流水。

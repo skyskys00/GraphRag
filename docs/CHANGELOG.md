@@ -45,6 +45,13 @@
 
 **探底：structured 补召回（B 方案，M5 层，无效，已整体回滚）**：给「进不了候选集」的表格块补候选资格——`struct_table.py` 从内存 chunks 解析表块为「列名+行 cell」，query 侧三信号打分（score=3×value + 2×num + 1×col，`token in query` 值匹配 + `(n,单位)` 数值区间 + 列语义），score≥2 的缺口表块追加进 RRF 池，随 rerank+五特征融合竞争 top5（进池≠进 top5 命题验证）。**机制全部按设计生效**：q004 城市分级表（sparse 专名盲区真缺口，`上海` ∈ cell 值「北京、上海、广州、深圳」）与 q013 配纸量表（`25 ∈ [20-50人]` 数值区间）都被补进池，col=1 弱信号（6.2 赔偿标准等）被阈值正确拦下；q020 会议室块本就在三路池内（非真缺口，零操作）。**但 rerank 把补块全部压出 top5**——30 题全量 nDCG@5 **0.8567** / Rec@5 0.9524 / Prec@5 0.4600 与 v5.20 baseline **逐位完全一致**（补块 sparse/rrf 特征为 0，排名只由 rerank 分决定，cross-encoder 对数字/专名表失明，v5.13 CS-TN-003 已证同因）。**判定：结构化补召回只解决「进池」，最终名次仍卡在 reranker 失明，无任何指标收益 → 不落地**。报告归档 `tests/reports/run_retr_admin_30_structB.json`；检索三路与候选池逻辑已 git 回滚，`struct_table.py` 未接线删除。与 v5.11/12/13 结论一脉相承：召回层手段（结构化/前缀/摘要）都无法抵消 rerank 对表格语义的失明，缺口需 reranker 侧或 LLM 高质摘要才能突破。
 
+**维护方案落地（无代码/库改动，仅文档/流程）**：**客服库构建时序错位排查结论 + 索引版本纪律**。
+
+- **已归档评测结果全部有效，无需重测**：v5.6~v5.9 系在 `eval_cservice_ws`（9-22 建、无前缀）、v5.10~v5.13 系在旁路 `eval_cservice_v510_ws`（9-24 建、25/99 带前缀，临时脚本 build_v510_* 已删），每版都测在与其代码时代匹配的库上，报告 `config.workspace` 自证。
+- **真正的坑**：(a) 标准命令 `--collection eval_cservice` 硬编码映射旧 `eval_cservice_ws`，重跑复现不出 v5.13 数字；(b) `default_ws` sparse 停在 9-21（未吃 v5.7 表格双表示），**先忽略，等评测结束、优化完全落地后再全链路重建**。
+- **根因**：sparse 一次性构建产物冻结 content（机制层）/ v5.10 验证走旁路库未回落（流程层）/ runner 硬编码映射固化分叉（命令层）。
+- **纪律写入**：M3_index v0.3.3 §3.5 全链路重建命令链（M2 重切→wipe PG→build_rag+ainsert→sparse，禁旁路库）；M9_evaluation v1.9.1 §4.6 评测 workspace 纪律（显式 `--workspace` + 报告自证）；项目根 CLAUDE.md 探底纪律第 4 条「临时验证库即建即收」。
+
 ---
 
 ## [v5.19] 2026-09-25 —— 行政库完整版：6 文档 / 30 题测试集 + 首轮全量检索与 e2e 评测 + 裁判一致性抽检（M9 v1.8→v1.9）

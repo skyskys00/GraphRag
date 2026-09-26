@@ -1,8 +1,8 @@
 # M9 模块规划：评测层
 
-> **版本：** v1.9
+> **版本：** v1.9.1
 > **状态：** 可用（retrieval 模式 + gold_rank 诊断 + 双窗口 + nDCG + **e2e 生成四指标** + **行政库完整版 30 题检索基线 / NL 摘要激活复测 / 30 题全量 e2e / 裁判一致性抽检 10/10**）；Phase 3 待执行
-> **更新：** 2026-09-25
+> **更新：** 2026-09-26
 > **定位：** 中文 RAG 系统量化评测——测试集 + 指标 + ablation + 回归
 > **契约：** 测试集（question + contexts + ground_truth）→ 评测报告（各指标分数 + 对比基线）
 > **上游：** [M5 检索层](M5_retrieve.md) / [M6 生成层](M6_generate.md) / [M7 交互层](M7_interact.md) | **下游：** 回归门禁 / 作品集量化数据 / README 展示
@@ -220,6 +220,17 @@ answer_result = await answer(query=q, contexts=results, ...)
 ```
 
 如果 M5/M6 的接口变了，M9 跟着改——因为 M9 是消费者，不是生产者。
+
+### 4.6 评测 workspace 与索引版本纪律
+
+> **背景（2026-09-26）**：bge-m3 sparse 是一次性构建产物（`m5_sparse.json`），建完即冻结 content，不随代码/ chunk jsonl 前进。v5.10 曾为测量列名前缀在旁路 workspace `eval_cservice_v510_ws` 上临时重建，评测结果有效但**业务库 `eval_cservice_ws` 停在 v5.13 之前（无前缀），用标准命令 `--collection eval_cservice` 重跑复现不出 v5.13 报告数字**。
+
+**评测命令约定：**
+
+1. **必须显式指定 workspace**：`--workspace <ws>` 直接传入（绕过 `collection→workspace` 硬编码映射）。依赖硬编码映射有落错库风险。
+2. **报告自带 workspace 自证**：报告 `config.workspace` 字段记录实际所用库。归档/对比报告时先核对这一字段，确保两个报告可比。
+3. **索引层改动后重建语义**：评测若依赖新索引内容，先按 [M3_index.md §3.5](M3_index.md) 全链路重建标准库，再跑评测；不另建旁路 workspace（见项目根 CLAUDE.md 探底纪律第 4 条）。
+4. **标准命令的已知矩阵**（runner.py `collection→workspace` 映射）：`default→default_ws`、`eval_admin→eval_admin_ws`、`eval_cservice→eval_cservice_ws`。其余 `collection` 按 id 即 workspace。
 
 ---
 
