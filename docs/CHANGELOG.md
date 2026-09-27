@@ -23,6 +23,27 @@
 
 ---
 
+## [v5.21] 2026-09-27 —— 检索层 LLM listwise 终审（M9 可选 reranker，正式功能）+ 表格失明终审权移交探底
+
+**影响模块**：M9 评测层新增可选 reranker；`retriever.py`/M6 生成链路零改动（纯评测侧消费）。生产检索路径（M5）不引入。
+
+**功能**：`runner.py --reranker llm` 把检索融合候选池（`fusion.fused_top40` 前 `LLM_POOL_SIZE=20`）交给 LLM listwise 重排定 top-N，绕过 cross-encoder 对数值/专名表格的语义失明。**谁握终审权比顺序更关键**：cross-encoder 失明把表块压出 top5 的根因在裁决层，LLM 终审 = 跨千分之 encoder 降级为召回/初筛。新模块 `app/m9_eval/llm_rerank.py`（`rerank_with_llm`，返回结构与 `retrieve()` results 对齐，指标路径全复用）；默认 `standard` 行为零变化。
+
+**A/B 验证（`tests/reports/run_retr_admin_30_llm_final.json`，30 题，同库同裁判）**：
+
+| 指标 | v5.20 baseline | --reranker llm | Δ |
+|---|---|---|---|
+| nDCG@5 | 0.8567 | **0.9479** | **+9.1pt** |
+| Recall@5 | 0.9524 | **0.9857** | +3.3pt |
+| Prec@5 加权 | 0.619 | **0.7281** | +10.9pt |
+| gold_rank avg | 2.04 | **1.76** | 更靠前 |
+
+- 单题探针 `scripts/probe_rankgpt_listwise.py`（报告 `tests/reports/probe_rankgpt_listwise.json`）：4/4 被压表块救回 top5（CS-TN-003 两表、adm_q020 会议室表、adm_q004/q012 城市分级表）。
+- **诚实边界**：个别题反向（q005 nDCG 0.973→0.826 等，LLM 排序引入噪声）；单题 +1 次 LLM 调用（pool 26 块原料 ≈ 6k tokens 输入 / +5~10s）；**只治池内不治池外**——fact_cross_doc 题为召回层缺口（q008 5 facts 全 miss 的答案块根本没进 fused_top40，重排无从救起，见 retrieval_comparison.md §遗留缺口）。
+- **决策记录**：answer 链路（`evaluate_answer`/M6 `answer`）暂不接 reranker=llm（每问 LLM 调用与评测 judge 叠加、`answer_stream` 流式不兼容、生产 token 成本）；生产 M5 不引入。
+
+---
+
 ## [v5.20] 2026-09-26 —— PDF 章级标题层级校准（M1 v1.3→v1.4）+ 表格语义注入探针结论归档
 
 **影响模块**：M1 解析层（`blocks_builder.py`，PDF 链路章误判修复）。检索/生成业务代码无改动。

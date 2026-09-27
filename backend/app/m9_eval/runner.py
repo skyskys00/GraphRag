@@ -30,6 +30,9 @@ sys.path.insert(0, str(PROJ))
 from .report import build_report, save_report, to_markdown
 from .testset import load_testset, stats as testset_stats
 
+# LLM listwise 终审（探底 A/B）：候选池大小（fusion.fused_top40 前 N）
+LLM_POOL_SIZE = 20
+
 
 def _load_dotenv() -> None:
     """加载 .env（复用 m3_index 同名函数）。"""
@@ -71,12 +74,14 @@ async def evaluate_retrieval(
     *,
     gold_rank_mode: str = "lexical",
     eval_top_n: int = 8,
+    reranker: str = "standard",
 ) -> list[dict[str, Any]]:
     """逐题跑检索 + 评测 context recall / precision + gold_rank。
 
     Args:
         gold_rank_mode: 'lexical'（默认，零成本）或 'llm'（精确）
         eval_top_n: 检索取多少块用于评测（默认 8，可同时出 top5/top8 两套指标）
+        reranker: 'standard'（cross-encoder+融合）或 'llm'（LLM listwise 终审，探底 A/B）
     """
     from app.m5_retrieve import retriever as ret_mod
     from app.m5_retrieve.retriever import retrieve
@@ -109,7 +114,17 @@ async def evaluate_retrieval(
                     allowed_docs=allowed_docs,
                     exclude_docs=exclude_docs,
                 )
-                contexts = retr.get("results", [])
+                if reranker == "llm":
+                    # 探底 A/B：LLM listwise 终审重排（绕过 cross-encoder 表格失明）
+                    from .llm_rerank import rerank_with_llm
+
+                    contexts = await rerank_with_llm(
+                        query_func, question_text, retr, sparse,
+                        top_n=eval_top_n, pool_size=LLM_POOL_SIZE,
+                    )
+                    retr["results"] = contexts  # 后续统一走 contexts
+                else:
+                    contexts = retr.get("results", [])
             except Exception as e:
                 print(f"  ⚠️  检索失败: {e}", flush=True)
                 contexts = []
@@ -563,7 +578,8 @@ async def main_async(args: argparse.Namespace) -> None:
     if args.mode in ("answer", "e2e"):
         results = await evaluate_answer(testset, rag, sparse, query_func)
     else:
-        results = await evaluate_retrieval(testset, rag, sparse, query_func)
+        results = await evaluate_retrieval(testset, rag, sparse, query_func,
+                                           reranker=args.reranker)
     total_time = round(time.time() - t_start, 1)
 
     # 汇总报告
@@ -571,6 +587,7 @@ async def main_async(args: argparse.Namespace) -> None:
         "mode": args.mode,
         "collection": collection,
         "workspace": workspace,
+        "reranker": args.reranker,
     }
     report = build_report(testset, results, config=config)
     report["summary"]["total_time_s"] = total_time
@@ -602,6 +619,9 @@ def main() -> None:
     parser.add_argument("--report", default=None, help="报告输出路径")
     parser.add_argument("--limit", type=int, default=None,
                         help="只跑前 N 题（冒烟用）")
+    parser.add_argument("--reranker", default="standard",
+                        choices=["standard", "llm"],
+                        help="检索排序终审：standard=cross-encoder+融合（默认）；llm=LLM listwise 终审（探底 A/B）")
 
     args = parser.parse_args()
 
