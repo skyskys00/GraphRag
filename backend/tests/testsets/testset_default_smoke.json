@@ -1,0 +1,71 @@
+{
+  "testset_id": "testset_default_smoke",
+  "collection": "default",
+  "domain": "综合冒烟",
+  "version": "2026-09-27",
+  "created": "2026-09-27",
+  "description": "default_ws 重建后冒烟验证（5 题，答案锚定真实 chunk 内容）",
+  "corpus_docs": ["季度销售业绩复盘报告.pdf", "智能客服系统产品需求文档.docx", "客户服务投诉处理SOP.md"],
+  "questions": [
+    {
+      "id": "DF-SM-001",
+      "category": "fact_single",
+      "question": "华东大区第三季度的销售完成率是多少？",
+      "ground_truth": "华东大区以 111.4% 的完成率领跑全国，主要得益于上海、杭州两地的重点客户项目。",
+      "key_facts": ["华东大区完成率 = 111.4%", "领先全国"],
+      "must_have_docs": ["季度销售业绩复盘报告.pdf"],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": ["季度销售业绩复盘报告.pdf"],
+      "tags": ["销售", "完成率", "华东"]
+    },
+    {
+      "id": "DF-SM-002",
+      "category": "fact_single",
+      "question": "公司2026年第三季度整体销售收入是多少？较上季度环比增长多少？",
+      "ground_truth": "2026年第三季度公司整体实现销售收入8,650万元，较上季度环比增长12.3%，较去年同期同比增长18.7%，超额完成季度目标的103%。",
+      "key_facts": ["整体销售收入 = 8650万元", "环比增长 12.3%", "同比增长 18.7%"],
+      "must_have_docs": ["季度销售业绩复盘报告.pdf"],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": ["季度销售业绩复盘报告.pdf"],
+      "tags": ["销售", "季度收入", "增长"]
+    },
+    {
+      "id": "DF-SM-003",
+      "category": "table_numeric",
+      "question": "智能硬件产品线本季度收入占公司整体收入的比例是多少？",
+      "ground_truth": "智能硬件产品线本季度收入占比达到 40%，已成为公司第一大收入来源。",
+      "key_facts": ["智能硬件产品线占比 = 40%", "第一大收入来源"],
+      "must_have_docs": ["季度销售业绩复盘报告.pdf"],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": ["季度销售业绩复盘报告.pdf"],
+      "tags": ["表格", "产品线", "占比"]
+    },
+    {
+      "id": "DF-SM-004",
+      "category": "fact_single",
+      "question": "投诉升级工单触发后，接收方须在多长时间内确认接收并启动处理？",
+      "ground_truth": "升级工单触发后，接收方须在 30 分钟内确认接收并启动处理，处理完毕后须将处理结果回传至原工单系统，形成闭环记录。",
+      "key_facts": ["升级工单确认接收时限 = 30分钟"],
+      "must_have_docs": ["客户服务投诉处理SOP.md"],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": ["客户服务投诉处理SOP.md"],
+      "tags": ["SOP", "升级机制", "时效"]
+    },
+    {
+      "id": "DF-SM-005",
+      "category": "proper_noun",
+      "question": "智能客服系统产品需求文档 PRD 的版本号是多少？",
+      "ground_truth": "智能客服系统产品需求文档（PRD）版本 V2.1，日期 2026年9月，负责人产品部。",
+      "key_facts": ["PRD 版本 = V2.1"],
+      "must_have_docs": ["智能客服系统产品需求文档.docx"],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": ["智能客服系统产品需求文档.docx"],
+      "tags": ["PRD", "版本"]
+    }
+  ]
+}

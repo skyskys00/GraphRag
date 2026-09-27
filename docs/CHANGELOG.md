@@ -38,7 +38,14 @@
 - **三库终态**：客服 35 gold_rank avg 1.71 / top8 0.838；行政 30 avg 1.59 / top8 0.914；default_ws 无评测测试集。
 - **结论**：行政库 retriever 在 top8 内事实上覆盖 **91.4%** key facts（旧口径误判仅 34.5%）——两评测库同向收敛，修复效果均被证实为「旧匹配器系统性假阴性的清除」而非造高分；gold_rank 维度（lexical 默认 / llm 精确）两库统一，可放心使用。
 
-**模块文档**：retrieval_comparison.md 新增「gold_rank 匹配器修复三库统一」小节（行政库历史各处的 gold_rank_avg 2.04 标注为旧口径、保留作对照）；[RETRIEVAL_OPTIMIZATION.md](modules/RETRIEVAL_OPTIMIZATION.md) 组 D 表 + 已知缺口表补行政库数字。耗时：277.7s（`time` 实测 4:42.75）。
+**模块文档**：[RETRIEVAL_OPTIMIZATION.md](modules/RETRIEVAL_OPTIMIZATION.md) 新增「gold_rank 匹配器修复三库统一」小节（行政库历史各处的 gold_rank_avg 2.04 标注为旧口径、保留作对照）+ 组 D 表 + 已知缺口表补行政库数字。耗时：277.7s（`time` 实测 4:42.75）。
+
+**核验补充（2026-09-28）——三库重建后重跑闭环，验证通过**：v5.23.1/2 重建两库 + v5.23/v5.23.3 gold_rank 修复之后，三库全链路重跑核查：
+
+- **客服 35 题重跑**（`tests/reports/run_retrieval_finalcheck_cservice35_20260927.json`，451.6s，与基线 `run_retrieval_goldrank_final_cservice35_20260927.json` 对照）：列前缀 0/99→**25/99** 重建生效，排序质量硬指标（词汇 gold_rank，无 judge 随机性）全面改善——gr avg 1.71→**1.64** / median 1.53→**1.44**、top1 覆盖率 0.539→**0.554**、top3 0.761→**0.776**、ndcg@5 0.884→**0.896**，top5/top8 持平（0.823/0.838，不损伤）。逐题归因：35 题中 **28 题 chunk 集与基线逐块一致**，7 题因列前缀生效改变 chunk 集（代表 CS-FC-001 gr avg 3.0→**1.0**）；CS-CP-004 / CS-FS-009 两题 recall 微降（0.5→0.25、1.0→0.75）但 chunk 集与 per-fact rank 全部一致，判定为 LLM judge 判断波动（±0.13pp/题量级），非检索变化。
+- **行政 30 题重跑**（`tests/reports/run_retrieval_finalcheck_admin30_20260927.json`，451.6s）：19 项指标（recall 0.9321 / precision 0.42 / gr 1.59 / top1-8 覆盖率 / ndcg）与基线**逐位一致**——行政库未重建、链路未变，复现稳定，流程可信。
+- **default_ws 冒烟**：新增 `backend/tests/testsets/testset_default_smoke.json`（5 题，答案锚定重建后真实块：华东 111.4% 完成率 / 8650 万收入 / 智能硬件 40% / 升级工单 30 分钟 / PRD V2.1），跑通（100.4s）——recall **1.0** / gr avg 1.2 / top1 覆盖率 0.7 / top3 0.9，default 库链路可用、无异常。
+- **结论**：客服列前缀增益真实、行政复现稳定、default 全链可用——v5.23 系列「重建 + 评测」闭环验证通过；两库新报告均存档于 `tests/reports/`。
 
 ---
 

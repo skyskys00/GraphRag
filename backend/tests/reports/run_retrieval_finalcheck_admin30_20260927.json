@@ -1,0 +1,5513 @@
+{
+  "testset_id": "testset_admin_30",
+  "domain": "",
+  "version": "v0.2",
+  "timestamp": "2026-09-28 00:00:20",
+  "config": {
+    "mode": "retrieval",
+    "collection": "eval_admin",
+    "workspace": "eval_admin_ws",
+    "reranker": "standard"
+  },
+  "summary": {
+    "total_questions": 30,
+    "overall": {
+      "context_recall": 0.9321,
+      "context_precision": 0.42,
+      "context_precision_weighted": 0.592,
+      "context_recall_top5": 0.9321,
+      "context_recall_top8": 0.9321,
+      "context_precision_top5": 0.42,
+      "context_precision_top8": 0.3042,
+      "context_precision_weighted_top5": 0.592,
+      "context_precision_weighted_top8": 0.5151,
+      "gold_rank_avg": 1.59,
+      "gold_rank_median": 1.52,
+      "gold_rank_min": 1.04,
+      "gold_rank_max": 2.25,
+      "gold_rank_top1_recall": 0.6661,
+      "gold_rank_top3_recall": 0.8476,
+      "gold_rank_top5_recall": 0.878,
+      "gold_rank_top8_recall": 0.9137,
+      "ndcg_top5": 0.845,
+      "ndcg_top8": 0.8831,
+      "ndcg": 0.845,
+      "faithfulness": 0.0,
+      "answer_relevance": 0.0,
+      "correctness": 0.0,
+      "citation_accuracy": 0.0,
+      "judge_failed_judgments": 0
+    },
+    "by_category": {
+      "comparison": {
+        "count": 4,
+        "context_recall": 0.8333,
+        "context_precision": 0.35,
+        "context_recall_top5": 0.8333,
+        "context_recall_top8": 0.8333,
+        "context_precision_top5": 0.35,
+        "context_precision_top8": 0.25,
+        "gold_rank_avg": 1.08,
+        "gold_rank_median": 1.0,
+        "gold_rank_top5_recall": 0.8334,
+        "gold_rank_top8_recall": 0.8334,
+        "ndcg_top5": 0.9297,
+        "ndcg_top8": 0.9637,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "fact_cross_doc": {
+        "count": 4,
+        "context_recall": 0.9,
+        "context_precision": 0.65,
+        "context_recall_top5": 0.9,
+        "context_recall_top8": 0.9,
+        "context_precision_top5": 0.65,
+        "context_precision_top8": 0.5625,
+        "gold_rank_avg": 2.62,
+        "gold_rank_median": 2.88,
+        "gold_rank_top5_recall": 0.775,
+        "gold_rank_top8_recall": 0.9,
+        "ndcg_top5": 0.8183,
+        "ndcg_top8": 0.9105,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "fact_single": {
+        "count": 11,
+        "context_recall": 0.9545,
+        "context_precision": 0.5091,
+        "context_recall_top5": 0.9545,
+        "context_recall_top8": 0.9545,
+        "context_precision_top5": 0.5091,
+        "context_precision_top8": 0.3523,
+        "gold_rank_avg": 1.53,
+        "gold_rank_median": 1.41,
+        "gold_rank_top5_recall": 0.9621,
+        "gold_rank_top8_recall": 0.9773,
+        "ndcg_top5": 0.9131,
+        "ndcg_top8": 0.9539,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "proper_noun": {
+        "count": 4,
+        "context_recall": 1.0,
+        "context_precision": 0.3,
+        "context_recall_top5": 1.0,
+        "context_recall_top8": 1.0,
+        "context_precision_top5": 0.3,
+        "context_precision_top8": 0.1875,
+        "gold_rank_avg": 1.0,
+        "gold_rank_median": 1.0,
+        "gold_rank_top5_recall": 0.875,
+        "gold_rank_top8_recall": 0.875,
+        "ndcg_top5": 0.9951,
+        "ndcg_top8": 0.9946,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "table_numeric": {
+        "count": 5,
+        "context_recall": 0.9333,
+        "context_precision": 0.36,
+        "context_recall_top5": 0.9333,
+        "context_recall_top8": 0.9333,
+        "context_precision_top5": 0.36,
+        "context_precision_top8": 0.25,
+        "gold_rank_avg": 1.77,
+        "gold_rank_median": 1.5,
+        "gold_rank_top5_recall": 0.8133,
+        "gold_rank_top8_recall": 0.88,
+        "ndcg_top5": 0.867,
+        "ndcg_top8": 0.905,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "unanswerable": {
+        "count": 2,
+        "context_recall": 0.0,
+        "context_precision": 0.0,
+        "context_recall_top5": 0.0,
+        "context_recall_top8": 0.0,
+        "context_precision_top5": 0.0,
+        "context_precision_top8": 0.0,
+        "gold_rank_avg": null,
+        "gold_rank_median": null,
+        "gold_rank_top5_recall": null,
+        "gold_rank_top8_recall": null,
+        "ndcg_top5": 0.0,
+        "ndcg_top8": 0.0,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "count": 16,
+        "context_recall": 0.9479,
+        "context_precision": 0.375,
+        "context_recall_top5": 0.9479,
+        "context_recall_top8": 0.9479,
+        "context_precision_top5": 0.375,
+        "context_precision_top8": 0.25,
+        "gold_rank_avg": 1.38,
+        "gold_rank_median": 1.28,
+        "gold_rank_top5_recall": 0.9635,
+        "gold_rank_top8_recall": 0.9844,
+        "ndcg_top5": 0.9242,
+        "ndcg_top8": 0.9529,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "hard": {
+        "count": 1,
+        "context_recall": 0.8,
+        "context_precision": 0.6,
+        "context_recall_top5": 0.8,
+        "context_recall_top8": 0.8,
+        "context_precision_top5": 0.6,
+        "context_precision_top8": 0.375,
+        "gold_rank_avg": 3.75,
+        "gold_rank_median": 4.5,
+        "gold_rank_top5_recall": 0.8,
+        "gold_rank_top8_recall": 0.8,
+        "ndcg_top5": 0.8237,
+        "ndcg_top8": 0.8277,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "medium": {
+        "count": 13,
+        "context_recall": 0.9212,
+        "context_precision": 0.4615,
+        "context_recall_top5": 0.9212,
+        "context_recall_top8": 0.9212,
+        "context_precision_top5": 0.4615,
+        "context_precision_top8": 0.3654,
+        "gold_rank_avg": 1.7,
+        "gold_rank_median": 1.59,
+        "gold_rank_top5_recall": 0.7606,
+        "gold_rank_top8_recall": 0.8212,
+        "ndcg_top5": 0.7493,
+        "ndcg_top8": 0.8014,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      }
+    },
+    "judge_failed_questions": 0,
+    "total_time_s": 451.6
+  },
+  "questions": [
+    {
+      "id": "adm_q001",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "办公用品分为哪几类？各自的领用方式是什么？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "ab3a1bb72b4bc3c6",
+          "ab3a1bb72b4bc3c6",
+          "7878fe49cd0ee82b",
+          "7878fe49cd0ee82b",
+          "ab3a1bb72b4bc3c6"
+        ],
+        "time_s": 12.31
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 4,
+          "found_facts": 3,
+          "not_found_facts": 1,
+          "min_rank": 2,
+          "median_rank": 2.0,
+          "avg_rank": 2.0,
+          "max_rank": 2,
+          "top_k_recall": {
+            "1": 0.0,
+            "3": 0.75,
+            "5": 0.75,
+            "8": 0.75
+          },
+          "per_fact": [
+            {
+              "fact": "A类=消耗品=月度定额内自由领用",
+              "gold_rank": 2,
+              "chunk_id": "chunk-b9d9d505528946de34277774e2fe305b",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "B类=耐用品=以旧换新、损坏报废",
+              "gold_rank": 2,
+              "chunk_id": "chunk-b9d9d505528946de34277774e2fe305b",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "C类=高值品=专项审批、部门经理签字",
+              "gold_rank": 2,
+              "chunk_id": "chunk-b9d9d505528946de34277774e2fe305b",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "共分三大类",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "A类=消耗品=月度定额内自由领用",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的表格中明确列出「A 类 （消耗品）」对应的「领用方式」为「月度定额内自由领用」，与事实陈述「A类=消耗品=月度定额内自由领用」完全一致。"
+            },
+            {
+              "fact": "B类=耐用品=以旧换新、损坏报废",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的表格中明确列出：“B 类（耐用品） | 可长期使用（1年以上）的低值办公用品 | 订书机、剪刀、计算器、文件架、笔筒、U盘(32G)、键盘、鼠标 | 以旧换新，损坏报废”，其中领用方式一栏原文即为“以旧换新，损坏报废”，与事实陈述“B类=耐用品=以旧换新、损坏报废”完全对应。"
+            },
+            {
+              "fact": "C类=高值品=专项审批、部门经理签字",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的分类表中明确列出：“C 类(高值品) | 单价较高或需专项管理的物品 | 移动硬盘、充电宝、降噪耳机、机械键盘、人体工学椅配件 | 专项审批，部门经理签字”，其中同时出现了“C类(高值品)”与“专项审批，部门经理签字”，与事实陈述完全对应。"
+            },
+            {
+              "fact": "共分三大类",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“办公用品分为三大类：”，与事实陈述“共分三大类”为等价表述。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "A类=消耗品=月度定额内自由领用",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的表格中明确列出「A 类 （消耗品）」对应的「领用方式」为「月度定额内自由领用」，与事实陈述「A类=消耗品=月度定额内自由领用」完全一致。"
+            },
+            {
+              "fact": "B类=耐用品=以旧换新、损坏报废",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的表格中明确列出：“B 类（耐用品） | 可长期使用（1年以上）的低值办公用品 | 订书机、剪刀、计算器、文件架、笔筒、U盘(32G)、键盘、鼠标 | 以旧换新，损坏报废”，其中领用方式一栏原文即为“以旧换新，损坏报废”，与事实陈述“B类=耐用品=以旧换新、损坏报废”完全对应。"
+            },
+            {
+              "fact": "C类=高值品=专项审批、部门经理签字",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的分类表中明确列出：“C 类(高值品) | 单价较高或需专项管理的物品 | 移动硬盘、充电宝、降噪耳机、机械键盘、人体工学椅配件 | 专项审批，部门经理签字”，其中同时出现了“C类(高值品)”与“专项审批，部门经理签字”，与事实陈述完全对应。"
+            },
+            {
+              "fact": "共分三大类",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“办公用品分为三大类：”，与事实陈述“共分三大类”为等价表述。"
+            }
+          ],
+          "hit_facts_top5": 4
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.5,
+        "context_precision_weighted_top8": 0.6715,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 4,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本确认办公用品分为三大类，与问题第一问直接相关，但未列出A/B/C类具体内容及各自的领用方式，也未涉及关键数值1年，信息不完整。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本以表格形式完整列出了A类（消耗品）、B类（耐用品）、C类（高值品）三大类的定义、示例和领用方式，其中B类明确指出'可长期使用（1年以上）'，与【关键数值】清单中的'1年'一致；分类及领用方式（月度定额内自由领用、以旧换新损坏报废、专项审批部门经理签字）与标准答案要点完全对应，可直接用于回答问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本讨论的是设备分类（固定资产、低值耐用品、耗材）及其管理方式，与问题所问的办公用品三分类（A类消耗品、B类耐用品、C类高值品）及领用方式不同；且文本中的'使用期限≥3年'与【关键数值】清单中的'1年'不符，未提供回答问题所需信息。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.3,
+              "reason": "文本提到了C类耗材的领用流程参照《办公用品领用管理办法》执行，与问题中办公用品的领用方式部分相关，但未涉及分类信息及具体领用方式（如专项审批），也未包含或核对关键数值‘1年’，因此相关度较低。"
+            },
+            {
+              "rank": 5,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "该文本介绍了C类高值品的专项申请、三级审批和资产登记等领用管理方式，与问题中C类领用方式（专项审批、部门经理签字）相关，但未完整覆盖A、B类，且文本中的'2年'与【关键数值】清单中的'1年'不一致。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "检索文本仅描述部门公共用品领用流程（联络员申领、OA计划、配送、临时审批），未涉及办公用品分为A/B/C三类的分类信息，也未提及A类月度定额内自由领用、B类以旧换新/损坏报废、C类专项审批/部门经理签字等各自领用方式，且未出现【关键数值】清单中的'1年'，对回答问题无实质帮助。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅为文档标题和页码信息，未包含A类/B类/C类办公用品的分类或领用方式，也未涉及关键数值1年，对回答问题没有帮助。"
+            },
+            {
+              "rank": 8,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "该文本为第二章办公用品分类与定额标准的标题，直接指向办公用品的分类及定额（对应领用方式），为回答问题提供结构性背景，但未给出具体三类内容及关键数值“1年”，故相关但不完整。"
+            }
+          ],
+          "reason": "4/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.6,
+        "context_precision_weighted_top5": 0.7445,
+        "context_precision": 0.6,
+        "context_precision_weighted": 0.7445,
+        "ndcg_top8": 0.8668,
+        "ndcg_top5": 0.776,
+        "ndcg": 0.776
+      },
+      "time_s": 12.31
+    },
+    {
+      "id": "adm_q002",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "普通员工的办公用品月度定额是多少？设计/研发岗呢？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "ab3a1bb72b4bc3c6",
+          "ab3a1bb72b4bc3c6",
+          "ab3a1bb72b4bc3c6",
+          "c35f3330f14430e8",
+          "ab3a1bb72b4bc3c6"
+        ],
+        "time_s": 19.23
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.5,
+          "avg_rank": 1.5,
+          "max_rank": 2,
+          "top_k_recall": {
+            "1": 0.5,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "普通员工月度定额=50元",
+              "gold_rank": 2,
+              "chunk_id": "chunk-518b022a86dc1df46e428db3f6908d21",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "设计/研发岗月度定额=100元",
+              "gold_rank": 1,
+              "chunk_id": "chunk-e8e66f8d9cf2199c9b3ca8af5a55f296",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "普通员工月度定额=50元",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的表格中明确列出“| 普通员工 | 50 | 含基本书写、纸张、装订用品 |”，与事实陈述“普通员工月度定额=50元”直接对应。"
+            },
+            {
+              "fact": "设计/研发岗月度定额=100元",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的表格中明确列出：“| 设计／研发岗 | 100 | 含普通员工标准+专用耗材（笔芯、草稿纸等） |”，即设计／研发岗月度定额为100元，与事实陈述一致。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "普通员工月度定额=50元",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的表格中明确列出“| 普通员工 | 50 | 含基本书写、纸张、装订用品 |”，与事实陈述“普通员工月度定额=50元”直接对应。"
+            },
+            {
+              "fact": "设计/研发岗月度定额=100元",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的表格中明确列出：“| 设计／研发岗 | 100 | 含普通员工标准+专用耗材（笔芯、草稿纸等） |”，即设计／研发岗月度定额为100元，与事实陈述一致。"
+            }
+          ],
+          "hit_facts_top5": 2
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.25,
+        "context_precision_weighted_top8": 0.5519,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 2,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本仅列出设计／研发岗月度定额为100元，与关键数值清单中的100元一致，并暗示普通员工标准包含在内，但未直接给出普通员工定额为50元，信息部分相关。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.5,
+              "reason": "该文本直接给出了普通员工的月度定额数值50（元），与【关键数值】清单中的50元一致，但未提及设计/研发岗的定额，因此只部分覆盖问题所需的两个数值。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅说明办公用品实行月度定额和超定额审批的管理原则，未提及普通员工50元或设计/研发岗100元的具体定额数值，无法回答所问数值。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本内容为弹性工作制规定，未提及办公用品月度定额，不含关键数值50元或100元，对回答问题无帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅为章节标题“第二章 办公用品分类与定额标准”，未包含普通员工或设计/研发岗的任何具体定额数值（关键数值50元、100元均未出现），对回答问题无实质帮助。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅描述新员工入职办公用品包及IT设备安排，未提及普通员工或设计/研发岗的月度定额，也未出现关键数值50元或100元，故与问题无关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅为办公用品领用管理办法的文件头信息（版本、部门、日期、编号），未提及普通员工或设计/研发岗的月度定额，也未出现关键数值50元或100元，对回答问题无帮助。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅说明办法的适用范围（正式员工、试用期员工及长期外协人员等），未提及普通员工或设计/研发岗的办公用品月度定额，也未出现关键数值50元或100元，与问题无关。"
+            }
+          ],
+          "reason": "2/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.4,
+        "context_precision_weighted_top5": 0.6569,
+        "context_precision": 0.4,
+        "context_precision_weighted": 0.6569,
+        "ndcg_top8": 1.0,
+        "ndcg_top5": 1.0,
+        "ndcg": 1.0
+      },
+      "time_s": 19.23
+    },
+    {
+      "id": "adm_q003",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "员工出差结束后，须在多少个工作日内提交报销申请？逾期有什么后果？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "06c4ec79e1a12dc1",
+          "06c4ec79e1a12dc1",
+          "06c4ec79e1a12dc1",
+          "c35f3330f14430e8",
+          "06c4ec79e1a12dc1"
+        ],
+        "time_s": 15.78
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 3,
+          "found_facts": 3,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "报销时限=10个工作日",
+              "gold_rank": 1,
+              "chunk_id": "chunk-f79d038219576dc1989b4d9e98285a4d",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "每延迟1天扣减1%",
+              "gold_rank": 1,
+              "chunk_id": "chunk-f79d038219576dc1989b4d9e98285a4d",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "最多扣减20%",
+              "gold_rank": 1,
+              "chunk_id": "chunk-f79d038219576dc1989b4d9e98285a4d",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 3,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "报销时限=10个工作日",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：\"员工出差结束后，须在 10个工作日内 在OA系统提交报销申请。\""
+            },
+            {
+              "fact": "每延迟1天扣减1%",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：“逾期未报销的，每延迟1天扣减报销金额的1%，最多扣减20%。”，与事实陈述“每延迟1天扣减1%”一致。"
+            },
+            {
+              "fact": "最多扣减20%",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确写道：'逾期未报销的，每延迟1天扣减报销金额的1%，最多扣减20%。'，即'最多扣减20%'有直接依据。"
+            }
+          ],
+          "reason": "3/3 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "报销时限=10个工作日",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：\"员工出差结束后，须在 10个工作日内 在OA系统提交报销申请。\""
+            },
+            {
+              "fact": "每延迟1天扣减1%",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：“逾期未报销的，每延迟1天扣减报销金额的1%，最多扣减20%。”，与事实陈述“每延迟1天扣减1%”一致。"
+            },
+            {
+              "fact": "最多扣减20%",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确写道：'逾期未报销的，每延迟1天扣减报销金额的1%，最多扣减20%。'，即'最多扣减20%'有直接依据。"
+            }
+          ],
+          "hit_facts_top5": 3
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.125,
+        "context_precision_weighted_top8": 0.3679,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本明确给出出差结束后须在10个工作日内提交OA报销申请，并说明逾期每延迟1天扣减1%、最多扣减20%，与标准答案要点及关键数值（10个、1天、1%、20%）逐项一致。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本描述的是审批流程中各角色的时限，未提及出差结束后提交报销申请的期限（10个工作日），也未提及逾期扣减规则（1天扣1%、最多扣20%），关键数值10个、1天、1%、20%均未出现，对回答问题无帮助。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "该文本仅涉及紧急出差后补办申请手续的3个工作日要求，未提及标准答案要点中的出差结束报销申请期限（10个工作日）或逾期扣减规则（1天、1%、20%），对回答问题无帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅提及出差须在OA系统提交出差申请及费用按制度报销，未涉及报销申请的10个工作日期限或逾期扣减1%/天、最多扣减20%的后果，无法回答问题的关键信息。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本主题为借支管理，未提及出差结束后提交报销申请的10个工作日时限，也未提及逾期每延迟1天扣减1%、最多扣减20%的后果，仅泛提'超过报销时限'但无关键数值，对回答问题无实质帮助。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅说明出差前在OA系统提交《出差申请单》及相关内容，未涉及出差结束后提交报销申请的10个工作日时限，也未提及逾期后果（如每延迟1天扣减1%、最多扣减20%），与问题和标准答案要点无关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅列出报销所需上传的材料，未提及提交报销申请的期限（应为10个工作日）或逾期后果（每延迟1天扣减1%、最多20%），与问题所问的时限和逾期处罚完全无关。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅定义出差情形，未涉及报销申请的10个工作日时限或逾期每延迟1天扣减1%、最多扣减20%的后果，与问题及标准答案要点均无关。"
+            }
+          ],
+          "reason": "1/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.2,
+        "context_precision_weighted_top5": 0.438,
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "ndcg_top8": 0.9718,
+        "ndcg_top5": 0.9415,
+        "ndcg": 0.9415
+      },
+      "time_s": 15.78
+    },
+    {
+      "id": "adm_q004",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "出差到上海，普通员工的住宿标准是多少元一晚？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "06c4ec79e1a12dc1",
+          "06c4ec79e1a12dc1",
+          "06c4ec79e1a12dc1",
+          "06c4ec79e1a12dc1",
+          "06c4ec79e1a12dc1"
+        ],
+        "time_s": 17.03
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "上海属于一类城市",
+              "gold_rank": 1,
+              "chunk_id": "chunk-4d323af7021bf938844ac5098be0a9c9",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "普通员工一类城市住宿标准=350元/晚",
+              "gold_rank": 1,
+              "chunk_id": "chunk-4d323af7021bf938844ac5098be0a9c9",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 0.5,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 1,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "上海属于一类城市",
+              "hit": false,
+              "score": 0.3,
+              "reason": "[证据强制校正] 原判定 hit=True score=0.95 但 reason 空洞否定无证据信号，校正为 miss。原reason: 上下文中仅出现“一类城市”“二类城市”“三类城市”的分类表述，但在住宿费标准、招待费标准等所有相关段落中均未出现上海被归为一类城市的任何表述或等价依据。"
+            },
+            {
+              "fact": "普通员工一类城市住宿标准=350元/晚",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的住宿费标准表格中明确列出：「| 普通员工 | 350 | 280 | 220 |」，对应一类城市（元/晚）为350，即普通员工一类城市住宿标准=350元/晚。"
+            }
+          ],
+          "reason": "1/2 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "上海属于一类城市",
+              "hit": false,
+              "score": 0.3,
+              "reason": "[证据强制校正] 原判定 hit=True score=0.95 但 reason 空洞否定无证据信号，校正为 miss。原reason: 上下文中仅出现“一类城市”“二类城市”“三类城市”的分类表述，但在住宿费标准、招待费标准等所有相关段落中均未出现上海被归为一类城市的任何表述或等价依据。"
+            },
+            {
+              "fact": "普通员工一类城市住宿标准=350元/晚",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的住宿费标准表格中明确列出：「| 普通员工 | 350 | 280 | 220 |」，对应一类城市（元/晚）为350，即普通员工一类城市住宿标准=350元/晚。"
+            }
+          ],
+          "hit_facts_top5": 1
+        },
+        "context_recall_top5": 0.5,
+        "context_recall": 0.5,
+        "context_precision_top8": 0.125,
+        "context_precision_weighted_top8": 0.3679,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本的住宿费标准表格中明确列出普通员工一类城市为350元/晚，与标准答案要点及关键数值350元完全一致，直接回答了问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅定义出差概念，未涉及上海住宿标准或350元等任何费用信息，与问题无关。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅泛泛提及酒店按住宿标准预订，未给出上海或普通员工的具体住宿金额，未包含关键数值350元，对回答问题无实质帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本讲的是出差期间公务招待费标准（一类城市300元/人/餐等），未涉及普通员工住宿标准；且全文未出现关键数值350元，与问题所需信息无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅涉及双人房安排、报销方式和超标审批流程，未提及上海或一类城市普通员工的住宿标准，也未出现关键数值350元，对回答问题无帮助。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅说明制度的适用范围，未提及上海、普通员工住宿标准或350元这一关键数值，对回答问题没有帮助。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本讲的是A类消耗品月度定额标准（普通员工50元），与出差住宿标准无关，未出现关键数值350元。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅为版本修订记录，提及住宿标准上调10%但未给出任何具体金额，与上海一类城市普通员工350元/晚的住宿标准无关。"
+            }
+          ],
+          "reason": "1/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.2,
+        "context_precision_weighted_top5": 0.438,
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "ndcg_top8": 0.9877,
+        "ndcg_top5": 0.9877,
+        "ndcg": 0.9877
+      },
+      "time_s": 17.04
+    },
+    {
+      "id": "adm_q005",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "IT设备分为哪几类？C类耗材如何管理？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "7878fe49cd0ee82b",
+          "7878fe49cd0ee82b",
+          "7878fe49cd0ee82b",
+          "7878fe49cd0ee82b",
+          "7878fe49cd0ee82b"
+        ],
+        "time_s": 20.07
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 4,
+          "found_facts": 4,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.25,
+          "max_rank": 2,
+          "top_k_recall": {
+            "1": 0.75,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "A类=固定资产=登记备案，使用期限≥3年",
+              "gold_rank": 1,
+              "chunk_id": "chunk-c8d5b0dbcc6bd5c9c03880580c2b2d93",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "B类=低值耐用品=台账管理，以旧换新",
+              "gold_rank": 1,
+              "chunk_id": "chunk-c8d5b0dbcc6bd5c9c03880580c2b2d93",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "C类=耗材=按需领用，计入部门办公费用",
+              "gold_rank": 1,
+              "chunk_id": "chunk-c8d5b0dbcc6bd5c9c03880580c2b2d93",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "C类耗材参照办公用品领用管理办法执行",
+              "gold_rank": 2,
+              "chunk_id": "chunk-56e82d54e709c19b9ce9d4aa7af7b54b",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "A类=固定资产=登记备案，使用期限≥3年",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的设备分类表中明确列出：「A类（固定资产） | 台式电脑、笔记本电脑、一体机、显示器（≥24寸）、打印机、投影仪、服务器、网络设备 | 固定资产登记，使用期限≥3年」，其中A类对应固定资产、管理方式为固定资产登记，使用期限≥3年，与事实陈述一致。"
+            },
+            {
+              "fact": "B类=低值耐用品=台账管理，以旧换新",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的分类表中明确写道：‘B类（低值耐用品） | 键盘、鼠标、耳机、摄像头、小型显示器（<24寸）、U盘、移动硬盘 | 台账管理，以旧换新’，与事实陈述‘B类=低值耐用品=台账管理，以旧换新’完全一致。"
+            },
+            {
+              "fact": "C类=耗材=按需领用，计入部门办公费用",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的表格中明确列出：'| C类（耗材） | 打印硒鼓、墨盒、数据线、转接头、鼠标垫 | 按需领用，计入部门办公费用 |'，直接支持了“C类=耗材=按需领用，计入部门办公费用”这一事实陈述。"
+            },
+            {
+              "fact": "C类耗材参照办公用品领用管理办法执行",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]明确表述：“C类耗材的领用流程及费用核算参照《办公用品领用管理办法》执行，由IT部负责库存管理。”这与事实陈述“C类耗材参照办公用品领用管理办法执行”一致。此外，上下文[3]也提到“C类耗材纳入办公用品管理”。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "A类=固定资产=登记备案，使用期限≥3年",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的设备分类表中明确列出：「A类（固定资产） | 台式电脑、笔记本电脑、一体机、显示器（≥24寸）、打印机、投影仪、服务器、网络设备 | 固定资产登记，使用期限≥3年」，其中A类对应固定资产、管理方式为固定资产登记，使用期限≥3年，与事实陈述一致。"
+            },
+            {
+              "fact": "B类=低值耐用品=台账管理，以旧换新",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的分类表中明确写道：‘B类（低值耐用品） | 键盘、鼠标、耳机、摄像头、小型显示器（<24寸）、U盘、移动硬盘 | 台账管理，以旧换新’，与事实陈述‘B类=低值耐用品=台账管理，以旧换新’完全一致。"
+            },
+            {
+              "fact": "C类=耗材=按需领用，计入部门办公费用",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的表格中明确列出：'| C类（耗材） | 打印硒鼓、墨盒、数据线、转接头、鼠标垫 | 按需领用，计入部门办公费用 |'，直接支持了“C类=耗材=按需领用，计入部门办公费用”这一事实陈述。"
+            },
+            {
+              "fact": "C类耗材参照办公用品领用管理办法执行",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]明确表述：“C类耗材的领用流程及费用核算参照《办公用品领用管理办法》执行，由IT部负责库存管理。”这与事实陈述“C类耗材参照办公用品领用管理办法执行”一致。此外，上下文[3]也提到“C类耗材纳入办公用品管理”。"
+            }
+          ],
+          "hit_facts_top5": 4
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.25,
+        "context_precision_weighted_top8": 0.5519,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 2,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.95,
+              "reason": "文本明确列出了IT设备的A、B、C三类及其包含设备和管理方式，与问题直接相关；其中'使用期限≥3年'与【关键数值】清单中的'3年'逐字核对一致，但关于C类耗材领用流程及费用核算参照《办公用品领用管理办法》执行的内容未出现在该文本中，故相关度略有扣减。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.8,
+              "reason": "该文本直接说明C类耗材的领用流程及费用核算参照《办公用品领用管理办法》执行，与标准答案要点第3条一致，对回答C类耗材如何管理有直接帮助；文本未涉及设备分类及关键数值3年，故未出现需核对或可能出错的数字。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅为文档修订历史记录，虽在v2.0条目中提及'C类耗材纳入办公用品管理'，但未说明IT设备的三类分类，也未提供C类耗材的领用流程、费用核算等具体管理信息，对回答问题没有实质帮助；且文本未出现与【关键数值】'3年'相关的任何内容。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅描述IT设备管理部门及人员职责，未提及IT设备分类（A/B/C类）或C类耗材管理及《办公用品领用管理办法》，对回答问题无帮助；文中不含【关键数值】清单中的“3年”。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅阐述IT设备管理原则，未提及IT设备的三类分类（A/B/C类）、C类耗材的管理方式，也未出现关键数值3年，对回答问题无实质帮助。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.3,
+              "reason": "文本提到了A/B/C三类设备的分类框架和部分示例（U盘、键盘、鼠标），与问题结构有关联，但其C类定义为'高值品'（移动硬盘、充电宝等），与标准答案C类（耗材：打印硒鼓、墨盒、数据线）不符，未涉及'3年'使用期限要求，也未提供C类耗材领用流程及费用核算信息，对回答核心要点帮助有限。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅描述IT设备年度盘点的流程，未涉及IT设备分类（A/B/C类）或C类耗材管理内容，与问题完全无关；文中未出现【关键数值】清单中的'3年'。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.2,
+              "reason": "该文本描述新员工入职设备申请流程，未提及IT设备分为A、B、C三类，也未涉及C类耗材管理，仅末尾提到《办公用品领用管理办法》与标准答案中该办法名称重合，但实质内容对回答无帮助，且未出现关键数值3年。"
+            }
+          ],
+          "reason": "2/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.4,
+        "context_precision_weighted_top5": 0.6569,
+        "context_precision": 0.4,
+        "context_precision_weighted": 0.6569,
+        "ndcg_top8": 0.9707,
+        "ndcg_top5": 0.8924,
+        "ndcg": 0.8924
+      },
+      "time_s": 20.07
+    },
+    {
+      "id": "adm_q006",
+      "category": "fact_single",
+      "difficulty": "medium",
+      "question": "员工离职时，IT设备需要归还吗？什么流程？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "7878fe49cd0ee82b",
+          "c35f3330f14430e8",
+          "7878fe49cd0ee82b",
+          "ab3a1bb72b4bc3c6",
+          "7878fe49cd0ee82b"
+        ],
+        "time_s": 19.01
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 5,
+          "found_facts": 5,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "离职须归还所有名下IT设备",
+              "gold_rank": 1,
+              "chunk_id": "chunk-b3ea50197b8cc63e690387dc01fcb687",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "IT部检查设备状态",
+              "gold_rank": 1,
+              "chunk_id": "chunk-b3ea50197b8cc63e690387dc01fcb687",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "清除个人数据、重置系统",
+              "gold_rank": 1,
+              "chunk_id": "chunk-b3ea50197b8cc63e690387dc01fcb687",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "有损坏按赔偿标准处理",
+              "gold_rank": 1,
+              "chunk_id": "chunk-b3ea50197b8cc63e690387dc01fcb687",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "IT部确认后才能办离职",
+              "gold_rank": 1,
+              "chunk_id": "chunk-b3ea50197b8cc63e690387dc01fcb687",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 5,
+          "hit_facts": 5,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "离职须归还所有名下IT设备",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：‘员工离职时：归还所有名下登记的IT设备（电脑、显示器、外设等）’；上下文[3]也表述：‘离职员工须在离职当天归还所有IT设备并清除个人数据。’"
+            },
+            {
+              "fact": "IT部检查设备状态",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确写道：“IT部检查设备外观及功能是否正常。”；上下文[5]也写明：“归还时IT部检查设备状态，有损坏按规定处理。”这两处均直接支持“IT部检查设备状态”这一事实。"
+            },
+            {
+              "fact": "清除个人数据、重置系统",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确记载：\"IT部清除设备上的个人数据，重置系统。\""
+            },
+            {
+              "fact": "有损坏按赔偿标准处理",
+              "hit": true,
+              "score": 0.98,
+              "reason": "上下文[1]中明确表述：'设备有损坏的按赔偿标准处理。' 与事实陈述'有损坏按赔偿标准处理'一致。此外上下文[4]中也有类似表述：'物品丢失或损坏的，按规定赔偿后办理离职手续。'"
+            },
+            {
+              "fact": "IT部确认后才能办离职",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确记载：『IT部在OA系统确认后方可办理离职手续。』这与事实陈述『IT部确认后才能办离职』为等价表述。"
+            }
+          ],
+          "reason": "5/5 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "离职须归还所有名下IT设备",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：‘员工离职时：归还所有名下登记的IT设备（电脑、显示器、外设等）’；上下文[3]也表述：‘离职员工须在离职当天归还所有IT设备并清除个人数据。’"
+            },
+            {
+              "fact": "IT部检查设备状态",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确写道：“IT部检查设备外观及功能是否正常。”；上下文[5]也写明：“归还时IT部检查设备状态，有损坏按规定处理。”这两处均直接支持“IT部检查设备状态”这一事实。"
+            },
+            {
+              "fact": "清除个人数据、重置系统",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确记载：\"IT部清除设备上的个人数据，重置系统。\""
+            },
+            {
+              "fact": "有损坏按赔偿标准处理",
+              "hit": true,
+              "score": 0.98,
+              "reason": "上下文[1]中明确表述：'设备有损坏的按赔偿标准处理。' 与事实陈述'有损坏按赔偿标准处理'一致。此外上下文[4]中也有类似表述：'物品丢失或损坏的，按规定赔偿后办理离职手续。'"
+            },
+            {
+              "fact": "IT部确认后才能办离职",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确记载：『IT部在OA系统确认后方可办理离职手续。』这与事实陈述『IT部确认后才能办离职』为等价表述。"
+            }
+          ],
+          "hit_facts_top5": 5
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.625,
+        "context_precision_weighted_top8": 0.8125,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 5,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本完整覆盖标准答案要点：明确员工离职须归还所有名下登记的IT设备，并包含IT部检查外观功能、清除个人数据并重置系统、损坏按赔偿标准处理、在OA系统确认等全部流程环节；标准答案要点中无【关键数值】清单，文本中的“6.3”仅为章节编号，不是需比对的关键数值。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本明确提到离职相关设备归还按《IT设备管理与领用规范》执行，与问题中IT设备归还要求直接相关，虽未列出具体流程细节，但提供了制度指引，对回答有部分帮助。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本明确提到离职员工须归还所有IT设备并清除个人数据，直接支持标准答案第1点及第2点中清除数据部分，但未涉及IT部检查、赔偿标准、OA确认等流程细节，因此相关但不完整。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "该文本涉及离职归还流程，与问题主题相关，但内容针对办公用品归还和行政部确认，而非IT设备归还及IT部检查处理流程，与标准答案要点的设备归还和IT部具体处理流程部分不匹配，仅提供部分参考。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.2,
+              "reason": "文本仅描述临时设备借用流程（借用期限等），未涉及员工离职时归还IT设备的要求或流程，与问题及标准答案要点无关。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅描述在职期间的设备更换申请条件与流程，未涉及员工离职时归还IT设备的要求及离职归还流程，与问题和标准答案无实质关联。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅涉及员工出差携带设备的规定，未提及离职时归还IT设备的义务及IT部检查、数据清除、损坏赔偿、OA系统确认等流程，与问题和标准答案要点完全无关。"
+            },
+            {
+              "rank": 8,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本提到员工离职时需归还耐用品，涉及设备归还的通用要求，与问题部分相关；但未涉及IT设备检查、数据清除、OA系统确认等具体流程，对标准答案要点的覆盖有限。"
+            }
+          ],
+          "reason": "5/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.8,
+        "context_precision_weighted_top5": 0.9124,
+        "context_precision": 0.8,
+        "context_precision_weighted": 0.9124,
+        "ndcg_top8": 0.9856,
+        "ndcg_top5": 0.9322,
+        "ndcg": 0.9322
+      },
+      "time_s": 19.02
+    },
+    {
+      "id": "adm_q007",
+      "category": "fact_cross_doc",
+      "difficulty": "medium",
+      "question": "新员工入职时，需要办理哪些行政/IT方面的领用手续？分别由哪个部门负责？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "ab3a1bb72b4bc3c6",
+          "7878fe49cd0ee82b",
+          "b1a060882af611d4",
+          "b1a060882af611d4",
+          "b1a060882af611d4"
+        ],
+        "time_s": 14.92
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 5,
+          "found_facts": 4,
+          "not_found_facts": 1,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.25,
+          "max_rank": 2,
+          "top_k_recall": {
+            "1": 0.6,
+            "3": 0.8,
+            "5": 0.8,
+            "8": 0.8
+          },
+          "per_fact": [
+            {
+              "fact": "办公用品由行政部负责，HR发起申领",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "办公用品包含中性笔、笔记本、文件夹等",
+              "gold_rank": 1,
+              "chunk_id": "chunk-d30c478c417c93492bcf31bcf7bd9b73",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "IT设备由IT部负责，HR提前3天申请",
+              "gold_rank": 1,
+              "chunk_id": "chunk-d30c478c417c93492bcf31bcf7bd9b73",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "IT设备按岗位配置标准配备",
+              "gold_rank": 2,
+              "chunk_id": "chunk-1e7fcad088977bf4aab999aee4365632",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "入职当天完成系统部署",
+              "gold_rank": 1,
+              "chunk_id": "chunk-d30c478c417c93492bcf31bcf7bd9b73",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 0.8,
+        "context_recall_detail": {
+          "total_facts": 5,
+          "hit_facts": 4,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "办公用品由行政部负责，HR发起申领",
+              "hit": false,
+              "score": 0.0,
+              "reason": "无法解析JSON: {\"hit\": true, \"score\": 0.95, \"reason\": \"上下文[1]明确表述：'新员工入职当天，由 HR 在 OA 系统发起\"新员工办公用品包\"申领，行政部在入职前1天准备好'，同时上下文[4]表格中'办公用品'环节对应'负责部门'为'行政部'。两处结合可明确支撑'办公用品由行政部负责，HR发起申领'这一事实。\"}"
+            },
+            {
+              "fact": "办公用品包含中性笔、笔记本、文件夹等",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确列出新人入职办公用品包含“中性笔 ×2、笔记本 ×1、文件夹 ×3”；上下文[4]也列出工位抽屉预置 A 类消耗品：“中性笔 2 支、笔记本、便利贴”，均直接包含中性笔、笔记本、文件夹（或同类表述）。"
+            },
+            {
+              "fact": "IT设备由IT部负责，HR提前3天申请",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[2]明确表述“HR在新员工入职前3天，在OA系统提交\"新员工IT设备申请\"。IT部根据岗位配置标准准备设备。”，与事实陈述中“IT设备由IT部负责，HR提前3天申请”完全对应。"
+            },
+            {
+              "fact": "IT设备按岗位配置标准配备",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]明确表述：\"IT部根据岗位配置标准准备设备。\"，上下文[6]同样表述：\"信息技术部按岗位配置标准准备设备。\"两处均直接说明IT设备按岗位配置标准配备。"
+            },
+            {
+              "fact": "入职当天完成系统部署",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[8]明确记载：'Q1：入职当天可以领到电脑吗？——可以。信息技术部在入职当天完成系统部署并交付电脑。'；上下文[2]也记载：'入职当天，IT运维工程师完成系统部署及软件安装。'"
+            }
+          ],
+          "reason": "4/5 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "办公用品由行政部负责，HR发起申领",
+              "hit": false,
+              "score": 0.0,
+              "reason": "无法解析JSON: {\"hit\": true, \"score\": 0.95, \"reason\": \"上下文[1]明确表述：'新员工入职当天，由 HR 在 OA 系统发起\"新员工办公用品包\"申领，行政部在入职前1天准备好'，同时上下文[4]表格中'办公用品'环节对应'负责部门'为'行政部'。两处结合可明确支撑'办公用品由行政部负责，HR发起申领'这一事实。\"}"
+            },
+            {
+              "fact": "办公用品包含中性笔、笔记本、文件夹等",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确列出新人入职办公用品包含“中性笔 ×2、笔记本 ×1、文件夹 ×3”；上下文[4]也列出工位抽屉预置 A 类消耗品：“中性笔 2 支、笔记本、便利贴”，均直接包含中性笔、笔记本、文件夹（或同类表述）。"
+            },
+            {
+              "fact": "IT设备由IT部负责，HR提前3天申请",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[2]明确表述“HR在新员工入职前3天，在OA系统提交\"新员工IT设备申请\"。IT部根据岗位配置标准准备设备。”，与事实陈述中“IT设备由IT部负责，HR提前3天申请”完全对应。"
+            },
+            {
+              "fact": "IT设备按岗位配置标准配备",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]明确表述：\"IT部根据岗位配置标准准备设备。\"，上下文[6]同样表述：\"信息技术部按岗位配置标准准备设备。\"两处均直接说明IT设备按岗位配置标准配备。"
+            },
+            {
+              "fact": "入职当天完成系统部署",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[8]明确记载：'Q1：入职当天可以领到电脑吗？——可以。信息技术部在入职当天完成系统部署并交付电脑。'；上下文[2]也记载：'入职当天，IT运维工程师完成系统部署及软件安装。'"
+            }
+          ],
+          "hit_facts_top5": 4
+        },
+        "context_recall_top5": 0.8,
+        "context_recall": 0.8,
+        "context_precision_top8": 0.75,
+        "context_precision_weighted_top8": 0.8739,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 6,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本涉及新员工办公用品领用流程（HR在OA系统发起申领、行政部准备中性笔等）及IT设备由IT设备管理组处理，与问题及标准答案要点有部分重叠，但未提及IT设备申请需提前3天提交、IT部根据岗位配置标准准备、入职当天完成系统部署和软件等关键要求，故相关度中等。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.85,
+              "reason": "检索文本与标准答案要点2高度相关，均明确提到HR在入职前3天（与关键数值清单中的“3天”一致）提交IT设备申请，IT部按岗位配置标准准备电脑及外设，入职当天完成系统部署和软件；对回答IT设备领用手续及负责部门有直接帮助，但未覆盖要点1中办公用品由行政部负责的完整信息。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "该文本直接涉及IT设备领用环节，明确信息技术部负责领取电脑及开通账号，与标准答案中IT设备由IT部负责的要点部分吻合，但未提及标准答案中的“入职前3天”及HR发起申请等关键信息，故相关但不完整。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "该文本列出了新员工领用手续中的“办公用品”环节（由行政部负责、含中性笔），与标准答案要点1的行政领用部分相符；但未涉及要点2的IT设备申请（入职前3天、IT部）内容，故相关但不完整。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "检索文本仅为文件标题、版本、发布部门、日期等封面信息，未包含办公用品或IT设备领用手续及其负责部门的具体内容，无法回答问题；文本中未出现【关键数值】清单中的1、2、3天、3，故判为不相关。"
+            },
+            {
+              "rank": 6,
+              "relevant": true,
+              "score": 0.8,
+              "reason": "文本明确提到HR在员工入职前3个工作日通过OA系统提交新员工IT设备申请，由信息技术部按岗位配置标准准备设备，对应标准答案中IT设备领用手续及负责部门，数字3天与关键数值清单一致。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅为关联文件清单，未包含新员工办公用品或IT设备领用手续的具体内容及负责部门信息，对回答问题无实质帮助；文本中亦未出现与关键数值1、2、3天、3相关的信息。"
+            },
+            {
+              "rank": 8,
+              "relevant": true,
+              "score": 0.5,
+              "reason": "该文本仅Q1涉及入职当天由信息技术部交付电脑，属于IT设备领用手续的一部分，与问题相关；但未涉及HR提交IT设备申请、入职前3天提交等标准答案中的其他关键信息，也未提及办公用品由行政部准备的环节，因此相关度有限。"
+            }
+          ],
+          "reason": "6/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.8,
+        "context_precision_weighted_top5": 0.9124,
+        "context_precision": 0.8,
+        "context_precision_weighted": 0.9124,
+        "ndcg_top8": 0.9534,
+        "ndcg_top5": 0.846,
+        "ndcg": 0.846
+      },
+      "time_s": 14.92
+    },
+    {
+      "id": "adm_q008",
+      "category": "fact_cross_doc",
+      "difficulty": "hard",
+      "question": "员工出差期间，公司配备的笔记本电脑如果丢失了，应该怎么处理？涉及哪些制度？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "7878fe49cd0ee82b",
+          "ab3a1bb72b4bc3c6",
+          "06c4ec79e1a12dc1",
+          "7878fe49cd0ee82b",
+          "7878fe49cd0ee82b"
+        ],
+        "time_s": 17.23
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 5,
+          "found_facts": 4,
+          "not_found_facts": 1,
+          "min_rank": 1,
+          "median_rank": 4.5,
+          "avg_rank": 3.75,
+          "max_rank": 5,
+          "top_k_recall": {
+            "1": 0.2,
+            "3": 0.2,
+            "5": 0.8,
+            "8": 0.8
+          },
+          "per_fact": [
+            {
+              "fact": "24小时内报告IT部和直属上级",
+              "gold_rank": 5,
+              "chunk_id": "chunk-25766d704f47a7785f27223914735822",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "IT部远程锁定、擦除数据、禁用账号",
+              "gold_rank": 4,
+              "chunk_id": "chunk-e2d9d2d211f7ca98d1bcb0e6a2618d9e",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "价值5000元以上应报警",
+              "gold_rank": 5,
+              "chunk_id": "chunk-25766d704f47a7785f27223914735822",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "责任认定：疏忽大意30%/严重过失50%/故意100%",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "涉及IT设备管理规范和差旅报销管理制度",
+              "gold_rank": 1,
+              "chunk_id": "chunk-771d3fbdcab9e0fd9eb9ae3dd5872dd1",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 0.8,
+        "context_recall_detail": {
+          "total_facts": 5,
+          "hit_facts": 4,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "24小时内报告IT部和直属上级",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[5]中明确表述：\"设备遗失后：立即报告：24小时内向IT部和直属上级报告。\""
+            },
+            {
+              "fact": "IT部远程锁定、擦除数据、禁用账号",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[5]明确表述：\"安全处理：IT部立即远程锁定、擦除设备数据，禁用相关账号。\"这与事实陈述\"IT部远程锁定、擦除数据、禁用账号\"完全对应。"
+            },
+            {
+              "fact": "价值5000元以上应报警",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[5]中明确写道：'报警：价值5000元以上的设备遗失，应同时报警。'这与事实陈述'价值5000元以上应报警'直接对应。"
+            },
+            {
+              "fact": "责任认定：疏忽大意30%/严重过失50%/故意100%",
+              "hit": false,
+              "score": 0.3,
+              "reason": "[证据强制校正] 原判定 hit=True score=0.95 但 reason 空洞否定无证据信号，校正为 miss。原reason: 上下文中仅出现“责任认定：IT部会同行政部、HR进行责任认定”，但没有出现“疏忽大意30%/严重过失50%/故意100%”这一具体比例划分，未找到该事实的任何依据。"
+            },
+            {
+              "fact": "涉及IT设备管理规范和差旅报销管理制度",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[1]明确提到‘按《员工差旅报销管理制度》执行’和‘按本规范第六章相关条款处理’，且该规范涉及IT设备管理；上下文[3]明确提到‘按《IT设备管理与领用规范》办理领用手续’。这些原文共同表明事实陈述‘涉及IT设备管理规范和差旅报销管理制度’有明确依据。"
+            }
+          ],
+          "reason": "4/5 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "24小时内报告IT部和直属上级",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[5]中明确表述：\"设备遗失后：立即报告：24小时内向IT部和直属上级报告。\""
+            },
+            {
+              "fact": "IT部远程锁定、擦除数据、禁用账号",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[5]明确表述：\"安全处理：IT部立即远程锁定、擦除设备数据，禁用相关账号。\"这与事实陈述\"IT部远程锁定、擦除数据、禁用账号\"完全对应。"
+            },
+            {
+              "fact": "价值5000元以上应报警",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[5]中明确写道：'报警：价值5000元以上的设备遗失，应同时报警。'这与事实陈述'价值5000元以上应报警'直接对应。"
+            },
+            {
+              "fact": "责任认定：疏忽大意30%/严重过失50%/故意100%",
+              "hit": false,
+              "score": 0.3,
+              "reason": "[证据强制校正] 原判定 hit=True score=0.95 但 reason 空洞否定无证据信号，校正为 miss。原reason: 上下文中仅出现“责任认定：IT部会同行政部、HR进行责任认定”，但没有出现“疏忽大意30%/严重过失50%/故意100%”这一具体比例划分，未找到该事实的任何依据。"
+            },
+            {
+              "fact": "涉及IT设备管理规范和差旅报销管理制度",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[1]明确提到‘按《员工差旅报销管理制度》执行’和‘按本规范第六章相关条款处理’，且该规范涉及IT设备管理；上下文[3]明确提到‘按《IT设备管理与领用规范》办理领用手续’。这些原文共同表明事实陈述‘涉及IT设备管理规范和差旅报销管理制度’有明确依据。"
+            }
+          ],
+          "hit_facts_top5": 4
+        },
+        "context_recall_top5": 0.8,
+        "context_recall": 0.8,
+        "context_precision_top8": 0.375,
+        "context_precision_weighted_top8": 0.5335,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 3,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "该文本虽未包含24小时报告、远程锁定、5000元报警、赔偿比例30%/50%/100%等具体数值，但明确指向按第六章处理遗失并提及《员工差旅报销管理制度》，与问题所需制度框架直接相关。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅涉及出差期间办公用品的差旅报销流程并提及《员工差旅报销管理制度》，未包含设备丢失后的24小时内报告、远程锁定擦除、5000元以上报警、责任认定、30%/50%/100%赔偿等任何处理流程或赔偿标准信息，与问题实质内容无关。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.4,
+              "reason": "文本虽未涉及遗失处理流程、赔偿比例或报警金额，但提及出差需按《IT设备管理与领用规范》办理IT设备领用手续，为回答问题涉及制度提供了部分背景；与【关键数值】清单（24、5000元、30%、50%、100%等）无直接数值对应。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "该文本涉及设备丢失须立即报告IT部并由IT部远程锁定、擦除数据，与标准答案中处理流程第（2）项吻合，属有价值的背景佐证，但未涵盖24小时内报告、5000元以上报警、责任认定、赔偿比例及制度名称等核心信息，相关度中等。"
+            },
+            {
+              "rank": 5,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本直接覆盖了标准答案要点中的处理流程前4项，包括24小时内报告、IT部远程锁定擦除并禁用账号、5000元以上报警、IT部会同行政部与HR进行责任认定，关键数值24和5000元均与【关键数值】清单一致；仅缺少赔偿比例和制度名称，但已提供回答所需的主要操作信息。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本讲的是离职归还IT设备的流程，未涉及出差期间笔记本丢失的处理（如24小时内报告、5000元以上报警、30%/50%/100%赔偿标准等），也未提及相关制度，与问题无关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅说明差旅制度的目的和范围，未涉及笔记本电脑丢失的处理流程、责任认定、赔偿标准等具体内容，虽提及差旅制度但与问题核心要素无关。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅说明差旅报销制度的适用范围（因公务离开常驻地到外地出差发生的费用报销），未涉及笔记本电脑丢失后的报告时限（24小时内）、远程锁定/擦除（IT部立即处理）、报警阈值（5000元以上）、责任认定（IT部会同行政部、HR）或赔偿比例（30%/50%/100%），对回答该问题无实质帮助。"
+            }
+          ],
+          "reason": "3/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.6,
+        "context_precision_weighted_top5": 0.635,
+        "context_precision": 0.6,
+        "context_precision_weighted": 0.635,
+        "ndcg_top8": 0.8277,
+        "ndcg_top5": 0.8237,
+        "ndcg": 0.8237
+      },
+      "time_s": 17.23
+    },
+    {
+      "id": "adm_q009",
+      "category": "proper_noun",
+      "difficulty": "easy",
+      "question": "什么是A类消耗品？请举例说明。",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "ab3a1bb72b4bc3c6",
+          "b1a060882af611d4",
+          "ab3a1bb72b4bc3c6",
+          "ab3a1bb72b4bc3c6",
+          "7878fe49cd0ee82b"
+        ],
+        "time_s": 10.62
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 3,
+          "found_facts": 3,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "A类=消耗品",
+              "gold_rank": 1,
+              "chunk_id": "chunk-b9d9d505528946de34277774e2fe305b",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "定义：一次性使用、不可回收",
+              "gold_rank": 1,
+              "chunk_id": "chunk-b9d9d505528946de34277774e2fe305b",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "举例：中性笔、笔记本、打印纸、便签纸、文件夹等",
+              "gold_rank": 1,
+              "chunk_id": "chunk-b9d9d505528946de34277774e2fe305b",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 3,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "A类=消耗品",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]表格中明确列出「| A 类 （消耗品） | 一次性使用、不可回收的办公用品 | ...」，直接表述了A类即消耗品。"
+            },
+            {
+              "fact": "定义：一次性使用、不可回收",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中A类（消耗品）的定义明确写着：\"一次性使用、不可回收的办公用品\"，与事实陈述一致。"
+            },
+            {
+              "fact": "举例：中性笔、笔记本、打印纸、便签纸、文件夹等",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确列出“A 类 （消耗品） | 一次性使用、不可回收的办公用品 | 中性笔、笔记本、打印纸、便签纸、文件夹、订书钉、回形针、橡皮、涂改液”，其中示例部分完整包含“中性笔、笔记本、打印纸、便签纸、文件夹”。"
+            }
+          ],
+          "reason": "3/3 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "A类=消耗品",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]表格中明确列出「| A 类 （消耗品） | 一次性使用、不可回收的办公用品 | ...」，直接表述了A类即消耗品。"
+            },
+            {
+              "fact": "定义：一次性使用、不可回收",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中A类（消耗品）的定义明确写着：\"一次性使用、不可回收的办公用品\"，与事实陈述一致。"
+            },
+            {
+              "fact": "举例：中性笔、笔记本、打印纸、便签纸、文件夹等",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确列出“A 类 （消耗品） | 一次性使用、不可回收的办公用品 | 中性笔、笔记本、打印纸、便签纸、文件夹、订书钉、回形针、橡皮、涂改液”，其中示例部分完整包含“中性笔、笔记本、打印纸、便签纸、文件夹”。"
+            }
+          ],
+          "hit_facts_top5": 3
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.375,
+        "context_precision_weighted_top8": 0.6439,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 3,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "该文本直接给出了A类（消耗品）的定义“一次性使用、不可回收的办公用品”，并列出中性笔、笔记本、打印纸、便签纸、文件夹、订书钉、回形针、橡皮、涂改液等示例，与标准答案要点完全一致。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本在“办公用品”环节明确提到“A 类消耗品”并举例中性笔、笔记本、便利贴，与标准答案要点中的定义和例子部分吻合，能佐证A类消耗品的含义，但未给出完整定义及全部例子，故相关度为中等。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅标题提及‘A类消耗品’但内容全为月度定额标准表格，未定义A类消耗品或举例，对回答无实质帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本提到A类消耗品无需归还（已消耗），间接说明其一次性使用、不可回收的特性，与问题定义和分类相关，但未给出具体例子，故相关度中等。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本是设备分类表，讨论固定资产、低值耐用品和耗材，未涉及办公用品分类中的A类消耗品（一次性使用、不可回收）及其例子（中性笔、笔记本等），与问题无关。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是关于C类高值品的专项申请、审批、资产登记及使用年限规定，未涉及A类消耗品的定义或任何例子（中性笔、笔记本、打印纸等），与问题和标准答案完全无关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅说明C类耗材的领用流程、费用核算及库存管理，完全未提及A类消耗品的定义或任何示例，对回答问题没有帮助。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅提及办公用品分为三大类，未说明A类消耗品的定义或举例，对回答无实质帮助。"
+            }
+          ],
+          "reason": "3/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.6,
+        "context_precision_weighted_top5": 0.7664,
+        "context_precision": 0.6,
+        "context_precision_weighted": 0.7664,
+        "ndcg_top8": 0.9784,
+        "ndcg_top5": 0.9803,
+        "ndcg": 0.9803
+      },
+      "time_s": 10.63
+    },
+    {
+      "id": "adm_q010",
+      "category": "proper_noun",
+      "difficulty": "medium",
+      "question": "什么是FAS？在什么语境下使用？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "7878fe49cd0ee82b",
+          "6be34e3b029a2936",
+          "c35f3330f14430e8",
+          "7878fe49cd0ee82b",
+          "7878fe49cd0ee82b"
+        ],
+        "time_s": 10.79
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 4,
+          "found_facts": 2,
+          "not_found_facts": 2,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 0.5,
+            "3": 0.5,
+            "5": 0.5,
+            "8": 0.5
+          },
+          "per_fact": [
+            {
+              "fact": "公司行政/差旅/IT制度中未将FAS定义为独立术语",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "FAS仅以固定资产管理办法编号FIN-FAS-2024-002的片段出现",
+              "gold_rank": 1,
+              "chunk_id": "chunk-7d95cff2780bac3583ca11b62d9feba8",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "FIN-FAS指财务-固定资产",
+              "gold_rank": 1,
+              "chunk_id": "chunk-7d95cff2780bac3583ca11b62d9feba8",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "本知识库未对FAS作业务定义",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "公司行政/差旅/IT制度中未将FAS定义为独立术语",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文中未出现关于公司行政/差旅/IT制度是否将FAS定义为独立术语的任何表述。相关文件列表仅出现《固定资产管理办法》（FIN-FAS-2024-002），但未对其术语定义作出说明。"
+            },
+            {
+              "fact": "FAS仅以固定资产管理办法编号FIN-FAS-2024-002的片段出现",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[1]中仅出现「《固定资产管理办法》（FIN-FAS-2024-002）」，即FAS仅以该编号片段出现，与事实陈述一致。"
+            },
+            {
+              "fact": "FIN-FAS指财务-固定资产",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文中只出现了文件编号「FIN-FAS-2024-002」及其对应的文件名《固定资产管理办法》，但没有任何文字将「FIN-FAS」解释或表述为「财务-固定资产」。"
+            },
+            {
+              "fact": "本知识库未对FAS作业务定义",
+              "hit": true,
+              "score": 0.95,
+              "reason": "检索上下文中未出现对'FAS'的业务定义，也没有任何关于本知识库是否对FAS作业务定义的表述；仅在一份文件名称中出现'FIN-FAS-2024-002'（《固定资产管理办法》），该编号不构成对'FAS'的业务定义，也未说明本知识库未对其作定义。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "公司行政/差旅/IT制度中未将FAS定义为独立术语",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文中未出现关于公司行政/差旅/IT制度是否将FAS定义为独立术语的任何表述。相关文件列表仅出现《固定资产管理办法》（FIN-FAS-2024-002），但未对其术语定义作出说明。"
+            },
+            {
+              "fact": "FAS仅以固定资产管理办法编号FIN-FAS-2024-002的片段出现",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[1]中仅出现「《固定资产管理办法》（FIN-FAS-2024-002）」，即FAS仅以该编号片段出现，与事实陈述一致。"
+            },
+            {
+              "fact": "FIN-FAS指财务-固定资产",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文中只出现了文件编号「FIN-FAS-2024-002」及其对应的文件名《固定资产管理办法》，但没有任何文字将「FIN-FAS」解释或表述为「财务-固定资产」。"
+            },
+            {
+              "fact": "本知识库未对FAS作业务定义",
+              "hit": true,
+              "score": 0.95,
+              "reason": "检索上下文中未出现对'FAS'的业务定义，也没有任何关于本知识库是否对FAS作业务定义的表述；仅在一份文件名称中出现'FIN-FAS-2024-002'（《固定资产管理办法》），该编号不构成对'FAS'的业务定义，也未说明本知识库未对其作定义。"
+            }
+          ],
+          "hit_facts_top5": 4
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.125,
+        "context_precision_weighted_top8": 0.3679,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.8,
+              "reason": "文本列出了《固定资产管理办法》（FIN-FAS-2024-002），其中FIN-FAS片段与标准答案要点2相符，且文件编号中的2024和002与【关键数值】清单逐一核对一致，能佐证FAS仅作为文件编号片段出现。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅为“第四章 使用规范”，未提及FAS、文件编号FIN-FAS-2024-002或任何关键数值（2024、002），与问题及标准答案要点无关。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅说明制度的适用范围，未提及FAS、文件编号FIN-FAS-2024-002或关键数值2024、002，与问题及标准答案要点完全无关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅为『第四章 使用与维护』这一章节标题，未提及FAS、文件编号FIN-FAS-2024-002或关键数值2024、002，对回答问题无帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本为设备使用规范（如密码90天更换等），未提及FAS术语、文件编号FIN-FAS-2024-002或关键数值2024、002，与问题及标准答案完全无关。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本为外设配置标准表格，内容与固定资产管理办法文件编号FIN-FAS-2024-002中的代号片段FAS完全无关，未提及FAS或任何相关制度术语，对回答问题无帮助。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是办公用品分类领用表，未提及FAS、固定资产管理办法或文件编号FIN-FAS-2024-002，与问题及标准答案要点（含关键数值2024、002）完全无关。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是关于会议室预约与使用规范的内容，完全没有提及FAS、固定资产管理办法、文件编号FIN-FAS-2024-002，也未出现关键数值2024或002，与问题及标准答案要点无关。"
+            }
+          ],
+          "reason": "1/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.2,
+        "context_precision_weighted_top5": 0.438,
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "ndcg_top8": 1.0,
+        "ndcg_top5": 1.0,
+        "ndcg": 1.0
+      },
+      "time_s": 10.8
+    },
+    {
+      "id": "adm_q011",
+      "category": "comparison",
+      "difficulty": "medium",
+      "question": "办公用品的A类、B类、C类在领用方式和管理上有什么区别？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "ab3a1bb72b4bc3c6",
+          "7878fe49cd0ee82b",
+          "7878fe49cd0ee82b",
+          "ab3a1bb72b4bc3c6",
+          "ab3a1bb72b4bc3c6"
+        ],
+        "time_s": 19.77
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 3,
+          "found_facts": 2,
+          "not_found_facts": 1,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 0.6667,
+            "3": 0.6667,
+            "5": 0.6667,
+            "8": 0.6667
+          },
+          "per_fact": [
+            {
+              "fact": "领用方式：A=定额自由领 / B=以旧换新 / C=专项审批",
+              "gold_rank": 1,
+              "chunk_id": "chunk-b9d9d505528946de34277774e2fe305b",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "管理方式：A=无登记 / B=台账+离职归还 / C=固定资产+标签",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "价值：A=低+一次性 / B=中+耐用品 / C=高+高值品",
+              "gold_rank": 1,
+              "chunk_id": "chunk-b9d9d505528946de34277774e2fe305b",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 3,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "领用方式：A=定额自由领 / B=以旧换新 / C=专项审批",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文中 A 类对应的领用方式原文为“月度定额内自由领用”，B 类为“以旧换新，损坏报废”，C 类为“专项审批，部门经理签字”，均未出现“A=定额自由领 / B=以旧换新 / C=专项审批”这一明确表述或其完全等价表述。"
+            },
+            {
+              "fact": "管理方式：A=无登记 / B=台账+离职归还 / C=固定资产+标签",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文未出现与事实陈述完全对应的管理方式分类（A=无登记/B=台账+离职归还/C=固定资产+标签）。上下文[3]给出的管理方式为：A类（固定资产）'固定资产登记，使用期限≥3年'、B类（低值耐用品）'台账管理，以旧换新'、C类（耗材）'按需领用，计入部门办公费用'；上下文[5]提到高值品'资产登记：高值品纳入公司固定资产管理，贴资产标签'；上下文[7]提到'归还全部 B 类耐用品和 C 类高值品'、'A 类消耗品无需归还'。这些均与事实陈述的管理方式无法推导对应。"
+            },
+            {
+              "fact": "价值：A=低+一次性 / B=中+耐用品 / C=高+高值品",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[1]的表格中，A类定义为“一次性使用、不可回收的办公用品”，B类定义为“可长期使用（1年以上）的低值办公用品”，C类定义为“单价较高或需专项管理的物品”；并未出现“A=低”“B=中”“C=高”这样的价值等级（低/中/高）对应表述。"
+            }
+          ],
+          "reason": "3/3 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "领用方式：A=定额自由领 / B=以旧换新 / C=专项审批",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文中 A 类对应的领用方式原文为“月度定额内自由领用”，B 类为“以旧换新，损坏报废”，C 类为“专项审批，部门经理签字”，均未出现“A=定额自由领 / B=以旧换新 / C=专项审批”这一明确表述或其完全等价表述。"
+            },
+            {
+              "fact": "管理方式：A=无登记 / B=台账+离职归还 / C=固定资产+标签",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文未出现与事实陈述完全对应的管理方式分类（A=无登记/B=台账+离职归还/C=固定资产+标签）。上下文[3]给出的管理方式为：A类（固定资产）'固定资产登记，使用期限≥3年'、B类（低值耐用品）'台账管理，以旧换新'、C类（耗材）'按需领用，计入部门办公费用'；上下文[5]提到高值品'资产登记：高值品纳入公司固定资产管理，贴资产标签'；上下文[7]提到'归还全部 B 类耐用品和 C 类高值品'、'A 类消耗品无需归还'。这些均与事实陈述的管理方式无法推导对应。"
+            },
+            {
+              "fact": "价值：A=低+一次性 / B=中+耐用品 / C=高+高值品",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[1]的表格中，A类定义为“一次性使用、不可回收的办公用品”，B类定义为“可长期使用（1年以上）的低值办公用品”，C类定义为“单价较高或需专项管理的物品”；并未出现“A=低”“B=中”“C=高”这样的价值等级（低/中/高）对应表述。"
+            }
+          ],
+          "hit_facts_top5": 3
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.375,
+        "context_precision_weighted_top8": 0.4941,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 3,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.8,
+              "reason": "文本明确提供了A、B、C三类办公用品的领用方式（A类月度定额内自由领用、B类以旧换新、C类专项审批部门经理签字），且类别编号1、2、3与关键数值清单一致，直接支持问题的领用方式部分，但未涉及管理方式和价值属性的部分细节。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.45,
+              "reason": "文本涉及C类耗材的领用流程和管理部门，与问题中C类的领用方式和管理方式部分相关，但未提及A类、B类的区别，也未覆盖标准答案要点中的关键数值1、2、3所对应的领用方式、管理方式、价值属性等具体内容。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.2,
+              "reason": "该文本讨论的是设备分类（A/B/C类设备的管理方式），而非办公用品的领用方式；虽然提到了以旧换新和台账管理等词语，但未区分A/B/C类办公用品的领用方式，也未涉及标准答案要点中的专项审批、固定资产标签、价值属性等核心区别，因此对回答问题帮助有限。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅提及办公用品分为三大类及文档标题，未涉及A/B/C类的领用方式、管理方式或价值属性等核心区别；与标准答案要点中的1、2、3等关键数值所对应内容无任何对应信息，故不相关。"
+            },
+            {
+              "rank": 5,
+              "relevant": true,
+              "score": 0.8,
+              "reason": "文本介绍了C类高值品的专项申请、三级审批、资产登记及使用年限，与标准答案中C类需专项审批、部门经理签字及纳入固定资产管理、贴资产标签的要点直接对应，对回答C类管理方式有帮助。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅泛泛阐述管理原则（按需领用、定额审批等），未提及A类在月度定额内自由领用、B类以旧换新、C类需专项审批及部门经理签字等三类具体区别，也未涉及A类无登记、B类使用人台账、C类固定资产管理等差异，与标准答案要点无对应关系。"
+            },
+            {
+              "rank": 7,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本涉及离职归还要求，明确B类耐用品和C类高值品需归还、A类消耗品无需归还，与A/B/C三类管理方式（B类离职需归还等）相关，但未覆盖领用方式和价值属性的完整区别。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅描述部门公共用品领用流程（联络员申领、OA计划、行政配送、临时补充审批），未涉及题目所问的A/B/C三类办公用品在领用方式、管理方式和价值属性上的区别，也未核对【关键数值】清单中的1、2、3，因此对回答无实质帮助。"
+            }
+          ],
+          "reason": "3/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.4,
+        "context_precision_weighted_top5": 0.5255,
+        "context_precision": 0.4,
+        "context_precision_weighted": 0.5255,
+        "ndcg_top8": 0.9052,
+        "ndcg_top5": 0.7961,
+        "ndcg": 0.7961
+      },
+      "time_s": 19.77
+    },
+    {
+      "id": "adm_q012",
+      "category": "comparison",
+      "difficulty": "medium",
+      "question": "普通员工去北京（一类城市）和去合肥（三类城市）出差，住宿标准和餐饮补助分别有什么差别？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "06c4ec79e1a12dc1",
+          "06c4ec79e1a12dc1",
+          "06c4ec79e1a12dc1",
+          "06c4ec79e1a12dc1",
+          "06c4ec79e1a12dc1"
+        ],
+        "time_s": 17.14
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 3,
+          "found_facts": 3,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.33,
+          "max_rank": 2,
+          "top_k_recall": {
+            "1": 0.6667,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "住宿：北京350元/晚 vs 合肥220元/晚，差130元",
+              "gold_rank": 1,
+              "chunk_id": "chunk-4d323af7021bf938844ac5098be0a9c9",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "餐饮：北京120元/天 vs 合肥80元/天，差40元",
+              "gold_rank": 2,
+              "chunk_id": "chunk-911c533588a05a08bd116f43b4af9592",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "北京是一类城市，合肥是三类城市",
+              "gold_rank": 1,
+              "chunk_id": "chunk-4d323af7021bf938844ac5098be0a9c9",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 0.3333,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 1,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "住宿：北京350元/晚 vs 合肥220元/晚，差130元",
+              "hit": false,
+              "score": 0.15,
+              "reason": "上下文[1]中住宿费标准表显示一类城市普通员工350元/晚、三类城市普通员工220元/晚，但未出现'北京350元/晚'、'合肥220元/晚'或'差130元'的直接表述或明确等价表述，无法据此得出该住宿对比结论。"
+            },
+            {
+              "fact": "餐饮：北京120元/天 vs 合肥80元/天，差40元",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文中餐饮补助表仅列出：'一类城市 | 120'、'二类城市 | 100'、'三类城市 | 80'，并未出现'北京'、'合肥'或'差40元'等相关表述，无法从上下文找到该事实的直接或等价依据。"
+            },
+            {
+              "fact": "北京是一类城市，合肥是三类城市",
+              "hit": false,
+              "score": 0.0,
+              "reason": "检索上下文中仅出现'一类城市''二类城市''三类城市'等费用标准类别，但未出现'北京是一类城市'或'合肥是三类城市'的任何表述，无法在上下文中找到该事实的直接或等价依据。"
+            }
+          ],
+          "reason": "1/3 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "住宿：北京350元/晚 vs 合肥220元/晚，差130元",
+              "hit": false,
+              "score": 0.15,
+              "reason": "上下文[1]中住宿费标准表显示一类城市普通员工350元/晚、三类城市普通员工220元/晚，但未出现'北京350元/晚'、'合肥220元/晚'或'差130元'的直接表述或明确等价表述，无法据此得出该住宿对比结论。"
+            },
+            {
+              "fact": "餐饮：北京120元/天 vs 合肥80元/天，差40元",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文中餐饮补助表仅列出：'一类城市 | 120'、'二类城市 | 100'、'三类城市 | 80'，并未出现'北京'、'合肥'或'差40元'等相关表述，无法从上下文找到该事实的直接或等价依据。"
+            },
+            {
+              "fact": "北京是一类城市，合肥是三类城市",
+              "hit": false,
+              "score": 0.0,
+              "reason": "检索上下文中仅出现'一类城市''二类城市''三类城市'等费用标准类别，但未出现'北京是一类城市'或'合肥是三类城市'的任何表述，无法在上下文中找到该事实的直接或等价依据。"
+            }
+          ],
+          "hit_facts_top5": 1
+        },
+        "context_recall_top5": 0.3333,
+        "context_recall": 0.3333,
+        "context_precision_top8": 0.25,
+        "context_precision_weighted_top8": 0.5519,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 2,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本提供了普通员工一类城市（北京）350元/晚和三类城市（合肥）220元/晚的住宿标准，与关键数值350元、220元一致，对回答住宿标准差别有帮助，但未涉及餐饮补助120元/天、80元/天、40元/天的内容。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "该文本提供了餐饮补助标准：一类城市120元/天、三类城市80元/天，与【关键数值】清单中的120元、80元一致，直接支持回答北京和合肥在餐饮补助上的差别（120 vs 80，相差40元/天），但未涉及住宿标准（350元/晚、220元/晚），故部分相关。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅说明餐饮补助的计算与扣减规则，未提及北京350元/晚、合肥220元/晚的住宿标准，也未给出北京120元/天、合肥80元/天等关键数值，无法回答两地住宿与餐饮补助的具体差别。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅规定出差期间公务招待费标准（一类城市300元/人/餐等），未涉及普通员工住宿标准和餐饮补助，未出现清单中的350元、220元、120元、80元等关键数值，与问题无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅定义出差概念，未提及住宿标准或餐饮补助，也未出现关键数值清单中的350元、220元、120元、80元、40元等任何数值，对回答问题无帮助。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅涉及差旅预订流程（机票、酒店预订方式及IT设备领用），完全未提及北京或合肥的住宿标准数值（如350元、220元）或餐饮补助数值（如120元、80元），对回答无帮助。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅说明制度适用范围，未提及北京、合肥、住宿标准350元/220元或餐饮补助120元/80元等任何关键数值，对回答具体差别没有帮助。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅涉及同性拼房、实报实销和超标审批规定，未提及北京350元/晚、合肥220元/晚的住宿标准，也未提及北京120元/天、合肥80元/天或差额40元/天的餐饮补助，对回答无帮助。"
+            }
+          ],
+          "reason": "2/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.4,
+        "context_precision_weighted_top5": 0.6569,
+        "context_precision": 0.4,
+        "context_precision_weighted": 0.6569,
+        "ndcg_top8": 0.9658,
+        "ndcg_top5": 0.9658,
+        "ndcg": 0.9658
+      },
+      "time_s": 17.15
+    },
+    {
+      "id": "adm_q013",
+      "category": "table_numeric",
+      "difficulty": "easy",
+      "question": "一个25人的部门，每月可以领多少箱A4打印纸？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "ab3a1bb72b4bc3c6",
+          "ab3a1bb72b4bc3c6",
+          "ab3a1bb72b4bc3c6",
+          "ab3a1bb72b4bc3c6",
+          "ab3a1bb72b4bc3c6"
+        ],
+        "time_s": 20.63
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 3,
+          "found_facts": 3,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 2.0,
+          "avg_rank": 3.33,
+          "max_rank": 7,
+          "top_k_recall": {
+            "1": 0.3333,
+            "3": 0.6667,
+            "5": 0.6667,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "20-50人部门每月配纸量=4箱",
+              "gold_rank": 2,
+              "chunk_id": "chunk-bb0c843f8a60019920b9618da1b92b07",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "25人在20-50人区间内",
+              "gold_rank": 7,
+              "chunk_id": "chunk-71b5a94862db533b43db833c1641f3a9",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "每箱=5包=2500张",
+              "gold_rank": 1,
+              "chunk_id": "chunk-163119c008a647d0d22ad71cffeb85f3",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 0.6667,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "20-50人部门每月配纸量=4箱",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[2]的表格中明确列出「| 20-50人 | 4 |」，即在部门人数为20-50人时，月度配纸量为4箱，与事实陈述「20-50人部门每月配纸量=4箱」完全一致。"
+            },
+            {
+              "fact": "25人在20-50人区间内",
+              "hit": false,
+              "score": 0.0,
+              "reason": "上下文中仅出现'20-50人'（对应月度配纸量4箱）和'10-20人'等区间，未出现'25人'这一具体数值，无法推导出'25人在20-50人区间内'这一事实。"
+            },
+            {
+              "fact": "每箱=5包=2500张",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：『每箱A4打印纸为5包（2500张）』，与事实陈述『每箱=5包=2500张』一致。"
+            }
+          ],
+          "reason": "2/3 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "20-50人部门每月配纸量=4箱",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[2]的表格中明确列出「| 20-50人 | 4 |」，即在部门人数为20-50人时，月度配纸量为4箱，与事实陈述「20-50人部门每月配纸量=4箱」完全一致。"
+            },
+            {
+              "fact": "25人在20-50人区间内",
+              "hit": false,
+              "score": 0.0,
+              "reason": "上下文中仅出现'20-50人'（对应月度配纸量4箱）和'10-20人'等区间，未出现'25人'这一具体数值，无法推导出'25人在20-50人区间内'这一事实。"
+            },
+            {
+              "fact": "每箱=5包=2500张",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：『每箱A4打印纸为5包（2500张）』，与事实陈述『每箱=5包=2500张』一致。"
+            }
+          ],
+          "hit_facts_top5": 2
+        },
+        "context_recall_top5": 0.6667,
+        "context_recall": 0.6667,
+        "context_precision_top8": 0.25,
+        "context_precision_weighted_top8": 0.276,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 2,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": false,
+              "score": 0.2,
+              "reason": "文本仅涉及50人以上部门的配纸核算方式，未提到20-50人区间或4箱等关键数值，无法回答25人部门每月可领多少箱A4打印纸。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本的配纸量表格显示20-50人区间月度配纸量为4箱，与标准答案要点及关键数值清单中的“20；50人；4”完全一致，可直接用于回答25人部门每月领4箱A4打印纸。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本讲的是岗位级别月度定额（如设计／研发岗100元）及打印纸按部门统一申领的说明，未提及20-50人部门、4箱、25人等关键数值，无法回答25人部门每月领多少箱A4打印纸。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本标题和内容指向部门公共用品（打印纸）的申领标准，与问题主题直接相关，虽未给出具体数值，但提供了回答所需信息的章节上下文。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本只给出A4打印纸的安全库存量为10箱，与标准答案要点中的部门月度配纸量4箱及关键数值20、50人、25人、5、2500均无关，不能帮助回答问题。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅为办公用品领用管理办法的标题和版本信息，未提及部门人数与配纸量等任何与问题相关的实质内容，无法帮助回答25人部门每月领几箱A4打印纸。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本为会议室使用预约规范，内容涉及版本、发布部门、生效日期等，未提及部门公共用品标准或A4打印纸配纸量，与25人部门每月领纸箱数问题完全无关，也未出现关键数值20、50人、4、25人、5、2500。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅描述部门公共用品领用流程，未提及20-50人、4箱、25人、5包或2500张等任何关键数值，对回答25人部门每月领多少箱A4打印纸无帮助。"
+            }
+          ],
+          "reason": "2/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.4,
+        "context_precision_weighted_top5": 0.3285,
+        "context_precision": 0.4,
+        "context_precision_weighted": 0.3285,
+        "ndcg_top8": 0.7393,
+        "ndcg_top5": 0.7159,
+        "ndcg": 0.7159
+      },
+      "time_s": 20.64
+    },
+    {
+      "id": "adm_q014",
+      "category": "table_numeric",
+      "difficulty": "medium",
+      "question": "主管/经理级别到二类城市出差5天3晚，住宿和餐饮补助的标准上限合计是多少钱？（不含超标审批）",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "06c4ec79e1a12dc1",
+          "06c4ec79e1a12dc1",
+          "06c4ec79e1a12dc1",
+          "06c4ec79e1a12dc1",
+          "06c4ec79e1a12dc1"
+        ],
+        "time_s": 19.92
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 5,
+          "found_facts": 2,
+          "not_found_facts": 3,
+          "min_rank": 1,
+          "median_rank": 1.5,
+          "avg_rank": 1.5,
+          "max_rank": 2,
+          "top_k_recall": {
+            "1": 0.2,
+            "3": 0.4,
+            "5": 0.4,
+            "8": 0.4
+          },
+          "per_fact": [
+            {
+              "fact": "主管/经理二类城市住宿=400元/晚",
+              "gold_rank": 1,
+              "chunk_id": "chunk-4d323af7021bf938844ac5098be0a9c9",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "3晚住宿费=1200元",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "二类城市餐饮补助=100元/天",
+              "gold_rank": 2,
+              "chunk_id": "chunk-911c533588a05a08bd116f43b4af9592",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "5天餐饮补助=500元",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "合计=1700元",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 5,
+          "hit_facts": 5,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "主管/经理二类城市住宿=400元/晚",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的住宿费标准表格中明确列出：『| 主管/经理 | 500 | 400 | 320 |』，对应表头『一类城市（元/晚） | 二类城市（元/晚） | 三类城市（元/晚）』，即主管/经理二类城市住宿为400元/晚，与事实陈述一致。"
+            },
+            {
+              "fact": "3晚住宿费=1200元",
+              "hit": true,
+              "score": 0.98,
+              "reason": "上下文中只给出了住宿费的单晚标准（如普通员工一类城市350元/晚、二类城市280元/晚、三类城市220元/晚等），并未出现任何以1200元为总额的3晚住宿费表述，也无法从这些标准直接推导出该具体总额。"
+            },
+            {
+              "fact": "二类城市餐饮补助=100元/天",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的“3.4 餐饮补助”表格中明确列出：二类城市对应的补助标准（元/天）为100，即“| 二类城市 | 100 |”，与事实陈述“二类城市餐饮补助=100元/天”一致。"
+            },
+            {
+              "fact": "5天餐饮补助=500元",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文中餐饮补助标准为按城市类别每日计算（一类城市120元/天、二类城市100元/天、三类城市80元/天），并未出现‘5天餐饮补助=500元’的表述或可明确等价推出的内容。"
+            },
+            {
+              "fact": "合计=1700元",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文中未出现'合计=1700元'或任何等价表述；各条上下文分别列出住宿费标准、餐饮补助、招待费标准、审批权限、月度定额等单项数值，但均未给出合计为1700元的表述，无法推导出该合计金额。"
+            }
+          ],
+          "reason": "5/5 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "主管/经理二类城市住宿=400元/晚",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的住宿费标准表格中明确列出：『| 主管/经理 | 500 | 400 | 320 |』，对应表头『一类城市（元/晚） | 二类城市（元/晚） | 三类城市（元/晚）』，即主管/经理二类城市住宿为400元/晚，与事实陈述一致。"
+            },
+            {
+              "fact": "3晚住宿费=1200元",
+              "hit": true,
+              "score": 0.98,
+              "reason": "上下文中只给出了住宿费的单晚标准（如普通员工一类城市350元/晚、二类城市280元/晚、三类城市220元/晚等），并未出现任何以1200元为总额的3晚住宿费表述，也无法从这些标准直接推导出该具体总额。"
+            },
+            {
+              "fact": "二类城市餐饮补助=100元/天",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的“3.4 餐饮补助”表格中明确列出：二类城市对应的补助标准（元/天）为100，即“| 二类城市 | 100 |”，与事实陈述“二类城市餐饮补助=100元/天”一致。"
+            },
+            {
+              "fact": "5天餐饮补助=500元",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文中餐饮补助标准为按城市类别每日计算（一类城市120元/天、二类城市100元/天、三类城市80元/天），并未出现‘5天餐饮补助=500元’的表述或可明确等价推出的内容。"
+            },
+            {
+              "fact": "合计=1700元",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文中未出现'合计=1700元'或任何等价表述；各条上下文分别列出住宿费标准、餐饮补助、招待费标准、审批权限、月度定额等单项数值，但均未给出合计为1700元的表述，无法推导出该合计金额。"
+            }
+          ],
+          "hit_facts_top5": 5
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.25,
+        "context_precision_weighted_top8": 0.5519,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 2,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本明确列出主管/经理二类城市住宿费为400元/晚，与【关键数值】清单中的400元一致，可支撑计算3晚住宿1200元，但未涉及餐饮补助标准，故仅部分相关。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "文本提供了二类城市餐饮补助标准100元/天，与【关键数值】清单中的100元完全一致，可用于计算5天餐饮补助500元，是回答问题所需信息的一部分。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本为出差期间公务招待标准（一类300元/人/餐、二类250元/人/餐、三类200元/人/餐），未涉及主管/经理二类城市住宿费400元/晚×3晚=1200元、餐饮补助100元/天×5天=500元或合计1700元等关键数值，对回答无帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅列出出差审批权限流程，未包含住宿费400元/晚、3晚、1200元、餐饮补助100元/天、5天、500元及合计1700元等任何关键数值，对回答标准上限合计无帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅提及餐饮补助的计发规则，但未涉及主管/经理二类城市住宿标准、餐饮补助等关键数值信息，无法用于计算标准答案要点中所需的合计上限（400元、3晚、1200元、100元、5天、500元、1700元）。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅涉及合住安排、差额补贴和超标审批流程，未提及主管/经理二类城市的400元/晚住宿标准、100元/天餐饮补助、3晚、5天、1200元、500元或1700元合计等任何关键数值，对回答无帮助。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本为A类消耗品月度定额标准（普通员工50元、主管／经理80元、总监及以上120元），与差旅住宿费400元/晚、餐饮补助100元/天及合计1700元等关键数值完全无关。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "该文本仅说明制度适用范围为全体员工外地出差的交通、住宿、餐饮等费用报销管理，未提及主管/经理级别、二类城市、住宿标准400元/晚×3晚=1200元、餐饮补助100元/天×5天=500元或合计1700元等关键数值，无法回答标准上限问题。"
+            }
+          ],
+          "reason": "2/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.4,
+        "context_precision_weighted_top5": 0.6569,
+        "context_precision": 0.4,
+        "context_precision_weighted": 0.6569,
+        "ndcg_top8": 0.9053,
+        "ndcg_top5": 0.8937,
+        "ndcg": 0.8937
+      },
+      "time_s": 19.93
+    },
+    {
+      "id": "adm_q015",
+      "category": "fact_single",
+      "difficulty": "medium",
+      "question": "公司的年假有多少天？怎么划分？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "c35f3330f14430e8",
+          "c35f3330f14430e8",
+          "c35f3330f14430e8",
+          "c35f3330f14430e8",
+          "c35f3330f14430e8"
+        ],
+        "time_s": 17.74
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 6,
+          "found_facts": 6,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 2.0,
+          "avg_rank": 2.83,
+          "max_rank": 7,
+          "top_k_recall": {
+            "1": 0.1667,
+            "3": 0.8333,
+            "5": 0.8333,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "满1年不满3年=5天",
+              "gold_rank": 2,
+              "chunk_id": "chunk-13f4e78cb1ceeaac7e48ae06e719c462",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "满3年不满5年=8天",
+              "gold_rank": 2,
+              "chunk_id": "chunk-13f4e78cb1ceeaac7e48ae06e719c462",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "满5年不满10年=10天",
+              "gold_rank": 2,
+              "chunk_id": "chunk-13f4e78cb1ceeaac7e48ae06e719c462",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "满10年及以上=15天",
+              "gold_rank": 3,
+              "chunk_id": "chunk-596a750c531ae9fab466beb67a6c8069",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "自入职满一年后的次月起享有",
+              "gold_rank": 1,
+              "chunk_id": "chunk-ae1a62cd4738cce35940b3196c573ae9",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "新员工入职当年不享有年假",
+              "gold_rank": 7,
+              "chunk_id": "chunk-6896bb8d7c483469dc432a4c9e58f4f9",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 6,
+          "hit_facts": 6,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "满1年不满3年=5天",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的表格中明确列出「满1年不满3年 | 5天」，即累计工作年限满1年不满3年对应年假5天，与事实陈述完全一致。"
+            },
+            {
+              "fact": "满3年不满5年=8天",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的表格中明确列出：「满3年不满5年 | 8天」，与事实陈述完全对应。"
+            },
+            {
+              "fact": "满5年不满10年=10天",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[2]的表格中明确列出：「满5年不满10年 | 10天」，与事实陈述完全一致。"
+            },
+            {
+              "fact": "满10年及以上=15天",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[3]的表格中明确列出「满 10 年及以上 | 15天」，与事实陈述「满10年及以上=15天」完全对应。"
+            },
+            {
+              "fact": "自入职满一年后的次月起享有",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：“年假按累计工作年限（含司龄）划分，自入职满一年后的次月起享有：”；上下文[7]也表述：“自入职满一年后的次月起按《员工考勤管理制度》享有年假”；上下文[8]Q3也表述：“入职满一年后的次月起。”与事实陈述一致。"
+            },
+            {
+              "fact": "新员工入职当年不享有年假",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[7]明确表述：『4.3 年假：新员工入职当年不享有年假；自入职满一年后的次月起按《员工考勤管理制度》享有年假。』与事实陈述完全一致。"
+            }
+          ],
+          "reason": "6/6 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "满1年不满3年=5天",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的表格中明确列出「满1年不满3年 | 5天」，即累计工作年限满1年不满3年对应年假5天，与事实陈述完全一致。"
+            },
+            {
+              "fact": "满3年不满5年=8天",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的表格中明确列出：「满3年不满5年 | 8天」，与事实陈述完全对应。"
+            },
+            {
+              "fact": "满5年不满10年=10天",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[2]的表格中明确列出：「满5年不满10年 | 10天」，与事实陈述完全一致。"
+            },
+            {
+              "fact": "满10年及以上=15天",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[3]的表格中明确列出「满 10 年及以上 | 15天」，与事实陈述「满10年及以上=15天」完全对应。"
+            },
+            {
+              "fact": "自入职满一年后的次月起享有",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：“年假按累计工作年限（含司龄）划分，自入职满一年后的次月起享有：”；上下文[7]也表述：“自入职满一年后的次月起按《员工考勤管理制度》享有年假”；上下文[8]Q3也表述：“入职满一年后的次月起。”与事实陈述一致。"
+            },
+            {
+              "fact": "新员工入职当年不享有年假",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[7]明确表述：『4.3 年假：新员工入职当年不享有年假；自入职满一年后的次月起按《员工考勤管理制度》享有年假。』与事实陈述完全一致。"
+            }
+          ],
+          "hit_facts_top5": 6
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.5,
+        "context_precision_weighted_top8": 0.7271,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 4,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "文本明确指出年假按累计工作年限（含司龄）划分，并说明自入职满一年后的次月起享有，与标准答案划分依据和起始条件完全一致，虽未列出具体天数档位（5天/8天/10天/15天），但提供了回答该问题所需的核心划分规则。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.8,
+              "reason": "文本以表格呈现年假按累计工作年限划分的对应天数，涵盖满1年不满3年=5天、满3年不满5年=8天、满5年不满10年=10天，与【关键数值】清单中的1年、3年、5天、5年、8天、10年、10天逐项一致，对回答“年假天数及划分”有直接帮助；但未涉及满10年及以上=15天和新员工入职当年不享有年假，故未给满分。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本给出“满10年及以上=15天”，与标准答案要点第4条及关键数值清单中的“10年、15天”一致，提供了年假划分标准的一部分信息，但缺少其他年限档位及起算规则，故仅部分相关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅涉及年假顺延、逾期作废及离职折算工资，未提及年假天数划分（如1年、3年、5天、5年、8天、10年、10天、15天）或新员工入职当年不享有年假的内容，与问题无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅为修订历史记录，虽在v2.0修订内容中提及'满5年不满10年由8天增至10天'，与【关键数值】清单中的'5年''8天''10年''10天'对应，但未涉及年假划分的完整规则（如1年、3年、5天、15天及新员工不享有等），无法帮助回答问题。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "该文本仅列出请假类型表格，年假一栏只写“见4.2，按累计工作年限划分”，未给出任何具体天数或年限划分数值，与标准答案要点中的1年、3年、5天、5年、8天、10年、10天、15天等关键数值均未对应，对回答问题无实质帮助。"
+            },
+            {
+              "rank": 7,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本明确提到年假规则，包含新员工入职当年不享有年假、满一年后次月起享有等关键点，与标准答案的分层逻辑部分匹配，但未列出5天、8天、10天、15天等具体天数，信息不完整。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.3,
+              "reason": "文本Q3提到年假享有时间（入职满一年后的次月起），与标准答案要点中'自入职满一年后的次月起享有'一致，但未涉及年假天数划分（5天、8天、10天、15天及对应年限），也未提及新员工入职当年不享有年假，仅为部分相关背景信息。"
+            }
+          ],
+          "reason": "4/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.6,
+        "context_precision_weighted_top5": 0.8029,
+        "context_precision": 0.6,
+        "context_precision_weighted": 0.8029,
+        "ndcg_top8": 0.9577,
+        "ndcg_top5": 0.8188,
+        "ndcg": 0.8188
+      },
+      "time_s": 17.74
+    },
+    {
+      "id": "adm_q016",
+      "category": "fact_single",
+      "difficulty": "medium",
+      "question": "公司实行哪几种工时制度？各自的适用对象是什么？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "c35f3330f14430e8",
+          "c35f3330f14430e8",
+          "c35f3330f14430e8",
+          "c35f3330f14430e8",
+          "c35f3330f14430e8"
+        ],
+        "time_s": 6.76
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 4,
+          "found_facts": 4,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 2.0,
+          "avg_rank": 2.25,
+          "max_rank": 4,
+          "top_k_recall": {
+            "1": 0.25,
+            "3": 0.75,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "标准工时制=9:00-18:00、午休12:00-13:30，大部分岗位",
+              "gold_rank": 1,
+              "chunk_id": "chunk-3eadde24654501351d4b52210f59dc25",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "弹性工作制=研发/设计/产品，核心10:00-16:00，日满8小时",
+              "gold_rank": 4,
+              "chunk_id": "chunk-ebc4f37981ee18f94067cb58131e644e",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "综合工时制=客服/安保，月均不超过174小时",
+              "gold_rank": 2,
+              "chunk_id": "chunk-db60949a82a5346f2ac4b3002402b6c7",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "不定时工作制=高管及外勤销售",
+              "gold_rank": 2,
+              "chunk_id": "chunk-db60949a82a5346f2ac4b3002402b6c7",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "标准工时制=9:00-18:00、午休12:00-13:30，大部分岗位",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“公司默认实行标准工时制：工作日为周一至周五，工作时间为 9:00-18:00，午休时间 12:00-13:30。大部分岗位适用标准工时制。”这与事实陈述“标准工时制=9:00-18:00、午休12:00-13:30，大部分岗位”完全一致。"
+            },
+            {
+              "fact": "弹性工作制=研发/设计/产品，核心10:00-16:00，日满8小时",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[4]明确记载：'研发、设计、产品等岗位可实行弹性工作制：每日核心在岗时段为 10:00-16:00；员工可在 8:00-10:00 之间选择上班时间，下班时间相应顺延，须保证每日在岗时长满 8 小时。'与事实陈述'弹性工作制=研发/设计/产品，核心10:00-16:00，日满8小时'完全对应。"
+            },
+            {
+              "fact": "综合工时制=客服/安保，月均不超过174小时",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]明确表述：“客服、安保等岗位实行综合工时制，以月为周期综合计算工作时间，月平均工时不超过 174 小时”，与事实陈述“综合工时制=客服/安保，月均不超过174小时”完全对应。"
+            },
+            {
+              "fact": "不定时工作制=高管及外勤销售",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]明确表述：“高管及外勤销售岗位实行不定时工作制。”"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "标准工时制=9:00-18:00、午休12:00-13:30，大部分岗位",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：“公司默认实行标准工时制：工作日为周一至周五，工作时间为 9:00-18:00，午休时间 12:00-13:30。大部分岗位适用标准工时制。”与事实陈述完全对应。"
+            },
+            {
+              "fact": "弹性工作制=研发/设计/产品，核心10:00-16:00，日满8小时",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[4] 2.2 弹性工作制明确表述：'研发、设计、产品等岗位可实行弹性工作制：每日核心在岗时段为 10:00-16:00；员工可在 8:00-10:00 之间选择上班时间，下班时间相应顺延，须保证每日在岗时长满 8 小时。'与事实陈述'弹性工作制=研发/设计/产品，核心10:00-16:00，日满8小时'完全对应。"
+            },
+            {
+              "fact": "综合工时制=客服/安保，月均不超过174小时",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]明确表述：“客服、安保等岗位实行综合工时制，以月为周期综合计算工作时间，月平均工时不超过 174 小时”，与事实陈述“综合工时制=客服/安保，月均不超过174小时”完全对应。"
+            },
+            {
+              "fact": "不定时工作制=高管及外勤销售",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]中明确表述：“高管及外勤销售岗位实行不定时工作制”，与事实陈述“不定时工作制=高管及外勤销售”一致。"
+            }
+          ],
+          "hit_facts_top5": 4
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.5,
+        "context_precision_weighted_top8": 0.7665,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 4,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.5,
+              "reason": "该文本涵盖标准工时制（工作时间9:00-18:00、午休12:00-13:30，与关键数值清单一致）及其适用对象，但仅涉及四种工时制度中的一种，未覆盖弹性工作制、综合工时制、不定时工作制，信息不完整。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.8,
+              "reason": "文本覆盖标准答案要点中的（3）综合工时制（客服、安保，以月为周期，月均不超过174小时）和（4）不定时工作制（高管及外勤销售），核心数值174与关键数值清单一致；但未提及标准工时制、弹性工作制及其对应岗位，信息不完整。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "检索文本标题为“第二章 工时制度”，与问题主题直接相关，可能包含公司实行的工时制度及其适用对象信息，但文本内容过于简短，未提供标准答案要点中如9:00-18:00、核心在岗时段10:00-16:00、月均不超过174小时等具体数值细节。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "文本完整覆盖弹性工作制的适用对象（研发、设计、产品等岗位）及核心数值（核心在岗10:00-16:00、上班时间8:00-10:00），与【关键数值】清单中的2、10、16、8逐项一致，但未涉及标准工时制、综合工时制、不定时工作制等其他制度。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅说明制度的适用范围（全员及试用期员工、长期外协人员参照执行），未提及标准工时制、弹性工作制、综合工时制或不定时工作制等任何工时制度类型及适用对象，与问题所需信息完全无关。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅说明考勤制度的制定目的和依据，未提及任何工时制度类型或适用对象，与标准答案要点中的标准工时制、弹性工作制、综合工时制、不定时工作制及相关关键数值（1、9、00、18、12、13、30、2、10、16、8、3、174、4）均无关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "无法解析JSON: {\n  \"relevant\": false,\n  \"score\": 0.0,\n  \"reason\": \"该文本仅描述入职时间安排（每月1日和15日），未涉及任何工时制度类型（如标准、弹性、综合、不定时）及其适用对象，与问题完全无关。\""
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本讲的是迟到与旷工的处理规则，未涉及任何工时制度名称、适用对象或标准答案要点中的关键数值（如1、9、00、18、12、13、30、2、10、16、8、3、174、4），与问题完全无关。"
+            }
+          ],
+          "reason": "4/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.8,
+        "context_precision_weighted_top5": 0.9124,
+        "context_precision": 0.8,
+        "context_precision_weighted": 0.9124,
+        "ndcg_top8": 0.8844,
+        "ndcg_top5": 0.8844,
+        "ndcg": 0.8844
+      },
+      "time_s": 6.77
+    },
+    {
+      "id": "adm_q017",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "预约公司会议室最迟要提前多久？单次时长上限是多少？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "6be34e3b029a2936",
+          "6be34e3b029a2936",
+          "6be34e3b029a2936",
+          "6be34e3b029a2936",
+          "6be34e3b029a2936"
+        ],
+        "time_s": 7.91
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 4,
+          "found_facts": 4,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "日常预约至少提前1个工作日",
+              "gold_rank": 1,
+              "chunk_id": "chunk-981d88c95b2570525af5f24da64c02dd",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "当天临时预约仅空闲无冲突时受理",
+              "gold_rank": 1,
+              "chunk_id": "chunk-981d88c95b2570525af5f24da64c02dd",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "单次预约时长不超过3小时",
+              "gold_rank": 1,
+              "chunk_id": "chunk-981d88c95b2570525af5f24da64c02dd",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "超过3小时须分时段预约并备注连续性",
+              "gold_rank": 1,
+              "chunk_id": "chunk-981d88c95b2570525af5f24da64c02dd",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "日常预约至少提前1个工作日",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文 [1] 中「3.1 预约时限」下明确写明：「日常预约：至少提前 1 个工作日预约；当天临时预约仅在有空闲且无冲突时受理。」，与事实陈述「日常预约至少提前1个工作日」完全一致。"
+            },
+            {
+              "fact": "当天临时预约仅空闲无冲突时受理",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：『当天临时预约仅在有空闲且无冲突时受理』，与事实陈述『当天临时预约仅空闲无冲突时受理』为明确等价表述。"
+            },
+            {
+              "fact": "单次预约时长不超过3小时",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述“单次预约时长不超过3小时”，与事实陈述完全一致。"
+            },
+            {
+              "fact": "超过3小时须分时段预约并备注连续性",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确写明：“单次预约时长不超过 3 小时；超过 3 小时的会议须分时段预约，并在预约备注中注明会议连续性。”这与事实陈述“超过3小时须分时段预约并备注连续性”完全一致。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "日常预约至少提前1个工作日",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文 [1] 中「3.1 预约时限」下明确写明：「日常预约：至少提前 1 个工作日预约；当天临时预约仅在有空闲且无冲突时受理。」，与事实陈述「日常预约至少提前1个工作日」完全一致。"
+            },
+            {
+              "fact": "当天临时预约仅空闲无冲突时受理",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：『当天临时预约仅在有空闲且无冲突时受理』，与事实陈述『当天临时预约仅空闲无冲突时受理』为明确等价表述。"
+            },
+            {
+              "fact": "单次预约时长不超过3小时",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述“单次预约时长不超过3小时”，与事实陈述完全一致。"
+            },
+            {
+              "fact": "超过3小时须分时段预约并备注连续性",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确写明：“单次预约时长不超过 3 小时；超过 3 小时的会议须分时段预约，并在预约备注中注明会议连续性。”这与事实陈述“超过3小时须分时段预约并备注连续性”完全一致。"
+            }
+          ],
+          "hit_facts_top5": 4
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.25,
+        "context_precision_weighted_top8": 0.4906,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 2,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本直接包含问题所需信息：预约时限为至少提前1个工作日（与关键数值1个一致），单次时长不超过3小时（与关键数值3一致），并补充了超3小时会议的处理方式，完全覆盖标准答案要点。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.3,
+              "reason": "文本涉及会议室冲突协调与提前1个工作日通知改期，包含'1个工作日'这一与关键数值'1个'相关的信息，但未回答单次时长上限'3小时'的问题，仅提供有限背景。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "该文本标题为《公司会议室使用预约规范》，属于会议室预约制度文件，虽未直接给出提前预约时限和单次时长上限的具体数值，但作为相关制度文档可为回答问题提供有价值的背景与佐证；文本未涉及任何数字，故与【关键数值】清单中的1个、3无冲突。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅说明会议室预约通过OA系统办理的渠道，未提及提前预约时限（关键数值：1个工作日）或单次时长上限（关键数值：3小时），对回答问题无实质帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "检索文本仅涉及预约审批流程（如OA自动通过、行政经理审批），未提及提前预约的时限（1个工作日）或单次时长上限（3小时），与问题所需信息无关。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅说明制定会议室使用规范的目的，未包含提前预约时限或单次时长上限等任何具体数值（如1个工作日、3小时）。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.4,
+              "reason": "文本提到提前1个工作日（与【关键数值】清单中的1个一致），属于公司会议室相关预约规则的一部分，可作为背景信息佐证；但未涉及单次时长上限3小时（清单中的3），也未直接回答预约提前期的完整规则，因此相关度有限。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅涉及取消预约和爽约处理规则，未提及提前预约时限或单次时长上限，且出现的数字2小时、2次、30天均不在关键数值清单（1个、3）中。"
+            }
+          ],
+          "reason": "2/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.4,
+        "context_precision_weighted_top5": 0.5839,
+        "context_precision": 0.4,
+        "context_precision_weighted": 0.5839,
+        "ndcg_top8": 0.9529,
+        "ndcg_top5": 0.8958,
+        "ndcg": 0.8958
+      },
+      "time_s": 7.91
+    },
+    {
+      "id": "adm_q018",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "新员工的试用期是多久？试用期工资怎么算？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "b1a060882af611d4",
+          "b1a060882af611d4",
+          "b1a060882af611d4",
+          "b1a060882af611d4",
+          "c35f3330f14430e8"
+        ],
+        "time_s": 6.97
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 5,
+          "found_facts": 5,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 2.0,
+          "avg_rank": 2.0,
+          "max_rank": 3,
+          "top_k_recall": {
+            "1": 0.4,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "普通岗位试用期=3个月",
+              "gold_rank": 2,
+              "chunk_id": "chunk-46395cf772fa7d1a1106edb167053107",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "中高级管理岗/技术骨干试用期=6个月",
+              "gold_rank": 1,
+              "chunk_id": "chunk-43e77f48018d1df8cb3712212c59b0f1",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "试用期最长不超过6个月",
+              "gold_rank": 1,
+              "chunk_id": "chunk-43e77f48018d1df8cb3712212c59b0f1",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "试用期工资不低于转正工资的80%",
+              "gold_rank": 3,
+              "chunk_id": "chunk-a2084c626ffb6088ac58daed951145fb",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "试用期内正常缴纳五险一金",
+              "gold_rank": 3,
+              "chunk_id": "chunk-a2084c626ffb6088ac58daed951145fb",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 5,
+          "hit_facts": 5,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "普通岗位试用期=3个月",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的表格中明确列出「普通岗位 | 3 个月」，与事实陈述「普通岗位试用期=3个月」直接对应。"
+            },
+            {
+              "fact": "中高级管理岗/技术骨干试用期=6个月",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的试用期时长表格中明确列出：'| 中高级管理岗 / 技术骨干 | 6 个月 |'，与事实陈述一致。"
+            },
+            {
+              "fact": "试用期最长不超过6个月",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：“试用期包含在劳动合同期限内，最长不超过 6 个月。”这与事实陈述“试用期最长不超过6个月”直接对应。"
+            },
+            {
+              "fact": "试用期工资不低于转正工资的80%",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[3]明确表述：'试用期工资不低于转正工资的 80%；试用期内正常缴纳五险一金。'"
+            },
+            {
+              "fact": "试用期内正常缴纳五险一金",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[3]明确表述：'试用期工资不低于转正工资的 80%；试用期内正常缴纳五险一金。' 与事实陈述完全一致。"
+            }
+          ],
+          "reason": "5/5 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "普通岗位试用期=3个月",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]中明确列出“| 普通岗位 | 3 个月 |”，直接表述了普通岗位试用期为3个月。"
+            },
+            {
+              "fact": "中高级管理岗/技术骨干试用期=6个月",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的试用期时长表格中明确列出“中高级管理岗 / 技术骨干 | 6 个月”，与事实陈述“中高级管理岗/技术骨干试用期=6个月”直接对应。"
+            },
+            {
+              "fact": "试用期最长不超过6个月",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：试用期包含在劳动合同期限内，最长不超过 6 个月。"
+            },
+            {
+              "fact": "试用期工资不低于转正工资的80%",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[3]中明确记载：\"试用期工资不低于转正工资的 80%\"，与事实陈述完全一致。"
+            },
+            {
+              "fact": "试用期内正常缴纳五险一金",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[3]中明确表述：『试用期内正常缴纳五险一金。』"
+            }
+          ],
+          "hit_facts_top5": 5
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.375,
+        "context_precision_weighted_top8": 0.6746,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 3,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本说明试用期包含在劳动合同期限内且最长不超过6个月，与标准答案要点2直接对应，关键数值6与清单一致，但对试用期时长分岗位规定及工资计算、五险一金等内容未涉及。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "检索文本直接给出了普通岗位试用期3个月、中高级管理岗/技术骨干试用期6个月，与关键数值清单中的3个和6个逐一对应，对回答试用期时长部分有帮助。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "该文本直接回答了试用期工资计算方式，明确写出试用期工资不低于转正工资的80%、试用期内正常缴纳五险一金，与关键数值清单中的80%一致，但未涉及试用期时长（3个月/6个月）的信息，属于部分相关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅涉及试用期请假规则，未提及试用期时长（3个月/6个月）或试用期工资（不低于转正工资的80%）等标准答案要点，与问题实质无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅说明制度适用范围（含试用期员工），未提及试用期时长（3个月/6个月）或试用期工资比例（80%）等关键数值，对回答问题无实质帮助。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅说明适用范围包含试用期员工，未提及试用期时长（3个月/6个月）或试用期工资比例（80%）等关键数值，对回答问题无实质帮助。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅说明办公用品管理办法的适用范围，未提及试用期时长、工资计算、劳动合同或五险一金，与问题及标准答案要点（3个月、6个月、80%）完全无关。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅为章标题“第三章 试用期管理”，未包含任何关于试用期时长（3个月/6个月）、试用期工资（不低于80%）或五险一金的具体内容，对回答该问题没有实质帮助。"
+            }
+          ],
+          "reason": "3/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.6,
+        "context_precision_weighted_top5": 0.8029,
+        "context_precision": 0.6,
+        "context_precision_weighted": 0.8029,
+        "ndcg_top8": 0.9282,
+        "ndcg_top5": 0.9282,
+        "ndcg": 0.9282
+      },
+      "time_s": 6.97
+    },
+    {
+      "id": "adm_q019",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "新员工入职当年可以享受年假吗？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "b1a060882af611d4",
+          "c35f3330f14430e8",
+          "b1a060882af611d4",
+          "c35f3330f14430e8",
+          "c35f3330f14430e8"
+        ],
+        "time_s": 7.34
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "新员工入职当年不享有年假",
+              "gold_rank": 1,
+              "chunk_id": "chunk-6896bb8d7c483469dc432a4c9e58f4f9",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "自入职满一年后的次月起享有年假",
+              "gold_rank": 1,
+              "chunk_id": "chunk-6896bb8d7c483469dc432a4c9e58f4f9",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "新员工入职当年不享有年假",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“4.3 年假：新员工入职当年不享有年假；自入职满一年后的次月起按《员工考勤管理制度》享有年假。”，与事实陈述完全一致。"
+            },
+            {
+              "fact": "自入职满一年后的次月起享有年假",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：\"年假：新员工入职当年不享有年假；自入职满一年后的次月起按《员工考勤管理制度》享有年假。\"上下文[2]也表述：\"自入职满一年后的次月起享有\"，与事实陈述完全一致。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "新员工入职当年不享有年假",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“4.3 年假：新员工入职当年不享有年假；自入职满一年后的次月起按《员工考勤管理制度》享有年假。”，与事实陈述完全一致。"
+            },
+            {
+              "fact": "自入职满一年后的次月起享有年假",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：\"年假：新员工入职当年不享有年假；自入职满一年后的次月起按《员工考勤管理制度》享有年假。\"上下文[2]也表述：\"自入职满一年后的次月起享有\"，与事实陈述完全一致。"
+            }
+          ],
+          "hit_facts_top5": 2
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.375,
+        "context_precision_weighted_top8": 0.6746,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 3,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本4.3直接包含标准答案的两个要点：新员工入职当年不享有年假，以及自入职满一年后的次月起按《员工考勤管理制度》享有年假，与关键数值完全一致。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本提到“自入职满一年后的次月起享有”年假，与标准答案要点2的表述一致；但未直接明确“入职当年不享有年假”这一要点，故相关度不是最高。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "该文本Q3明确列出'入职后多久可以请年假？——入职满一年后的次月起'，直接对应标准答案中'入职满一年后的次月起享有年假'的要点。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本讨论的是年假顺延至次年6月30日及离职折算工资，未涉及新员工入职当年是否享有年假或入职满一年后按制度享有年假的内容，对回答该问题没有帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅列出累计工作年限对应的年假天数表，未涉及新员工入职当年是否享有年假或满一年后次月起享有年假的内容，对回答该问题没有帮助。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅为《新员工入职办理指南》的版本、发布部门、生效日期、修订日期和文件编号等元信息，未包含任何关于年假享受条件或入职满一年后次月起享有年假的内容，对回答问题无帮助。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅涉及试用期请假及病假/事假累计天数与延长试用期的条件，完全未提及新员工入职当年是否享有年假或满一年后享有年假的规定，与问题及标准答案要点无关。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅说明新员工办公用品的领用流程和物品清单，未提及年假制度或入职满一年等任何与年假相关的信息，与问题及标准答案要点（新员工入职当年不享有年假、入职满一年后次月起按考勤制度享有年假）完全无关。"
+            }
+          ],
+          "reason": "3/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.6,
+        "context_precision_weighted_top5": 0.8029,
+        "context_precision": 0.6,
+        "context_precision_weighted": 0.8029,
+        "ndcg_top8": 0.9869,
+        "ndcg_top5": 0.9869,
+        "ndcg": 0.9869
+      },
+      "time_s": 7.34
+    },
+    {
+      "id": "adm_q020",
+      "category": "fact_cross_doc",
+      "difficulty": "medium",
+      "question": "新员工入职次日的培训在哪里举行？该会议室有什么特点、预约有什么要求？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "b1a060882af611d4",
+          "6be34e3b029a2936",
+          "6be34e3b029a2936",
+          "6be34e3b029a2936",
+          "6be34e3b029a2936"
+        ],
+        "time_s": 7.83
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 4,
+          "found_facts": 4,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 5.0,
+          "avg_rank": 4.5,
+          "max_rank": 7,
+          "top_k_recall": {
+            "1": 0.25,
+            "3": 0.5,
+            "5": 0.5,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "入职次日9:30在3F大会议室培训",
+              "gold_rank": 1,
+              "chunk_id": "chunk-e6bdfa7e57b42cd236614233916ad173",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "3F大会议室容量40人",
+              "gold_rank": 7,
+              "chunk_id": "chunk-92904e64ce361a82165bac43f4298cc4",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "适用全员大会/入职培训/季度总结",
+              "gold_rank": 7,
+              "chunk_id": "chunk-92904e64ce361a82165bac43f4298cc4",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "大会议室预约须行政经理审批",
+              "gold_rank": 3,
+              "chunk_id": "chunk-5fe064f280329c584fd53b7b34519eac",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "入职次日9:30在3F大会议室培训",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确记载：“| 6 | 入职培训 | 人力资源部 | 入职次日 9:30 在 3F 大会议室参加新员工培训 |”，与事实陈述“入职次日9:30在3F大会议室培训”完全一致。"
+            },
+            {
+              "fact": "3F大会议室容量40人",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[7]的会议室清单表格中明确列出“| 大会议室 | 3F | 40人 | 投影、白板、视频会议、音响 | 全员大会、入职培训、季度总结 |”，即大会议室位于3F、容量40人，与事实陈述一致。"
+            },
+            {
+              "fact": "适用全员大会/入职培训/季度总结",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[7]会议室清单中，大会议室对应\"适用场景\"一栏原文明确写有\"全员大会、入职培训、季度总结\"，与事实陈述完全一致。"
+            },
+            {
+              "fact": "大会议室预约须行政经理审批",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[3]中明确表述：\"大会议室、VIP 接待室：须行政经理审批。\"与事实陈述一致。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "入职次日9:30在3F大会议室培训",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确记载：“| 6 | 入职培训 | 人力资源部 | 入职次日 9:30 在 3F 大会议室参加新员工培训 |”，与事实陈述“入职次日9:30在3F大会议室培训”完全一致。"
+            },
+            {
+              "fact": "3F大会议室容量40人",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[7]的会议室清单表格中明确列出“| 大会议室 | 3F | 40人 | 投影、白板、视频会议、音响 | 全员大会、入职培训、季度总结 |”，即大会议室位于3F、容量40人，与事实陈述一致。"
+            },
+            {
+              "fact": "适用全员大会/入职培训/季度总结",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[7]会议室清单中，大会议室对应\"适用场景\"一栏原文明确写有\"全员大会、入职培训、季度总结\"，与事实陈述完全一致。"
+            },
+            {
+              "fact": "大会议室预约须行政经理审批",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[3]中明确表述：\"大会议室、VIP 接待室：须行政经理审批。\"与事实陈述一致。"
+            }
+          ],
+          "hit_facts_top5": 4
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.5,
+        "context_precision_weighted_top8": 0.6351,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 4,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本明确提到“入职次日 9:30 在 3F 大会议室参加新员工培训”，与关键数值清单中的9、30、3逐一核对一致，能回答培训地点，但未涉及3F大会议室的特点和预约要求，因此相关但不完整。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.4,
+              "reason": "文本提到会议室预约须通过OA系统办理，与标准答案中预约要求这一要点部分相关，但未涉及3F大会议室特点、容量40人、9:30培训等关键信息。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本明确提到大会议室须行政经理审批，与标准答案要点3的预约要求一致；但未涉及培训地点及会议室特点（如容量40人、9:30等），仅覆盖部分问题信息。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.5,
+              "reason": "该文本标题为‘公司会议室使用预约规范’，属于会议室预约制度文件，与问题中‘该会议室预约有什么要求’部分直接相关，可能包含审批要求等信息；但文本仅为文件头部信息（版本、部门、日期、编号），未给出具体预约规则内容，故只能提供有限参考价值，相关度中等。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅说明制定会议室预约规范的目的，未提及3F大会议室的位置、培训时间9:30、容量40人、设施或行政经理审批要求，对回答无实质帮助。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本内容为新人入职领用办公用品的流程，涉及中性笔、笔记本等物品申领，完全未提及培训地点（3F大会议室，对应关键数值3）、会议室特点（容量40人，对应关键数值40人）或预约要求（行政经理审批，对应关键数值5），与问题及标准答案要点无任何关联。"
+            },
+            {
+              "rank": 7,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本提供了大会议室位于3F、容量40人及设备与适用场景（含入职培训）的信息，与标准答案第2点及关键数值3、40人一致，但未提及9:30时间、A6入职指南、行政经理审批等要求，故为部分相关。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本讲的是新员工入职设备申请与领用流程，未提及培训地点、3F大会议室特点或预约审批要求，与问题及标准答案要点（如3F大会议室、容量40人、行政经理审批）完全无关。"
+            }
+          ],
+          "reason": "4/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.6,
+        "context_precision_weighted_top5": 0.6934,
+        "context_precision": 0.6,
+        "context_precision_weighted": 0.6934,
+        "ndcg_top8": 0.9147,
+        "ndcg_top5": 0.8039,
+        "ndcg": 0.8039
+      },
+      "time_s": 7.83
+    },
+    {
+      "id": "adm_q021",
+      "category": "fact_cross_doc",
+      "difficulty": "medium",
+      "question": "员工出差期间要打卡吗？考勤怎么算？差旅费用按什么制度报销？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "c35f3330f14430e8",
+          "ab3a1bb72b4bc3c6",
+          "7878fe49cd0ee82b",
+          "06c4ec79e1a12dc1",
+          "06c4ec79e1a12dc1"
+        ],
+        "time_s": 15.34
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 3,
+          "found_facts": 3,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "出差期间免打卡",
+              "gold_rank": 1,
+              "chunk_id": "chunk-98821251292b25ba2ccd9ea765e061b1",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "出差考勤按出差单执行",
+              "gold_rank": 1,
+              "chunk_id": "chunk-98821251292b25ba2ccd9ea765e061b1",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "差旅费用按《员工差旅报销管理制度》报销",
+              "gold_rank": 1,
+              "chunk_id": "chunk-98821251292b25ba2ccd9ea765e061b1",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 3,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "出差期间免打卡",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“出差期间免打卡，考勤按出差单执行”，与事实陈述“出差期间免打卡”完全一致。"
+            },
+            {
+              "fact": "出差考勤按出差单执行",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：\"出差期间免打卡，考勤按出差单执行；相关费用按《员工差旅报销管理制度》报销。\""
+            },
+            {
+              "fact": "差旅费用按《员工差旅报销管理制度》报销",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：“相关费用按《员工差旅报销管理制度》报销。”;上下文[3]表述：“差旅途中设备相关费用报销，按《员工差旅报销管理制度》执行。”"
+            }
+          ],
+          "reason": "3/3 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "出差期间免打卡",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“出差期间免打卡，考勤按出差单执行”，与事实陈述“出差期间免打卡”完全一致。"
+            },
+            {
+              "fact": "出差考勤按出差单执行",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：\"出差期间免打卡，考勤按出差单执行；相关费用按《员工差旅报销管理制度》报销。\""
+            },
+            {
+              "fact": "差旅费用按《员工差旅报销管理制度》报销",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：“相关费用按《员工差旅报销管理制度》报销。”;上下文[3]表述：“差旅途中设备相关费用报销，按《员工差旅报销管理制度》执行。”"
+            }
+          ],
+          "hit_facts_top5": 3
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.625,
+        "context_precision_weighted_top8": 0.7394,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 5,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本明确说明出差期间免打卡、考勤按出差单执行、费用按《员工差旅报销管理制度》报销，与标准答案要点完全吻合，且编号3.4与关键数值清单中的3.4一致。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "该文本位于A4考勤制度§3.4，并明确提及出差费用按《员工差旅报销管理制度》报销，覆盖标准答案第2点，与关键数值清单中的“3.4”和“2”一致，但对免打卡和考勤计算未涉及，仅部分帮助回答。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本为3.3出差携带设备的规定，未涉及问题所问的出差打卡考勤（对应A4考勤制度§3.4）及差旅费用报销制度；虽末句提及《员工差旅报销管理制度》，但仅是设备费用报销的附带引用，对回答考勤与报销问题无实质帮助，且未包含关键数值4、3.4、2。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅说明差旅制度的目的，属于背景性内容，未涉及出差打卡/考勤计算（标准答案要点1，对应A4考勤制度§3.4）或报销制度名称（要点2），对回答问题无实质帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "该文本涉及借支与冲抵等内容，与差旅报销相关，属报销制度执行细节，但未直接说明出差免打卡、考勤按出差单执行及报销制度名称，仅提供部分差旅费用管理背景，且未涉及关键数值 4、3.4、2。"
+            },
+            {
+              "rank": 6,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "该文本属于差旅制度的适用范围条款，明确了因公务出差发生的交通、住宿、餐饮等费用报销管理，与问题中差旅费用报销部分相关；但未涉及出差打卡和考勤计算，也未出现关键数值4、3.4、2，故仅部分相关。"
+            },
+            {
+              "rank": 7,
+              "relevant": true,
+              "score": 0.5,
+              "reason": "该文本属于差旅制度中与出差报销相关的条款（差旅预订及特殊报销批准），能为回答差旅费用报销制度提供背景佐证，但未涉及打卡或考勤计算，也未出现关键数值4、3.4、2对应的A4考勤制度§3.4或《员工差旅报销管理制度》主体，因此仅部分相关。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.3,
+              "reason": "该文本界定了出差（超过4小时或需住宿），与问题中的出差认定/考勤场景有关联背景，但未提及免打卡、考勤单执行或差旅报销制度等核心要点，也未出现3.4或2等关键数值，故仅提供有限辅助。"
+            }
+          ],
+          "reason": "5/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.6,
+        "context_precision_weighted_top5": 0.7445,
+        "context_precision": 0.6,
+        "context_precision_weighted": 0.7445,
+        "ndcg_top8": 0.9464,
+        "ndcg_top5": 0.7997,
+        "ndcg": 0.7997
+      },
+      "time_s": 15.34
+    },
+    {
+      "id": "adm_q022",
+      "category": "proper_noun",
+      "difficulty": "easy",
+      "question": "什么是弹性工作制？有什么要求？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "c35f3330f14430e8",
+          "c35f3330f14430e8",
+          "c35f3330f14430e8",
+          "c35f3330f14430e8",
+          "ab3a1bb72b4bc3c6"
+        ],
+        "time_s": 10.71
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 4,
+          "found_facts": 4,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "弹性工作制适用于研发/设计/产品岗",
+              "gold_rank": 1,
+              "chunk_id": "chunk-ebc4f37981ee18f94067cb58131e644e",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "核心在岗时段10:00-16:00",
+              "gold_rank": 1,
+              "chunk_id": "chunk-ebc4f37981ee18f94067cb58131e644e",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "8:00-10:00间选择上班时间",
+              "gold_rank": 1,
+              "chunk_id": "chunk-ebc4f37981ee18f94067cb58131e644e",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "每日在岗须满8小时",
+              "gold_rank": 1,
+              "chunk_id": "chunk-ebc4f37981ee18f94067cb58131e644e",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "弹性工作制适用于研发/设计/产品岗",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：\"研发、设计、产品等岗位可实行弹性工作制\"，与事实陈述\"弹性工作制适用于研发/设计/产品岗\"完全对应。"
+            },
+            {
+              "fact": "核心在岗时段10:00-16:00",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确记载：“每日核心在岗时段为 10:00-16:00”，与事实陈述完全一致。"
+            },
+            {
+              "fact": "8:00-10:00间选择上班时间",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“员工可在 8:00-10:00 之间选择上班时间”，与事实陈述“8:00-10:00间选择上班时间”一致。"
+            },
+            {
+              "fact": "每日在岗须满8小时",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[1]中明确说明：「员工可在 8:00-10:00 之间选择上班时间，下班时间相应顺延，须保证每日在岗时长满 8 小时」，与事实陈述「每日在岗须满8小时」一致。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "弹性工作制适用于研发/设计/产品岗",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：\"研发、设计、产品等岗位可实行弹性工作制\"，与事实陈述\"弹性工作制适用于研发/设计/产品岗\"完全对应。"
+            },
+            {
+              "fact": "核心在岗时段10:00-16:00",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确记载：“每日核心在岗时段为 10:00-16:00”，与事实陈述完全一致。"
+            },
+            {
+              "fact": "8:00-10:00间选择上班时间",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“员工可在 8:00-10:00 之间选择上班时间”，与事实陈述“8:00-10:00间选择上班时间”一致。"
+            },
+            {
+              "fact": "每日在岗须满8小时",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[1]中明确说明：「员工可在 8:00-10:00 之间选择上班时间，下班时间相应顺延，须保证每日在岗时长满 8 小时」，与事实陈述「每日在岗须满8小时」一致。"
+            }
+          ],
+          "hit_facts_top5": 4
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.125,
+        "context_precision_weighted_top8": 0.3679,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "该文本完整覆盖弹性工作制的定义与要求，核心在岗时段10:00-16:00、上班时间8:00-10:00、每日在岗满8小时均与关键数值10、00、16、8逐一核对一致。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅为文档修订历史记录，仅提到“增加弹性工作制”但未说明其定义、核心在岗时段（10:00-16:00）、上班选择区间（8:00-10:00）或每日在岗时长（8小时）等任何具体要求，对回答问题无实质帮助。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本描述的是标准工时制（9:00-18:00，午休12:00-13:30），未提及弹性工作制及其核心时段10:00-16:00、8小时在岗时长等要求，与问题无关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本介绍综合工时制和不定时工作制，与弹性工作制的核心在岗时段10:00-16:00及8:00-10:00弹性上班、满8小时等要求完全无关，未包含回答所需信息。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是关于办公用品分类与领用方式的表格，未提及弹性工作制、核心在岗时段10:00-16:00、上班时间8:00-10:00或在岗时长满8小时等任何关键数值，与问题完全无关。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本讲的是办公用品领用管理原则（按需领用、定额管理、统一采购、线上化），未涉及弹性工作制、核心在岗时段10:00-16:00或8:00-10:00上班、每日在岗满8小时等任何内容，与问题无关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本讲的是公司设备使用规范（如软件安装审批、密码每90天更换等），完全未提及弹性工作制、核心在岗时段10:00-16:00或8:00-10:00弹性上班等关键数值，与问题无关。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅说明制度的适用范围（全体正式员工、试用期员工及长期外协人员），未涉及弹性工作制的定义、岗位类型、核心在岗时段10:00-16:00或8小时在岗时长要求，与问题及标准答案要点完全无关。"
+            }
+          ],
+          "reason": "1/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.2,
+        "context_precision_weighted_top5": 0.438,
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "ndcg_top8": 1.0,
+        "ndcg_top5": 1.0,
+        "ndcg": 1.0
+      },
+      "time_s": 10.72
+    },
+    {
+      "id": "adm_q023",
+      "category": "proper_noun",
+      "difficulty": "easy",
+      "question": "什么是「爽约」？对应的处罚是什么？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "6be34e3b029a2936",
+          "6be34e3b029a2936",
+          "06c4ec79e1a12dc1",
+          "ab3a1bb72b4bc3c6",
+          "ab3a1bb72b4bc3c6"
+        ],
+        "time_s": 7.71
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 3,
+          "found_facts": 3,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "爽约=预约后未按约使用且未提前取消",
+              "gold_rank": 1,
+              "chunk_id": "chunk-d97e973488279d774386f2354dc03a22",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "当月累计爽约2次暂停30天",
+              "gold_rank": 1,
+              "chunk_id": "chunk-d97e973488279d774386f2354dc03a22",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "第3次起每次顺延30天",
+              "gold_rank": 1,
+              "chunk_id": "chunk-d97e973488279d774386f2354dc03a22",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 3,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "爽约=预约后未按约使用且未提前取消",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确给出「爽约定义：预约后未按约使用且未提前取消。」，与事实陈述『爽约=预约后未按约使用且未提前取消』逐字一致。"
+            },
+            {
+              "fact": "当月累计爽约2次暂停30天",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确记载：『当月累计爽约2次，OA 预约功能暂停30天』，与事实陈述『当月累计爽约2次暂停30天』直接对应。"
+            },
+            {
+              "fact": "第3次起每次顺延30天",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确写道：“爽约处理：当月累计爽约2次，OA 预约功能暂停30天；第 3 次起每次顺延 30 天。”其中“第 3 次起每次顺延 30 天”与事实陈述完全对应。"
+            }
+          ],
+          "reason": "3/3 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "爽约=预约后未按约使用且未提前取消",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确给出「爽约定义：预约后未按约使用且未提前取消。」，与事实陈述『爽约=预约后未按约使用且未提前取消』逐字一致。"
+            },
+            {
+              "fact": "当月累计爽约2次暂停30天",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确记载：『当月累计爽约2次，OA 预约功能暂停30天』，与事实陈述『当月累计爽约2次暂停30天』直接对应。"
+            },
+            {
+              "fact": "第3次起每次顺延30天",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确写道：“爽约处理：当月累计爽约2次，OA 预约功能暂停30天；第 3 次起每次顺延 30 天。”其中“第 3 次起每次顺延 30 天”与事实陈述完全对应。"
+            }
+          ],
+          "hit_facts_top5": 3
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.125,
+        "context_precision_weighted_top8": 0.3679,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本完整包含爽约定义（预约后未按约使用且未提前取消）及对应处罚，且数值与【关键数值】清单逐一核对一致：2次、30天、第3次起顺延30天。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅为修订历史表，仅提及“增加爽约处罚规则”这一版本记录，未包含爽约定义及具体处罚（如2次、30天、3次顺延30天）等信息，无法回答问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本内容为交通报销标准，与爽约定义及处罚（如爽约2次、暂停30天、第3次起顺延30天等关键数值）完全无关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本讲的是违规等级与处理措施，涉及金额和领用资格，未提及爽约定义或OA预约暂停等，且文本中的数字（如200元、6个月）与【关键数值】清单（2次、30天、3次）不符。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本列举的是虚报冒领、囤积倒卖等违规情形，未提及「爽约」定义或「2次、30天、3次」等处罚数值，与问题完全无关。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本讲的是违规等级与处理措施（如金额<500元、累计两次或金额500-2000元等），与『爽约』定义及处罚（累计爽约2次暂停OA预约30天、第3次起顺延30天）无关，未涉及关键数值2次、30天、3次。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅涉及迟到、旷工的处罚规则，未提及爽约的定义，也未出现关键数值2次、30天、3次，与问题及标准答案完全无关。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本列举的是虚报费用、票据造假等违规情形，未提及爽约定义或 “2次”“30天”“3次” 等关键数值，与问题完全无关。"
+            }
+          ],
+          "reason": "1/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.2,
+        "context_precision_weighted_top5": 0.438,
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "ndcg_top8": 1.0,
+        "ndcg_top5": 1.0,
+        "ndcg": 1.0
+      },
+      "time_s": 7.71
+    },
+    {
+      "id": "adm_q024",
+      "category": "comparison",
+      "difficulty": "medium",
+      "question": "标准工时制和弹性工作制有什么核心区别？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "c35f3330f14430e8",
+          "c35f3330f14430e8",
+          "c35f3330f14430e8",
+          "c35f3330f14430e8",
+          "c35f3330f14430e8"
+        ],
+        "time_s": 19.97
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 3,
+          "found_facts": 2,
+          "not_found_facts": 1,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 0.6667,
+            "3": 0.6667,
+            "5": 0.6667,
+            "8": 0.6667
+          },
+          "per_fact": [
+            {
+              "fact": "适用岗位不同：大部分 vs 研发/设计/产品",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "固定9:00-18:00 vs 8:00-10:00可选上班时间",
+              "gold_rank": 1,
+              "chunk_id": "chunk-ebc4f37981ee18f94067cb58131e644e",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "弹性制核心在岗10:00-16:00且日满8小时",
+              "gold_rank": 1,
+              "chunk_id": "chunk-ebc4f37981ee18f94067cb58131e644e",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 3,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "适用岗位不同：大部分 vs 研发/设计/产品",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]明确表述“大部分岗位适用标准工时制”，上下文[1]明确表述“研发、设计、产品等岗位可实行弹性工作制”，两处共同构成“大部分 vs 研发/设计/产品”的岗位适用范围对比依据。"
+            },
+            {
+              "fact": "固定9:00-18:00 vs 8:00-10:00可选上班时间",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]明确表述标准工时制工作时间为'9:00-18:00'，上下文[1]明确表述弹性工作制下'员工可在 8:00-10:00 之间选择上班时间'，二者共同支持该事实陈述。"
+            },
+            {
+              "fact": "弹性制核心在岗10:00-16:00且日满8小时",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：'研发、设计、产品等岗位可实行弹性工作制：每日核心在岗时段为 10:00-16:00；员工可在 8:00-10:00 之间选择上班时间，下班时间相应顺延，须保证每日在岗时长满 8 小时。'"
+            }
+          ],
+          "reason": "3/3 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "适用岗位不同：大部分 vs 研发/设计/产品",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]明确表述“大部分岗位适用标准工时制”，上下文[1]明确表述“研发、设计、产品等岗位可实行弹性工作制”，两处共同构成“大部分 vs 研发/设计/产品”的岗位适用范围对比依据。"
+            },
+            {
+              "fact": "固定9:00-18:00 vs 8:00-10:00可选上班时间",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]明确表述标准工时制工作时间为'9:00-18:00'，上下文[1]明确表述弹性工作制下'员工可在 8:00-10:00 之间选择上班时间'，二者共同支持该事实陈述。"
+            },
+            {
+              "fact": "弹性制核心在岗10:00-16:00且日满8小时",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：'研发、设计、产品等岗位可实行弹性工作制：每日核心在岗时段为 10:00-16:00；员工可在 8:00-10:00 之间选择上班时间，下班时间相应顺延，须保证每日在岗时长满 8 小时。'"
+            }
+          ],
+          "hit_facts_top5": 3
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.25,
+        "context_precision_weighted_top8": 0.5519,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 2,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "文本直接描述弹性工作制的适用岗位（研发、设计、产品等）及核心在岗时段10:00-16:00、可选上班时间8:00-10:00、每日在岗满8小时等细节，与标准答案要点中弹性工作制部分的关键数值完全一致，能为对比核心区别提供必要信息。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本描述了标准工时制的适用岗位（大部分岗位适用）和工作时间（9:00-18:00、午休12:00-13:30），这些信息与标准答案要点中标准工时制的核心区别（适用岗位、工作时间）直接对应，对回答有帮助；但未涉及弹性工作制内容，故相关度未满分。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本介绍综合工时制（月平均工时不超过174小时）和不定时工作制，未提及标准工时制的固定9:00-18:00、弹性工作制的8:00-10:00选择区间及核心在岗时段10:00-16:00等关键数值，与问题核心区别无关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅为制度修订历史表，提到“弹性工作制”和数字“8”“10”等，但未涉及标准工时制或弹性工作制的适用岗位、工作时间或核心在岗时段等核心区别内容，对回答无帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅为'第二章 工时制度'标题，未包含标准答案中任何关键数值（如1、2、9、00、18、12、13、30、8、10、3、16），也未提供适用岗位、工作时间或核心要求等实质信息，对回答问题无帮助。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅涉及迟到早退旷工扣款及日工资计算（21.75），未提及标准工时制与弹性工作制在适用岗位、工作时间或核心在岗时段上的任何区别，与问题无关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本内容为交通费标准，涉及飞机、高铁、火车等差旅报销规定，与标准工时制和弹性工作制的核心区别（如9:00-18:00固定工时、8:00-10:00弹性到岗、10:00-16:00核心在岗时段等）完全无关，未包含任何回答所需的信息。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅涉及加班待遇（1.5倍、2倍、3倍工资及调休方式），未提及标准工时制与弹性工作制在适用岗位、工作时间或核心在岗时段等方面的任何区别，与问题所需信息无关。"
+            }
+          ],
+          "reason": "2/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.4,
+        "context_precision_weighted_top5": 0.6569,
+        "context_precision": 0.4,
+        "context_precision_weighted": 0.6569,
+        "ndcg_top8": 1.0,
+        "ndcg_top5": 1.0,
+        "ndcg": 1.0
+      },
+      "time_s": 19.97
+    },
+    {
+      "id": "adm_q025",
+      "category": "comparison",
+      "difficulty": "easy",
+      "question": "工作日和节假日/非工作时间使用会议室，审批要求有什么不同？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "6be34e3b029a2936",
+          "6be34e3b029a2936",
+          "6be34e3b029a2936",
+          "6be34e3b029a2936",
+          "6be34e3b029a2936"
+        ],
+        "time_s": 19.77
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 3,
+          "found_facts": 3,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "工作日普通会议室OA自动通过",
+              "gold_rank": 1,
+              "chunk_id": "chunk-5fe064f280329c584fd53b7b34519eac",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "工作日大会议室/VIP接待室须行政经理审批",
+              "gold_rank": 1,
+              "chunk_id": "chunk-5fe064f280329c584fd53b7b34519eac",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "节假日/非工作时间任何会议室均须行政经理审批",
+              "gold_rank": 1,
+              "chunk_id": "chunk-5fe064f280329c584fd53b7b34519eac",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 3,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "工作日普通会议室OA自动通过",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确记载：普通会议室（中型会议室 A/B/C、小型会议室、电话间）：工作日 OA 系统自动通过。这与事实陈述‘工作日普通会议室OA自动通过’完全一致。"
+            },
+            {
+              "fact": "工作日大会议室/VIP接待室须行政经理审批",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确写道：“大会议室、VIP 接待室：须行政经理审批。”，与事实陈述“工作日大会议室/VIP接待室须行政经理审批”一致。"
+            },
+            {
+              "fact": "节假日/非工作时间任何会议室均须行政经理审批",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[1]明确表述：「节假日 / 非工作时间使用：任何会议室均须行政经理审批。」与事实陈述完全一致。"
+            }
+          ],
+          "reason": "3/3 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "工作日普通会议室OA自动通过",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确记载：普通会议室（中型会议室 A/B/C、小型会议室、电话间）：工作日 OA 系统自动通过。这与事实陈述‘工作日普通会议室OA自动通过’完全一致。"
+            },
+            {
+              "fact": "工作日大会议室/VIP接待室须行政经理审批",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确写道：“大会议室、VIP 接待室：须行政经理审批。”，与事实陈述“工作日大会议室/VIP接待室须行政经理审批”一致。"
+            },
+            {
+              "fact": "节假日/非工作时间任何会议室均须行政经理审批",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[1]明确表述：「节假日 / 非工作时间使用：任何会议室均须行政经理审批。」与事实陈述完全一致。"
+            }
+          ],
+          "hit_facts_top5": 3
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.125,
+        "context_precision_weighted_top8": 0.3679,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "该文本逐项对应标准答案要点：工作日普通会议室OA自动通过、大会议室/VIP接待室须行政经理审批、节假日/非工作时间任何会议室均须行政经理审批，与关键数值核对一致，完全包含回答问题所需信息。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本讲的是会议室门禁刷工牌解锁及非工作时间门禁关闭，未涉及工作日与节假日/非工作时间使用会议室所需的审批要求（如OA自动通过或行政经理审批），与问题实质内容无关。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本讲的是访客陪同及来访登记，未涉及工作日与节假日/非工作时间使用会议室在OA自动通过或行政经理审批上的任何差异，对回答该问题没有帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本讲的是会议室使用冲突的协调顺序和征用通知，未涉及工作日与节假日/非工作时间的审批要求差异，与问题无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本讲的是会议室人数容量及超出容量30%的违规处理，未涉及工作日与节假日/非工作时间的审批要求差异，与标准答案要点（OA自动通过、行政经理审批等）完全无关。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本是请假时长的审批权限表，内容涉及请假流程，与会议室审批要求（工作日自动通过/行政经理审批、节假日均须行政经理审批）完全无关，未包含任何关于会议室审批的信息。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅涉及设备爱护、音量控制及会后整理等使用要求，未提及工作日与节假日/非工作时间会议室审批要求，也未出现任何审批流程或相关数值，与问题无关。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅为会议室预约规范的文件头信息（版本、部门、日期、编号），未包含工作日与节假日/非工作时间审批要求差异的任何实质内容，对回答问题没有帮助。"
+            }
+          ],
+          "reason": "1/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.2,
+        "context_precision_weighted_top5": 0.438,
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "ndcg_top8": 0.984,
+        "ndcg_top5": 0.9568,
+        "ndcg": 0.9568
+      },
+      "time_s": 19.77
+    },
+    {
+      "id": "adm_q026",
+      "category": "table_numeric",
+      "difficulty": "easy",
+      "question": "累计工龄满5年不满10年的员工年假几天？满10年及以上呢？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "c35f3330f14430e8",
+          "c35f3330f14430e8",
+          "c35f3330f14430e8",
+          "c35f3330f14430e8",
+          "c35f3330f14430e8"
+        ],
+        "time_s": 17.24
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 2.0,
+          "avg_rank": 2.0,
+          "max_rank": 3,
+          "top_k_recall": {
+            "1": 0.5,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "满5年不满10年=10天",
+              "gold_rank": 1,
+              "chunk_id": "chunk-13f4e78cb1ceeaac7e48ae06e719c462",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "满10年及以上=15天",
+              "gold_rank": 3,
+              "chunk_id": "chunk-596a750c531ae9fab466beb67a6c8069",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "满5年不满10年=10天",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[1]的表格中明确列出「满5年不满10年 | 10天」，与事实陈述「满5年不满10年=10天」完全一致；上下文[2]的修订历史中也提及「年假梯度调整(满5年不满10年由8天增至10天)」，进一步印证该事实。"
+            },
+            {
+              "fact": "满10年及以上=15天",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[3]中包含表格原文「满 10 年及以上 | 15天」，与事实陈述“满10年及以上=15天”完全一致。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "满5年不满10年=10天",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[1]的表格中明确列出「满5年不满10年 | 10天」，与事实陈述「满5年不满10年=10天」完全一致；上下文[2]的修订历史中也提及「年假梯度调整(满5年不满10年由8天增至10天)」，进一步印证该事实。"
+            },
+            {
+              "fact": "满10年及以上=15天",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[3]中包含表格原文「满 10 年及以上 | 15天」，与事实陈述“满10年及以上=15天”完全一致。"
+            }
+          ],
+          "hit_facts_top5": 2
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.375,
+        "context_precision_weighted_top8": 0.6746,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 3,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "该文本明确列出“满5年不满10年 | 10天”，与关键数值清单中的5年、10年、10天一致，能回答第一个问题；但未包含“满10年及以上”对应的15天，无法回答第二个问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本中提及'满5年不满10年由8天增至10天'，经与关键数值清单核对，包含5年、10年、10天，可为回答该梯度年假天数提供佐证，但未涉及满10年及以上=15天的信息。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本包含满10年及以上=15天（与关键数值清单中的10年、15天一致），可支撑回答的第二问，但缺少满5年不满10年=10天的信息，仅部分相关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅提及年假按累计工作年限划分及享有时间，未出现清单中的关键数值5年、10年、10天、15天，无法回答具体天数。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅涉及年假顺延、逾期作废及离职折算工资，未提及工龄满5年不满10年对应10天、满10年及以上对应15天的规定，与问题及标准答案要点中的关键数值均无关。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅笼统提及年假按《员工考勤管理制度》执行，未涉及任何与问题相关的关键数值（5年、10年、10天、15天）。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅涉及试用期请假规则，未提及年假天数，也未出现关键数值中的5年、10年、10天、15天，与问题无关。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅为考勤制度文件的标题、版本、部门和日期等元信息，未提及满5年不满10年对应10天或满10年及以上对应15天等任何年假规定，无法回答该问题。"
+            }
+          ],
+          "reason": "3/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.6,
+        "context_precision_weighted_top5": 0.8029,
+        "context_precision": 0.6,
+        "context_precision_weighted": 0.8029,
+        "ndcg_top8": 1.0,
+        "ndcg_top5": 1.0,
+        "ndcg": 1.0
+      },
+      "time_s": 17.24
+    },
+    {
+      "id": "adm_q027",
+      "category": "table_numeric",
+      "difficulty": "easy",
+      "question": "工作日加班、休息日加班、法定节假日加班的待遇分别是多少？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "c35f3330f14430e8",
+          "c35f3330f14430e8",
+          "c35f3330f14430e8",
+          "c35f3330f14430e8",
+          "c35f3330f14430e8"
+        ],
+        "time_s": 17.64
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 3,
+          "found_facts": 3,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "工作日加班=1.5倍，可调休",
+              "gold_rank": 1,
+              "chunk_id": "chunk-6b681c733b13702854a42105c9d6ba0e",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "休息日加班=2倍，优先调休",
+              "gold_rank": 1,
+              "chunk_id": "chunk-6b681c733b13702854a42105c9d6ba0e",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "法定节假日加班=3倍，不可调休",
+              "gold_rank": 1,
+              "chunk_id": "chunk-6b681c733b13702854a42105c9d6ba0e",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 3,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "工作日加班=1.5倍，可调休",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确列出表格：『| 工作日加班 | 1.5 倍加班工资 | 可调休 |』，直接对应‘工作日加班=1.5倍，可调休’。"
+            },
+            {
+              "fact": "休息日加班=2倍，优先调休",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]表格中明确记载：「休息日加班 | 2 倍加班工资 | 优先调休，调休不足部分支付现金」，直接支持事实陈述『休息日加班=2倍，优先调休』。"
+            },
+            {
+              "fact": "法定节假日加班=3倍，不可调休",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的加班待遇表中明确列出：'| 法定节假日加班 | 3 倍加班工资 | 不可调休 |'，与事实陈述'法定节假日加班=3倍，不可调休'完全一致。"
+            }
+          ],
+          "reason": "3/3 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "工作日加班=1.5倍，可调休",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确列出表格：『| 工作日加班 | 1.5 倍加班工资 | 可调休 |』，直接对应‘工作日加班=1.5倍，可调休’。"
+            },
+            {
+              "fact": "休息日加班=2倍，优先调休",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]表格中明确记载：「休息日加班 | 2 倍加班工资 | 优先调休，调休不足部分支付现金」，直接支持事实陈述『休息日加班=2倍，优先调休』。"
+            },
+            {
+              "fact": "法定节假日加班=3倍，不可调休",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的加班待遇表中明确列出：'| 法定节假日加班 | 3 倍加班工资 | 不可调休 |'，与事实陈述'法定节假日加班=3倍，不可调休'完全一致。"
+            }
+          ],
+          "hit_facts_top5": 3
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.125,
+        "context_precision_weighted_top8": 0.3679,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本逐项列出工作日加班1.5倍、休息日加班2倍、法定节假日加班3倍加班工资，并说明调休方式（可调休/优先调休/不可调休），与标准答案要点及关键数值1.5倍、2倍、3倍完全一致。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅规定加班认定和时长计入规则，未提及1.5倍、2倍、3倍加班工资待遇，对回答问题无帮助。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅为文档修订历史表格，列出了版本、日期、修订内容及修订人，未提及任何关于工作日加班、休息日加班或法定节假日加班待遇的信息，也未出现1.5倍、2倍、3倍等关键数值。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅说明综合工时制和不定时工作制的岗位及月平均工时174小时，未提及工作日、休息日、法定节假日加班的1.5倍、2倍、3倍待遇，与问题无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅介绍标准工时制的工作日与工作时间安排，未提及工作日加班1.5倍、休息日加班2倍或法定节假日加班3倍的任何加班待遇信息，与问题完全无关。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅规定每月加班时长上限不超过36小时，未涉及工作日、休息日、法定节假日加班的待遇标准，也未出现1.5倍、2倍、3倍等关键数值，与问题完全无关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅涉及迟到、早退、旷工的扣款标准及日工资计算方式，未提及工作日加班1.5倍、休息日加班2倍或法定节假日加班3倍等任何加班待遇信息。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅介绍弹性工作制的核心在岗时段和上下班安排，未提及工作日、休息日、法定节假日加班的任何待遇，也未出现1.5倍、2倍、3倍等关键数值，对回答问题无帮助。"
+            }
+          ],
+          "reason": "1/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.2,
+        "context_precision_weighted_top5": 0.438,
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "ndcg_top8": 1.0,
+        "ndcg_top5": 1.0,
+        "ndcg": 1.0
+      },
+      "time_s": 17.64
+    },
+    {
+      "id": "adm_q028",
+      "category": "table_numeric",
+      "difficulty": "easy",
+      "question": "3F的大会议室可以容纳多少人？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "6be34e3b029a2936",
+          "6be34e3b029a2936",
+          "6be34e3b029a2936",
+          "6be34e3b029a2936",
+          "6be34e3b029a2936"
+        ],
+        "time_s": 16.8
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "3F大会议室容量=40人",
+              "gold_rank": 1,
+              "chunk_id": "chunk-92904e64ce361a82165bac43f4298cc4",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "适用全员大会/入职培训/季度总结",
+              "gold_rank": 1,
+              "chunk_id": "chunk-92904e64ce361a82165bac43f4298cc4",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "3F大会议室容量=40人",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]会议室清单表格中明确列出：「| 大会议室 | 3F | 40人 | 投影、白板、视频会议、音响 | 全员大会、入职培训、季度总结 |」，即大会议室位于3F、容量为40人，与事实陈述「3F大会议室容量=40人」完全一致。"
+            },
+            {
+              "fact": "适用全员大会/入职培训/季度总结",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的会议室清单表格中，大会议室的\"适用场景\"列明确写有\"全员大会、入职培训、季度总结\"，与事实陈述完全一致。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "3F大会议室容量=40人",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]会议室清单表格中明确列出：「| 大会议室 | 3F | 40人 | 投影、白板、视频会议、音响 | 全员大会、入职培训、季度总结 |」，即大会议室位于3F、容量为40人，与事实陈述「3F大会议室容量=40人」完全一致。"
+            },
+            {
+              "fact": "适用全员大会/入职培训/季度总结",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的会议室清单表格中，大会议室的\"适用场景\"列明确写有\"全员大会、入职培训、季度总结\"，与事实陈述完全一致。"
+            }
+          ],
+          "hit_facts_top5": 2
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.25,
+        "context_precision_weighted_top8": 0.4293,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 2,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本的会议室清单中明确列出大会议室位于3F、容量为40人，与【关键数值】清单中的楼层3和容量40人逐项一致，完整回答了问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本列出的会议室为5F中型会议室C（16人）、5F小型会议室1/2/3（6人）、2F电话间A/B（2人），均不涉及3F大会议室，也未出现关键数值“3”或“40人”，无法回答3F大会议室可容纳多少人。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本呈现的是6F VIP接待室（容量8人）的信息，未涉及3F大会议室，也未出现关键数值3或40人，对回答3F大会议室可容纳多少人没有帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅为会议室使用预约规范的版本与发布信息，未提及3F大会议室，也未包含任何容量数字（关键数值应为3和40人），对回答问题无帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅说明会议室人数管理规则（超容量30%违规），未提及3F或40人等【关键数值】清单中的任何数字，无法回答3F大会议室可容纳多少人。"
+            },
+            {
+              "rank": 6,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本提到'3F大会议室'这一与问题中'3F的大会议室'直接对应的场所，但未提供任何关于可容纳人数（清单关键数值'40人'）的信息，仅涉及新员工培训地点，属于相关背景但不含问题所需核心数据。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅说明会议室预约渠道为OA系统，未提及3F大会议室的容量40人或其他相关信息，对回答问题无帮助，且未出现【关键数值】清单中的任何数字。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅说明会议室规范的制定目的，未提及3F大会议室的容量，也未出现关键数值清单中的40人，无法回答该问题。"
+            }
+          ],
+          "reason": "2/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.2,
+        "context_precision_weighted_top5": 0.438,
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "ndcg_top8": 0.8804,
+        "ndcg_top5": 0.7254,
+        "ndcg": 0.7254
+      },
+      "time_s": 16.8
+    },
+    {
+      "id": "adm_q029",
+      "category": "unanswerable",
+      "difficulty": "medium",
+      "question": "公司2026年的年度经营目标是多少？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "06c4ec79e1a12dc1",
+          "c35f3330f14430e8",
+          "ab3a1bb72b4bc3c6",
+          "6be34e3b029a2936",
+          "7878fe49cd0ee82b"
+        ],
+        "time_s": 18.6
+      },
+      "metrics": {
+        "context_recall": null,
+        "context_recall_top5": null,
+        "context_recall_top8": null,
+        "context_precision_top8": 0.0,
+        "context_precision_weighted_top8": 0.0,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 0,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅记录报销标准修订（如住宿标准上调10%），未提及公司2026年度经营目标，与问题无关。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是文档修订历史表格，未提及公司2026年度经营目标的任何数值或信息。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅为文档修订历史表，列出了版本号、日期和修订内容，完全没有提及公司2026年的年度经营目标，与问题无关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本是公司会议室使用预约规范，仅生效日期和修订日期涉及2026年，但未提及任何年度经营目标内容，与问题完全无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本为IT设备管理与领用规范的文件头信息，仅包含版本、部门、日期和文件编号，未提及公司2026年度经营目标的任何数据或背景，与问题完全无关。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本为《新员工入职办理指南》，内容仅涉及入职办理流程与文档版本、生效日期、文件编号等，未包含任何公司年度经营目标信息，与问题完全无关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本为办公用品领用管理办法的文件头信息，仅含生效日期2026年3月1日和修订日期2026年8月15日，未涉及任何公司年度经营目标的内容，对回答问题无帮助。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本为文档修订历史表格，仅记录版本、日期、修订内容和修订人，未提及任何年度经营目标或相关数字，与问题完全无关。"
+            }
+          ],
+          "reason": "0/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.0,
+        "context_precision_weighted_top5": 0.0,
+        "context_precision": 0.0,
+        "context_precision_weighted": 0.0,
+        "ndcg_top8": 0.0,
+        "ndcg_top5": 0.0,
+        "ndcg": 0.0
+      },
+      "time_s": 18.6
+    },
+    {
+      "id": "adm_q030",
+      "category": "unanswerable",
+      "difficulty": "medium",
+      "question": "公司总裁（CEO）叫什么名字？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "06c4ec79e1a12dc1",
+          "ab3a1bb72b4bc3c6",
+          "6be34e3b029a2936",
+          "7878fe49cd0ee82b",
+          "c35f3330f14430e8"
+        ],
+        "time_s": 18.75
+      },
+      "metrics": {
+        "context_recall": null,
+        "context_recall_top5": null,
+        "context_recall_top8": null,
+        "context_precision_top8": 0.0,
+        "context_precision_weighted_top8": 0.0,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 0,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本是制度修订历史表，列出了版本、日期、修订人和修订内容，完全没有提及公司总裁（CEO）的姓名或相关信息，对回答问题无帮助。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本为文档修订历史表格，仅列出版本、日期、修订内容及修订人，未出现任何人员担任总裁（CEO）的信息，无法帮助回答问题，因此与问题不相关。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅为制度文档的修订历史表格，列出了版本号、日期和修订人（钱晓雯），完全未提及公司总裁（CEO）的姓名，无法回答该问题。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是文档修订历史表，仅列出版本、日期、修订内容和修订人（如李四、周浩），未提及公司总裁（CEO）的任何姓名或相关信息，对回答问题无帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅包含文档修订历史（版本号、日期、修订内容及修订人唐玉婷），未提及公司总裁（CEO）姓名，对回答问题无帮助。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅列出IT部门人员及职责，未提及公司总裁（CEO）的姓名，对回答问题无帮助。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本内容为网络安全规定，未提及公司总裁（CEO）姓名，与问题完全无关。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本内容为入职时间安排，未提及公司总裁（CEO）姓名，与问题完全无关。"
+            }
+          ],
+          "reason": "0/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.0,
+        "context_precision_weighted_top5": 0.0,
+        "context_precision": 0.0,
+        "context_precision_weighted": 0.0,
+        "ndcg_top8": 0.0,
+        "ndcg_top5": 0.0,
+        "ndcg": 0.0
+      },
+      "time_s": 18.75
+    }
+  ]
+}

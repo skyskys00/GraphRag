@@ -1,0 +1,902 @@
+{
+  "testset_id": "testset_default_smoke",
+  "domain": "综合冒烟",
+  "version": "2026-09-27",
+  "timestamp": "2026-09-28 00:07:45",
+  "config": {
+    "mode": "retrieval",
+    "collection": "default",
+    "workspace": "default_ws",
+    "reranker": "standard"
+  },
+  "summary": {
+    "total_questions": 5,
+    "overall": {
+      "context_recall": 1.0,
+      "context_precision": 0.28,
+      "context_precision_weighted": 0.5256,
+      "context_recall_top5": 1.0,
+      "context_recall_top8": 1.0,
+      "context_precision_top5": 0.28,
+      "context_precision_top8": 0.2,
+      "context_precision_weighted_top5": 0.5256,
+      "context_precision_weighted_top8": 0.4538,
+      "gold_rank_avg": 1.2,
+      "gold_rank_median": 1.2,
+      "gold_rank_min": 1.2,
+      "gold_rank_max": 1.2,
+      "gold_rank_top1_recall": 0.7,
+      "gold_rank_top3_recall": 0.9,
+      "gold_rank_top5_recall": 0.9,
+      "gold_rank_top8_recall": 0.9,
+      "ndcg_top5": 0.9364,
+      "ndcg_top8": 0.9699,
+      "ndcg": 0.9364,
+      "faithfulness": 0.0,
+      "answer_relevance": 0.0,
+      "correctness": 0.0,
+      "citation_accuracy": 0.0,
+      "judge_failed_judgments": 0
+    },
+    "by_category": {
+      "fact_single": {
+        "count": 3,
+        "context_recall": 1.0,
+        "context_precision": 0.2667,
+        "context_recall_top5": 1.0,
+        "context_recall_top8": 1.0,
+        "context_precision_top5": 0.2667,
+        "context_precision_top8": 0.2083,
+        "gold_rank_avg": 1.0,
+        "gold_rank_median": 1.0,
+        "gold_rank_top5_recall": 0.8333,
+        "gold_rank_top8_recall": 0.8333,
+        "ndcg_top5": 0.8956,
+        "ndcg_top8": 0.9514,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "proper_noun": {
+        "count": 1,
+        "context_recall": 1.0,
+        "context_precision": 0.2,
+        "context_recall_top5": 1.0,
+        "context_recall_top8": 1.0,
+        "context_precision_top5": 0.2,
+        "context_precision_top8": 0.125,
+        "gold_rank_avg": 1.0,
+        "gold_rank_median": 1.0,
+        "gold_rank_top5_recall": 1.0,
+        "gold_rank_top8_recall": 1.0,
+        "ndcg_top5": 1.0,
+        "ndcg_top8": 1.0,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "table_numeric": {
+        "count": 1,
+        "context_recall": 1.0,
+        "context_precision": 0.4,
+        "context_recall_top5": 1.0,
+        "context_recall_top8": 1.0,
+        "context_precision_top5": 0.4,
+        "context_precision_top8": 0.25,
+        "gold_rank_avg": 2.0,
+        "gold_rank_median": 2.0,
+        "gold_rank_top5_recall": 1.0,
+        "gold_rank_top8_recall": 1.0,
+        "ndcg_top5": 0.9952,
+        "ndcg_top8": 0.9952,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "count": 4,
+        "context_recall": 1.0,
+        "context_precision": 0.25,
+        "context_recall_top5": 1.0,
+        "context_recall_top8": 1.0,
+        "context_precision_top5": 0.25,
+        "context_precision_top8": 0.1875,
+        "gold_rank_avg": 1.0,
+        "gold_rank_median": 1.0,
+        "gold_rank_top5_recall": 0.875,
+        "gold_rank_top8_recall": 0.875,
+        "ndcg_top5": 0.9217,
+        "ndcg_top8": 0.9635,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "medium": {
+        "count": 1,
+        "context_recall": 1.0,
+        "context_precision": 0.4,
+        "context_recall_top5": 1.0,
+        "context_recall_top8": 1.0,
+        "context_precision_top5": 0.4,
+        "context_precision_top8": 0.25,
+        "gold_rank_avg": 2.0,
+        "gold_rank_median": 2.0,
+        "gold_rank_top5_recall": 1.0,
+        "gold_rank_top8_recall": 1.0,
+        "ndcg_top5": 0.9952,
+        "ndcg_top8": 0.9952,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      }
+    },
+    "judge_failed_questions": 0,
+    "total_time_s": 100.4
+  },
+  "questions": [
+    {
+      "id": "DF-SM-001",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "华东大区第三季度的销售完成率是多少？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "2e6b273e579c4834",
+          "2e6b273e579c4834",
+          "2e6b273e579c4834",
+          "2e6b273e579c4834",
+          "2e6b273e579c4834"
+        ],
+        "time_s": 10.57
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 1,
+          "not_found_facts": 1,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 0.5,
+            "3": 0.5,
+            "5": 0.5,
+            "8": 0.5
+          },
+          "per_fact": [
+            {
+              "fact": "华东大区完成率 = 111.4%",
+              "gold_rank": 1,
+              "chunk_id": "chunk-2a4c122e092d088067cd0e01be16901f",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "领先全国",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "华东大区完成率 = 111.4%",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]表格中明确列出「华东大区 | 2,800 | 3,120 | 111.4% | 24.5%」，上下文[2]也写明「华东大区以111.4%的完成率领跑全国」，均直接支持该事实。"
+            },
+            {
+              "fact": "领先全国",
+              "hit": true,
+              "score": 0.95,
+              "reason": "检索上下文中没有出现“领先全国”这一表述。最接近的原文为[2]中的“华东大区以111.4%的完成率领跑全国”，该表述与“领先全国”并非明确等价表述，且[6]中仅有“巩固市场领先地位”的表述，均未形成对“领先全国”这一事实陈述的直接或明确等价依据。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "华东大区完成率 = 111.4%",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]表格中明确列出「华东大区 | 2,800 | 3,120 | 111.4% | 24.5%」，上下文[2]也写明「华东大区以111.4%的完成率领跑全国」，均直接支持该事实。"
+            },
+            {
+              "fact": "领先全国",
+              "hit": true,
+              "score": 0.95,
+              "reason": "检索上下文中没有出现“领先全国”这一表述。最接近的原文为[2]中的“华东大区以111.4%的完成率领跑全国”，该表述与“领先全国”并非明确等价表述，且[6]中仅有“巩固市场领先地位”的表述，均未形成对“领先全国”这一事实陈述的直接或明确等价依据。"
+            }
+          ],
+          "hit_facts_top5": 2
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.25,
+        "context_precision_weighted_top8": 0.5519,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 2,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本表格中明确列出华东大区完成率为111.4%，与【关键数值】清单中的111.4%逐字一致，可直接回答华东大区第三季度销售完成率。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本明确写出“华东大区以111.4%的完成率领跑全国”，与【关键数值】111.4%逐一核对一致，直接回答了华东大区第三季度销售完成率的问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.2,
+              "reason": "文本仅笼统提及华东区域市场突破，未给出华东大区第三季度销售完成率，也未出现关键数值111.4%，无法回答该问题。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅列出西南大区、其他区域和合计的完成率，未出现华东大区，也未出现标准答案关键数值111.4%，无法回答华东大区第三季度销售完成率的问题。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅提及区域销售业绩对比的标题，未给出华东大区第三季度完成率或任何具体数字，未包含标准答案要点中的关键数值111.4%，对回答问题无实质帮助。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅提及华东大区继续保持资源投入并争取20%同比增长，未出现关键数值111.4%，无法回答销售完成率。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本只列出三条产品线的季度收入、占比、同比增长和毛利率，未提及华东大区或销售完成率，关键数值111.4%在文本中完全未出现，因此对回答问题没有帮助。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本为按产品线列示的季度收入、占比、同比增长和毛利率数据，未提及华东大区或销售完成率，且不含关键数值111.4%，对回答问题没有帮助。"
+            }
+          ],
+          "reason": "2/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.4,
+        "context_precision_weighted_top5": 0.6569,
+        "context_precision": 0.4,
+        "context_precision_weighted": 0.6569,
+        "ndcg_top8": 0.9975,
+        "ndcg_top5": 0.9975,
+        "ndcg": 0.9975
+      },
+      "time_s": 13.67
+    },
+    {
+      "id": "DF-SM-002",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "公司2026年第三季度整体销售收入是多少？较上季度环比增长多少？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "2e6b273e579c4834",
+          "2e6b273e579c4834",
+          "2e6b273e579c4834",
+          "16b897d0dbd91ed7",
+          "16b897d0dbd91ed7"
+        ],
+        "time_s": 9.77
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 3,
+          "found_facts": 3,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "整体销售收入 = 8650万元",
+              "gold_rank": 1,
+              "chunk_id": "chunk-5c25d38bdf6ed05dd87f6dbb859cb978",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "环比增长 12.3%",
+              "gold_rank": 1,
+              "chunk_id": "chunk-5c25d38bdf6ed05dd87f6dbb859cb978",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "同比增长 18.7%",
+              "gold_rank": 1,
+              "chunk_id": "chunk-5c25d38bdf6ed05dd87f6dbb859cb978",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 3,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "整体销售收入 = 8650万元",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：“2026年第三季度，公司整体实现销售收入8,650万元”，与事实陈述“整体销售收入 = 8650万元”直接对应。"
+            },
+            {
+              "fact": "环比增长 12.3%",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：'2026年第三季度，公司整体实现销售收入8,650万元，较上季度环比增长12.3%'，与事实陈述'环比增长 12.3%'完全对应。"
+            },
+            {
+              "fact": "同比增长 18.7%",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“2026年第三季度，公司整体实现销售收入8,650万元，较上季度环比增长12.3%，较去年同期同比增长18.7%”，其中“同比增长18.7%”与事实陈述完全一致。"
+            }
+          ],
+          "reason": "3/3 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "整体销售收入 = 8650万元",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：“2026年第三季度，公司整体实现销售收入8,650万元”，与事实陈述“整体销售收入 = 8650万元”直接对应。"
+            },
+            {
+              "fact": "环比增长 12.3%",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：'2026年第三季度，公司整体实现销售收入8,650万元，较上季度环比增长12.3%'，与事实陈述'环比增长 12.3%'完全对应。"
+            },
+            {
+              "fact": "同比增长 18.7%",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“2026年第三季度，公司整体实现销售收入8,650万元，较上季度环比增长12.3%，较去年同期同比增长18.7%”，其中“同比增长18.7%”与事实陈述完全一致。"
+            }
+          ],
+          "hit_facts_top5": 3
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.25,
+        "context_precision_weighted_top8": 0.4293,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 2,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本明确包含2026年第三季度销售收入8,650万元和环比增长12.3%，与关键数值清单中的8650万、12.3%完全一致，直接回答了问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本只提到2026年第三季度销售目标完成率（如华东111.4%、华北108.3%等），未提及整体销售收入8,650万元、环比增长12.3%或同比增长18.7%，【关键数值】清单中的8650万、12.3%、18.7%均未出现，故对回答该问题无帮助。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本为下季度销售策略建议，未提及2026年第三季度整体销售收入8650万元，也未提及环比增长12.3%等关键数值，与问题及标准答案无关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本为智能客服系统产品需求文档（PRD），仅提及日期2026年9月，未包含2026年第三季度销售收入8,650万元、环比增长12.3%、同比增长18.7%等关键数值中的任何信息，与问题完全无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本为2026年项目里程碑计划（时间节点涉及9月、10月、12月），未提及任何销售收入、环比增长等财务数据，与问题所需的8650万元、12.3%等关键数值完全无关。"
+            },
+            {
+              "rank": 6,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "该表列出智能硬件3,460万元、软件服务2,595万元、技术咨询1,730万元三条产品线季度收入，合计7,785万元，与标准答案要点中2026年第三季度整体销售收入8,650万元不完全一致，且未直接给出环比增长12.3%，但提供了分产品线季度收入明细，可作为编制整体销售收入及分析季度环比变化的辅助佐证。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本为客服投诉处理标准作业流程（CS-SOP-2026-014），仅含有效日期2026年9月1日，未涉及2026年第三季度销售收入、8650万元、12.3%、18.7%等任何关键数值，与问题完全无关。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅列出华东、华南、华北大区的季度目标、实际完成、完成率及同比增长等分区域数据，未提及公司整体销售收入（8,650万元）或整体环比增长率（12.3%），与问题及关键数值（2026年、8650万、12.3%）不相关。"
+            }
+          ],
+          "reason": "2/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.2,
+        "context_precision_weighted_top5": 0.438,
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "ndcg_top8": 0.8799,
+        "ndcg_top5": 0.7127,
+        "ndcg": 0.7127
+      },
+      "time_s": 31.85
+    },
+    {
+      "id": "DF-SM-003",
+      "category": "table_numeric",
+      "difficulty": "medium",
+      "question": "智能硬件产品线本季度收入占公司整体收入的比例是多少？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "2e6b273e579c4834",
+          "2e6b273e579c4834",
+          "2e6b273e579c4834",
+          "2e6b273e579c4834",
+          "2e6b273e579c4834"
+        ],
+        "time_s": 9.3
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 2,
+          "median_rank": 2.0,
+          "avg_rank": 2.0,
+          "max_rank": 2,
+          "top_k_recall": {
+            "1": 0.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "智能硬件产品线占比 = 40%",
+              "gold_rank": 2,
+              "chunk_id": "chunk-5b2202f732dcebdfc88bd0a62a7b037a",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "第一大收入来源",
+              "gold_rank": 2,
+              "chunk_id": "chunk-5b2202f732dcebdfc88bd0a62a7b037a",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "智能硬件产品线占比 = 40%",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的表格中明确列出：\"| 智能硬件 | 3,460 | 40.0% | 32.5% | 35.2% |\"，且上下文[2]中明确表述\"智能硬件产品线本季度收入占比达到40%\"，与事实陈述一致。"
+            },
+            {
+              "fact": "第一大收入来源",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]明确表述：“智能硬件产品线本季度收入占比达到40%，已成为公司第一大收入来源。”该原文直接支持事实陈述“第一大收入来源”。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "智能硬件产品线占比 = 40%",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的表格中明确列出：\"| 智能硬件 | 3,460 | 40.0% | 32.5% | 35.2% |\"，且上下文[2]中明确表述\"智能硬件产品线本季度收入占比达到40%\"，与事实陈述一致。"
+            },
+            {
+              "fact": "第一大收入来源",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]明确表述：“智能硬件产品线本季度收入占比达到40%，已成为公司第一大收入来源。”该原文直接支持事实陈述“第一大收入来源”。"
+            }
+          ],
+          "hit_facts_top5": 2
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.25,
+        "context_precision_weighted_top8": 0.5519,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 2,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本中的产品线收入表明确列出智能硬件占比为40.0%，与标准答案要点中的关键数值40%一致，直接支持回答该问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本首句明确给出智能硬件产品线本季度收入占比达到40%，与标准答案要点及关键数值清单中的40%完全一致，直接回答了问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.2,
+              "reason": "文本仅提及智能硬件产品线的新品上市带动效应，但未给出该产品线本季度收入占比，也未出现关键数值40%，无法回答占比问题。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本中仅列出运维服务占比10.0%和合计占比100%，未提及智能硬件产品线，也未出现关键数值40%，对回答无帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.2,
+              "reason": "文本虽提及智能硬件产品线收入增长，但未给出任何占比数字，无法回答占比是多少，也未提及关键数值40%，故对回答问题帮助有限。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅讨论各大区销售目标完成率（如华东111.4%、华北108.3%、华南94.5%、西南90%）及区域表现，未提及智能硬件产品线收入占公司整体收入的比例，不含关键数值40%。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本为下季度销售策略建议，未提及智能硬件产品线本季度收入占比，也未出现关键数值40%，无法回答该问题。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅列出华东、华南、华北大区的销售目标、实际完成、完成率和同比增长数据，完全未提及智能硬件产品线收入或公司整体收入占比，与问题及标准答案要点中的关键数值40%无关。"
+            }
+          ],
+          "reason": "2/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.4,
+        "context_precision_weighted_top5": 0.6569,
+        "context_precision": 0.4,
+        "context_precision_weighted": 0.6569,
+        "ndcg_top8": 0.9952,
+        "ndcg_top5": 0.9952,
+        "ndcg": 0.9952
+      },
+      "time_s": 12.25
+    },
+    {
+      "id": "DF-SM-004",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "投诉升级工单触发后，接收方须在多长时间内确认接收并启动处理？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "cca7c8bcff3a0d25",
+          "cca7c8bcff3a0d25",
+          "cca7c8bcff3a0d25",
+          "cca7c8bcff3a0d25",
+          "cca7c8bcff3a0d25"
+        ],
+        "time_s": 9.64
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 1,
+          "found_facts": 1,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "升级工单确认接收时限 = 30分钟",
+              "gold_rank": 1,
+              "chunk_id": "chunk-4c38e7cc92073b08ba21f1ef8eddd835",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 1,
+          "hit_facts": 1,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "升级工单确认接收时限 = 30分钟",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：“升级工单触发后，接收方须在30分钟内确认接收并启动处理”，与事实陈述“升级工单确认接收时限 = 30分钟”直接对应。"
+            }
+          ],
+          "reason": "1/1 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "升级工单确认接收时限 = 30分钟",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：“升级工单触发后，接收方须在30分钟内确认接收并启动处理”，与事实陈述“升级工单确认接收时限 = 30分钟”直接对应。"
+            }
+          ],
+          "hit_facts_top5": 1
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.125,
+        "context_precision_weighted_top8": 0.3679,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本与标准答案要点完全一致，明确包含“30分钟内确认接收并启动处理”这一关键数值，与【关键数值】清单中的30逐字核对相符，可直接回答问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅列举升级触发条件（超期、情绪、技术、跨部门），未提及接收方确认接收与启动处理的时限，也未出现关键数值30，与问题及标准答案要点无关。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.2,
+              "reason": "文本仅提及启动升级流程的情形，未涉及接收方确认接收并启动处理的时限，也未出现关键数值30分钟。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅描述投诉分级派单流转规则，未提及升级工单确认接收时限，也未出现【关键数值】清单中的30分钟，无法回答该问题。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅说明不同等级投诉有全流程处理时效表，但未给出任何具体时限数值，也未提及30分钟这一关键数值，无法回答接收方确认接收并启动处理的时限问题。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本列出的是投诉等级分级的首次响应、方案提出、问题解决等时效标准，未提及升级工单触发后接收方确认接收的时限，且未出现关键数值30分钟，与问题及标准答案无关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅说明时效计算方式和各类时间的定义，未提及升级工单触发后接收方须在多长时间内确认接收并启动处理，也未出现关键数值30，与问题及标准答案要点无关。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该段文本为客服投诉处理的一般注意事项，未提及升级工单触发后的确认接收时限，也未出现关键数值30，对回答问题没有帮助。"
+            }
+          ],
+          "reason": "1/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.2,
+        "context_precision_weighted_top5": 0.438,
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "ndcg_top8": 0.9767,
+        "ndcg_top5": 0.9767,
+        "ndcg": 0.9767
+      },
+      "time_s": 30.37
+    },
+    {
+      "id": "DF-SM-005",
+      "category": "proper_noun",
+      "difficulty": "easy",
+      "question": "智能客服系统产品需求文档 PRD 的版本号是多少？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "16b897d0dbd91ed7",
+          "16b897d0dbd91ed7",
+          "cca7c8bcff3a0d25",
+          "16b897d0dbd91ed7",
+          "cca7c8bcff3a0d25"
+        ],
+        "time_s": 9.47
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 1,
+          "found_facts": 1,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "PRD 版本 = V2.1",
+              "gold_rank": 1,
+              "chunk_id": "chunk-87e93cecae9722ea7a9be40f16d62c1f",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 1,
+          "hit_facts": 1,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "PRD 版本 = V2.1",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“智能客服系统产品需求文档（PRD） 版本：V2.1”，与事实陈述“PRD 版本 = V2.1”完全一致。"
+            }
+          ],
+          "reason": "1/1 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "PRD 版本 = V2.1",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“智能客服系统产品需求文档（PRD） 版本：V2.1”，与事实陈述“PRD 版本 = V2.1”完全一致。"
+            }
+          ],
+          "hit_facts_top5": 1
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.125,
+        "context_precision_weighted_top8": 0.3679,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本明确给出PRD版本V2.1，与关键数值清单中的2.1一致，日期2026年9月也与清单中的2026年、9一致，直接回答了版本号问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本是项目里程碑计划表，虽包含2026年9月20日与PRD文档终稿字样，但并未提及版本号2.1（关键数值清单中的2.1），无法回答PRD版本号问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本为《客户服务投诉处理标准作业流程（SOP）》，版本V2.3、生效日期2026年9月1日，与问题所问的《智能客服系统产品需求文档（PRD）》版本V2.1不是同一文档，文档编号、版本号（2.3 vs 2.1）均不一致，对回答问题无帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅描述项目背景与目标，未提及任何版本号信息，与PRD版本号（V2.1，2026年9月）完全无关，未出现清单中的关键数值2.1、2026、9。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅描述客服系统信息登记与投诉录入时限，未提及 PRD 版本号、日期或负责人，与关键数值 2.1、2026年、9 均无关。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是关于投诉处理注意事项和客服文档审核的内容，未提及智能客服系统产品需求文档（PRD）的版本号，也未出现关键数值2.1、2026年或9，与问题所需信息无关。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本只列出智能客服系统的功能模块和工期，未出现PRD版本号V2.1、日期2026年9月或负责人产品部等信息，与问题及标准答案要点无实质关联。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅列出2027年1月和2月的联调测试与上线部署安排，未提及智能客服系统PRD版本号或关键数值2.1、2026年、9，与问题完全无关。"
+            }
+          ],
+          "reason": "1/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.2,
+        "context_precision_weighted_top5": 0.438,
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "ndcg_top8": 1.0,
+        "ndcg_top5": 1.0,
+        "ndcg": 1.0
+      },
+      "time_s": 12.26
+    }
+  ]
+}
