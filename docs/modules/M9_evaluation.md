@@ -1,6 +1,6 @@
 # M9 模块规划：评测层
 
-> **版本：** v1.10
+> **版本：** v1.11
 > **状态：** 可用（retrieval 模式 + gold_rank 诊断 + 双窗口 + nDCG + **e2e 生成四指标** + **行政库完整版 30 题检索基线 / NL 摘要激活复测 / 30 题全量 e2e / 裁判一致性抽检 10/10** + **可選 reranker=llm（LLM listwise 终审）**）；Phase 3 待执行
 > **更新：** 2026-09-27
 > **定位：** 中文 RAG 系统量化评测——测试集 + 指标 + ablation + 回归
@@ -189,7 +189,11 @@ reports/                      # 评测输出（gitignore，关键版本存档）
 
 1. **judge 数值幻觉**：precision 判定把标准答案的 78.5% 幻读成 68.5%（4 处，reason 自述「与标准答案 68.5% 不一致」），根因是 `context_precision.py` 的 `CHUNK_PROMPT_TEMPLATE` 将 `ground_truth[:500]` 摘要直接喂给裁判（[context_precision.py:58](backend/app/m9_eval/metrics/context_precision.py#L58)）。**实测标准答案（testset 的 ground_truth + key_facts）与 sparse 全库均只有 78.5%**，68.5 是裁判复制数字时出错。影响：仅污染 reason 叙述，`relevant/score` 判定本身不受影响。
 2. **judge 无条件过宽**：抽检 20 题发现 5 处（CS-FC-001 / CS-PN-001 / CS-SM-001×2 / CS-TN-003 / adm_q008），reason 自述「上下文中未出现 / 无等价表述 / 无法推导」却仍判 hit=0.9+。成因：① recall SYSTEM_PROMPT 允许「明确的等价表述就算命中」——合理宽松设计，容忍 paraphrase；② LLM answer-bias：对上下文「拎半相关即判中」；③ `score>=0.5` 一刀切、无 partial 档。影响：recall 绝对值轻微虚高（CS-TN-003 单题实质 R 0.667→0.333，其余每题 ~0.1-0.25/fact），但**对「重跑无波动 / 横向 A/B 对比」结论不构成威胁**——历史基线与重跑用同套裁判（同 prompt/模型/缓存），虚高同幅作用于两侧。
-3. **修复分级（建议，未实施）**：P0 = recall prompt 加证据强制（hit 必引原句、reason 不得自相矛盾）；P1 = precision 判定不直接比对原始 ground_truth 数字（消除 68.5 类幻觉）；P2 = 加 partial 0.5 档，降低一刀切。实施需重跑留档对比前后指标。
+3. **修复分级（v5.22 已实施 P0 + P1，P2 未做）**：
+   - **P1 已落地**（precision 数字纪律）：`context_precision.py` 不再把 `ground_truth[:500]` 整段喂裁判（68.5 幻读根源），改 `build_gt_points` 归一化 = 要点句 + 显式【关键数值】清单（`extract_number_facts` 确定性提取）+ prompt「数字纪律」。缓存版本 `p1_norm_gt`。**验证：两库重跑 precision reason 含 68.5 处数 0（修复前 4），judge 显式按清单逐字核对**。
+   - **P0 已落地**（recall 证据强制）：`context_recall.py` SYSTEM_PROMPT 要求 hit 必引原文证据 + 代码层 `_enforce_evidence` 兜底（`_PROMPT_VERSION=p0_evidence`）。**验证：原人工标注 6 处无条件过宽全部降 miss，`[证据强制校正]` 触发 27 次**。
+   - **落地边界（待人工复核）**：`_STRONG_NEG_RE` 只用否定词出现与否触发，误杀约 10+ 处「reason 有块引用证据但夹带免责否定」的合法命中（如 CS-TN-002「[1]表格列出华南168为最高…其他/总部未给出」、adm_q011 逐字命中被「未出现等价表述」杀）；**负向断言型 fact**（CS-CP-004、adm_q010×2，命中证据恰是「未出现/X未定义」）被系统性降 miss；**算术/映射推导型**（CS-TN-001/004、CS-SM-001 问题1 3.8pp、adm_q014 1200/500/1700）被收紧。两库 recall 因此 -16.7pt / -9.5pt，大部分来自误杀而非过宽修正。分类明细与完整对照见 CHANGELOG v5.22；修正判据方向 = 证据引用（[N]块引用/原文引号/数值对齐）优先于否定措辞，负向断言型单独豁免。
+   - **P2 未做**（partial 0.5 档，降低 score>=0.5 一刀切）。
 
 > 逐题抽检细节见 [`tests/reports/human_checklist_rerun_20260927.md`](tests/reports/human_checklist_rerun_20260927.md)（20 题 + 汇总发现表）。
 
@@ -551,3 +555,4 @@ gold_rank top5 覆盖率仅 0.261（客服库 v5.9 基线 52%）——行政库�
 - **v1.9**（2026-09-25）：行政库 30 题完整版评测。六文档 203 chunks 建库 + 测试集 v0.2（30 题），全量检索基线（Rec@5/8 0.9524、Prec@5 加权 0.619 / @8 0.5359、nDCG@5 0.8567 / @8 0.9019、gold_rank avg 2.04）+ 全量 e2e（faithfulness 0.884 / answer_relevance 0.9333 / correctness 0.9713 / citation_accuracy 0.8187，judge_failed=0）+ 裁判一致性抽检 **10/10 达标**（平均 |diff| 0.049、最大 0.15）。详见 [§8.1c/8.1d](#81c-行政库30题全量检索基线2026-09-25m9-v19) 与 [CHANGELOG](../CHANGELOG.md) v5.19。
 - **v1.8**（2026-09-25）：行政库 e2e 生成质量评测。15 题全量四指标首次出值（faithfulness 0.9277 / answer_relevance 0.9000 / correctness 0.9373 / citation_accuracy 0.8928，judge_failed=0，耗时 9.3 分钟），拒答验证通过（q015 正确拒答）、干扰题行为正确（q010）、检索缺口传导到生成（q004 correctness 0.5）。详见 [§8.1b](#81b-行政库e2e生成质量评测2026-09-25m9-v17--v18) 与 [CHANGELOG](../CHANGELOG.md) v5.18。
 - **v1.10**（2026-09-27）：LLM listwise 终审正式化（`--reranker llm`，对应 CHANGELOG v5.21）。新增 §7.7 正式使用小节（机制 / 启用 / 决策边界）；nDCG@5 0.8567→**0.9479**、Re@5 0.9524→**0.9857**、gold_rank avg 2.04→**1.76**。仅 M9 评测启用，不接 answer / 生产 M5。
+- **v1.11**（2026-09-27）：judge 可靠性修复 P0 + P1 落地（对应 CHANGELOG v5.22）。P1 precision 数字纪律（归一化标准答案 → 要点句 + 【关键数值】清单，消除 68.5 类数值幻读，两库重跑 0 处）；P0 recall 证据强制（hit 必引原文 + `_enforce_evidence` 兜底，原 6 处过宽全降 miss）。已记录 side effect：强否定判据误杀「reason 有块引用证据但夹带免责否定」的合法命中约 10+ 处（含负向断言型 / 算术推导型），recall -16.7pt / -9.5pt 大部分来自误杀——详见 §4.3 第 3 条。

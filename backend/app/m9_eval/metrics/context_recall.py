@@ -8,12 +8,21 @@
 from __future__ import annotations
 
 import asyncio
+import re
 from typing import Any, Callable
 
 from ..judge import judge
 
-SYSTEM_PROMPT = """你是一个严谨的 RAG 评测裁判。你的任务是判断给定的事实陈述能否在检索到的上下文（retrieved contexts）中找到依据。
-只根据上下文内容判断，不要使用外部知识。如果事实在上下文中有明确的等价表述，就算命中。"""
+# P0（v5.22）：证据强制。改此 prompt 必须同步升级 _PROMPT_VERSION 使缓存失效
+_PROMPT_VERSION = "p0_evidence"
+
+SYSTEM_PROMPT = """你是一个严谨的 RAG 评测裁判。你的任务是判断给定的事实陈述能否在检索到的上下文（retrieved contexts）中找到明确依据。
+判断规则：
+1. 只根据上下文内容判断，不要使用外部知识。
+2. 只有在上下文中能找到该事实的直接表述、或明确等价表述时，才判 hit=true。
+3. 判 hit=true 必须在 reason 中逐字引用上下文中的对应原文作为证据。
+4. 如果上下文中没有该事实的任何依据（未出现 / 未找到 / 无法推导），即使语义上"感觉可能对"，也必须判 hit=false——不允许"没有依据却命中"。
+5. reason 必须与判定自洽：判 hit=true 的 reason 只能陈述找到了什么，不得出现"未出现 / 未找到 / 无法推导"等否定性自述。"""
 
 FACT_PROMPT_TEMPLATE = """请判断以下事实陈述是否能在「检索上下文」中找到明确依据。
 
@@ -27,9 +36,30 @@ FACT_PROMPT_TEMPLATE = """请判断以下事实陈述是否能在「检索上下
 {{
   "hit": true 或 false,
   "score": 0.0 到 1.0 的置信度,
-  "reason": "一句话说明判断依据"
+  "reason": "判定依据，必须引用上下文原文；判 hit=true 时不得写‘未出现/未找到/无法推导’等否定描述"
 }}
 """
+
+# 证据强制兜底（代码层校验，防 prompt 被绕过）：
+# reason 自述强否定（找不到依据）却仍判 hit → 无条件过宽，强制降为 miss。
+# 有「部分/间接」等半依据补偿词时保留原判定（允许合理宽松）。
+_STRONG_NEG_RE = re.compile(
+    r"未出现|未找到|未提及|未提供|未给出|未包含|未检索到|"
+    r"无法找到|无法推导|无法支持|无法证实|均未|无等价|无依据|未能提供"
+)
+_COMPENSATION_RE = re.compile(r"部分|间接|基本一致|大体|与.*对应|均有对应")
+
+
+def _enforce_evidence(reason: str, hit: bool, score: float) -> tuple[bool, float]:
+    """证据强制：judge 自述无依据却判 hit 时，校正为 miss。
+
+    返回 (corr_hit, corr_score)。
+    """
+    if not hit or score < 0.5:
+        return hit, score
+    if _STRONG_NEG_RE.search(reason) and not _COMPENSATION_RE.search(reason):
+        return False, 0.3
+    return hit, score
 
 
 async def compute_context_recall(
@@ -55,7 +85,7 @@ async def compute_context_recall(
     tasks = []
     for fact in key_facts:
         prompt = FACT_PROMPT_TEMPLATE.format(fact=fact, context_str=context_str)
-        cache_parts = ["context_recall", fact, context_str[:500]]
+        cache_parts = ["context_recall", _PROMPT_VERSION, fact, context_str[:500]]
         tasks.append(_judge_fact(query_func, fact, prompt, cache_parts))
 
     results = await asyncio.gather(*tasks)
@@ -101,10 +131,20 @@ async def _judge_fact(query_func: Callable, fact: str, prompt: str, cache_parts:
             "reason": result["reason"],
             "error": result["error"],
         }
+
+    raw_hit = result["score"] >= 0.5
+    raw_score = result["score"]
+    hit, score = _enforce_evidence(result["reason"], raw_hit, raw_score)
+    if hit != raw_hit:
+        # 证据强制校正（P0）：记录原始判定，reason 标注入档可追溯
+        result["reason"] = (
+            f"[证据强制校正] 原判定 hit={raw_hit} score={raw_score} "
+            f"但 reason 自述无依据，校正为 miss。原reason: {result['reason']}"
+        )
     # 用 score >= 0.5 作为 hit 阈值
     return {
         "fact": fact,
-        "hit": result["score"] >= 0.5,
-        "score": result["score"],
+        "hit": hit,
+        "score": score,
         "reason": result["reason"],
     }
