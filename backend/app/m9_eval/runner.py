@@ -30,7 +30,7 @@ sys.path.insert(0, str(PROJ))
 from .report import build_report, save_report, to_markdown
 from .testset import load_testset, stats as testset_stats
 
-# LLM listwise 终审（探底 A/B）：候选池大小（fusion.fused_top40 前 N）
+# LLM listwise 终审（--reranker llm）：候选池大小（fusion.fused_top40 前 N）
 LLM_POOL_SIZE = 20
 
 
@@ -81,7 +81,7 @@ async def evaluate_retrieval(
     Args:
         gold_rank_mode: 'lexical'（默认，零成本）或 'llm'（精确）
         eval_top_n: 检索取多少块用于评测（默认 8，可同时出 top5/top8 两套指标）
-        reranker: 'standard'（cross-encoder+融合）或 'llm'（LLM listwise 终审，探底 A/B）
+        reranker: 'standard'（cross-encoder+融合，默认）或 'llm'（LLM listwise 终审，正式可选）
     """
     from app.m5_retrieve import retriever as ret_mod
     from app.m5_retrieve.retriever import retrieve
@@ -115,7 +115,7 @@ async def evaluate_retrieval(
                     exclude_docs=exclude_docs,
                 )
                 if reranker == "llm":
-                    # 探底 A/B：LLM listwise 终审重排（绕过 cross-encoder 表格失明）
+                    # LLM listwise 终审重排（正式可选 reranker，绕过 cross-encoder 表格失明）
                     from .llm_rerank import rerank_with_llm
 
                     contexts = await rerank_with_llm(
@@ -621,7 +621,7 @@ def main() -> None:
                         help="只跑前 N 题（冒烟用）")
     parser.add_argument("--reranker", default="standard",
                         choices=["standard", "llm"],
-                        help="检索排序终审：standard=cross-encoder+融合（默认）；llm=LLM listwise 终审（探底 A/B）")
+                        help="检索排序终审：standard=cross-encoder+融合（默认）；llm=LLM listwise 终审（正式可选，仅评测）")
 
     args = parser.parse_args()
 

@@ -391,6 +391,35 @@ RAGAS 是好工具，但**不直接用**，核心原因：
 
 **公式**：DCG@k = Σ(2^rel_i - 1) / log2(i+1)，nDCG@k = DCG@k / IDCG@k（理想排序下的 DCG）。相关度直接用 LLM 裁判给的 per-chunk score（0~1 连续值）。
 
+### 7.7 LLM listwise 终审（`--reranker llm`）：正式使用
+
+**解决的问题**：cross-encoder（bge-reranker-v2-m3）对数字型/专名表格语义失明——表块能进 `fused_top40` 候选池，但被低分压出 top5。v5.21 前四类手段（前缀 v5.10 / 特征 boost v5.11-12 / NL 摘要 v5.13 / sparse 注入 v5.20）都只改变分数量级、不改变排名结构。
+
+**机制**：把 `fusion.fused_top40` 前 `LLM_POOL_SIZE=20` 块交给 LLM listwise 重排（RankGPT 式），取前 `eval_top_n` 作为评测上下文，绕过 cross-encoder 失明。
+
+**启用方式**：
+
+```bash
+cd backend && python -m app.m9_eval.runner \
+  --testset testsets/cservice.json --report reports/run_xxx_llm.json \
+  --reranker llm
+```
+
+**效果（v5.21，行政库 30 题）**：
+
+| 指标 | v5.20 baseline | --reranker llm |
+|---|---|---|
+| nDCG@5 | 0.8567 | **0.9479** |
+| Re@5 | 0.9524 | **0.9857** |
+| gold_rank avg | 2.04 | **1.76** |
+
+**决策边界（v5.21 拍板，本模块不改变它）**：
+- **仅 M9 评测可选**——不进入生产检索路径（M5），`RERANK_TOP` 生产仍为 5；
+- **不接 answer 链路**（流式不兼容 + 评测同源偏置风险 + 生产 token 成本）；
+- 生产侧以 v5.20 baseline 为准，输入侧改造已封顶（详见 [`RETRIEVAL_OPTIMIZATION.md`](../RETRIEVAL_OPTIMIZATION.md) 组 C/E）。
+
+**归属**：`app/m9_eval/llm_rerank.py`（`rerank_with_llm`），runner 接线于 `evaluate_retrieval`。
+
 ---
 
 ## 8. 评测结果快照（按库）
@@ -513,3 +542,4 @@ gold_rank top5 覆盖率仅 0.261（客服库 v5.9 基线 52%）——行政库�
 - **v1.6**（2026-09-25）：行政库（eval_admin）首轮检索基线。15 题最小集 retrieval 模式评测出值（Recall@5 0.9405 / Prec@5 0.5878 / nDCG@5 0.8518），逐题检索质量诊断定位四大问题（q013 表碎片化、q004 跨表依赖、q010 字符串命中、q015 拒答前提成立），gold_rank 词汇模式 top5 覆盖率 0.261 印证 [§7.5](M9_evaluation.md) 文档型事实边界。详见 [CHANGELOG](../CHANGELOG.md) v5.16 与本文 §8.1。
 - **v1.9**（2026-09-25）：行政库 30 题完整版评测。六文档 203 chunks 建库 + 测试集 v0.2（30 题），全量检索基线（Rec@5/8 0.9524、Prec@5 加权 0.619 / @8 0.5359、nDCG@5 0.8567 / @8 0.9019、gold_rank avg 2.04）+ 全量 e2e（faithfulness 0.884 / answer_relevance 0.9333 / correctness 0.9713 / citation_accuracy 0.8187，judge_failed=0）+ 裁判一致性抽检 **10/10 达标**（平均 |diff| 0.049、最大 0.15）。详见 [§8.1c/8.1d](#81c-行政库30题全量检索基线2026-09-25m9-v19) 与 [CHANGELOG](../CHANGELOG.md) v5.19。
 - **v1.8**（2026-09-25）：行政库 e2e 生成质量评测。15 题全量四指标首次出值（faithfulness 0.9277 / answer_relevance 0.9000 / correctness 0.9373 / citation_accuracy 0.8928，judge_failed=0，耗时 9.3 分钟），拒答验证通过（q015 正确拒答）、干扰题行为正确（q010）、检索缺口传导到生成（q004 correctness 0.5）。详见 [§8.1b](#81b-行政库e2e生成质量评测2026-09-25m9-v17--v18) 与 [CHANGELOG](../CHANGELOG.md) v5.18。
+- **v1.10**（2026-09-27）：LLM listwise 终审正式化（`--reranker llm`，对应 CHANGELOG v5.21）。新增 §7.7 正式使用小节（机制 / 启用 / 决策边界）；nDCG@5 0.8567→**0.9479**、Re@5 0.9524→**0.9857**、gold_rank avg 2.04→**1.76**。仅 M9 评测启用，不接 answer / 生产 M5。

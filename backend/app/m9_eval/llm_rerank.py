@@ -1,11 +1,14 @@
-"""LLM listwise 终审重排（探底：验证 RankGPT 式终审能否救回 rerank 压掉的表块）。
+"""LLM listwise 终审重排（M9 正式可选 reranker：用理解数值/结构语义的层做终审）。
 
 标准检索：cross-encoder + 多特征融合排序（fuse_and_rank + RERANK_TOP 截断）。
 本模块：把融合候选池（fusion.fused_top40）前 pool_size 个交给 LLM listwise 重排，
-取前 top_n 作为最终评测上下文 —— 让理解数值/结构语义的层做终审，绕过
-cross-encoder 对表格/专名内容的失明（表块能进池但被低分压出 top5）。
+取前 top_n 作为最终评测上下文 —— 绕过 cross-encoder 对表格/专名内容的失明
+（表块能进池但被低分压出 top5）。
 
-仅用于评测 A/B，不进入生产检索路径（M5）。
+v5.21 A/B 验证：nDCG@5 0.8567→0.9479、Re@5 0.9524→0.9857、gold_rank avg 2.04→1.76。
+设计边界（v5.21 决策）：
+- 仅 M9 评测可选（--reranker llm），不进入生产检索路径（M5）；
+- 不接 answer 链路（流式不兼容 + 评测同源偏置风险 + 生产 token 成本）。
 """
 from __future__ import annotations
 

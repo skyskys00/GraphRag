@@ -54,6 +54,7 @@
 | [`modules/M8_frontend_req.md`](modules/M8_frontend_req.md) | 前端需求文档（FR-xx 条目） |
 | [`modules/GRAPH_OPTIMIZATION_v4.md`](modules/GRAPH_OPTIMIZATION_v4.md) | 图谱优化 v4 方案（双层图谱 + 关系分类 + 实体筛选） |
 | [`PARSER_COMPARISON.md`](PARSER_COMPARISON.md) | MinerU vs Docling 选型复核 |
+| [`RETRIEVAL_OPTIMIZATION.md`](RETRIEVAL_OPTIMIZATION.md) | 检索优化方法单一事实源（方法→阶段→状态；数据见检索对比总表） |
 
 ### 🐛 坑点层（集中存放，模块文档只留索引）
 
