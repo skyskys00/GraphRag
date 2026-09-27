@@ -39,8 +39,9 @@
 | gold_rank avg | 2.04 | **1.76** | 更靠前 |
 
 - 单题探针 `scripts/probe_rankgpt_listwise.py`（报告 `tests/reports/probe_rankgpt_listwise.json`）：4/4 被压表块救回 top5（CS-TN-003 两表、adm_q020 会议室表、adm_q004/q012 城市分级表）。
-- **诚实边界**：个别题反向（q005 nDCG 0.973→0.826 等，LLM 排序引入噪声）；单题 +1 次 LLM 调用（pool 26 块原料 ≈ 6k tokens 输入 / +5~10s）；**只治池内不治池外**——fact_cross_doc 题为召回层缺口（q008 5 facts 全 miss 的答案块根本没进 fused_top40，重排无从救起，见 retrieval_comparison.md §遗留缺口）。
+- **诚实边界**：个别题反向（q005 nDCG 0.973→0.826 等，LLM 排序引入噪声）；单题 +1 次 LLM 调用（pool 26 块原料 ≈ 6k tokens 输入 / +5~10s）；**只治池内不治池外**【同日探底更正此口径：q008 实际 3/5 被 fused40 覆盖，非「5 facts 全 miss」，见下方探底折叠】。
 - **决策记录**：answer 链路（`evaluate_answer`/M6 `answer`）暂不接 reranker=llm（每问 LLM 调用与评测 judge 叠加、`answer_stream` 流式不兼容、生产 token 成本）；生产 M5 不引入。
+- **探底折叠（同日，无效不落地，`scripts/probe_expand.py` 留档可复跑）— children+neighbor 展开救池外答案块**：全量 30 题（28 可判，99 facts）仅 q008 救回 1 fact（6.2 赔偿表 030，靠 **neighbor**（029 rank5）±3 拉入，非 children）；其余 27 题 0 救回，展开新增 ~2290 块作代价，收益 1.0%，噪声比远超验收线。**children 前提被证伪**：孤儿标题块（028 第六章，仅 11 字）根本进不了 fused40，构建期静态引用无触发点；即便池内标题块存在（多数题 heading_in_pool≥1），其子树也非缺失答案块；且 testset 多数「缺失 fact」是无宿主否定型（q010 FAS 未定义类），本无答案块可救。**更正上文**：q008「5 facts 全 miss」是 gold_rank `_lexical_match` 系统性假阴性（数字粘连词「疏忽大意30%」作整串 keyword，匹配不了文档中的 `|疏忽大意|…|30%|`）；修正判定后 017 rank1（fact5 跨文档）、029 rank5（fact0/1/2）已在池。**结论**：children 无收益证据（M2 零改动）；neighbor 仅覆盖 q008 一例且噪声大，不落地；q008 缺口实质是 030/031 已在向量近邻却没进 top8，属 reranker 排序层（同 v5.21「终审权」主题）而非池外。评测 gold_rank 的 `_lexical_match` 数字粘连假阴性待修（影响历史 gold_rank 数字，幅度小）。
 
 ---
 
