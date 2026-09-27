@@ -1,6 +1,7 @@
-"""表格 NL 摘要：给表格块生成一句自然语言描述，注入 rerank 文本。
+"""表格 NL 摘要（M5 正式功能，v5.13）：给表格块生成一句自然语言描述，注入 rerank 文本。
 
-探底实验：验证 cross-encoder 能否通过 NL 摘要更好理解表格语义。
+为解决 cross-encoder 对表格语义理解弱的问题（v5.13 落地生效：单块 rerank 分 +165%，
+结果进基准：Recall 0.9520 / nDCG@5 0.9028，详见 docs 检索优化单一事实源组 C）。
 规则模板（零成本）：提取 caption + 列名 + 首末行数据，拼成一段描述文字。
 """
 from __future__ import annotations
