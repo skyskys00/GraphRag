@@ -185,6 +185,14 @@ reports/                      # 评测输出（gitignore，关键版本存档）
 - 加缓存：同一题 + 同一答案 + 同一指标，结果缓存到本地 JSON，重复评测不重复花钱。
 - **裁判自验证**：v1.0 落地时，人工抽检 10 道题的裁判结果，计算「人 vs 裁判」一致性——如果低于 80%，说明提示词或模型有问题，需要调优后再正式使用。
 
+**已知偏差（2026-09-27 两库重跑 × 20 题人工抽检发现）**：
+
+1. **judge 数值幻觉**：precision 判定把标准答案的 78.5% 幻读成 68.5%（4 处，reason 自述「与标准答案 68.5% 不一致」），根因是 `context_precision.py` 的 `CHUNK_PROMPT_TEMPLATE` 将 `ground_truth[:500]` 摘要直接喂给裁判（[context_precision.py:58](backend/app/m9_eval/metrics/context_precision.py#L58)）。**实测标准答案（testset 的 ground_truth + key_facts）与 sparse 全库均只有 78.5%**，68.5 是裁判复制数字时出错。影响：仅污染 reason 叙述，`relevant/score` 判定本身不受影响。
+2. **judge 无条件过宽**：抽检 20 题发现 5 处（CS-FC-001 / CS-PN-001 / CS-SM-001×2 / CS-TN-003 / adm_q008），reason 自述「上下文中未出现 / 无等价表述 / 无法推导」却仍判 hit=0.9+。成因：① recall SYSTEM_PROMPT 允许「明确的等价表述就算命中」——合理宽松设计，容忍 paraphrase；② LLM answer-bias：对上下文「拎半相关即判中」；③ `score>=0.5` 一刀切、无 partial 档。影响：recall 绝对值轻微虚高（CS-TN-003 单题实质 R 0.667→0.333，其余每题 ~0.1-0.25/fact），但**对「重跑无波动 / 横向 A/B 对比」结论不构成威胁**——历史基线与重跑用同套裁判（同 prompt/模型/缓存），虚高同幅作用于两侧。
+3. **修复分级（建议，未实施）**：P0 = recall prompt 加证据强制（hit 必引原句、reason 不得自相矛盾）；P1 = precision 判定不直接比对原始 ground_truth 数字（消除 68.5 类幻觉）；P2 = 加 partial 0.5 档，降低一刀切。实施需重跑留档对比前后指标。
+
+> 逐题抽检细节见 [`tests/reports/human_checklist_rerun_20260927.md`](tests/reports/human_checklist_rerun_20260927.md)（20 题 + 汇总发现表）。
+
 ### 4.4 代码结构（`app/m9_eval/`）
 
 | 文件 | 职责 |
