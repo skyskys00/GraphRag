@@ -41,7 +41,9 @@ cd backend
 
 > **触发场景**：M2 切分逻辑、chunker 参数、表格双表示、列名前缀、NL 摘要等**索引层改动**后必须重建索引，否则新旧内容错位。**`m5_sparse.json` 是一次性构建产物，建完即冻结 content，不会随代码/ chunk jsonl 前进**（2026-09-26 时序错位事故根源）。
 
-**命令链（backend/ 下执行）：**
+**脚本化入口（推荐）**：`backend/scripts/rebuild_standard_lib.py` 已把下面命令链封装为一条命令（M2 重切 → wipe PG → M3 建图入库 → M5 sparse），先 `--workspace <ws>` 预览、加 `--execute` 才真执行，完成后自带对齐校验。用法举例：`python scripts/rebuild_standard_lib.py --workspace default_ws --execute`；默认布局按 workspace 推断（`<x>_ws` → `data/parse/<x>` + `data/chunks/<x>`），自定义布局要三者全给 `--parse/--chunks/--working-dir`。
+
+**手工命令链（backend/ 下执行）：**
 
 ```bash
 cd backend
