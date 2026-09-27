@@ -57,6 +57,8 @@ M1 解析 → M2 切分 → M3 索引 → M5 检索（三路召回 → RRF 融�
 | 方法 | 版本 | 机制 | 状态 |
 |---|---|---|---|
 | LLM listwise 终审（`--reranker llm`） | v5.21 | `LLM_POOL_SIZE=20` 池内块做 RankGPT 式 listwise 重排，绕过 cross-encoder 对数字/专名表的失明 | **正式可选（仅 M9）**：nDCG@5 0.8567→**0.9479**、Re@5 0.9524→0.9857、gold_rank avg 2.04→1.76。**决策：不接 answer 链路、不引入 M5 生产检索**（流式不兼容 + 评测同源偏置 + token 成本） |
+| P0 recall 证据强制（判据层） | v5.22 / v5.22.1 | prompt 要求「hit 必须逐字引用原文 + reason 不得自述否定」+ 代码层 `_enforce_evidence` 兜底——judge 自述强否定却判 hit 时，仅**空洞否定**（reason 无数值锚点/推导缺口/块引用/核心词组任一证据信号，且非负向断言 fact）校正为 miss | **正式（M9 判据层）**：v5.22 粗校「有否定词即降 miss」误杀 20/27 → v5.22.1 精准化为空洞否定后校正收敛 27→7，recall 客服 0.7778→0.8626（+8.5pt）、行政 0.8571→0.9321（+7.5pt），20 处误杀全部恢复 |
+| P1 precision 数字纪律（判据层） | v5.22 | precision 判据不再喂整段 `ground_truth[:500]`（数值复读幻觉根源），改用 `build_gt_points` 归一化 = 要点句 + 显式【关键数值】清单，prompt 注明比对数值严格以清单为准 | **正式（M9 判据层）**：两库 precision reason 含 68.5 幻读处数 0（修复前客服 4 处）——对照数据见 CHANGELOG v5.22/v5.22.1 |
 
 ---
 
