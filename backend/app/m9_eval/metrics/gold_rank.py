@@ -9,23 +9,13 @@
 from __future__ import annotations
 
 import asyncio
+import difflib
 import re
 from typing import Any, Callable
 
 from ..judge import judge
 
-# 中文停用词（极简版，只过滤最常见的）
-_STOPWORDS = {
-    "的", "了", "是", "在", "有", "和", "与", "及", "或", "也", "都", "就",
-    "个", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十",
-    "为", "中", "上", "下", "这", "那", "其", "之", "等", "将", "被",
-    "对", "从", "到", "以", "由", "于", "向", "把", "给", "让",
-    "可以", "能够", "可能", "应该", "需要", "进行", "表示", "根据",
-    "其中", "以及", "或者", "还是", "不是", "没有", "如果", "因为",
-    "达到", "约为", "约", "约", "左右", "以上", "以下", "之间",
-    "多少", "什么", "哪个", "哪些", "怎么", "如何", "为什么",
-    "比", "较", "更", "最", "相",
-}
+# 中文停用词（不再用于 keyword 命中，保留供潜在 keyword 形态回退）
 
 # 数字模式：整数/小数/百分比/带逗号千分位（连续数字串，前后无非数字字符）
 # 匹配连续的数字+逗号+小数点，至少 1 位数字主体
@@ -44,63 +34,124 @@ def _extract_number_tokens(text: str) -> list[str]:
     return result
 
 
-def _extract_keywords(text: str) -> list[str]:
-    """从 fact 文本中提取中文关键词（长度≥2、非停用词）。"""
-    # 简单切分：按标点和空格切
-    tokens = re.split(r"[，。、；：「」『』""''（）()【】\[\] ,.?!:;~～·\-—/\\\n]", text)
-    keywords = []
-    for t in tokens:
-        t = t.strip()
-        if len(t) < 2:
+def _num_in_content(num: str, content: str) -> bool:
+    """数字 token 边界匹配：避免「30」误中「130」「30%」等粘连形式。
+
+    两侧都去逗号后匹配，兼容千分位（fact「14,826」/「1,963」对 chunk
+    原文「14,826」「1,963」等价命中）。
+    """
+    clean = num.replace(",", "")
+    return re.search(rf"(?<!\d){re.escape(clean)}(?!\d)", content.replace(",", "")) is not None
+
+
+# 文本佐证用分隔符归一化：去标点/空格/符号，保汉字/字母/数字/百分号，
+# 让「知识图谱 + 大模型融合」与「| 疏忽大意 | … | 30% |」可跨单元格连续匹配
+_SEP = re.compile(r"[^一-龥A-Za-z0-9%]")
+
+
+def _norm(text: str) -> str:
+    return _SEP.sub("", text).lower()
+
+
+# ── 数字锚分类（2026-09-27 定稿）────────────────────────────
+# 强锚 = 单位绑定数字 / 小数 / 比较符后数字（80%、52秒、=30、2.4）；
+# 弱锚 = 版本号 / 年份 / 差值 / 序数（V2.3、2026、+13.2%、趋势2）→ 不构成强证据。
+# 结论位 = 等式/≈/→ 最右右值、≤≥<> 后数字；无比较式时退化为全部强锚
+# （并列主值，如「西南 52 秒 vs 华东 38 秒」任一命中即可）。
+_UNIT_AFFIX = ("分", "小时", "分钟", "次", "秒", "件", "元", "天", "点", "周", "人", "亿")
+_ORD_PREFIX = ("第", "问题", "趋势", "阶段", "季度", "款", "轮", "条", "项", "列", "节")
+_DIFF_SUFFIX = ("pp", "个百分点", "百分点", "倍")
+
+
+def _is_weak_anchor(num: str, fact: str) -> bool:
+    if re.search(rf"[Vv]\s*{re.escape(num)}", fact) or re.search(rf"{re.escape(num)}\s*版", fact) \
+            or (num.count(".") == 1 and re.search(r"[Vv版]", fact)):
+        return True
+    if re.match(r"^(?:19|20)\d{2}$", num):
+        return True
+    if re.search(rf"[+\-]\s*{re.escape(num)}", fact) \
+            or any(re.search(rf"{re.escape(num)}\s*{s}", fact) for s in _DIFF_SUFFIX):
+        return True
+    if any(re.search(rf"{p}\s*{re.escape(num)}", fact) for p in _ORD_PREFIX) \
+            or re.search(rf"[Qq]{re.escape(num)}", fact):
+        return True
+    return False
+
+
+def _number_anchors(fact: str) -> tuple[set[str], set[str]]:
+    fact_nums = set(_extract_number_tokens(fact))
+    strong = set()
+    for n in fact_nums:
+        if _is_weak_anchor(n, fact):
             continue
-        if t in _STOPWORDS:
-            continue
-        # 过滤纯数字（数字 token 已单独提取）
-        if re.fullmatch(r"[\d,.%]+", t):
-            continue
-        if t not in keywords:
-            keywords.append(t)
-    return keywords
+        if "." in n or n.endswith("%") \
+                or any(re.search(rf"{re.escape(n)}\s*{u}", fact) for u in _UNIT_AFFIX) \
+                or re.search(rf"[=≈≤≥<>→]\s*{re.escape(n)}", fact):
+            strong.add(n)
+    # 结论位：等式/≈/→ 右值是主结论（必中）；无等式时比较符后数字（目标值）
+    # 作为结论位；再无则退化为全部 strong（并列主值，任一命中即可）。
+    rv = [m.group(1).replace(",", "") for m in re.finditer(r"[=≈→]\s*([\d,]+(?:\.\d+)?%?)", fact)]
+    cmp = {m.group(1).replace(",", "") for m in re.finditer(r"[≤≥<>]\s*([\d,]+(?:\.\d+)?%?)", fact)}
+    if rv:
+        concl = {rv[-1]}
+    elif cmp:
+        concl = cmp
+    else:
+        concl = strong
+    return strong, concl
 
 
 def _lexical_match(fact: str, chunk_content: str) -> bool:
     """词汇模式：判断 fact 是否出现在 chunk 中。
 
-    策略：
-    - 如果 fact 有数字 token：数字命中率 ≥ 50%（至少 1 个） + 关键词命中 ≥ 1 个
-      （数字是强信号，数字本身命中率已经能说明问题）
-    - 如果 fact 无数字 token：关键词命中率 ≥ 60%
+    形态（探针 + 全库回归校准，2026-09-27）：
+    1. 数字 token 用边界正则匹配（`(?<!\d)…(?!\d)`，避免「30」误中「130」），
+       千分位去逗号后等价匹配；
+    2. fact/chunk 都做分隔符归一化，数字粘连词（「疏忽大意30%」）与分离表格块
+       （「| 疏忽大意 | … | 30% |」）可连续匹配；
+    3. 文本佐证用「累计匹配长度」而非最长块——表格碎片/连接词把公共内容
+       打断成多段，lcs 会低估（「GraphRAG核心」lcs=8 但两个块合计 17，长度 19
+       覆盖 89%）；累计长度对碎片化鲁棒；
+    4. 数字事实：数字是强信号，文本佐证需 ≥ 较大子串；多数字事实还要求
+       多数数字边界命中（纯「30分钟」式弱支持无法靠单数字通过）;
+    5. 纯文本事实要求实质覆盖（累计 ≥ max(4, len/2)），否则 4 字短语
+       （如「一级投诉」）会误中只顺带提及该词的长块。
+    6. 锚定分类（2026-09-27 v5.23 定稿）：区分「结论位/强锚」数字与「弱锚」
+       （版本/年份/差值/序数）。对含强锚数字的事实，若强锚任一致命缺失
+       或结论位数字未命中则拒绝——结论位 = 等式/≈/→ 最右右值（主结论，
+       优先），无等式时才以 ≤≥<> 后数字为目标值，均无则退化为全部强锚
+       （并列主值，任一命中即可）。堵住「合计扣分=20+10=30分」这类推导型
+       事实只命中前提数字（20/10）而结论数值（30）未出现的伪命中；同时
+       「西南52秒 vs 华东38秒」这种并列主值只要任一值被检索到即可命中。
     """
     fact_nums = set(_extract_number_tokens(fact))
-    fact_kws = _extract_keywords(fact)
-    chunk_lower = chunk_content.lower()
-
-    if fact_nums:
-        # 数字命中比例
-        num_hits = sum(1 for n in fact_nums if n in chunk_lower)
-        num_hit_ratio = num_hits / len(fact_nums)
-        if num_hits < 1 or num_hit_ratio < 0.4:
-            return False
-        # 关键词命中
-        kw_hits = sum(1 for kw in fact_kws if kw.lower() in chunk_lower)
-        # 三档判断：
-        # 1. 数字几乎全中(≥75%)且数字够多(≥3个) → 强信号，直接过
-        # 2. 数字中一半以上 + 至少1个关键词 → 通过
-        # 3. 数字只有1个 → 必须有至少1个关键词辅助（防止单个数字误匹配）
-        if num_hit_ratio >= 0.75 and len(fact_nums) >= 3:
-            return True
-        if fact_kws and kw_hits >= 1:
-            return True
-        if not fact_kws and num_hit_ratio >= 0.5:
-            return True
-        # 数字少(1-2个)且无关键词命中 → 疑伪，不通过
-        return False
-    else:
-        # 纯文本事实：关键词命中率 ≥ 60%
-        if not fact_kws:
-            return False
-        kw_hits = sum(1 for kw in fact_kws if kw.lower() in chunk_lower)
-        return kw_hits / len(fact_kws) >= 0.6
+    has_num = bool(fact_nums)
+    if has_num:
+        strong, concl = _number_anchors(fact)
+        if strong:
+            strong_hits = sum(1 for n in strong if _num_in_content(n, chunk_content))
+            if strong_hits < 1:
+                return False
+            if len(strong) >= 2 and strong_hits / len(strong) < 0.5:
+                return False
+            if concl and not any(_num_in_content(n, chunk_content) for n in concl):
+                return False
+        else:
+            num_hits = sum(1 for n in fact_nums if _num_in_content(n, chunk_content))
+            if num_hits < 1:
+                return False
+            # 多数字事实：要求多数数字命中（至少一半），单个数字的弱支持不够
+            if len(fact_nums) >= 2 and num_hits / len(fact_nums) < 0.5:
+                return False
+    f_norm = _norm(fact)
+    if not f_norm:
+        return True
+    chunk_norm = _norm(chunk_content)
+    sm = difflib.SequenceMatcher(None, f_norm, chunk_norm, autojunk=False)
+    cum = sum(m.size for m in sm.get_matching_blocks() if m.size >= 2)
+    if has_num:
+        return cum >= max(2, min(4, len(f_norm))) or sm.ratio() >= 0.5
+    return cum >= max(4, len(f_norm) // 2) or sm.ratio() >= 0.5
 
 
 def _compute_lexical_gold_rank(

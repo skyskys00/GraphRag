@@ -1,17 +1,17 @@
 # 检索优化单一事实源
 
 > **定位**：收敛「为提升检索质量（切分 / 召回 / 排序 / 评测）做过的全部优化方法」的权威清单——**方法 → 所属阶段 → 当前状态**的判定以本表为准。
-> 本页**不复述数据**，每个方法只留一句话关键结论；效果数字、A/B 明细、逐题数据见下面的数据文档区；版本时序唯一权威是 [CHANGELOG.md](CHANGELOG.md)。
+> 本页**不复述数据**，每个方法只留一句话关键结论；效果数字、A/B 明细、逐题数据见下面的数据文档区；版本时序唯一权威是 [CHANGELOG.md](../CHANGELOG.md)。
 
 ## 与其它文档的关系（不复制，链接）
 
 | 事实源 | 内容 | 何时更新 |
 |--------|------|----------|
 | **本文档** | 方法总表：阶段 / 机制 / 状态判定 / 结论一句话 | 新方法落版 / 弃用时 |
-| [retrieval_comparison.md](../backend/tests/reports/retrieval_comparison.md) | benchmark 数据：各版总体/类目指标对比 + A/B 明细 + 探针数据复原 | 每次评测归档时 |
-| [CHANGELOG.md](CHANGELOG.md) | 版本时序（semver）+ 各版本完整实测结论 | 版本变更时 |
-| [modules/M5_retrieve.md](modules/M5_retrieve.md) | 检索层接口契约 + 关键决策（对应组 C 方法如何接线） | M5 代码变化时 |
-| [modules/M9_evaluation.md](modules/M9_evaluation.md) | 评测层接口契约 + 可选 reranker（对应组 D 方法如何启用） | M9 代码变化时 |
+| [retrieval_comparison.md](../../backend/tests/reports/retrieval_comparison.md) | benchmark 数据：各版总体/类目指标对比 + A/B 明细 + 探针数据复原 | 每次评测归档时 |
+| [CHANGELOG.md](../CHANGELOG.md) | 版本时序（semver）+ 各版本完整实测结论 | 版本变更时 |
+| [M5_retrieve.md](M5_retrieve.md) | 检索层接口契约 + 关键决策（对应组 C 方法如何接线） | M5 代码变化时 |
+| [M9_evaluation.md](M9_evaluation.md) | 评测层接口契约 + 可选 reranker（对应组 D 方法如何启用） | M9 代码变化时 |
 
 **维护原则**：改检索方法 = 三处同步——本文档（状态判定）+ CHANGELOG（版本+结论）+ retrieval_comparison.md（数据）。本文档只说「哪个方法、在哪个阶段、什么状态」，数据一律进 benchmark 文档。
 
@@ -59,6 +59,7 @@ M1 解析 → M2 切分 → M3 索引 → M5 检索（三路召回 → RRF 融�
 | LLM listwise 终审（`--reranker llm`） | v5.21 | `LLM_POOL_SIZE=20` 池内块做 RankGPT 式 listwise 重排，绕过 cross-encoder 对数字/专名表的失明 | **正式可选（仅 M9）**：nDCG@5 0.8567→**0.9479**、Re@5 0.9524→0.9857、gold_rank avg 2.04→1.76。**决策：不接 answer 链路、不引入 M5 生产检索**（流式不兼容 + 评测同源偏置 + token 成本） |
 | P0 recall 证据强制（判据层） | v5.22 / v5.22.1 | prompt 要求「hit 必须逐字引用原文 + reason 不得自述否定」+ 代码层 `_enforce_evidence` 兜底——judge 自述强否定却判 hit 时，仅**空洞否定**（reason 无数值锚点/推导缺口/块引用/核心词组任一证据信号，且非负向断言 fact）校正为 miss | **正式（M9 判据层）**：v5.22 粗校「有否定词即降 miss」误杀 20/27 → v5.22.1 精准化为空洞否定后校正收敛 27→7，recall 客服 0.7778→0.8626（+8.5pt）、行政 0.8571→0.9321（+7.5pt），20 处误杀全部恢复 |
 | P1 precision 数字纪律（判据层） | v5.22 | precision 判据不再喂整段 `ground_truth[:500]`（数值复读幻觉根源），改用 `build_gt_points` 归一化 = 要点句 + 显式【关键数值】清单，prompt 注明比对数值严格以清单为准 | **正式（M9 判据层）**：两库 precision reason 含 68.5 幻读处数 0（修复前客服 4 处）——对照数据见 CHANGELOG v5.22/v5.22.1 |
+| gold_rank lexical 匹配器（锚定分类 + 数字粘连修复） | v5.23 | `_lexical_match` 数字边界正则 + 分隔符归一化 + 结论位/强锚/弱锚分类（等式右值必中，版本/年份/差值/序数不算强证据） | **正式（M9 gold_rank 维度，零 LLM 成本）**：top1/3/5/8 事实覆盖率 0.306/0.421/0.486/0.517 → **0.539/0.761/0.823/0.838**，gold_rank_avg 2.08→**1.71**；judge 判据零改动（recall/precision/ndcg 逐位不变） |
 
 ---
 
@@ -86,7 +87,7 @@ M1 解析 → M2 切分 → M3 索引 → M5 检索（三路召回 → RRF 融�
 | 缺口 | 定性 | 状态 |
 |---|---|---|
 | q008 6.2 赔偿表（030/031） | 连 `fused_top40` 候选池都没进——**召回/融合边界缺口**，非 reranker 层（LLM 终审也救不了池外块） | **承认搁置**。e2e 已证明系统诚实拒答不幻觉，可用性不受损。若未来要缓池塘外表格子块，唯一保留的最小成本路径：对「已命中表格族块」做 ±1 或按表边界展开 |
-| gold_rank `_lexical_match` 数字粘连假阴性 | 数字粘连中文词（如「疏忽大意30%」）作整串 keyword 匹配，对分离形式永远失配 | **待修**（影响历史 gold_rank 数字，幅度小）；探针已用「数字边界 + SequenceMatcher」用例验证过正确形态 |
+| gold_rank `_lexical_match` 数字粘连假阴性 | 数字粘连中文词（如「疏忽大意30%」）作整串 keyword 匹配，对分离表格块永远失配 | **已修 v5.23**：数字边界正则 + 分隔符归一化 + 结论位/强弱锚分类，35 题 top8 事实覆盖率 0.517→**0.838**、gold_rank_avg 2.08→**1.71**（judge 判据零改动） |
 
 ---
 

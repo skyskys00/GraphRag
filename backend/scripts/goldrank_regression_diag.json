@@ -1,0 +1,1139 @@
+{
+  "stats": {
+    "total_facts": 129,
+    "found": {
+      "ORIG": 72,
+      "STRICT": 71,
+      "NEW": 111
+    }
+  },
+  "matrix": {
+    "三级投诉 = 一般投诉": {
+      "ORIG": false,
+      "STRICT": true,
+      "NEW": true
+    },
+    "首次响应时效 = 4 小时": {
+      "ORIG": false,
+      "STRICT": true,
+      "NEW": true
+    },
+    "工作时间计算（工作日9:00-18:00）": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "一级投诉问题解决时限 = 24 小时": {
+      "ORIG": false,
+      "STRICT": true,
+      "NEW": true
+    },
+    "一级投诉按自然时间计算，其他等级按工作时间": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "FCR = First Contact Resolution = 首次联系解决率": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "衡量一次联系内问题解决的比例": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "PRD 中目标值为 70%": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "法则名称 = LSC 法则": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "L = Listen 倾听": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "S = Share 共情": {
+      "ORIG": true,
+      "STRICT": false,
+      "NEW": true
+    },
+    "C = Clarify & Solve 澄清并解决": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "连续输错次数 = 5 次": {
+      "ORIG": false,
+      "STRICT": true,
+      "NEW": true
+    },
+    "锁定时长 = 30 分钟": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "超期升级：超时自动升级": {
+      "ORIG": false,
+      "STRICT": true,
+      "NEW": true
+    },
+    "情绪升级：客户威胁升级 → 客服总监": {
+      "ORIG": true,
+      "STRICT": false,
+      "NEW": true
+    },
+    "技术升级：2小时定位不出 → 技术支持中心": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "跨部门升级：客服项目经理拉群": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "v2.1 新增：情绪识别模块": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "v2.1 新增：多轮对话管理": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "v2.1 新增：知识库管理后台": {
+      "ORIG": true,
+      "STRICT": false,
+      "NEW": true
+    },
+    "v2.1 升级：智能问答引擎从关键词匹配升级为语义理解": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "不耐烦类": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "推卸责任类": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "激化矛盾类": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "随意承诺类": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "网络用语类": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "当前版本 = V2.3，生效日期 2026-09-01": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "上一版本 = V2.0，修订日期 2026-01-10": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "V2.0 修订内容：新增二级投诉分类、调整响应时效标准、增加情绪升级条款": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "修订人 = 王小燕": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "传统 RAG 问题：幻觉率高、企业专有知识覆盖不足": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "GraphRAG 核心：知识图谱 + 大模型融合": {
+      "ORIG": true,
+      "STRICT": false,
+      "NEW": true
+    },
+    "技术手段：实体级知识关联 + 图推理": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": false
+    },
+    "适用场景：企业内部多文档、强关联知识": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": false
+    },
+    "三级投诉定义 = 不影响核心功能、情绪平稳的常规问题": {
+      "ORIG": true,
+      "STRICT": false,
+      "NEW": true
+    },
+    "典型场景：外观划痕、配件缺失、操作咨询": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "首次响应 4 小时 / 方案提出 24 小时 / 问题解决 5 个工作日": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "按工作时间计算": {
+      "ORIG": false,
+      "STRICT": true,
+      "NEW": true
+    },
+    "SOP：三级投诉的标准回答工具": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "话术规范：自动回复话术训练校准的依据": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "PRD：智能客服系统核心模块，v2.1 升级为语义理解": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "运营报表：拦截率反映效果，西南大区尚未接入": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": false
+    },
+    "职位 = 客服总监": {
+      "ORIG": false,
+      "STRICT": true,
+      "NEW": true
+    },
+    "投诉处理最终负责人（一级投诉抄送她）": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "SOP V2.0/V2.3 修订人": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "话术规范审批人（V1.0/V1.2）": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "含义一：投诉分级升级（三级→二级→一级）": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "触发条件：超期/情绪/技术/跨部门 四种": {
+      "ORIG": true,
+      "STRICT": false,
+      "NEW": true
+    },
+    "含义二：跨部门升级（客服→其他部门）": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "执行方式：客服项目经理拉群，工单系统 v3.0 流转": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "含义一：客户响应时限 = SOP 分级响应 SLA（4h/1h/15min）": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "面向客户、按工作时间计": {
+      "ORIG": false,
+      "STRICT": true,
+      "NEW": true
+    },
+    "含义二：ART 平均响应时间 = 系统性能指标": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": false
+    },
+    "Q3 整体 ART = 45 秒（目标 ≤ 30 秒）": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "含义三：AHT 平均处理时长 = 工单打开到关闭平均耗时": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "Q3 整体 AHT = 2.4 小时（目标三级投诉 ≤ 2 小时）": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "PRD 目标解决率 = 85%": {
+      "ORIG": false,
+      "STRICT": true,
+      "NEW": true
+    },
+    "Q3 实际解决率 = 81.2%": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "差距约 3.8 个百分点": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": false
+    },
+    "主要原因：西南大区未接入智能客服（解决率 78.6%）": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "首问解决率 = FCR = 首次联系解决率（同一概念）": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "行业水平：40% → 70%+（LLM 驱动）": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "PRD 目标：整体 ≥ 85%、智能问答 ≥ 70%（分层）": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "Q3 整体 FCR 实际 = 78.5%，未达 85% 目标": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "ART = Average Response Time": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "中文 = 平均响应时间": {
+      "ORIG": false,
+      "STRICT": true,
+      "NEW": true
+    },
+    "定义：从接收用户消息到发出第一条回复的平均时长": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "衡量响应速度的核心 KPI": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": false
+    },
+    "FCR = First Contact Resolution": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "中文 = 首次联系解决率": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "一次联系内问题解决的比例": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "衡量客服效率与解决能力的核心指标": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": false
+    },
+    "CSAT = Customer Satisfaction Score": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "中文 = 客户满意度评分": {
+      "ORIG": false,
+      "STRICT": true,
+      "NEW": true
+    },
+    "通常 1-5 分制": {
+      "ORIG": true,
+      "STRICT": false,
+      "NEW": false
+    },
+    "衡量客户服务体验的核心指标": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "AHT = Average Handle Time": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "中文 = 平均处理时长": {
+      "ORIG": false,
+      "STRICT": true,
+      "NEW": true
+    },
+    "含服务时长 + 事后整理时间": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": false
+    },
+    "衡量客服工作效率的运营指标": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": false
+    },
+    "LSC 是情绪处理法则": {
+      "ORIG": false,
+      "STRICT": true,
+      "NEW": true
+    },
+    "GraphRAG = 知识图谱 + 大模型融合的 RAG 架构": {
+      "ORIG": true,
+      "STRICT": false,
+      "NEW": true
+    },
+    "GraphRAG 优势：实体级关联 + 图推理": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "适用：多文档、强关联的企业知识场景": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "三级 = 4 小时、二级 = 1 小时、一级 = 15 分钟": {
+      "ORIG": true,
+      "STRICT": false,
+      "NEW": true
+    },
+    "等级越高，响应越快": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "一级按自然时间计算，二三级按工作时间": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "原因：一级涉及人身安全/大规模故障/媒体风险，紧急程度最高": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "服务时间：智能 7×24 vs 人工工作日 9:00-18:00": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "响应速度：智能秒级 vs 人工需排队": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "处理范围：智能标准化（80%常见问题）vs 人工复杂个性化": {
+      "ORIG": false,
+      "STRICT": true,
+      "NEW": true
+    },
+    "协作模式：AI 拦截简单问题 + 复杂转人工": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": false
+    },
+    "解决率：华东 84.2% vs 西南 78.6%（+5.6pp）": {
+      "ORIG": true,
+      "STRICT": false,
+      "NEW": true
+    },
+    "CSAT：华东 4.45，居首；西南较低": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "ART：西南 52 秒 vs 华东 38 秒": {
+      "ORIG": true,
+      "STRICT": false,
+      "NEW": true
+    },
+    "原因：西南未接入智能问答引擎，仍以人工为主": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "版本迭代表无指标目标对比（七个维度：核心能力/意图识别/对话轮次/工单对接/情绪识别/知识库自学习/渠道）": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": false
+    },
+    "四、核心指标定义仅 V2.1 目标：解决率≥85%、整体FCR≥85%且智能问答≥70%、ART≤30s、拦截率≥60%": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "v1.0 无指标目标记录 → 核心指标目标无法 v1.0 vs v2.1 比较": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "名为「v1.0→v2.1 指标目标提升」的说法无文档依据": {
+      "ORIG": true,
+      "STRICT": false,
+      "NEW": true
+    },
+    "Q3 总工单量 = 46,820 件": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "7 月 = 14,826 件": {
+      "ORIG": true,
+      "STRICT": false,
+      "NEW": true
+    },
+    "9 月 = 16,789 件": {
+      "ORIG": true,
+      "STRICT": false,
+      "NEW": true
+    },
+    "9 月比 7 月增长 ≈ 1,963 件（+13.2%）": {
+      "ORIG": false,
+      "STRICT": true,
+      "NEW": true
+    },
+    "人均工单量最高 = 华南大区，约 168 件/人": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "解决率最低 = 总部区域，75.3%": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "解决率次低 = 西南大区，78.6%": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "2026E 市场规模 ≈ 425 亿元": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "2023 年市场规模 ≈ 186 亿元": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "增长约 1.29 倍（2026 约为 2023 的 2.29 倍）": {
+      "ORIG": false,
+      "STRICT": true,
+      "NEW": false
+    },
+    "信息准确性 = 25 分，错误一次扣 10 分": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "服务态度 = 20 分，被投诉态度问题扣 20 分": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "合计扣分 = 20 + 10 = 30 分": {
+      "ORIG": true,
+      "STRICT": false,
+      "NEW": true
+    },
+    "剩余 = 70 分（及格以上）": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    },
+    "整体：工单量 46,820、解决率 81.2%、CSAT 4.38、ART 45s、FCR 78.5%、拦截率 61.7%": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "问题 1：解决率距 85% 目标差 3.8pp": {
+      "ORIG": true,
+      "STRICT": false,
+      "NEW": true
+    },
+    "问题 2：FCR/CSAT/ART 未达目标；西南大区未接入智能客服表现弱": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "问题 3：复杂问题处理能力不足": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "改进方向：西南接入、知识库优化、情绪识别提升": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": false
+    },
+    "技术趋势 1：GraphRAG（知识图谱 + 大模型）": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "技术趋势 2：多模态（语音成熟、图片早期）": {
+      "ORIG": true,
+      "STRICT": false,
+      "NEW": true
+    },
+    "技术趋势 3：情绪识别与主动服务": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "技术趋势 4：Agent 化（从问答到任务）": {
+      "ORIG": true,
+      "STRICT": true,
+      "NEW": true
+    },
+    "未来展望：降本→增效、垂直化、人机协作常态": {
+      "ORIG": false,
+      "STRICT": false,
+      "NEW": true
+    }
+  },
+  "new_vs_strict": [
+    {
+      "fact": "一级投诉按自然时间计算，其他等级按工作时间",
+      "qid": "CS-FS-002",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "衡量一次联系内问题解决的比例",
+      "qid": "CS-FS-003",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "PRD 中目标值为 70%",
+      "qid": "CS-FS-003",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "S = Share 共情",
+      "qid": "CS-FS-004",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "锁定时长 = 30 分钟",
+      "qid": "CS-FS-005",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "情绪升级：客户威胁升级 → 客服总监",
+      "qid": "CS-FS-006",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "跨部门升级：客服项目经理拉群",
+      "qid": "CS-FS-006",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "v2.1 新增：知识库管理后台",
+      "qid": "CS-FS-007",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "GraphRAG 核心：知识图谱 + 大模型融合",
+      "qid": "CS-FS-010",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "三级投诉定义 = 不影响核心功能、情绪平稳的常规问题",
+      "qid": "CS-FC-001",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "SOP：三级投诉的标准回答工具",
+      "qid": "CS-FC-002",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "话术规范：自动回复话术训练校准的依据",
+      "qid": "CS-FC-002",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "投诉处理最终负责人（一级投诉抄送她）",
+      "qid": "CS-FC-003",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "含义一：投诉分级升级（三级→二级→一级）",
+      "qid": "CS-FC-004",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "触发条件：超期/情绪/技术/跨部门 四种",
+      "qid": "CS-FC-004",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "含义二：跨部门升级（客服→其他部门）",
+      "qid": "CS-FC-004",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "含义三：AHT 平均处理时长 = 工单打开到关闭平均耗时",
+      "qid": "CS-FC-005",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "首问解决率 = FCR = 首次联系解决率（同一概念）",
+      "qid": "CS-FC-007",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "定义：从接收用户消息到发出第一条回复的平均时长",
+      "qid": "CS-PN-001",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "中文 = 首次联系解决率",
+      "qid": "CS-PN-002",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "一次联系内问题解决的比例",
+      "qid": "CS-PN-002",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "衡量客户服务体验的核心指标",
+      "qid": "CS-PN-003",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "GraphRAG = 知识图谱 + 大模型融合的 RAG 架构",
+      "qid": "CS-PN-006",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "GraphRAG 优势：实体级关联 + 图推理",
+      "qid": "CS-PN-006",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "适用：多文档、强关联的企业知识场景",
+      "qid": "CS-PN-006",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "三级 = 4 小时、二级 = 1 小时、一级 = 15 分钟",
+      "qid": "CS-CP-001",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "等级越高，响应越快",
+      "qid": "CS-CP-001",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "一级按自然时间计算，二三级按工作时间",
+      "qid": "CS-CP-001",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "原因：一级涉及人身安全/大规模故障/媒体风险，紧急程度最高",
+      "qid": "CS-CP-001",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "响应速度：智能秒级 vs 人工需排队",
+      "qid": "CS-CP-002",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "解决率：华东 84.2% vs 西南 78.6%（+5.6pp）",
+      "qid": "CS-CP-003",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "ART：西南 52 秒 vs 华东 38 秒",
+      "qid": "CS-CP-003",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "原因：西南未接入智能问答引擎，仍以人工为主",
+      "qid": "CS-CP-003",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "名为「v1.0→v2.1 指标目标提升」的说法无文档依据",
+      "qid": "CS-CP-004",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "7 月 = 14,826 件",
+      "qid": "CS-TN-001",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "9 月 = 16,789 件",
+      "qid": "CS-TN-001",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "增长约 1.29 倍（2026 约为 2023 的 2.29 倍）",
+      "qid": "CS-TN-003",
+      "old": true,
+      "new": false
+    },
+    {
+      "fact": "合计扣分 = 20 + 10 = 30 分",
+      "qid": "CS-TN-004",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "剩余 = 70 分（及格以上）",
+      "qid": "CS-TN-004",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "问题 1：解决率距 85% 目标差 3.8pp",
+      "qid": "CS-SM-001",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "技术趋势 2：多模态（语音成熟、图片早期）",
+      "qid": "CS-SM-002",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "未来展望：降本→增效、垂直化、人机协作常态",
+      "qid": "CS-SM-002",
+      "old": false,
+      "new": true
+    }
+  ],
+  "new_vs_orig": [
+    {
+      "fact": "三级投诉 = 一般投诉",
+      "qid": "CS-FS-001",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "首次响应时效 = 4 小时",
+      "qid": "CS-FS-001",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "一级投诉问题解决时限 = 24 小时",
+      "qid": "CS-FS-002",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "一级投诉按自然时间计算，其他等级按工作时间",
+      "qid": "CS-FS-002",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "衡量一次联系内问题解决的比例",
+      "qid": "CS-FS-003",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "PRD 中目标值为 70%",
+      "qid": "CS-FS-003",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "连续输错次数 = 5 次",
+      "qid": "CS-FS-005",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "锁定时长 = 30 分钟",
+      "qid": "CS-FS-005",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "超期升级：超时自动升级",
+      "qid": "CS-FS-006",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "跨部门升级：客服项目经理拉群",
+      "qid": "CS-FS-006",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "按工作时间计算",
+      "qid": "CS-FC-001",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "SOP：三级投诉的标准回答工具",
+      "qid": "CS-FC-002",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "话术规范：自动回复话术训练校准的依据",
+      "qid": "CS-FC-002",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "职位 = 客服总监",
+      "qid": "CS-FC-003",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "投诉处理最终负责人（一级投诉抄送她）",
+      "qid": "CS-FC-003",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "含义一：投诉分级升级（三级→二级→一级）",
+      "qid": "CS-FC-004",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "含义二：跨部门升级（客服→其他部门）",
+      "qid": "CS-FC-004",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "面向客户、按工作时间计",
+      "qid": "CS-FC-005",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "含义三：AHT 平均处理时长 = 工单打开到关闭平均耗时",
+      "qid": "CS-FC-005",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "PRD 目标解决率 = 85%",
+      "qid": "CS-FC-006",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "首问解决率 = FCR = 首次联系解决率（同一概念）",
+      "qid": "CS-FC-007",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "中文 = 平均响应时间",
+      "qid": "CS-PN-001",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "定义：从接收用户消息到发出第一条回复的平均时长",
+      "qid": "CS-PN-001",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "中文 = 首次联系解决率",
+      "qid": "CS-PN-002",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "一次联系内问题解决的比例",
+      "qid": "CS-PN-002",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "中文 = 客户满意度评分",
+      "qid": "CS-PN-003",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "通常 1-5 分制",
+      "qid": "CS-PN-003",
+      "old": true,
+      "new": false
+    },
+    {
+      "fact": "衡量客户服务体验的核心指标",
+      "qid": "CS-PN-003",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "中文 = 平均处理时长",
+      "qid": "CS-PN-004",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "LSC 是情绪处理法则",
+      "qid": "CS-PN-005",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "GraphRAG 优势：实体级关联 + 图推理",
+      "qid": "CS-PN-006",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "适用：多文档、强关联的企业知识场景",
+      "qid": "CS-PN-006",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "等级越高，响应越快",
+      "qid": "CS-CP-001",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "一级按自然时间计算，二三级按工作时间",
+      "qid": "CS-CP-001",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "原因：一级涉及人身安全/大规模故障/媒体风险，紧急程度最高",
+      "qid": "CS-CP-001",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "响应速度：智能秒级 vs 人工需排队",
+      "qid": "CS-CP-002",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "处理范围：智能标准化（80%常见问题）vs 人工复杂个性化",
+      "qid": "CS-CP-002",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "原因：西南未接入智能问答引擎，仍以人工为主",
+      "qid": "CS-CP-003",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "9 月比 7 月增长 ≈ 1,963 件（+13.2%）",
+      "qid": "CS-TN-001",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "剩余 = 70 分（及格以上）",
+      "qid": "CS-TN-004",
+      "old": false,
+      "new": true
+    },
+    {
+      "fact": "未来展望：降本→增效、垂直化、人机协作常态",
+      "qid": "CS-SM-002",
+      "old": false,
+      "new": true
+    }
+  ]
+}
