@@ -216,3 +216,29 @@
 | q008 | 0（col=1 被阈值拦） | 与探针「部分救」一致 |
 
 **机制全部按设计生效，但 30 题全量指标与 v5.20 baseline 逐位一致**（nDCG@5 0.8567 / Rec@5 0.9524 / Prec@5 0.4600 / gold_rank_avg 2.04）。根因链条完全符合预期：补块 sparse/rrf 特征为 0、排名几乎只由 rerank 分决定 → **cross-encoder 对数字/专名表失明，补块全部被压出 top5**（q004 城市分级块补进池后融合排名仍在 top5 之外）。**结论：结构化补召回能解决「进候选池」，但最终名次卡在 reranker 失明，无任何指标收益 → 不落地。** 与 v5.11/12（特征增益无效）、v5.13（NL 摘要探针有效整体无效）一脉相承：**召回层手段（前缀注入 / NL 摘要 / 结构化补召回）都无法抵消 rerank 对表格语义的失明**，缺口需 reranker 侧改造或 LLM 高质摘要才能突破。代码已 git 回滚，`struct_table.py` 未接线删除。
+## LLM listwise 终审探底 A/B（v5.21，2026-09-27，已落地为 M9 可选 reranker）
+
+> **决策背景**：B 方案（结构化补召回）证明「进池靠召回层手段、出位卡 reranker 失明」。终审权移交方向：把 `fusion.fused_top40` 前 20 交给 LLM listwise 重排定 top-N —— **谁握终审权比顺序更关键**，cross-encoder 降级为召回/初筛。
+> 探针 `scripts/probe_rankgpt_listwise.py`（报告 `probe_rankgpt_listwise.json`）→ 全量 A/B `tests/reports/run_retr_admin_30_llm_final.json`（30 题，同库同裁判）。
+
+### A/B 总体
+
+| 指标 | v5.20 baseline | --reranker llm | Δ |
+|---|---|---|---|
+| nDCG@5 | 0.8567 | **0.9479** | **+9.1pt** |
+| Recall@5 | 0.9524 | **0.9857** | +3.3pt |
+| Prec@5 加权 | 0.619 | **0.7281** | +10.9pt |
+| gold_rank avg | 2.04 | **1.76** | 更靠前 |
+
+### 逐题画像（升/降/不动，诚实标注）
+
+- **大幅提升（符合「救表块」机制）**：q021 nDCG 0.743→1.000（prec 0.4→1.0）、q011 0.906→0.981（recall 0.667→1.0）、q004 recall 0.5→1.0、q010 prec 0.2→1.0、q013 table 0.760→0.916。
+- **个别反向（LLM 排序引入噪声）**：q005 nDCG 0.973→0.826、q009 0.989→0.868、q019 0.991→0.907；q014/q008 recall 1.0→0.8（LLM 把含 fact 的块排出 top8）。单题波动含 judge 随机性，但 net +9.1pt 远超噪声可解释。
+- **四类评分**：comparison 0.9667 / fact_single 0.9475 / proper_noun 0.9561 / **table_numeric 0.9519（原最弱项，gold_rank avg 1.00）**。
+
+### 结论与边界（决策依据）
+
+- **LLM 终审治「reranker 层失明」**：池内表块（CS-TN-003 两表、q020 会议室表、q004/q012 城市分级表）4/4 救回 top5 —— cross-encoder 失明的终审权问题已解决。
+- **只治池内不治池外**：fact_cross_doc 为召回层缺口（q008 5 facts 全 miss 的答案块根本没进 fused_top40），LLM 终审无从救起 —— **属 M2 切分/查询扩展/多文档关联范畴，非排序层问题**。
+- **成本**：每问 +1 次 LLM 调用（pool 20 块 ≈ 6k tokens 输入，+5~10s）；与 e2e judge 叠加后单题 ~25s。
+- **决策**：仅 M9 `--reranker llm` 可选，**不接 answer 链路**（流式不兼容 + 评测同源偏置风险 + 生产 token 成本）、**不引入 M5 生产检索**。
