@@ -4,7 +4,7 @@
 
 > **优化目标**：提升 `table_numeric`（表格数字题）类目的 Context Precision
 
-> **数据事实源**：本表收录各版评测指标 + A/B 明细 + 探针数据复原。方法 → 阶段 → 状态的方法总表见 [docs/RETRIEVAL_OPTIMIZATION.md](../../../docs/RETRIEVAL_OPTIMIZATION.md)；版本时序见 [docs/CHANGELOG.md](../../../docs/CHANGELOG.md)。
+> **数据事实源**：本表收录各版评测指标 + A/B 明细 + 探针数据复原。方法 → 阶段 → 状态的方法总表见 [docs/modules/RETRIEVAL_OPTIMIZATION.md](../../../docs/modules/RETRIEVAL_OPTIMIZATION.md)；版本时序见 [docs/CHANGELOG.md](../../../docs/CHANGELOG.md)。
 
 ## 版本演进
 

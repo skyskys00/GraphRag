@@ -428,7 +428,7 @@ cd backend && python -m app.m9_eval.runner \
 **决策边界（v5.21 拍板，本模块不改变它）**：
 - **仅 M9 评测可选**——不进入生产检索路径（M5），`RERANK_TOP` 生产仍为 5；
 - **不接 answer 链路**（流式不兼容 + 评测同源偏置风险 + 生产 token 成本）；
-- 生产侧以 v5.20 baseline 为准，输入侧改造已封顶（详见 [`RETRIEVAL_OPTIMIZATION.md`](../RETRIEVAL_OPTIMIZATION.md) 组 C/E）。
+- 生产侧以 v5.20 baseline 为准，输入侧改造已封顶（详见 [`RETRIEVAL_OPTIMIZATION.md`](RETRIEVAL_OPTIMIZATION.md) 组 C/E）。
 
 **归属**：`app/m9_eval/llm_rerank.py`（`rerank_with_llm`），runner 接线于 `evaluate_retrieval`。
 
