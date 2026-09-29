@@ -42,6 +42,7 @@ async def retrieve(
     entities: list[str] | None = None,
     exclude_docs: list[str] | None = None,
     allowed_docs: list[str] | None = None,
+    ablation_routes: list[str] | None = None,
 ) -> dict[str, Any]:
     """正式检索：返回 {query, preprocess, routes, fusion, results, sources}。
 
@@ -50,7 +51,11 @@ async def retrieve(
     exclude_docs: 软删文档的 full_doc_id 集合，召回结果按此过滤（保证删除后不再推荐）。
     allowed_docs: 白名单文档集合。如有，则只返回属于这些文档的 chunk；
                   与 exclude_docs 同时存在时，取「allowed 且不 excluded」的交集。
+    ablation_routes: 召回路数对照（ablation）。None/缺省 = graph+vector+keyword 三路全走；
+                     传子集（如 ["vector"] 或 ["vector","graph"]）时只执行选中路并入 RRF 融合，
+                     keyword 未选中时其 sparse 特征也不参与融合（对照组纯度）。
     """
+    active = set(ablation_routes) if ablation_routes is not None else {"graph", "vector", "keyword"}
     prep: PreprocessedQuery | None = None
     q_vec = query
     q_kw = query
@@ -61,38 +66,45 @@ async def retrieve(
         q_kw = prep.expanded  # keyword 路也用扩展 query
         ll_kw = prep.ll_keywords
 
-    graph_data = (
-        await rag.aquery_data(
-            query,
-            QueryParam(
-                mode="mix",
-                top_k=15,
-                chunk_top_k=20,
-                only_need_context=True,
-                enable_rerank=False,
-                ll_keywords=ll_kw,
-            ),
-        )
-    ).get("data", {})
-    vector_data = (
-        await rag.aquery_data(
-            q_vec,
-            QueryParam(mode="naive", top_k=20, chunk_top_k=20, only_need_context=True, enable_rerank=False),
-        )
-    ).get("data", {})
+    g_chunks: list[str] = []
+    if "graph" in active:
+        graph_data = (
+            await rag.aquery_data(
+                query,
+                QueryParam(
+                    mode="mix",
+                    top_k=15,
+                    chunk_top_k=20,
+                    only_need_context=True,
+                    enable_rerank=False,
+                    ll_keywords=ll_kw,
+                ),
+            )
+        ).get("data", {})
+        g_chunks = [c.get("chunk_id") for c in graph_data.get("chunks", []) if c.get("chunk_id")]
 
-    g_chunks = [c.get("chunk_id") for c in graph_data.get("chunks", []) if c.get("chunk_id")]
-    v_chunks = [c.get("chunk_id") for c in vector_data.get("chunks", []) if c.get("chunk_id")]
+    v_chunks: list[str] = []
+    if "vector" in active:
+        vector_data = (
+            await rag.aquery_data(
+                q_vec,
+                QueryParam(mode="naive", top_k=20, chunk_top_k=20, only_need_context=True, enable_rerank=False),
+            )
+        ).get("data", {})
+        v_chunks = [c.get("chunk_id") for c in vector_data.get("chunks", []) if c.get("chunk_id")]
     # 数字感知检索（v5.8）：数字型问题把精确数字 token 追加进 keyword 路 query，
     # 提升含同数字表格行的稀疏点积得分；数字 token 是精确强信号，1x 权重不引入噪声
-    kw_query = q_kw
-    if is_numeric_query(query):
-        nums = numeric_terms(query)
-        if nums:
-            kw_query = q_kw + " " + " ".join(nums)
-    kw_chunks_with_score = sparse_score(kw_query, sparse_doc, top_k=FUSED_TOP)
-    kw_chunks = [cid for cid, _ in kw_chunks_with_score]
-    kw_score_map = dict(kw_chunks_with_score)
+    kw_chunks: list[str] = []
+    kw_score_map: dict[str, float] = {}
+    if "keyword" in active:
+        kw_query = q_kw
+        if is_numeric_query(query):
+            nums = numeric_terms(query)
+            if nums:
+                kw_query = q_kw + " " + " ".join(nums)
+        kw_chunks_with_score = sparse_score(kw_query, sparse_doc, top_k=FUSED_TOP)
+        kw_chunks = [cid for cid, _ in kw_chunks_with_score]
+        kw_score_map = dict(kw_chunks_with_score)
 
     fused = _rrf([g_chunks, v_chunks, kw_chunks])[:FUSED_TOP]
     fused_ids = [cid for cid, _ in fused]

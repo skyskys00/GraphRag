@@ -23,7 +23,32 @@
 
 ---
 
-## [v5.23.3] 2026-09-27 —— gold_rank 修复三库统一：行政库同口径重跑
+## [v5.24] 2026-09-29 —— 召回路数对照（ablation study）落地
+
+**影响模块**：M5 检索 `retriever.py`（`ablation_routes` 参数）+ M9 评测 `runner.py`（`--ablation-routes` CLI 开关）+ 新增 `scripts/compare_ablation.py`（四报告汇总脚本，留档可复跑）。背景：内部参考资料 此前标注「⚠️ ablation study 未做」——真正需要回答的是「每一条召回路由（graph / vector / keyword）各带来多少增益」，而非整链路有无。本次以**不改任何检索/融合/判据逻辑**的方式落地该探底对比：`--ablation-routes` 按 active set 裁剪三路召回输入（未选中路由传空列表，对 RRF 无贡献；sparse 权重置空），在 admin 30 题测试集跑 vector / vector+graph / 三条全量三组对照，另加 verify 组排除污染：初跑 vector/vg 带瞬时 judge ERROR 日志（均重试成功、judge_failed=0），verify 组（0 ERROR）复跑逐项一致（0 题指标差异），确认数字未被污染。
+
+**admin 30 题三组对照**（报告 `tests/reports/run_ablation_admin_{vector,vector_graph,graph_vector_keyword}_20260929.json`）：
+
+| 指标 | vector | vector+graph | full（三路） | 2026-09-27 基线 |
+|---|---|---|---|---|
+| Recall@5 | 0.9440 | 0.9440 | 0.9321 | 0.9321 |
+| Prec@5 | 0.4200 | 0.4333 | 0.4200 | 0.4200 |
+| wPrec@5 | 0.5876 | 0.5966 | 0.5920 | 0.5920 |
+| nDCG@5 | 0.8415 | 0.8426 | 0.8450 | 0.8450 |
+| gold_rank avg | 1.37 | 1.37 | 1.59 | 1.59 |
+| GR top1 / top3 / top8 | 0.642/0.878/0.884 | 同左 | 0.666/0.848/0.914 | 同左 |
+
+**每加一路的增量归因**（Δ full-baseline 三组全部=0，先确认三路就是生产配置、pipeline+judge 逐位稳定）：
+
+- **graph 路（vg−vector）**：**召回层零增益**——8 题 chunk 集合与纯向量完全一致、仅 rerank 排序微调（adm_q009/q020 等）；Prec@5 +0.0133 / wPrec +0.9pt / nDCG@5 +0.001（源自 2 题 judge 判 0.4→0.6），量级落在 LLM judge 波动（±0.13pp/题）内，不构成可靠增益。
+- **keyword 路（full−vg）**：**双刃**。救回跨文档关键词考核（fact_cross_doc Re@5 0.775→**0.900** +12.5pt、GR top8 0.8839→**0.9137** +3.0pt，rank7 救援 3 个 fact：`25人在20-50人区间内`、`3F大会议室容量40人`、`适用全员大会/入职培训/季度总结`）；代价是 top5 净 recall −1.2pt（fact_single 1.0→0.9545、table_numeric 1.0→0.9333、GR top3 0.878→0.848），即「关键词竞价把个别事实挤出了 top5」。
+- **生产 top5 净效果 ≈ 中性**：三路收益集中在跨文档召回 + top6-8 覆盖；top5 排序结构被 keyword 路扰动 12/30 题。**结论：不因此调检索配置**——这是「keep 三路、recall 由 top8 窗口兜底」的现状合理性证明。
+
+**辅助数据**：full vs vector top5 差异 12/30 题、full vs vg 差异 10/30（脚本逐题打印）；graph 一路对 top1-8 事实覆盖率零改动。judge 失败 0。
+
+**模块文档**：[RETRIEVAL_OPTIMIZATION.md](modules/RETRIEVAL_OPTIMIZATION.md) 组 D 表新增「召回路数对照」行；`tests/reports/retrieval_comparison.md` 追加 ablation 小节。耗时：三组合计 609.7s（vector 146.5 + vg 182.8 + full 280.4，`time` 实测；初次含 judge 重试的慢跑已弃用，数值以 verify 一致组为准）。
+
+---
 
 **影响模块**：M9 评测层 `metrics/gold_rank.py`（v5.23 修复的验证补齐）。代码零改动，无新版本号上升。背景：v5.23 只定向重跑客服库（35 题），行政库 30 题仍是 v5.22.1 旧匹配器口径，两评测库 gold_rank 数字不统一；本次补齐行政库同口径重跑（default_ws 无评测测试集，不涉及该维度）。
 

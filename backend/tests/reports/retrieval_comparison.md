@@ -345,3 +345,30 @@
 - **judge 判据零改动**（隔离性二次验证）：retrieval 判据 recall 0.9321 / precision 0.42 / ndcg 0.845 与 v5.22.1 逐位不变。
 - **结论**：行政库 retriever 在 top8 内事实上覆盖 **91.4%** key facts（旧口径误判仅 34.5%）——修复效果与客服库同向且更显著，行政库同为旧匹配器系统性假阴性的受害者。
 - **三库终态**：客服 35 gold_rank avg 1.71 / top8 0.838（v5.23）；行政 30 avg 1.59 / top8 0.914（v5.23.3）；default_ws 无评测测试集。上文行政库各历史行 gold_rank_avg 2.04（v5.19~v5.21 探底）均为旧匹配器口径，保留作对照。
+
+---
+
+## 召回路数对照（route ablation，v5.24，2026-09-29）
+
+**背景**：回答「每条召回路由（graph / vector / keyword）各带多少增益」——`--ablation-routes` 开关按 active set 裁剪三路召回输入（不改检索/融合/判据逻辑），admin 30 题跑 vector / vector+graph / 三条全量三组对照；verify 组（0 ERROR）复跑逐项一致，初跑 judge ERROR 为已重试成功的瞬时日志，未污染。
+
+**总体指标**（报告 `tests/reports/run_ablation_admin_{vector,vector_graph,graph_vector_keyword}_20260929.json`）：
+
+| 指标 | vector | vector+graph | full（三路） | 2026-09-27 基线 |
+|---|---|---|---|---|
+| Recall@5 | 0.9440 | 0.9440 | 0.9321 | 0.9321 |
+| Prec@5 | 0.4200 | 0.4333 | 0.4200 | 0.4200 |
+| wPrec@5 | 0.5876 | 0.5966 | 0.5920 | 0.5920 |
+| nDCG@5 | 0.8415 | 0.8426 | 0.8450 | 0.8450 |
+| gold_rank avg | 1.37 | 1.37 | 1.59 | 1.59 |
+| GR top1 / top3 / top8 | 0.642 / 0.878 / 0.884 | 与 vector 全同 | 0.666 / 0.848 / 0.914 | 与 full 全同 |
+
+**每加一路的增量**：
+
+- **graph 路（vg−vector）**：召回层**零增益**。8 题 chunk 集合与纯向量完全一致、仅排序微调；Prec@5 +0.0133 / wPrec +0.9pt / nDCG@5 +0.001 全部来自 adm_q009/q020 两题 judge 判 0.4→0.6，量级等于 LLM judge 单题波动（±0.13pp），不构成可靠增益。gold_rank 全部维度逐位不变。
+- **keyword 路（full−vg）**：**双刃**。
+  - 正向：fact_cross_doc Re@5 0.775→**0.900**（+12.5pt）、GR top8 0.884→**0.914**（+3.0pt）；rank7 救援 3 个 key fact（`25人在20-50人区间内` [adm_q013] / `3F大会议室容量40人` + `适用全员大会/入职培训/季度总结` [adm_q020]）；GR avg 1.37→1.59。
+  - 代价：top5 净 recall −1.2pt——fact_single Re@5 1.0→0.9545、table_numeric 1.0→0.9333、GR top3 0.878→0.848（关键词路由把个别事实从 top5 挤到 top6-8）。
+- **full = 2026-09-27 基线逐位一致**（Δ 全 0）：三路就是生产配置，pipeline + judge 复现性确认。
+
+**结论**：生产 top5 净效果 ≈ 中性；三路收益集中在跨文档召回 + top6-8 覆盖，由 RERANK_TOP=8 窗口兜底。**不因此调检索配置**——现状「keep 三路」合理。逐题 top5 差异：full vs vector 12/30、full vs vg 10/30（`scripts/compare_ablation.py` 可复跑逐题归因）。

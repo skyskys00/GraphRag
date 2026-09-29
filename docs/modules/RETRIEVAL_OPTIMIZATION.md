@@ -60,6 +60,7 @@ M1 解析 → M2 切分 → M3 索引 → M5 检索（三路召回 → RRF 融�
 | P0 recall 证据强制（判据层） | v5.22 / v5.22.1 | prompt 要求「hit 必须逐字引用原文 + reason 不得自述否定」+ 代码层 `_enforce_evidence` 兜底——judge 自述强否定却判 hit 时，仅**空洞否定**（reason 无数值锚点/推导缺口/块引用/核心词组任一证据信号，且非负向断言 fact）校正为 miss | **正式（M9 判据层）**：v5.22 粗校「有否定词即降 miss」误杀 20/27 → v5.22.1 精准化为空洞否定后校正收敛 27→7，recall 客服 0.7778→0.8626（+8.5pt）、行政 0.8571→0.9321（+7.5pt），20 处误杀全部恢复 |
 | P1 precision 数字纪律（判据层） | v5.22 | precision 判据不再喂整段 `ground_truth[:500]`（数值复读幻觉根源），改用 `build_gt_points` 归一化 = 要点句 + 显式【关键数值】清单，prompt 注明比对数值严格以清单为准 | **正式（M9 判据层）**：两库 precision reason 含 68.5 幻读处数 0（修复前客服 4 处）——对照数据见 CHANGELOG v5.22/v5.22.1 |
 | gold_rank lexical 匹配器（锚定分类 + 数字粘连修复） | v5.23 / v5.23.3 | `_lexical_match` 数字边界正则 + 分隔符归一化 + 结论位/强锚/弱锚分类（等式右值必中，版本/年份/差值/序数不算强证据） | **正式（M9 gold_rank 维度，零 LLM 成本，两评测库统一）**：客服 35 top1/3/5/8 覆盖率 0.517→**0.838**、avg 2.08→**1.71**；行政 30 top1/3/5/8 覆盖率 0.345→**0.914**、avg 2.04→**1.59**；judge 判据零改动（recall/precision/ndcg 逐位不变，三库收敛） |
+| 召回路数对照（route ablation） | v5.24 | `--ablation-routes vector\|vector,graph\|graph,vector,keyword` 开关：retriever 按 active set 裁剪三路召回输入（未选中路由传空列表，RRF/稀疏权重均无贡献）；`scripts/compare_ablation.py` 汇总四份报告归因每路增量 | **正式（M5/M9 探底开关，不改检索逻辑）**：admin 30 **graph 路召回零增益**（8 题 chunk 集与纯向量完全一致、仅排序微调；Prec@5 +1.3pt / wPrec +0.9pt 源自 2 题，在 judge 波动量级）、**keyword 路双刃**（fact_cross_doc Re@5 +12.5pt、GR top8 +3.0pt，但 fact_single / table_numeric Re@5 -4.5pt、GR top3 -3.0pt）→ 生产 top5 净效果≈中性，增益集中于跨文档召回 + top6-8；三路=2026-09-27 基线逐位复现（复现性确认）。数据详见 CHANGELOG v5.24 |
 
 ---
 

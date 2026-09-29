@@ -75,6 +75,7 @@ async def evaluate_retrieval(
     gold_rank_mode: str = "lexical",
     eval_top_n: int = 8,
     reranker: str = "standard",
+    ablation_routes: list[str] | None = None,
 ) -> list[dict[str, Any]]:
     """逐题跑检索 + 评测 context recall / precision + gold_rank。
 
@@ -82,6 +83,7 @@ async def evaluate_retrieval(
         gold_rank_mode: 'lexical'（默认，零成本）或 'llm'（精确）
         eval_top_n: 检索取多少块用于评测（默认 8，可同时出 top5/top8 两套指标）
         reranker: 'standard'（cross-encoder+融合，默认）或 'llm'（LLM listwise 终审，正式可选）
+        ablation_routes: 召回路数对照（ablation）。None=三路全走；子集如 ['vector'] 只走指定路。
     """
     from app.m5_retrieve import retriever as ret_mod
     from app.m5_retrieve.retriever import retrieve
@@ -113,6 +115,7 @@ async def evaluate_retrieval(
                     entities=entities,
                     allowed_docs=allowed_docs,
                     exclude_docs=exclude_docs,
+                    ablation_routes=ablation_routes,
                 )
                 if reranker == "llm":
                     # LLM listwise 终审重排（正式可选 reranker，绕过 cross-encoder 表格失明）
@@ -578,8 +581,10 @@ async def main_async(args: argparse.Namespace) -> None:
     if args.mode in ("answer", "e2e"):
         results = await evaluate_answer(testset, rag, sparse, query_func)
     else:
+        ablation_routes = args.ablation_routes.split(",") if args.ablation_routes else None
         results = await evaluate_retrieval(testset, rag, sparse, query_func,
-                                           reranker=args.reranker)
+                                           reranker=args.reranker,
+                                           ablation_routes=ablation_routes)
     total_time = round(time.time() - t_start, 1)
 
     # 汇总报告
@@ -588,6 +593,7 @@ async def main_async(args: argparse.Namespace) -> None:
         "collection": collection,
         "workspace": workspace,
         "reranker": args.reranker,
+        "ablation_routes": args.ablation_routes,
     }
     report = build_report(testset, results, config=config)
     report["summary"]["total_time_s"] = total_time
@@ -622,6 +628,9 @@ def main() -> None:
     parser.add_argument("--reranker", default="standard",
                         choices=["standard", "llm"],
                         help="检索排序终审：standard=cross-encoder+融合（默认）；llm=LLM listwise 终审（正式可选，仅评测）")
+    parser.add_argument("--ablation-routes", default="graph,vector,keyword",
+                        help="召回路数对照（ablation，仅 retrieval 模式生效）：逗号分隔限定 RRF 融合的路由；"
+                             "如 'vector'（纯向量）、'vector,graph'（图+向量），默认三条全走（现行为）")
 
     args = parser.parse_args()
 
