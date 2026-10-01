@@ -15,6 +15,7 @@ export const mockCitations: Citation[] = [
     anchor: null,
     snippet: '投诉分级处理机制：一级（一线 24h 直接回复）、二级（主管 72h 首次回复）、三级（专项小组 1h 响应并上报）…',
     score: 0.92,
+    image_path: null,
   },
   {
     marker: 2,
@@ -26,6 +27,7 @@ export const mockCitations: Citation[] = [
     anchor: null,
     snippet: '回访与考核：闭环后 3 工作日内质检组抽访 30%，满意度纳入月度考核指标…',
     score: 0.86,
+    image_path: null,
   },
   {
     marker: 3,
@@ -37,6 +39,7 @@ export const mockCitations: Citation[] = [
     anchor: null,
     snippet: 'Q3 重点：客服工单系统支持三级流转，升级投诉自动派单至主管…',
     score: 0.71,
+    image_path: null,
   },
 ]
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { fetchDocPreview } from '../lib/api'
+import { apiUrl, fetchDocPreview } from '../lib/api'
 import type { DocPreview, UploadDoc } from '../types'
 
 interface DocumentPreviewProps {
@@ -23,6 +23,7 @@ export function DocumentPreview({
   const [preview, setPreview] = useState<DocPreview | null>(null)
   const [errorMsg, setErrorMsg] = useState('')
   const [attempt, setAttempt] = useState(0)
+  const [zoom, setZoom] = useState<string | null>(null)
 
   const docId = doc.doc_id ?? ''
 
@@ -96,6 +97,7 @@ export function DocumentPreview({
           {preview.units.map((u) => {
             const isTop = u.text_unit_id === topUnitId
             const isJump = jumpUnitId != null && u.text_unit_id === jumpUnitId && !isTop
+            const imgSrc = u.image_url ? apiUrl(u.image_url, collectionId) : null
             return (
               <div
                 key={u.text_unit_id}
@@ -115,12 +117,29 @@ export function DocumentPreview({
                     className="preview-table-wrapper"
                     dangerouslySetInnerHTML={{ __html: u.html ?? u.content }}
                   />
+                ) : u.block_type === 'drawing' && imgSrc ? (
+                  <div className="preview-drawing">
+                    <img
+                      className="preview-drawing-img"
+                      src={imgSrc}
+                      alt={u.content || '文档图片'}
+                      loading="lazy"
+                      onClick={() => setZoom(imgSrc)}
+                    />
+                    {u.content && <div className="preview-unit-content">{u.content}</div>}
+                  </div>
                 ) : (
                   <div className="preview-unit-content">{u.content}</div>
                 )}
               </div>
             )
           })}
+        </div>
+      )}
+
+      {zoom && (
+        <div className="preview-lightbox" onClick={() => setZoom(null)}>
+          <img src={zoom} alt="放大预览" />
         </div>
       )}
     </div>

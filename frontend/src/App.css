@@ -737,6 +737,16 @@
   border-radius: 4px;
   word-break: break-word;
 }
+.cite-thumb {
+  display: block;
+  margin-top: 6px;
+  max-width: 100%;
+  max-height: 160px;
+  object-fit: contain;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: zoom-in;
+}
 .cite-score {
   margin-top: 6px;
   font-size: 11px;
@@ -1783,6 +1793,38 @@
 .preview-unit.is-jump {
   border-color: var(--accent);
   box-shadow: 0 0 0 1px var(--accent-soft);
+}
+/* 多模态图片块：原图 + 视觉描述 */
+.preview-drawing {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.preview-drawing-img {
+  max-width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-soft, #fafafa);
+  cursor: zoom-in;
+}
+.preview-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  background: rgba(0, 0, 0, 0.72);
+  cursor: zoom-out;
+}
+.preview-lightbox img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
 }
 .preview-top1-tag {
   font-size: 10px;

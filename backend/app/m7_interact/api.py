@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any, AsyncIterator
 
 from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -148,6 +148,7 @@ async def preview_doc(doc_id: str, collection_id: str = Query("default")) -> dic
         if not line.strip():
             continue
         u = json.loads(line)
+        img = u.get("image_path")
         units.append({
             "text_unit_id": u.get("text_unit_id"),
             "content": u.get("content") or "",
@@ -156,6 +157,7 @@ async def preview_doc(doc_id: str, collection_id: str = Query("default")) -> dic
             "file_path": u.get("file_path"),
             "block_type": u.get("block_type") or "paragraph",
             "html": u.get("html") or None,
+            "image_url": f"/docs/{doc_id}/{img}" if img else None,
         })
         if not filename and u.get("file_path"):
             filename = Path(u["file_path"]).name
@@ -164,6 +166,23 @@ async def preview_doc(doc_id: str, collection_id: str = Query("default")) -> dic
     if rec and rec.get("filename"):
         filename = rec["filename"]
     return {"doc_id": doc_id, "filename": filename, "units": units}
+
+
+@app.get("/docs/{doc_id}/images/{name}")
+async def doc_image(doc_id: str, name: str, collection_id: str = Query("default")):
+    """多模态图片块的原图：serve <parse_dir>/<doc_id>/images/<name>。
+
+    doc_id/name 仅允许单一路径段，且解析后须落在 images/ 之下，防目录穿越。
+    """
+    deps = await get_deps(collection_id)
+    for seg in (doc_id, name):
+        if not seg or seg in (".", "..") or "/" in seg or "\\" in seg:
+            raise HTTPException(status_code=404, detail="非法路径")
+    images_dir = (deps.parse_dir / doc_id / "images").resolve()
+    target = (images_dir / name).resolve()
+    if images_dir not in target.parents or not target.is_file():
+        raise HTTPException(status_code=404, detail=f"图片不存在: {name}")
+    return FileResponse(target)
 
 
 @app.get("/graph")

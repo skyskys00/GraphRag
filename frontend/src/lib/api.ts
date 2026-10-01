@@ -21,6 +21,11 @@ function withQuery(path: string, params: Record<string, string | undefined>): st
   return url.toString()
 }
 
+// 后端返回的是裸路径（如 /docs/<doc>/images/<name>），前端补 API_BASE + collection_id
+export function apiUrl(path: string, collection_id = 'default'): string {
+  return withQuery(path, { collection_id })
+}
+
 export async function postAnswer(params: {
   query: string
   history?: HistoryMessage[]

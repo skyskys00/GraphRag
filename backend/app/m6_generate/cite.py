@@ -37,6 +37,7 @@ class Citation:
     anchor: str | None
     snippet: str
     score: float
+    image_path: str | None = None
 
     def to_dict(self) -> dict:
         return {
@@ -49,6 +50,7 @@ class Citation:
             "anchor": self.anchor,
             "snippet": self.snippet,
             "score": self.score,
+            "image_path": self.image_path,
         }
 
 
@@ -86,6 +88,7 @@ def parse_citations(
                 anchor=(meta.anchor if meta else None),
                 snippet=_html_to_text(ref["content"])[:120],
                 score=ref["score"],
+                image_path=(meta.image_path if meta else None),
             )
         )
     # 修复：assemble 按精排位次编号，但正文 [n] 出现顺序不等于位次 →

@@ -54,7 +54,7 @@
 |------|------|
 | [`modules/M8_frontend_req.md`](modules/M8_frontend_req.md) | 前端需求文档（FR-xx 条目） |
 | [`modules/GRAPH_OPTIMIZATION_v4.md`](modules/GRAPH_OPTIMIZATION_v4.md) | 图谱优化 v4 方案（双层图谱 + 关系分类 + 实体筛选） |
-| [`modules/MULTIMODAL.md`](modules/MULTIMODAL.md) | 多模态：图片→视觉描述→独立 TextUnit（M0/M1/M2 **已实施** + M3/M5 零改动**已实测**，M6/M7/M8 待实施） |
+| [`modules/MULTIMODAL.md`](modules/MULTIMODAL.md) | 多模态：图片→视觉描述→独立 TextUnit（M0–M8 **全链已实施**，M3/M5 零改动**已实测**） |
 | [`PARSER_COMPARISON.md`](PARSER_COMPARISON.md) | MinerU vs Docling 选型复核 |
 
 ### 🐛 坑点层（集中存放，模块文档只留索引）

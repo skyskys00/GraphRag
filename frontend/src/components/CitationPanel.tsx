@@ -1,13 +1,21 @@
+import { apiUrl } from '../lib/api'
 import type { Citation } from '../types'
 
 interface CitationPanelProps {
   citations: Citation[]
   activeMarker: number | null
+  collectionId: string
   onJumpToGraph: (c: Citation) => void
   onOpenPreview: (docId: string, textUnitId?: string) => void
 }
 
-export function CitationPanel({ citations, activeMarker, onJumpToGraph, onOpenPreview }: CitationPanelProps) {
+export function CitationPanel({
+  citations,
+  activeMarker,
+  collectionId,
+  onJumpToGraph,
+  onOpenPreview,
+}: CitationPanelProps) {
   // 按置信度降序展示（后端已做相对阈值过滤，前端不再固定条数截断）
   const sorted = [...citations].sort((a, b) => b.score - a.score)
 
@@ -38,6 +46,15 @@ export function CitationPanel({ citations, activeMarker, onJumpToGraph, onOpenPr
               {' · '}相关度 {Math.round(c.score * 100)}%
             </div>
             <div className="cite-snippet">{c.snippet}</div>
+            {c.image_path && (
+              <img
+                className="cite-thumb"
+                src={apiUrl(`/docs/${c.full_doc_id}/${c.image_path}`, collectionId)}
+                alt="引用图片"
+                loading="lazy"
+                onClick={() => onOpenPreview(c.full_doc_id, c.text_unit_id)}
+              />
+            )}
             <div className="cite-score">
               <span>置信度</span>
               <span className="bar">

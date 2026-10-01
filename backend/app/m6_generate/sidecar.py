@@ -23,6 +23,7 @@ class ChunkMeta:
     page_range: list[int] | None = None
     anchor: str | None = None
     block_type: str | None = None
+    image_path: str | None = None
 
 
 class Sidecar:
@@ -66,6 +67,7 @@ def load(data_chunks_dir: str | Path) -> Sidecar:
                     page_range=rec.get("page_range"),
                     anchor=rec.get("anchor"),
                     block_type=rec.get("block_type"),
+                    image_path=rec.get("image_path"),
                 )
             )
     return Sidecar(items)

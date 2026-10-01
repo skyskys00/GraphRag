@@ -1,7 +1,7 @@
 # 多模态方案：说明书图片入索引
 
-> **版本：** v0.3.1（M0/M1/M2 已实施，M3/M5 零改动已验证）
-> **状态：** 已实施（M0 契约 / M1 解析 / M2 切分）；M6/M7/M8 展示层待实施
+> **版本：** v0.3.2（M0–M8 全链已实施，M3/M5 零改动已验证）
+> **状态：** 已实施（M0 契约 / M1 解析 / M2 切分 / M6 溯源 / M7 接口 / M8 前端）
 > **更新：** 2026-10-01
 > **定位：** 跨模块特性方案（M0 契约 / M1 解析 / M2 切分 / M6 溯源 / M7 接口 / M8 前端）——把说明书里的图片转为可检索文本块
 > **契约：** 扩展 [`M0_contracts/parse.md`](M0_contracts/parse.md) §3（`img_path`）与 [`textunit.schema.json`](M0_contracts/textunit.schema.json)（`image_path`）
@@ -237,11 +237,13 @@ if bt == "drawing" and b.get("content"):
 
 > **零改动的边界**（2026-10-01 实测后澄清）：多模态本身**不需要**改 M3/M5。v5.25.1 对 M5 `sparse_index.build()` 的改动是修重建链一个**既有**对齐缺陷（M2↔PG 元数据关联键），与图片通路无关 —— 详见 [`docs/pitfalls/lightrag-chunk-id-dedup.md`](../pitfalls/lightrag-chunk-id-dedup.md)。
 
-### 4.5 M6 溯源
+### 4.5 M6 溯源 ✅
 
 **改 `sidecar.py`**：`ChunkMeta` 加 `image_path: str | None = None`；`load()` 里 `image_path=rec.get("image_path")`。
 
-### 4.6 M7 接口层
+**改 `cite.py`（方案外补充）**：`Citation` 加 `image_path` + `to_dict()` 输出。§4.7 的引用卡片缩略图需要它，只改 `sidecar.py` 无法把 `image_path` 传到 M7/M8。`parse_citations` 用 `sidecar.resolve()` 拿到的 `ChunkMeta` 填充。
+
+### 4.6 M7 接口层 ✅
 
 **改 `api.py`**：
 
@@ -250,23 +252,29 @@ if bt == "drawing" and b.get("content"):
    img = u.get("image_path")
    ... "image_url": f"/docs/{doc_id}/{img}" if img else None,
    ```
-2. **新增图片静态路由**（必须定义在 `app.mount("/", StaticFiles(...))` **之前**，见 `api.py:314`）：
+2. **新增图片静态路由**（定义在 `api.py:172`，早于 `app.mount("/", StaticFiles(...))`（`api.py:333`）——Starlette 按注册顺序匹配，mount 是 catch-all）：
    ```python
    @app.get("/docs/{doc_id}/images/{name}")
    async def doc_image(doc_id: str, name: str, collection_id: str = Query("default")):
-       """serve parse/<doc_id>/images/<name>。name 白名单校验（防路径穿越）。"""
+       """serve parse/<doc_id>/images/<name>。doc_id/name 白名单 + resolve 后确认在 images/ 之下。"""
    ```
-   ⚠️ **安全**：`name` 必须校验不含 `/`、`..`，或直接用 `Path(deps.parse_dir / doc_id / "images" / name).resolve()` 后确认仍在 `images/` 之下。
+   ⚠️ **安全**：实测 `..%2f` 编码穿越、`--path-as-is` 原始穿越、doc_id 段穿越三类均返回 404；正常图片返回 200 `image/jpeg`。
 
 **`documents.py` 零改动**：`ingest()` 调 `process_one()` 时视觉步骤已内嵌 M1 ⇒ 上传链路自动获得多模态。
 
-### 4.7 M8 前端
+### 4.7 M8 前端 ✅
 
-**改 `DocumentPreview.tsx`**：unit 渲染加 `block_type === 'drawing'` 分支 —— 渲染 `<img src={unit.image_url}>` + 描述文本（点击可放大）。
+**改 `DocumentPreview.tsx`**：unit 渲染加 `block_type === 'drawing'` 分支 —— 渲染 `<img src={unit.image_url}>` + 描述文本，点击开 lightbox 放大。
 
-**改 `frontend/src/types.ts`**：`PreviewUnit` 加 `image_url?: string | null`。
+**改 `frontend/src/types.ts`**：`PreviewUnit` 加 `image_url?: string | null`；`Citation` 加 `image_path: string | null`。
 
-**改 `CitationPanel.tsx`**（可选）：引用卡片若 `image_path` 非空则展示缩略图。
+**改 `CitationPanel.tsx`**：引用卡片 `image_path` 非空则展示缩略图（点击跳原文档预览）。
+
+**改 `lib/api.ts`（方案外补充）**：新增 `apiUrl(path, collection_id)` —— 后端返回**裸路径**（`/docs/<doc>/images/<name>`），前端补 `API_BASE` + `collection_id` 查询参数。
+
+**改 `App.css`**：新增 `.preview-drawing` / `.preview-drawing-img` / `.preview-lightbox` / `.cite-thumb` 四组样式。
+
+**改 `mocks/events.ts`**：三条 mock 引用补 `image_path: null`（`Citation` 类型加必填字段后 tsc 报错）。
 
 ### 4.8 配置
 
@@ -302,7 +310,7 @@ VISION_MIN_AREA=10000         # px²，成本兜底：小于此面积不调模�
 | **2. M2 单元** | `python -m app.m2_chunk.runner -s /tmp/m1_mm -o /tmp/m2_mm`：jsonl 含 `block_type=drawing` 且 content 非空的 TextUnit；`image_path` 字段存在；`chunk_order_index` 落在原位 | ✅ 铭昇 45 units / 9 drawing；融柏 123 / 27；`image_path` 全带、`title_path` 上下文正确。注：`chunk_order_index` 有缺口是 M2 **既有行为**（末尾 `[u for u in out if u["content"].strip()]` 丢弃空 content 块），与本次改动无关 |
 | **3. 降级** | `VISION_ENABLED=false` 重跑 M1+M2：**不因视觉产生块**（`drawing` 块只可能来自过滤后的 MinerU 真图注） | ✅ 铭昇 **0** drawing；融柏 **4**（正是 §2.2 的 3 条真图注 + p22 footnote，零纯图号垃圾）。铭昇 29 units、融柏 83 units |
 | **4. M3/M5 零改动** | 按 M3_index §3.5 重建链建**临时 workspace**（遵守探底纪律第 4 条，不污染标准库）：PG `lightrag_doc_chunks` 含图片块；`m5_sparse.json` 含图片块 | ✅ 已实测（2026-10-01，临时库 `mm_verify_ws`，用后即收）：M2 38 drawing → PG 38（24 按序号命中 + 14 按 content 命中）→ sparse 38 条 `block_type=drawing`，**M1/M2/M3/M5 零改动**。验证中另发现并修复重建链一个**既有**对齐缺陷（与多模态无关，见 CHANGELOG v5.25.1） |
-| **5. 端到端** | 上传一份 PDF → preview 接口返回 `image_url` → 浏览器预览面板显示图片；检索「XX 图标含义」类问题能召回对应块 | ⏳ 待 M6/M7/M8 实施（不在本轮范围） |
+| **5. 端到端** | 上传一份 PDF → preview 接口返回 `image_url` → 浏览器预览面板显示图片；检索「XX 图标含义」类问题能召回对应块 | ✅ **API 级已验证**（2026-10-01）：用 v5.25 遗留真实产物（铭昇 H2-5000IBP，doc `719a920e62722e29`，8 drawing 块 / 16 图）灌入临时库 `col_d2fb1ad8`，`GET /docs/{doc}/preview` → 43 units、8 drawing、8 带 `image_url`；图片路由 200 + `image/jpeg` + 穿越 404；M6 单测 `Citation.image_path` 正确填充。`npx tsc -b` 与 `npm run build` 通过。⚠️ **浏览器目视未完成** —— camofox 浏览器启动依赖外部 geoip 公网 IP 查询，当前出口不可用（与代码无关），M8 仅到「类型检查 + 构建 + 后端契约」级证据 |
 
 > 降级验收口径的修正：初稿写「与现状逐字节一致」，实施时发现 MinerU 图注**并非全空**（§2.2），
 > 且视觉调用失败会让块退化为「图 13」——故口径改为 **「不因视觉产生块」**：关闭视觉后，
@@ -322,6 +330,11 @@ VISION_MIN_AREA=10000         # px²，成本兜底：小于此面积不调模�
 
 ## 9. Changelog
 
+- **2026-10-01 · v0.3.2（M6/M7/M8 展示层已实施）**：按 §4.5–4.7 落地展示层，多模态链路 M0→M8 全线打通。
+  - **M6**：`sidecar.py` `ChunkMeta` 加 `image_path`；**方案外补充** `cite.py` `Citation.image_path` + `to_dict()`（§4.7 缩略图必需）。
+  - **M7**：`preview_doc()` 返回 unit 加 `image_url`；新增 `GET /docs/{doc_id}/images/{name}` 静态路由（注册在 StaticFiles catch-all 之前），doc_id/name 白名单 + resolve 归属校验防穿越。
+  - **M8**：`DocumentPreview` drawing 分支 + lightbox；`CitationPanel` 缩略图；**方案外补充** `lib/api.ts` 新增 `apiUrl()`（后端返回裸路径，前端补 `API_BASE`/`collection_id`）；`App.css` 四组样式；`mocks/events.ts` 补字段。
+  - **验证**：临时库 `col_d2fb1ad8`（真实遗留产物，零 API 成本）走通 M6/M7；穿越三类 404；tsc + build 通过。浏览器目视因 camofox 外部 geoip 依赖不可用而未做（见 §6 步骤 5 注）。登记 CHANGELOG **v5.25.2**。
 - **2026-10-01 · v0.3.1（M3/M5 零改动已验证）**：按 §6 步骤 4 建临时 workspace（`mm_verify_ws`，用后即收）跑重建链，**核心约束「M3/M5 零改动」经实测成立** —— M2 38 drawing 块全部进 PG 与 `m5_sparse.json`，M1/M2/M3/M5 零改动。验证中另暴露重建链一个**既有**对齐缺陷（LightRAG 同文档 content 去重 → `block_type` 按序号关联错位 34/171），已修（M5 `sparse_index.build()` 改按 content 关联、`_align_check` 改比 content 集合），登记 CHANGELOG **v5.25.1**，坑点记录 [`pitfalls/lightrag-chunk-id-dedup.md`](../pitfalls/lightrag-chunk-id-dedup.md)。**与多模态无关**，§4.4 加边界说明。
 - **2026-09-29 · v0.3（M0/M1/M2 已实施）**：按 v0.2 方案落地前三段。
   - **M0**：`parse.md` §3 扩展字段加 `img_path`；`textunit.schema.json` / `textunit.md` 加 `image_path`。

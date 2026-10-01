@@ -472,6 +472,7 @@ function App() {
             <CitationPanel
               citations={currentCitations}
               activeMarker={activeCitation}
+              collectionId={current}
               onJumpToGraph={handleJumpToGraph}
               onOpenPreview={openPreview}
             />

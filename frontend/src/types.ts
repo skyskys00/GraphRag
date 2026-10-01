@@ -11,6 +11,7 @@ export interface Citation {
   anchor: string | null
   snippet: string
   score: number
+  image_path: string | null
 }
 
 export interface AnswerMeta {
@@ -140,6 +141,7 @@ export interface PreviewUnit {
   file_path: string | null
   block_type?: string
   html?: string | null
+  image_url?: string | null
 }
 
 export interface DocPreview {

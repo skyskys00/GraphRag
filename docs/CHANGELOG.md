@@ -47,6 +47,30 @@
 
 ---
 
+## [v5.25.2] 2026-10-01 —— 多模态：M6 溯源 / M7 接口 / M8 前端展示层
+
+**影响模块**：M6 生成 `sidecar.py` + `cite.py`｜M7 接口 `api.py`｜M8 前端 `types.ts`/`lib/api.ts`/`DocumentPreview.tsx`/`CitationPanel.tsx`/`App.tsx`/`App.css`/`mocks/events.ts`。方案文档 [`docs/modules/MULTIMODAL.md`](modules/MULTIMODAL.md) v0.3.2 §4.5–4.7。**M0–M5 零改动**（v5.25/v5.25.1 已完成），多模态链路 M0→M8 全线打通。
+
+**能力**：说明书图片块（`block_type=drawing`）现在端到端可见 —— 文档预览面板按 drawing 分支渲染原图（点击 lightbox 放大），引用卡片展示缩略图（点击跳原文档）。后端返回**裸路径**，前端经新增 `apiUrl()` 补 `API_BASE` + `collection_id`。
+
+**关键实现**：
+- **M6**：`ChunkMeta` 加 `image_path`；**方案外补充** `cite.py` `Citation.image_path` + `to_dict()` —— §4.7 缩略图需要它，只改 `sidecar.py` 传不到 M7/M8。
+- **M7**：`preview_doc()` unit 加 `image_url`；新增 `GET /docs/{doc_id}/images/{name}`，**注册在 StaticFiles catch-all（`api.py:333`）之前**（Starlette 按注册顺序匹配），doc_id/name 白名单 + `resolve()` 归属校验防目录穿越。
+- **M8**：`apiUrl()` 统一补前缀；drawing 分支 + lightbox；引用缩略图；`Citation` 类型加必填 `image_path` 后同步补 `mocks/events.ts` 三条 mock。
+
+**验证**（临时库 `col_d2fb1ad8`，灌入 v5.25 遗留真实产物，零 API 成本）：
+
+| 检查 | 结果 |
+|---|---|
+| M7 preview | 铭昇 H2-5000IBP（doc `719a920e62722e29`）→ HTTP 200、43 units、8 drawing、8 带 `image_url`；非 drawing unit `image_url`=None |
+| M7 图片路由 | 正常 → 200 `image/jpeg` 21725B；`..%2f` 编码穿越 / `--path-as-is` 原始穿越 / doc_id 段穿越 → 全 404；不存在图 → 404 |
+| M6 单测 | 真实 chunks jsonl：`ChunkMeta.block_type=drawing`、`image_path` 有值；`parse_citations` → `unmatched=0`、`Citation.image_path` 正确填充 |
+| M8 构建 | `npx tsc -b` 干净；`npm run build` 成功（1306 modules，271ms，仅 chunk-size 警告） |
+
+**未做（诚实记录）**：**浏览器目视未完成** —— camofox 浏览器启动依赖外部 geoip 公网 IP 查询，当前出口不可用（`api.ipify.org` 直连/代理均 HTTP 000，与本次代码无关）。M8 仅有「类型检查 + 构建 + 后端契约」级证据；临时库 `col_d2fb1ad8` 保留供用户自行目视（前端选「mm_e2e」库 → 打开铭昇文档预览）。
+
+---
+
 ## [v5.25.1] 2026-10-01 —— 重建链 block_type 对齐缺陷修复 + 多模态 M3/M5 零改动验证
 
 **影响模块**：M5 检索 `app/m5_retrieve/sparse_index.py`（`build()` 的 M2↔PG 对齐键由序号改 content）+ `scripts/rebuild_standard_lib.py`（`_align_check` 改为比 content 集合）。**M1/M2/M3 代码与检索/融合逻辑零改动。**
@@ -94,6 +118,8 @@
 **辅助数据**：full vs vector top5 差异 12/30 题、full vs vg 差异 10/30（脚本逐题打印）；graph 一路对 top1-8 事实覆盖率零改动。judge 失败 0。
 
 **模块文档**：[RETRIEVAL_OPTIMIZATION.md](modules/RETRIEVAL_OPTIMIZATION.md) 组 D 表新增「召回路数对照」行；`tests/reports/retrieval_comparison.md` 追加 ablation 小节。耗时：三组合计 609.7s（vector 146.5 + vg 182.8 + full 280.4，`time` 实测；初次含 judge 重试的慢跑已弃用，数值以 verify 一致组为准）。
+
+**补测（2026-10-01 归档）**：客服库 35 题同口径复现（vector vs 三路全量），报告 `tests/reports/run_ablation_cservice35_{vector,graph_vector_keyword}_20260929.json`。结论与 admin 库**同向**：Δ 全部 < 1.2pt（recall +0.61pt / prec +1.15pt / wPrec −0.73pt / GR top8 +0.8pt），跨领域复现「keep 三路、不调配置」的判断。详见 `retrieval_comparison.md`「客服库复现」小节。
 
 ---
 
