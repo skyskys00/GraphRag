@@ -1,10 +1,10 @@
 # 解析层产物契约 v1
 
-> **版本：** v1
+> **版本：** v1.3
 > **状态：** 已落地
-> **更新：** 2026-09-12
+> **更新：** 2026-09-29
 > **定位：** M1 解析层产物规约 = 输入什么 → 走哪个引擎 → 产出什么结构
-> **契约：** 原始文档 → blocks.jsonl（page_label / block_type / anchor 扩展字段）
+> **契约：** 原始文档 → blocks.jsonl（page_label / block_type / anchor / img_path 扩展字段）
 > **上游：** 原始文档（PDF / DOCX / PPTX / …） | **下游：** [M2 切分层](../M2_chunk.md) / [textunit 契约](textunit.md)
 > **依据：** MinerU/Docling 源码拆解 + [`PARSER_COMPARISON.md`](../../PARSER_COMPARISON.md) 选型结论
 > **运行：** 见 [M1_parse.md](../M1_parse.md) §复现命令
@@ -28,6 +28,7 @@
 ├── content_list.json        # MinerU：结构主源（page_idx + bbox + text_level + blocks）——PDF 走这个
 ├── _middle.json             # MinerU：span 级细粒度侧车（可选，需要再展开）
 ├── images/                  # 抽取的图片/公式图（MinerU：sha256 扁平命名）
+├── image_captions.json      # 图片视觉描述缓存（仅图片块；key=img_path，见 §3.1）
 ├── blocks.jsonl             # 统一块级文件（LightRAG 消费；我们在此加扩展字段，见 §3）
 └── doc.meta.json            # 解析元数据（引擎、版本、耗时、警告）
 ```
@@ -36,15 +37,26 @@
 
 ## 3. blocks.jsonl 扩展字段规范（M1 的最终产物增补）
 
-LightRAG 官方 IR block 已有：`blockid / content / heading / parent_headings / level / positions[]`。我们**在其上加三块**（对应 TextUnit 契约）：
+LightRAG 官方 IR block 已有：`blockid / content / heading / parent_headings / level / positions[]`。我们**在其上加四块**（对应 TextUnit 契约）：
 
 | 扩展字段 | 取值来源 | 格式 |
 |---|---|---|
 | `page_label` | MinerU：`content_list[].page_idx`（0 起始）<br>Docling：PDF `prov.page_no`；PPTX=slide+1；XLSX=sheet 序号；HTML=估算页 | int（**docx 不设**，流式排版无页） |
 | `block_type` | MinerU：`text_level`（doc_title→title / paragraph_title→heading）+ span 类型<br>Docling：`label`（paragraph/table/picture/formula/heading/list_item/...） | enum：`heading/title/paragraph/table/drawing/equation/list_item/mixed` |
 | `anchor` | PDF：`page_idx:bbox`（content_list 内嵌 bbox，归一化 0–1000）<br>docx：**待 M1 自研**（Docling 无 paraId；方案：插桩 `msword_backend._handle_text_elements` 写 `item.meta`，或 post-process 读原始 XML `w14:paraId`） | PDF=`"{page}:{x0},{y0},{x1},{y1}"`；docx=`paraid:<w14:paraId>`（补丁后） |
+| `img_path` | MinerU：`content_list[].img_path`（相对 doc_dir，指向 `<doc_dir>/images/` 下的 sha256 扁平文件，如 `images/371ceffd….jpg`） | string（**非图片块为 `null`**） |
 
 **插入时机**（最小侵入）：沿用 LightRAG `parser/external/{mineru,docling}` 官方 IR 转换链，在产出 IR block 之后、`blocks.jsonl` 写盘之前，用一段轻量 `attach_extensions(block, source_record)` 附加以上字段——不改官方链内部。
+
+### 3.1 图片块的 content（多模态增强）
+
+MinerU 的 image 条目 `text` 为空 ⇒ 图片块原本 content 为空、被 M2 静默丢弃。M1 增加视觉增强（[`MULTIMODAL.md`](../MULTIMODAL.md)）：对满足面积阈值的 image 调用视觉模型生成描述，写入
+
+- `content` = 过滤后的 `image_caption` + 视觉描述 + `image_footnote` 拼接（跳过空串）。**MinerU 图注需过 `_usable_mineru_caption` 过滤**：实测融柏 23/35 有值但 19 条是纯图号噪声（`图 13`/`如图 22`），剥掉 `图\s*\d+` 后剩余正文 <6 字的丢弃；`image_footnote` 不过滤；
+- `img_path` = 原图相对路径（契约 §3）；
+- `<doc_dir>/image_captions.json` = `{img_path: {"caption": str, "model": str, "error": str|None}}`（已有且无 `error` 的 key 重跑不重复调用；有 `error` 的下次重试）。
+
+视觉模型自评为「无有效信息」的图不入 caption ⇒ content 仍为空 ⇒ 退化为纯文本链路（与 `VISION_ENABLED=false` 同路径）。开关与阈值见 MULTIMODAL.md §4.8。
 
 ## 4. 统一 Markdown 规范
 
@@ -78,3 +90,4 @@ LightRAG 官方 IR block 已有：`blockid / content / heading / parent_headings
 - **2026-09-12 · v1**：初稿。引擎路由、目录规范、blocks 扩展字段（page_label/block_type/anchor）、插入时机；docx 定位标"待 M1 自研"。
 - **2026-09-12 · v1.1（冒烟实证）**：本机冒烟通过——MinerU `content_list.json` 每条目**实测内嵌** `type/text/text_level/bbox/page_idx`（page_idx 0 起始；bbox 为 PDF 点坐标）；Docling docx 实测 `prov` **全空**（无页码/无坐标/无 charspan），但 **`title`/`section_header` label 可得**（docx 的 title_path 来源）。**待确认**：MinerU `text_level` 数值语义（样例中文档标题=2，正文应=0/1），adapter 编码时实证再定映射。
 - **2026-09-12 · v1.2（M1 首个实现实证）**：`app/m1_parse` 跑通 inputs/raw 8/8（PDF→mineru、其余→docling）。实测 `text_level` 语义：**文档标题=2、正文=null、目录条目=null**（标题恒 2 级、目录项不带层级）；docx：`title`→level1、`section_header`→level2、table 块 `content` 为空（单元格需另取）。待优化：表格内容渲染、docx anchor 自研补丁、text_level 深标题校准。
+- **2026-09-29 · v1.3（多模态扩展）**：扩展字段 **3 → 4 行**，新增 `img_path`（MinerU `content_list[].img_path`，非图片块 `null`）；新增 §3.1 图片块 content 规约（图注过滤 + 视觉描述写入 + `image_captions.json` 缓存 + 自评「无有效信息」时退化为空）；§2 目录规范补 `image_captions.json`。见 [`MULTIMODAL.md`](../MULTIMODAL.md)。

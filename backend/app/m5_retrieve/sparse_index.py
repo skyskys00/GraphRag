@@ -16,9 +16,20 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+from lightrag.utils import sanitize_text_for_encoding
+
 from app.m3_index.providers import XINFERENCE_URL, _xf_token
 
 SPARSE_FILE = "m5_sparse.json"
+
+
+def content_key(content: str) -> str:
+    """关联 M2 与 PG 的 content 口径。
+
+    LightRAG 落 PG 前对 chunk 做过 sanitize_text_for_encoding（strip + html.unescape +
+    去控制字符），故 M2 侧须过同一函数才能与 PG 的 content 逐字节对上。
+    """
+    return sanitize_text_for_encoding(content)
 
 
 def _pg_chunks(workspace: str) -> list[dict]:
@@ -31,12 +42,12 @@ def _pg_chunks(workspace: str) -> list[dict]:
         )
         try:
             rows = await conn.fetch(
-                "SELECT id, content, full_doc_id, chunk_order_index FROM lightrag_doc_chunks "
+                "SELECT id, content, full_doc_id FROM lightrag_doc_chunks "
                 "WHERE workspace = $1 AND content <> '' ORDER BY full_doc_id, chunk_order_index",
                 workspace,
             )
             return [
-                {"id": r["id"], "content": r["content"], "full_doc_id": r["full_doc_id"], "chunk_order_index": r["chunk_order_index"]}
+                {"id": r["id"], "content": r["content"], "full_doc_id": r["full_doc_id"]}
                 for r in rows
             ]
         finally:
@@ -62,23 +73,25 @@ def build(workspace: str, out_path: Path, chunks_dir: Path | None = None) -> dic
     """构建稀疏索引并落盘，返回索引元数据。
 
     chunks_dir: 可选的 M2 输出目录（每文档一个 jsonl），传了则从 jsonl 读 block_type
-                等元数据，按 full_doc_id + chunk_order_index 对齐写进 chunks meta。
+                等元数据，按 full_doc_id + content 对齐写进 chunks meta。
     """
     chunks = _pg_chunks(workspace)
     if not chunks:
         raise SystemExit(f"[sparse] workspace={workspace} 无 chunk，检查 STORAGE/POSTGRES_WORKSPACE")
 
-    # 从 M2 jsonl 加载元数据（block_type 等），按 (full_doc_id, chunk_order_index) 索引
-    extra_meta: dict[tuple[str, int], dict] = {}
+    # 从 M2 jsonl 加载元数据（block_type 等），按 (full_doc_id, content) 索引。
+    # 不能按 (full_doc_id, chunk_order_index) 对齐：LightRAG 的 chunk id = hash(doc_id, content)，
+    # 同一文档内 content 完全相同的重复块会被丢弃 ⇒ PG 的 chunk_order_index 相对 M2 整体前移，
+    # 按序号关联会错位。content 是 LightRAG 生成 id 的输入，按它对齐必命中。
+    extra_meta: dict[tuple[str, str], dict] = {}
     if chunks_dir and chunks_dir.exists():
         for jf in chunks_dir.glob("*.jsonl"):
             with jf.open(encoding="utf-8") as f:
                 for line in f:
                     u = json.loads(line)
-                    key = (u["full_doc_id"], u["chunk_order_index"])
-                    extra_meta[key] = {
-                        "block_type": u.get("block_type", "paragraph"),
-                    }
+                    key = (u["full_doc_id"], content_key(u["content"]))
+                    # setdefault：与 LightRAG 同文档去重（保留首次出现）语义一致
+                    extra_meta.setdefault(key, {"block_type": u.get("block_type", "paragraph")})
         print(f"[sparse] loaded block_type from {chunks_dir}: {len(extra_meta)} units")
 
     index: dict[str, dict[str, float]] = {}
@@ -90,7 +103,7 @@ def build(workspace: str, out_path: Path, chunks_dir: Path | None = None) -> dic
         for c, s in zip(batch, sp):
             index[c["id"]] = s
             entry = {"content": c["content"], "full_doc_id": c["full_doc_id"]}
-            extra = extra_meta.get((c["full_doc_id"], c["chunk_order_index"]))
+            extra = extra_meta.get((c["full_doc_id"], c["content"]))
             if extra:
                 entry.update(extra)
             meta[c["id"]] = entry

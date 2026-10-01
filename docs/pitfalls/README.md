@@ -10,6 +10,7 @@
 | 存储 | [`postgres-storage-pitfalls.md`](postgres-storage-pitfalls.md) | PG 存储层 7 个坑：向量表后缀 / HNSW 删改 / 单写者 / callback 异常 / 边规范化 等 | M4 / M5 |
 | Embedding | [`bge-m3-xinference.md`](bge-m3-xinference.md) | bge-m3 在 Xinference 上的配置坑：return_sparse 启动参数 / sparse 索引构建 / reranker 接入 | M3 / M5 |
 | 工具 | [`understand-anything-dashboard.md`](understand-anything-dashboard.md) | UA 生成的图谱 schema 错位：layers 缺 nodeIds / tour 字段漂移 → dashboard 结构视图与导览空白（数据无损可修） | —（第三方工具） |
+| 框架 | [`lightrag-chunk-id-dedup.md`](lightrag-chunk-id-dedup.md) | LightRAG chunk id = hash(doc, content)，**同文档**重复块被静默丢弃 → PG `chunk_order_index` 整体前移，按序号与 M2 对齐错位（改按 content 对齐） | M3 / M5 |
 
 ## 新增 pitfall 的流程
 

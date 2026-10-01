@@ -3,6 +3,7 @@
 规则（参照 interfaces.md / qa-notes §E）：
 - 标题驱动分组：heading(level>=1) 开新块，正文归入当前标题链；标题链维护 title_path
 - 表格整块：block_type=table 单独成块（仍带当前标题上下文）
+- 图片独立成块：block_type=drawing 且 content 非空（视觉描述）时单独成块（MULTIMODAL.md §4.3）
 - 聚合扩展字段：page_range（PDF）/ anchor / block_type（主导类型）
 """
 from __future__ import annotations
@@ -282,6 +283,41 @@ def _build_split_unit(
     return unit
 
 
+def _build_image_unit(
+    b: dict, i: int, doc_id: str, file_path: str,
+    path: list[tuple[int, str]],
+) -> dict:
+    """图片块（block_type=drawing）独立成 TextUnit：content=视觉描述，image_path=原图路径。
+
+    描述语义自足，故不与相邻正文合并（MULTIMODAL.md §4.3）；仍带当前标题链上下文。
+    """
+    title_path = " / ".join(h for _lvl, h in path) if path else None
+    last_lvl, last_head = (path[-1] if path else (None, None))
+    parent_headings = [h for _lvl, h in path[:-1]]
+    heading = None
+    if last_head is not None:
+        heading = {"level": last_lvl, "heading": last_head, "parent_headings": parent_headings}
+
+    content = b.get("content") or ""
+    return {
+        "text_unit_id": f"{doc_id}-chunk-{i:03d}",
+        "content": content,
+        "tokens": approx_tokens(content),
+        "full_doc_id": doc_id,
+        "chunk_order_index": i,
+        "file_path": file_path,
+        "heading": heading,
+        "title_path": title_path,
+        "page_range": _page_range_of([b]) if b.get("page_label") is not None else None,
+        "anchor": b.get("anchor"),
+        "block_type": "drawing",
+        "image_path": b.get("img_path"),
+        "embedding": None,
+        "entity_refs": [],
+        "llm_cache_list": [],
+    }
+
+
 def chunk_blocks(blocks: list[dict], doc_id: str, file_path: str) -> list[dict]:
     """blocks.jsonl 行 -> TextUnit 列表。"""
     chunks: list[dict] = []
@@ -319,6 +355,13 @@ def chunk_blocks(blocks: list[dict], doc_id: str, file_path: str) -> list[dict]:
                 cur = None
                 for b2 in subs:
                     chunks.append(_build_split_unit(b2, len(chunks), doc_id, file_path, path))
+            continue
+
+        if bt == "drawing" and b.get("content"):
+            # 图片独立成块（MULTIMODAL.md §4.3）：不与相邻正文合并，仍带当前标题链上下文。
+            # content 为空（视觉关闭/调用失败/模型自评无信息）时走不到这里 ⇒ 被末尾过滤丢弃。
+            _flush(cur); cur = None
+            chunks.append(_build_image_unit(b, len(chunks), doc_id, file_path, path))
             continue
 
         if bt in HEADING_TYPES and level is not None and head:

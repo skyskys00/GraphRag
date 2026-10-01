@@ -1,10 +1,10 @@
 # TextUnit 契约 v2
 
-> **版本：** v2
+> **版本：** v2.1
 > **状态：** 已落地
-> **更新：** 2026-09-12
+> **更新：** 2026-09-29
 > **定位：** 切分层（M2）出口统一数据模型，全系统唯一"块"标准
-> **契约：** blocks.jsonl → TextUnit v2 JSONL（必填六字段 + page_range/anchor/block_type 三扩展字段）
+> **契约：** blocks.jsonl → TextUnit v2 JSONL（必填六字段 + page_range/anchor/block_type/image_path 扩展字段）
 > **上游：** [parse 契约](parse.md)（M1 产物） | **下游：** [M3 索引层](../M3_index.md) / [M5 检索层](../M5_retrieve.md) / [M6 生成层](../M6_generate.md)
 > **依据：** LightRAG 接口 + MinerU/Docling 源码拆解 + [`PARSER_COMPARISON.md`](../../PARSER_COMPARISON.md)
 > **运行：** `textunit.schema.json` JSON Schema 机器校验（`$id`= `/textunit/v2`）
@@ -38,6 +38,7 @@ Document = 文档级记录：`doc_id / file_path / content_hash / parse_engine /
 | `page_range` | [int,int]? | — | 🆕 | ✅ 见 §4.1 |
 | `anchor` | string? | — | 🆕 | ⚠️ docx 需自研补丁（§4.2） |
 | `block_type` | enum? | — | 🆕 | ✅ 见 §4.3 |
+| `image_path` | string? | — | 🆕 | ✅ 见 §4.4 |
 | `sidecar` | object? | — | LightRAG，P/多模态 | ✅ |
 | `embedding` | float[]? | — | LightRAG | ✅ |
 | `entity_refs` | string[]? | — | ⚠️ 派生视图 | ✅ 反查规则定 |
@@ -71,6 +72,19 @@ Document = 文档级记录：`doc_id / file_path / content_hash / parse_engine /
 - Docling：`label`（`paragraph`/`table`/`picture`/`formula`/`heading`/`list_item`/...）映射；
 - 一个 chunk 由多块组成时，M2 取主导类型（或标 `mixed`）。
 
+### 4.4 `image_path` —— 图片独立块的溯源路径（v2.1 新增）
+
+图片块（`block_type=drawing`）在 M2 **独立成块**，不与相邻正文合并（描述语义自足）。取值链路：
+
+```
+MinerU content_list[].img_path  →  M1 blocks.jsonl `img_path`（parse.md §3）
+                                →  M2 图片独立块 `image_path`
+```
+
+- 路径相对 `<doc_dir>`（如 `images/371ceffd….jpg`），M6/M7 据此拼图片 URL 供前端预览；
+- `content` = 该图的视觉描述文本（M1 调视觉模型生成，见 [MULTIMODAL.md](../MULTIMODAL.md) §4.2）；
+- **降级**：视觉关闭 / 调用失败 / 模型自评「无有效信息」⇒ content 为空 ⇒ M2 照旧过滤掉，不产生空块（与 v2 行为逐字节一致）。
+
 ## 5. 与拆解文档的联系
 
 | 拆解文档 | 与本契约的关系 |
@@ -93,3 +107,4 @@ Document = 文档级记录：`doc_id / file_path / content_hash / parse_engine /
 
 - **2026-09-12 · v1**：初稿；字段结构基于 LightRAG v1.5.7 拆解；结构化补点标注"待拆"。
 - **2026-09-12 · v2**：MinerU/Docling 拆解完成 → 补全取值机制（§4）；`page_range`（PDF 经 content_list/`prov.page_no`）、`block_type`（text_level/label 映射）、`anchor`（docx 无 paraId → 自研补丁点）。schema `$id`→`/textunit/v2`。
+- **2026-09-29 · v2.1（增量，多模态）**：新增 `image_path`（§4.4）——图片独立块的原图相对路径，来源 M1 blocks.jsonl `img_path`。纯增量、不改既有字段语义；schema `$id` 不变（`additionalProperties: true` 本就放行，此次显式声明）。见 [`MULTIMODAL.md`](../MULTIMODAL.md)。

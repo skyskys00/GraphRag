@@ -13,7 +13,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from . import config
+from . import config, vision
 from ._util import make_doc_id, write_jsonl, write_meta
 from .blocks_builder import build_blocks_from_mineru
 
@@ -65,7 +65,9 @@ def parse_with_mineru(src: Path, out_root: Path) -> Path:
 
     # blocks.jsonl（统一块级 + 扩展字段，见 parse.md §3）
     data = json.loads((doc_dir / "content_list.json").read_text(encoding="utf-8"))
-    blocks = build_blocks_from_mineru(data, doc_id)
+    # 图片语义增强（MULTIMODAL.md §4.2）：VISION_ENABLED=false 时返回 {}，完全退化为纯文本链路
+    captions = vision.caption_images(doc_dir, data)
+    blocks = build_blocks_from_mineru(data, doc_id, captions)
     write_jsonl(doc_dir / "blocks.jsonl", blocks)
 
     write_meta(doc_dir, engine="mineru", src_name=src.name, parse_schema="parse-v1.1")

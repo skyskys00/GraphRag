@@ -1,9 +1,9 @@
 # M1 模块记录：解析层
 
-> **版本：** v1.4
-> **状态：** 已落地 + 实测复核（2026-09-21）+ 章级校准（2026-09-26，v5.20）
-> **更新：** 2026-09-26
-> **定位：** MinerU + Docling 双引擎解析，输出统一 blocks.jsonl
+> **版本：** v1.5
+> **状态：** 已落地 + 实测复核（2026-09-21）+ 章级校准（2026-09-26，v5.20）+ 图片语义增强（2026-09-29，多模态）
+> **更新：** 2026-09-29
+> **定位：** MinerU + Docling 双引擎解析，输出统一 blocks.jsonl（含图片语义增强）
 > **契约：** 原始文档 → blocks.jsonl（page_label / block_type / anchor 扩展字段），见 [`M0_contracts/parse.md`](M0_contracts/parse.md)
 > **上游：** 原始文档（PDF / DOCX / PPTX / HTML / …） | **下游：** [M2 切分层](M2_chunk.md)
 > **依据：** [`PARSER_COMPARISON.md`](../PARSER_COMPARISON.md) v1.2（§10 实测复核）｜ [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.2
@@ -34,7 +34,8 @@
 | `config.py` | 引擎路由表（扩展名→MINERU_EXTS/DOCLING_EXTS）、MinerU 引擎参数、docx 定位策略 |
 | `mineru_adapter.py` | 子进程调 mineru CLI → 定位 `content_list/_middle/md/images` → 归一拷贝 → 调 blocks_builder 产 blocks.jsonl |
 | `docling_adapter.py` | `DocumentConverter` 转换 → iterate_items 产 blocks.jsonl + export md + 保留 doc.json |
-| `blocks_builder.py` | MinerU content_list → 统一 block（含契约扩展字段），与 LightRAG IR block shape 对齐（type/blockid/heading/positions…） |
+| `blocks_builder.py` | MinerU content_list → 统一 block（含契约扩展字段），与 LightRAG IR block shape 对齐（type/blockid/heading/positions…）；`image` 条目独立分支：MinerU 图注经 `_usable_mineru_caption` 过滤后与视觉描述合并为 content |
+| `vision.py` | **图片语义增强**（多模态，2026-09-29）：image 条目 → DeepSeek `deepseek-flash` 视觉描述；像素面积兜底 + 按 img_path 去重 + `image_captions.json` 落盘缓存 + 5 并发；`VISION_ENABLED=false` 时返回 `{}`，完全退化为纯文本链路。见 [`MULTIMODAL.md`](MULTIMODAL.md) §4.2 |
 | `_util.py` | `make_doc_id`（md5 规范化路径）、`write_meta`、`write_jsonl` |
 
 **设计要点**：未依赖 LightRAG `parser/external/*`，而是自建 adapter 直接产出我们规格的 blocks.jsonl（shape 对齐官方，扩展字段自加）——与 LightRAG 内核彻底解耦（M2 可直接吃我们的 blocks）。
@@ -42,7 +43,7 @@
 ## 3. 与 parse.md 契约对照
 
 - 目录规范（§2）✅：`parse/<doc_id>/{content_list.json, <basename>.md, blocks.jsonl, doc.meta.json, images/}`（_middle.json 保留）；
-- 扩展字段（§3）✅：`page_label`（PDF=page_idx / docx=null）、`block_type`（type/text_level/label 映射）、`anchor`（PDF=`page_idx:bbox` / docx=null）；
+- 扩展字段（§3）✅：`page_label`（PDF=page_idx / docx=null）、`block_type`（type/text_level/label 映射）、`anchor`（PDF=`page_idx:bbox` / docx=null）、`img_path`（图片块的原图相对路径，非图片块为 null；2026-09-29 新增，见 [`MULTIMODAL.md`](MULTIMODAL.md) §4.1）；
 - **实测 text_level 语义**（v1.2 changelog）：MinerU 文档标题=2、正文=null、目录条目=null；docx title→1、section_header→2、table 块原 content 为空（已修复见 §7.1）。
 
 ## 4. 复现命令

@@ -54,6 +54,7 @@
 |------|------|
 | [`modules/M8_frontend_req.md`](modules/M8_frontend_req.md) | 前端需求文档（FR-xx 条目） |
 | [`modules/GRAPH_OPTIMIZATION_v4.md`](modules/GRAPH_OPTIMIZATION_v4.md) | 图谱优化 v4 方案（双层图谱 + 关系分类 + 实体筛选） |
+| [`modules/MULTIMODAL.md`](modules/MULTIMODAL.md) | 多模态：图片→视觉描述→独立 TextUnit（M0/M1/M2 **已实施** + M3/M5 零改动**已实测**，M6/M7/M8 待实施） |
 | [`PARSER_COMPARISON.md`](PARSER_COMPARISON.md) | MinerU vs Docling 选型复核 |
 
 ### 🐛 坑点层（集中存放，模块文档只留索引）
@@ -67,6 +68,7 @@
 | [`pitfalls/postgres-storage-pitfalls.md`](pitfalls/postgres-storage-pitfalls.md) | PG 存储层 7 个坑（向量表后缀 / HNSW / 单写者 等） | M4 / M5 |
 | [`pitfalls/bge-m3-xinference.md`](pitfalls/bge-m3-xinference.md) | bge-m3 + Xinference 配置坑（return_sparse / sparse 索引 / reranker） | M3 / M5 |
 | [`pitfalls/understand-anything-dashboard.md`](pitfalls/understand-anything-dashboard.md) | UA 图谱 schema 错位 → dashboard 结构视图/导览空白（layers 缺 nodeIds / tour 字段漂移，数据可无损修） | —（第三方工具） |
+| [`pitfalls/lightrag-chunk-id-dedup.md`](pitfalls/lightrag-chunk-id-dedup.md) | LightRAG 同文档 content 去重 → `chunk_order_index` 前移，按序号与 M2 对齐错位（改按 content 对齐） | M3 / M5 |
 
 ### ⏱ 时序层（变更唯一权威记录）
 

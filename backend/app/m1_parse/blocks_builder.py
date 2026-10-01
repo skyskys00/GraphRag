@@ -11,6 +11,21 @@ from typing import Any
 # sibling 展开为整文档目录；docx（office 后端读 Word 大纲）章值本来就是 1，恒等不变。
 _CHAPTER_RE = re.compile(r"^第(?:[一二三四五六七八九十百千万]+|[0-9０-９]+)[章节篇卷]")
 
+# MinerU image_caption 的图号部分（「图 7」「图15」…），用于图注可用性判定
+_FIGNO_RE = re.compile(r"图\s*[0-9０-９]+")
+# 剥掉图号后剩余正文的最小字数：低于此值判为无检索价值（如「如图 22」剩「如」）
+_MIN_CAPTION_CHARS = 6
+
+
+def _usable_mineru_caption(cap: str) -> bool:
+    """MinerU 图注是否含可检索语义（MULTIMODAL.md §4.2）。
+
+    融柏实测 23 条图注中 19 条剥掉图号后为空或只剩「如」（'图 13'、'图 9\\n图 10'、
+    '如图 22'）⇒ 作为 TextUnit 无可检索语义、纯噪声，丢弃；4 条含真图注
+    （如「图17为先抽取后灌注界面…」）保留。铭昇图注全空，不受影响。
+    """
+    return len(_FIGNO_RE.sub("", cap).strip()) >= _MIN_CAPTION_CHARS
+
 
 def _blockid(doc_id: str, i: int, text: str) -> str:
     return hashlib.md5(f"{doc_id}:{i}:{text[:64]}".encode("utf-8")).hexdigest()[:32]
@@ -28,9 +43,12 @@ def _mineru_block_type(typ: str, text_level: int | None) -> str:
     return "paragraph"
 
 
-def build_blocks_from_mineru(data: list[dict], doc_id: str) -> list[dict]:
+def build_blocks_from_mineru(
+    data: list[dict], doc_id: str, captions: dict[str, str] | None = None
+) -> list[dict]:
     """MinerU content_list 条目 -> blocks.jsonl 行（每行含扩展字段）。
     text_level 数值语义：0=正文，>=1=标题（v3.4.5 实测，adapter 阶段再校准）。
+    captions: {img_path: 视觉描述}（MULTIMODAL.md §4.2），仅 image 条目消费。
     """
     out: list[dict[str, Any]] = []
     for i, it in enumerate(data):
@@ -43,6 +61,7 @@ def build_blocks_from_mineru(data: list[dict], doc_id: str) -> list[dict]:
         # 标题层级再校准：章级 marker 强制为 1（PDF 模型误判章=节的修复点，
         # 见 _CHAPTER_RE 注释；对 docx 无影响）。
         level = 1 if (is_heading and _CHAPTER_RE.match(text)) else tl
+        img: str | None = None
 
         # MinerU 表格的 text 为 None，实际内容在 table_body（HTML）和 table_footnote 里
         if typ == "table":
@@ -60,6 +79,17 @@ def build_blocks_from_mineru(data: list[dict], doc_id: str) -> list[dict]:
                 html_parts.append(f'<p class="table-footnote">{fn}</p>')
             content = "\n".join(html_parts)
             fmt = "html"
+        elif typ == "image":
+            # image 条目 text 为空 ⇒ 语义靠 MinerU 图注（实测融柏 23/35 有值，多为纯图号）
+            # 与视觉模型描述（MULTIMODAL.md §2.3）；两者皆无时 content 留空，M2 照旧丢弃
+            img = it.get("img_path") or None
+            parts = [
+                *(c for c in (it.get("image_caption") or []) if _usable_mineru_caption(c)),
+                (captions or {}).get(img or "", ""),
+                *(it.get("image_footnote") or []),
+            ]
+            content = "\n".join(p for p in parts if p.strip())
+            fmt = "plain_text"
         else:
             content = text
             fmt = "plain_text"
@@ -86,6 +116,7 @@ def build_blocks_from_mineru(data: list[dict], doc_id: str) -> list[dict]:
             "page_label": page,
             "block_type": _mineru_block_type(typ, tl),
             "anchor": f"{page}:{':'.join(map(str, bbox))}" if (page is not None and bbox) else None,
+            "img_path": img,
         }
         out.append(block)
     return out

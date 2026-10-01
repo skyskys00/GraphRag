@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://graphrag.local/contracts/textunit/v2",
   "title": "TextUnit",
-  "description": "GraphRAG 统一数据模型 v2 —— 切分层（M2）出口。v2：基于 MinerU/Docling 拆解补全 page_range/anchor/block_type 的取值机制。依据：lightrag/docs/{interfaces,qa-notes}.md + mineru/docs/mineru.md + docling/docs/docling.md。",
+  "description": "GraphRAG 统一数据模型 v2 —— 切分层（M2）出口。v2：基于 MinerU/Docling 拆解补全 page_range/anchor/block_type 的取值机制。v2.1（增量）：新增 image_path（图片独立块）。依据：lightrag/docs/{interfaces,qa-notes}.md + mineru/docs/mineru.md + docling/docs/docling.md + docs/modules/MULTIMODAL.md。",
   "type": "object",
   "properties": {
     "text_unit_id": {
@@ -59,6 +59,10 @@
       "type": "string",
       "enum": ["heading", "title", "paragraph", "table", "drawing", "equation", "mixed"],
       "description": "聚合块类型。取值：MinerU `text_level`（doc_title→title / paragraph_title→heading）+ span 类型（image/table/inline_equation...）映射；Docling label（paragraph/table/picture/formula/heading...）映射；多块聚合取主导类型（M2）。"
+    },
+    "image_path": {
+      "type": "string",
+      "description": "图片块的原图相对路径 `<doc_dir>/images/<sha>.jpg`（来自 M1 blocks.jsonl 的 `img_path`，见 parse.md §3）。仅 `block_type=drawing` 的图片独立块存在；content 为该图的视觉描述文本。"
     },
     "sidecar": {
       "type": "object",

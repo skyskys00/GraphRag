@@ -1,8 +1,8 @@
 # M5 模块记录：检索层
 
-> **版本：** v1.13
+> **版本：** v1.14
 > **状态：** 已落地
-> **更新：** 2026-09-24
+> **更新：** 2026-10-01
 > **定位：** 三路召回（graph/vector/keyword）+ RRF(k=60) + bge-reranker + 五特征融合排序 + 表格 NL 摘要 + query 预处理 + 白名单过滤
 > **契约：** query + 模式 → 精排后 chunk 列表（full_doc_id / score / snippet）
 > **上游：** [M3 索引层](M3_index.md) / [M4 存储层](M4_storage.md) | **下游：** [M6 生成层](M6_generate.md)
@@ -75,6 +75,7 @@ python -m app.m5_retrieve.runner -w data/default_ws -m mix
 
 bge-m3 + Xinference 相关配置坑（return_sparse 启动参数 / sparse 索引离线构建 / reranker 接口 / 文件态库限制），**完整记录见 [`docs/pitfalls/bge-m3-xinference.md`](../pitfalls/bge-m3-xinference.md)**。
 PG 存储相关坑（向量表名后缀等）**见 [`docs/pitfalls/postgres-storage-pitfalls.md`](../pitfalls/postgres-storage-pitfalls.md)**。
+LightRAG 同文档 content 去重导致 `block_type` 对齐错位（`build()` 须按 content 而非序号关联 M2）**见 [`docs/pitfalls/lightrag-chunk-id-dedup.md`](../pitfalls/lightrag-chunk-id-dedup.md)**。
 
 速查清单：
 
@@ -84,6 +85,7 @@ PG 存储相关坑（向量表名后缀等）**见 [`docs/pitfalls/postgres-stor
 4. **纯口语 query 预处理无提升**——需 C 查询改写（LLM），暂不做。
 5. **keyword 路用 bge-m3 sparse**——没走 jieba/BM25；需领域分词定制再加。
 6. **文件态库无 keyword 路**——用默认四模式，不走 `--formal`。
+7. **`block_type` 元数据按 `(full_doc_id, content)` 关联 M2**——不能按 `chunk_order_index`：LightRAG 会丢弃同文档重复 content 的块，PG 序号整体前移会错位（v5.25.1 修复，见上）。
 
 ## 6. 验收清单（v1）
 

@@ -23,6 +23,53 @@
 
 ---
 
+## [v5.25] 2026-09-29 —— 多模态：说明书图片入索引（M0+M1+M2 三段）
+
+**影响模块**：M0 契约（`parse.md` §3 加 `img_path`；`textunit.schema.json`/`textunit.md` 加 `image_path`）+ M1 解析（新增 `app/m1_parse/vision.py`；`blocks_builder.py` image 分支独立 + 图注过滤；`mineru_adapter.py` 调视觉）+ M2 切分（`chunker.py` 新增 `drawing` 分支 + `_build_image_unit()`）。方案文档 [`docs/modules/MULTIMODAL.md`](modules/MULTIMODAL.md) v0.3。M6/M7/M8 展示层不在本次范围。
+
+**能力**：PDF 说明书里的界面截图/图片型表格 → 视觉模型描述文本 → 独立 TextUnit 进索引。视觉通路复用已有 `DEEPSEEK_API_KEY`（官方 `deepseek-flash`，`input_modalities` 含 image），无新增凭据。开关 `VISION_ENABLED`。
+
+**关键实现**：
+- **面积口径修正**：`VISION_MIN_AREA` 作用于**图片像素面积**（PIL 读文件头），非 MinerU bbox 面积 —— bbox 是归一化 0–1000 坐标，其面积在阈值 10000 下滤 7/15 与 5/35，与实测尺寸形态对不上；像素口径滤 6/16 与 4/38，吻合。
+- **MinerU 图注过滤**：实测融柏 `image_caption` 23/35 有值（初稿曾断言全空，有误），其中 19 条是纯图号噪声（`图 13`、`图 9\n图 10`、`如图 22`）⇒ 新增 `_usable_mineru_caption`（剥掉 `图\s*\d+` 后剩余正文 ≥6 字才保留），保留 3 条真图注；`image_footnote` 不过滤（实测仅 1 条且有实义）。
+- **降级口径修正**：由「输出与现状逐字节一致」改为「**不因视觉产生块**」——因图注非空 + 视觉调用失败会退化为纯图号块，原口径不成立。
+
+**实测（两份器械说明书）**：
+
+| | 视觉 OFF | 视觉 ON |
+|---|---|---|
+| 铭昇 H2-5000IBP | 29 units / **0** drawing | 45 units / 9 drawing |
+| 融柏 LSP-1C | 83 units / **4** drawing（零垃圾） | 123 units / 27 drawing |
+
+视觉全量成本：54 张图 16,782 tokens / 10.0s（5 并发）。`RemoteDisconnected` 3/50 张记 error 不阻塞、下次重试。
+
+**未做**：M6 溯源 / M7 接口 / M8 前端。（M3/M5 零改动验证已于 v5.25.1 完成）
+
+---
+
+## [v5.25.1] 2026-10-01 —— 重建链 block_type 对齐缺陷修复 + 多模态 M3/M5 零改动验证
+
+**影响模块**：M5 检索 `app/m5_retrieve/sparse_index.py`（`build()` 的 M2↔PG 对齐键由序号改 content）+ `scripts/rebuild_standard_lib.py`（`_align_check` 改为比 content 集合）。**M1/M2/M3 代码与检索/融合逻辑零改动。**
+
+**背景**：v5.25 遗留「M3/M5 零改动验证」—— 按 M3_index §3.5 重建链建**临时 workspace**（遵守探底纪律第 4 条），验证图片块是否真的零改动流进 PG 与 sparse。验证**结论成立**，但顺带暴露重建链一个既有缺陷。
+
+**缺陷（既有，非多模态引入）**：LightRAG `ainsert_custom_chunks` 的 chunk id = `hash(doc_id, content)`，**同一文档内** content 完全相同的重复块被 `seen_chunk_ids` 静默丢弃（跨文档不去重，因 `doc_key` 不同）。PG 的 `chunk_order_index` 是去重后列表的位置 ⇒ 发生去重的文档**后续序号整体前移**，按 `(full_doc_id, chunk_order_index)` 与 M2 对齐会错位。融柏说明书页眉「保定融柏恒流泵制造有限公司」在 17 页出现，其中 2 个成为独立同内容块 ⇒ 第二个被丢 ⇒ PG 127→126，从 M2 idx 69 起 **34 块 `block_type` 错配**（drawing↔paragraph、table↔paragraph 成对互换）。**检索内容零损失**（丢的只是重复副本）；实际影响仅 `table_summary.py` 的表格 NL 摘要判定。完整记录见 [`docs/pitfalls/lightrag-chunk-id-dedup.md`](pitfalls/lightrag-chunk-id-dedup.md)。
+
+**修复**：M5 对齐键由 `(full_doc_id, chunk_order_index)` 改为 `(full_doc_id, content)`（content 是 LightRAG 生成 id 的输入，按它对齐必命中；M2 侧须过 `sanitize_text_for_encoding` 对齐 LightRAG 落库前口径，见新增 `content_key()`）。`_align_check` 由「三源计数相等」改为「**PG 与 M2 的 (doc, content) 集合相等**」——去重只丢重复副本、不丢唯一内容，计数比对会把合法去重误报为失败。
+
+**验证**（临时库 `mm_verify_ws`，用后即收）：
+
+| 检查 | 结果 |
+|---|---|
+| 三源对齐 | `[OK] 三源对齐 171（LightRAG 丢弃同文档重复副本 1 条）` |
+| 图片块零改动 | M2 38 drawing → PG 38（24 按序号命中 + 14 按 content 命中）→ sparse 38 条 `block_type=drawing` |
+| block_type 正确率 | **旧序号 join 错配 34 → 新 content join 错配 0**（171 行全带元数据） |
+| 回归（现有标准库） | `default_ws`(34)/`eval_cservice_ws`(99)/`eval_admin_ws`(203) 三库**同文档重复内容组均为 0** ⇒ 序号==PG 序号 ⇒ 新旧 join 逐块一致，**历史评测结论有效** |
+
+**结论**：v5.25 的核心约束「**M3/M5 零改动**」经实测成立（图片块透传进两侧索引）；同时修掉重建链一个既有对齐缺陷。
+
+---
+
 ## [v5.24] 2026-09-29 —— 召回路数对照（ablation study）落地
 
 **影响模块**：M5 检索 `retriever.py`（`ablation_routes` 参数）+ M9 评测 `runner.py`（`--ablation-routes` CLI 开关）+ 新增 `scripts/compare_ablation.py`（四报告汇总脚本，留档可复跑）。背景：内部参考资料 此前标注「⚠️ ablation study 未做」——真正需要回答的是「每一条召回路由（graph / vector / keyword）各带来多少增益」，而非整链路有无。本次以**不改任何检索/融合/判据逻辑**的方式落地该探底对比：`--ablation-routes` 按 active set 裁剪三路召回输入（未选中路由传空列表，对 RRF 无贡献；sparse 权重置空），在 admin 30 题测试集跑 vector / vector+graph / 三条全量三组对照，另加 verify 组排除污染：初跑 vector/vg 带瞬时 judge ERROR 日志（均重试成功、judge_failed=0），verify 组（0 ERROR）复跑逐项一致（0 题指标差异），确认数字未被污染。

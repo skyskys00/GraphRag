@@ -1,8 +1,8 @@
 # M3 模块记录：索引层（LightRAG 建图 + bge-m3 向量）
 
-> **版本：** v0.3.3
+> **版本：** v0.3.4
 > **状态：** 已落地
-> **更新：** 2026-09-26
+> **更新：** 2026-10-01
 > **定位：** TextUnit → LightRAG 知识图谱 + bge-m3 向量索引
 > **契约：** TextUnit → 图索引（entities/relations） + 向量索引（dense + sparse）
 > **上游：** [M2 切分层](M2_chunk.md) | **下游：** [M5 检索层](M5_retrieve.md)
@@ -56,6 +56,7 @@ cd backend
 
 - **生产链路参照** `backend/scripts/build_eval_admin.py`（ingest → build_workspace_deps，M1→M2→M3→M5 sparse 全链自动）。
 - **规则**：索引层改动落库时必须走完整重建链重建标准库，**禁止为验证另建旁路 workspace**（如 v5.10 曾建 `eval_cservice_v510_ws`）；验证用临时库即建即收（见项目根 CLAUDE.md 探底纪律第 4 条）。
+- **对齐校验口径**：脚本末尾的 `_align_check` 比的是「PG 与 M2 的 `(full_doc_id, content)` **集合**相等」，**不是**三源计数相等 —— LightRAG 会丢弃**同一文档内** content 完全相同的重复块，PG 计数天然可能少于 M2 unit 数，按计数比对会把合法去重误报为失败。同理，M2↔PG 的元数据关联（如 M5 的 `block_type`）**必须按 content 而非 `chunk_order_index`**：去重会让 PG 序号整体前移而错位。详见 [`docs/pitfalls/lightrag-chunk-id-dedup.md`](../pitfalls/lightrag-chunk-id-dedup.md)。
 
 ## 4. 关键坑：DeepSeek v4-flash 思考模式
 
@@ -111,4 +112,5 @@ DeepSeek：实体「ARPU」+ 关系描述写道「…提升8%」 ← 干净，�
 
 - **v0.3**（2026-09-14）：增量建图 `ainsert_custom_chunks` 被 M7 上传管线复用。
 - **v0.3.3**（2026-09-26）：新增 §3.5 全链路索引重建命令链（M2→M3→M5），索引层改动后重建标准库、禁旁路 workspace。
+- **v0.3.4**（2026-10-01）：§3.5 补「对齐校验口径」——`_align_check` 比 content 集合（非计数）、元数据关联按 content（非序号），修 LightRAG 同文档 content 去重导致的对齐错位（v5.25.1）。
 - 变更记录：**逐条版本历史见 `docs/CHANGELOG.md`**（v0.1 GLM 冒烟 → v0.2 DeepSeek 定案+思考模式修复 → v0.3 联动复用）。本文件不再维护历史流水。

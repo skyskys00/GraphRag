@@ -138,18 +138,39 @@ def _pg_count(workspace: str) -> int:
 
 
 def _align_check(workspace: str, working_dir: Path, chunks_dir: Path) -> None:
-    """对齐校验：PG doc_chunks 数 == chunks jsonl units 数 == sparse chunks 数。"""
-    from app.m5_retrieve.sparse_index import SPARSE_FILE
+    """对齐校验：PG 与 sparse 计数一致，且 (full_doc_id, content) 集合 PG == M2。
+
+    注：LightRAG 的 chunk id = hash(doc_id, content)，**同一文档内** content 完全相同的
+        重复块会被丢弃（跨文档不去重，因 doc_key 不同）⇒ PG 计数可能少于 M2 units 计数，
+        按计数直接比对会误报。按 content 集合比对才是真正的不变量：去重只丢重复副本，
+        不丢任何唯一内容。
+    """
+    from app.m5_retrieve.sparse_index import SPARSE_FILE, content_key
 
     n_pg = _pg_count(workspace)
-    n_units = sum(len(_read_units(f)) for f in chunks_dir.glob("*.jsonl"))
     sp = working_dir / SPARSE_FILE
-    n_sp = len(json.loads(sp.read_text(encoding="utf-8"))["chunks"]) if sp.exists() else 0
-    print(f"  对齐: PG={n_pg}  chunks_jsonl={n_units}  sparse={n_sp}")
-    if n_pg == n_units == n_sp:
-        print(f"  [OK] 三源对齐 {n_pg}")
-    else:
-        _fail(f"对齐失败：PG={n_pg} chunks_jsonl={n_units} sparse={n_sp}")
+    if not sp.exists():
+        _fail(f"sparse 未生成：{sp}")
+    sp_chunks = json.loads(sp.read_text(encoding="utf-8"))["chunks"]
+    n_sp = len(sp_chunks)
+
+    m2_keys: set[tuple[str, str]] = set()
+    n_units = 0
+    for f in chunks_dir.glob("*.jsonl"):
+        for u in _read_units(f):
+            n_units += 1
+            m2_keys.add((u["full_doc_id"], content_key(u["content"])))
+    # sparse 的 chunks 由 PG 原样落盘（content 即 PG content），故可代表 PG 侧
+    pg_keys = {(v["full_doc_id"], v["content"]) for v in sp_chunks.values()}
+
+    dedup = n_units - len(m2_keys)
+    print(f"  对齐: PG={n_pg}  chunks_jsonl={n_units}（同文档去重后 {len(m2_keys)}）  sparse={n_sp}")
+    if n_pg != n_sp:
+        _fail(f"PG({n_pg}) 与 sparse({n_sp}) 计数不一致")
+    if pg_keys != m2_keys:
+        _fail(f"内容集合不一致：PG 独有 {len(pg_keys - m2_keys)}，M2 独有 {len(m2_keys - pg_keys)}")
+    tail = f"（LightRAG 丢弃同文档重复副本 {dedup} 条）" if dedup else ""
+    print(f"  [OK] 三源对齐 {n_pg}{tail}")
 
 
 def main() -> None:
