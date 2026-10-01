@@ -372,3 +372,20 @@
 - **full = 2026-09-27 基线逐位一致**（Δ 全 0）：三路就是生产配置，pipeline + judge 复现性确认。
 
 **结论**：生产 top5 净效果 ≈ 中性；三路收益集中在跨文档召回 + top6-8 覆盖，由 RERANK_TOP=8 窗口兜底。**不因此调检索配置**——现状「keep 三路」合理。逐题 top5 差异：full vs vector 12/30、full vs vg 10/30（`scripts/compare_ablation.py` 可复跑逐题归因）。
+
+### 客服库复现（cservice 35 题，2026-09-29）
+
+**动机**：admin 30 题的「三路 ≈ 中性」结论是否只在行政库成立？在另一领域（客服业务库，`eval_cservice_ws`）跑同口径对照（vector / 三路全量两组）。
+
+**总体指标**（报告 `tests/reports/run_ablation_cservice35_{vector,graph_vector_keyword}_20260929.json`）：
+
+| 指标 | vector | full（三路） | Δ |
+|---|---|---|---|
+| Recall@5 | 0.8692 | **0.8753** | +0.61pt |
+| Prec@5 | 0.4914 | **0.5029** | +1.15pt |
+| wPrec@5 | **0.6281** | 0.6208 | −0.73pt |
+| nDCG@5 | 0.8934 | **0.8960** | +0.26pt |
+| gold_rank avg / median | 1.69 / 1.50 | **1.64 / 1.44** | 更靠前 |
+| GR top1 / top3 / top5 / top8 | 0.5465 / 0.7611 / 0.8177 / 0.8303 | **0.5540 / 0.7763 / 0.8227 / 0.8379** | 全面 +0.8~1.5pt |
+
+**结论**：**与 admin 库同向** —— 三路 vs 纯向量在客服库上同样是「小幅度、方向不一」的微调（recall/prec/gold_rank 略优，wPrec 略劣），所有 Δ 均 < 1.2pt，量级与 LLM judge 单题波动相当。**跨领域复现了「keep 三路、不调配置」的判断**：三路的价值是稳健兜底（尤其 GR top-k 覆盖），不是单窗口的显著增益。
