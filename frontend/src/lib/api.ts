@@ -1,6 +1,7 @@
 import type {
   Answer,
   CollectionInfo,
+  CompareResult,
   ConversationDetail,
   ConversationInfo,
   DashboardStats,
@@ -185,4 +186,26 @@ export async function deleteConversation(id: string, collection_id = 'default'):
     { method: 'DELETE' },
   )
   if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`)
+}
+
+// ---------- 器械场景：跨型号参数对比 ----------
+
+export async function compareParams(params: {
+  query: string
+  doc_ids: string[]
+  collection_id?: string
+  top_k?: number
+}): Promise<CompareResult> {
+  const res = await fetch(`${API_BASE}/compare`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      query: params.query,
+      doc_ids: params.doc_ids,
+      collection_id: params.collection_id ?? 'default',
+      top_k: params.top_k ?? 3,
+    }),
+  })
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`)
+  return (await res.json()) as CompareResult
 }

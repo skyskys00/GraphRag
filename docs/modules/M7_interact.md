@@ -1,9 +1,9 @@
 # M7 模块记录：交互层（FastAPI + SSE + 上传/调度）
 
-> **版本：** v10.4
+> **版本：** v10.5
 > **状态：** 已落地
-> **更新：** 2026-10-01
-> **定位：** HTTP API + SSE 流式问答 + 文档上传调度 + 图谱查询 + 多知识库 + 多会话
+> **更新：** 2026-10-02
+> **定位：** HTTP API + SSE 流式问答 + 文档上传调度 + 图谱查询 + 多知识库 + 多会话 + 参数对比
 > **契约：** REST/SSE → M5/M6 编排结果；完整接口以 **Swagger UI** 为准（代码即契约，永不过时）
 > **上游：** [M5 检索层](M5_retrieve.md) / [M6 生成层](M6_generate.md) | **下游：** [M8 前端](M8_frontend.md)
 > **依据：** [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.8 ｜ [`FRAMEWORK_NOTES.md`](../FRAMEWORK_NOTES.md) §3

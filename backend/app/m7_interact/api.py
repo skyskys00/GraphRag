@@ -18,6 +18,7 @@ from pydantic import BaseModel
 
 from . import collections, conversations, documents
 from .bootstrap import WEB_DIRNAME, dispose, evict_deps, get_deps
+from .compare import compare_params
 from .events import sse
 from .graph import collect_document_graph, collect_graph
 from .respond import make_answer, stream_answer
@@ -64,6 +65,25 @@ async def post_answer(req: AnswerRequest) -> dict[str, Any]:
         return await make_answer(deps, req.query, req.history,
                                  req.response_type, req.conversation_id)
     except Exception as e:  # noqa: BLE001 —— 边界：把 LLM/检索异常转成可读 500
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}") from e
+
+
+class CompareRequest(BaseModel):
+    query: str
+    doc_ids: list[str]
+    collection_id: str = "default"
+    top_k: int = 3
+
+
+@app.post("/compare")
+async def post_compare(req: CompareRequest) -> dict[str, Any]:
+    """跨文档参数对比：同一 query 在各型号内单独检索，并排返回片段（DEVICE_SCENARIO §5.1）。"""
+    try:
+        deps = await get_deps(req.collection_id)
+        return await compare_params(deps, req.query, req.doc_ids, req.top_k)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except Exception as e:  # noqa: BLE001 —— 边界：把检索异常转成可读 500
         raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}") from e
 
 

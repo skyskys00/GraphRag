@@ -1,9 +1,9 @@
 # M8 模块记录：正式问答前端（React + TypeScript + Vite）
 
-> **版本：** v5.4
+> **版本：** v5.5
 > **状态：** 已落地
-> **更新：** 2026-10-01
-> **定位：** 四视图（问答 / 文档管理 / 知识图谱 / 仪表盘）+ 多知识库切换 + 多会话
+> **更新：** 2026-10-02
+> **定位：** 五视图（问答 / 文档管理 / 知识图谱 / 仪表盘 / 参数对比）+ 多知识库切换 + 多会话
 > **契约：** 消费 M7 REST + SSE 接口（见 Swagger UI: http://localhost:8787/swagger）
 > **上游：** [M7 交互层](M7_interact.md) | **下游：** 浏览器用户
 > **依据：** [`M8_frontend_req.md`](M8_frontend_req.md) ｜ [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.9

@@ -195,5 +195,27 @@ export interface ConversationDetail {
   messages: ConversationMessage[]
 }
 
-// 主区视图：仪表盘 / 问答 / 文档管理 / 知识图谱
-export type AppView = 'dashboard' | 'chat' | 'documents' | 'graph'
+// 器械场景：跨型号参数对比（见 docs/modules/DEVICE_SCENARIO.md §5.1）
+export interface CompareSnippet {
+  content: string
+  score: number
+  page_range: number[] | null
+  block_type: string | null
+  image_url: string | null
+}
+
+export interface CompareRow {
+  doc_id: string
+  doc_name: string
+  error?: string
+  snippets: CompareSnippet[]
+}
+
+export interface CompareResult {
+  query: string
+  rows: CompareRow[]
+  score_cutoff: number
+}
+
+// 主区视图：仪表盘 / 问答 / 文档管理 / 知识图谱 / 参数对比
+export type AppView = 'dashboard' | 'chat' | 'documents' | 'graph' | 'compare'

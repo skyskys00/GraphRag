@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import { TopBar } from './components/TopBar'
 import { Sidebar } from './components/Sidebar'
+import { DeviceCompare } from './components/DeviceCompare'
 import { ChatView } from './components/ChatView'
 import { CitationPanel } from './components/CitationPanel'
 import { InputBar } from './components/InputBar'
@@ -385,7 +386,9 @@ function App() {
             ? ' docs'
             : activeView === 'graph'
               ? ' graph'
-              : ''
+              : activeView === 'compare'
+                ? ' compare'
+                : ''
       }`}
     >
       <TopBar online={backendOnline} onNew={handleNewChat} newDisabled={isStreaming} />
@@ -435,6 +438,8 @@ function App() {
         />
       ) : activeView === 'graph' ? (
         <GraphView focus={graphFocus} uploadDocs={docs} collectionId={current} />
+      ) : activeView === 'compare' ? (
+        <DeviceCompare docs={docs} collectionId={current} />
       ) : messages.length === 0 ? (
         <main className="chat" ref={chatRef}>
           <EmptyState suggestions={SUGGESTIONS} onPick={(q) => send(q, undefined, current)} />
