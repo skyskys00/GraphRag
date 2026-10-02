@@ -24,8 +24,13 @@ from pathlib import Path
 
 _PROJ = Path(__file__).resolve().parents[2]
 
-# 模型自评标记：prompt 要求无检索价值的图只输出它，上层据此丢弃 caption
+# 模型自评标记：prompt 要求无检索价值的图只输出它，上层据此丢弃 caption。
+# ⚠️ 实测 deepseek-flash 从不输出这个裸标记（总填满三段格式），故真正生效的是
+# _is_noise() 的第 2 字段判定；此处保留作兼容（模型偶发输出裸标记时仍能过滤）。
 NO_INFO = "无有效信息"
+
+# 装饰/图标类：自评「无可读文字」时即无检索价值（logo、纯装饰图形、方向图标）
+_NOISE_TYPES = {"装饰图", "其他", "按键图标"}
 
 _MAX_WORKERS = 5
 _TIMEOUT = 120
@@ -87,6 +92,19 @@ def _image_area(p: Path) -> int:
     return w * h
 
 
+def _is_noise(cap: str) -> bool:
+    """视觉描述是否无检索价值（装饰图/logo/无文字图标）。
+
+    prompt 里的 NO_INFO 裸标记逃生口实测从不触发（deepseek-flash 总填满
+    `类型|有/无|描述` 三段格式）⇒ 改为解析字段判定：第 2 字段「是否有可读文字」
+    为「无」且第 1 字段属 _NOISE_TYPES 时丢弃。非三段格式则退回裸标记判定。
+    """
+    parts = [p.strip() for p in cap.split("|")]
+    if len(parts) < 2:
+        return NO_INFO in cap
+    return parts[1] == "无" and parts[0] in _NOISE_TYPES
+
+
 def _caption_one(img_abs: Path, page_idx: int | None) -> str:
     """单图 -> 描述文本（同步 HTTP，见模块 docstring）。"""
     ext = img_abs.suffix.lstrip(".").lower()
@@ -126,7 +144,8 @@ def caption_images(doc_dir: Path, content_list: list[dict]) -> dict[str, str]:
     - 面积兜底：像素面积 < VISION_MIN_AREA 的图不调模型（滤小图标，实测阈值 10000 下
       样本1 滤 6/16、样本2 滤 4/38）。
     - 按 img_path 去重（MinerU sha256 命名，同图同路径）。
-    - NO_INFO 与空串不入返回 dict ⇒ 上层自然退化为纯文本链路。
+    - 无检索价值的图（_is_noise：装饰图/logo/无文字图标）与空串不入返回 dict
+      ⇒ 上层自然退化为纯文本链路。
     """
     if not enabled():
         return {}
@@ -162,6 +181,6 @@ def caption_images(doc_dir: Path, content_list: list[dict]) -> dict[str, str]:
     out: dict[str, str] = {}
     for rel in targets:
         cap = ((cache.get(rel) or {}).get("caption") or "").strip()
-        if cap and NO_INFO not in cap:
+        if cap and not _is_noise(cap):
             out[rel] = cap
     return out

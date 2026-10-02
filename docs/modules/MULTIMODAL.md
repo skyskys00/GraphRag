@@ -1,7 +1,7 @@
 # 多模态方案：说明书图片入索引
 
-> **版本：** v0.3.2（M0–M8 全链已实施，M3/M5 零改动已验证）
-> **状态：** 已实施（M0 契约 / M1 解析 / M2 切分 / M6 溯源 / M7 接口 / M8 前端）
+> **版本：** v0.3.6（M0–M8 全链已实施，M3/M5 零改动已验证，端到端全链已实测，装饰图噪声过滤已修，浏览器目视已验证，验证库已收尾）
+> **状态：** 已实施并端到端验证（M0 契约 / M1 解析 / M2 切分 / M6 溯源 / M7 接口 / M8 前端）
 > **更新：** 2026-10-01
 > **定位：** 跨模块特性方案（M0 契约 / M1 解析 / M2 切分 / M6 溯源 / M7 接口 / M8 前端）——把说明书里的图片转为可检索文本块
 > **契约：** 扩展 [`M0_contracts/parse.md`](M0_contracts/parse.md) §3（`img_path`）与 [`textunit.schema.json`](M0_contracts/textunit.schema.json)（`image_path`）
@@ -83,7 +83,9 @@ M1 对 caption 做可用性过滤（§4.2 `_usable_mineru_caption`），footnote
 
 **描述质量达标**：界面截图读出全部关键数值与按钮（如「先抽后灌模式 / 灌注量 50.00uL / 运行速度 302.8um/min / 运行时间 15.00sec」）；**图片型表格被完整转写**（「Hamilton、Unimetrics、Popper & Sons 品牌微量注射器容量与尺寸对应表」）—— 这正是纯文本链路永远召回不到的部分。
 
-**关键发现：面积不是唯一判据。** 样本1 有张 390×285（111,150 px²）的图仍是装饰图标，样本2 有张 296×387（114,552 px²）的 YS logo —— 面积比部分信息图还大却无检索价值 ⇒ 面积阈值只能兜住小图标，**大尺寸装饰图需靠视觉模型自评**（§4.2 prompt 约定）。
+**关键发现：面积不是唯一判据。** 样本1 有张 390×285（111,150 px²）的图仍是装饰图标，样本2 有张 296×387（114,552 px²）的 YS logo —— 面积比部分信息图还大却无检索价值 ⇒ 面积阈值只能兜住小图标，**大尺寸装饰图需靠视觉模型自评**（§4.2 `_is_noise`）。
+
+> ⚠️ **自评机制的实测修正（v5.25.4）**：prompt 原约定「无信息图整行只输出 `无有效信息`」，但 `deepseek-flash` **从不**输出该裸标记，总是填满三段格式 ⇒ 原 `NO_INFO not in cap` 过滤永不命中，装饰图仍进索引（实测 40 块中 4 块 = 10%）。改为解析字段判定后生效（§7）。
 
 ## 3. 方案总览
 
@@ -148,7 +150,13 @@ M7 ingest() 在 async 上下文里同步调 process_one()，内部若 asyncio.ru
 M1 CLI 不经 runner 加载 dotenv，模块内 _load_env() 兜底读 backend/.env（setdefault，幂等）。
 """
 
-NO_INFO = "无有效信息"   # 模型自评标记：M1 侧据此丢弃 caption
+NO_INFO = "无有效信息"   # 模型自评标记（prompt 约定）；实测从不触发，保留作兼容
+_NOISE_TYPES = {"装饰图", "其他", "按键图标"}   # 自评「无可读文字」即无检索价值的类型
+
+def _is_noise(cap: str) -> bool:
+    """视觉描述是否无检索价值。prompt 里的 NO_INFO 裸标记实测从不触发
+    （deepseek-flash 总填满三段格式）⇒ 改为解析字段判定：第 2 字段「是否有可读文字」
+    为「无」且第 1 字段 ∈ _NOISE_TYPES 时丢弃；非三段格式退回裸标记判定。"""
 
 def enabled() -> bool:      # VISION_ENABLED（默认 true）
 def _model() -> str:        # VISION_MODEL（默认 deepseek-flash）
@@ -163,13 +171,14 @@ def _caption_one(img_abs: Path, page_idx: int | None) -> str:
     """单图 → 描述文本。messages:
     {"type":"image_url","image_url":{"url":"data:image/jpeg;base64,<...>"}}
     prompt 要求模型输出 `类型|是否有可读文字|描述`，读出按钮名/菜单项/数值/报警文本；
-    无任何可读文字与信息内容时只输出 NO_INFO（过滤大尺寸 logo/装饰图，零额外成本）。
+    约定「无任何可读文字与信息内容时只输出 NO_INFO」（过滤大尺寸 logo/装饰图，零额外成本）
+    —— ⚠️ 实测 deepseek-flash 从不遵守该裸标记约定，真正生效的是 `_is_noise()` 的字段判定。
     body 顶层传 "thinking":{"type":"disabled"}（deepseek-flash 是推理模型）。"""
 
 def caption_images(doc_dir: Path, content_list: list[dict]) -> dict[str, str]:
     """对 content_list 中 image 条目批量生成描述，返回 {img_path: caption}。
     面积兜底 → 按 img_path 去重（MinerU sha256 命名，同图同路径）→ 读缓存 → 5 并发调用。
-    NO_INFO 与空串不入返回 dict ⇒ 上层自然退化为纯文本链路。"""
+    `_is_noise` 判定的噪声图与空串不入返回 dict ⇒ 上层自然退化为纯文本链路。"""
 ```
 
 **改 `blocks_builder.py`**：
@@ -294,7 +303,7 @@ VISION_MIN_AREA=10000         # px²，成本兜底：小于此面积不调模�
 | 手段 | 说明 |
 |---|---|
 | **小图标过滤** | `VISION_MIN_AREA` 阈值作用于**图片像素面积**（PIL 读文件头，非 MinerU bbox 面积，见 §4.2 实施修正）。实测（10000）：样本1 滤 6/16、样本2 滤 4/38 |
-| **模型自评过滤** | prompt 要求无信息图返回 `无有效信息`，M1 侧丢弃 caption（滤大尺寸 logo/装饰图，**零额外成本**，见 §2.3） |
+| **模型自评过滤** | prompt 要求无信息图返回 `无有效信息`（⚠️ **实测模型从不输出该裸标记**，v5.25.4 修正）；实际生效的是 `_is_noise()` 字段判定：自评「无可读文字」且类型 ∈ {装饰图, 其他, 按键图标} 的 caption 被丢弃（滤大尺寸 logo/装饰图，**零额外成本**，见 §7） |
 | **按 img_path 去重** | MinerU 以 sha256 命名，同图同路径；重复引用只调一次 |
 | **落盘缓存** | `<doc_dir>/image_captions.json`，已有且无 `error` 的 key 重跑不重复调用；失败的下次重试 |
 | **开关** | `VISION_ENABLED=false` 一键关闭，完全退化为纯文本链路 |
@@ -310,7 +319,7 @@ VISION_MIN_AREA=10000         # px²，成本兜底：小于此面积不调模�
 | **2. M2 单元** | `python -m app.m2_chunk.runner -s /tmp/m1_mm -o /tmp/m2_mm`：jsonl 含 `block_type=drawing` 且 content 非空的 TextUnit；`image_path` 字段存在；`chunk_order_index` 落在原位 | ✅ 铭昇 45 units / 9 drawing；融柏 123 / 27；`image_path` 全带、`title_path` 上下文正确。注：`chunk_order_index` 有缺口是 M2 **既有行为**（末尾 `[u for u in out if u["content"].strip()]` 丢弃空 content 块），与本次改动无关 |
 | **3. 降级** | `VISION_ENABLED=false` 重跑 M1+M2：**不因视觉产生块**（`drawing` 块只可能来自过滤后的 MinerU 真图注） | ✅ 铭昇 **0** drawing；融柏 **4**（正是 §2.2 的 3 条真图注 + p22 footnote，零纯图号垃圾）。铭昇 29 units、融柏 83 units |
 | **4. M3/M5 零改动** | 按 M3_index §3.5 重建链建**临时 workspace**（遵守探底纪律第 4 条，不污染标准库）：PG `lightrag_doc_chunks` 含图片块；`m5_sparse.json` 含图片块 | ✅ 已实测（2026-10-01，临时库 `mm_verify_ws`，用后即收）：M2 38 drawing → PG 38（24 按序号命中 + 14 按 content 命中）→ sparse 38 条 `block_type=drawing`，**M1/M2/M3/M5 零改动**。验证中另发现并修复重建链一个**既有**对齐缺陷（与多模态无关，见 CHANGELOG v5.25.1） |
-| **5. 端到端** | 上传一份 PDF → preview 接口返回 `image_url` → 浏览器预览面板显示图片；检索「XX 图标含义」类问题能召回对应块 | ✅ **API 级已验证**（2026-10-01）：用 v5.25 遗留真实产物（铭昇 H2-5000IBP，doc `719a920e62722e29`，8 drawing 块 / 16 图）灌入临时库 `col_d2fb1ad8`，`GET /docs/{doc}/preview` → 43 units、8 drawing、8 带 `image_url`；图片路由 200 + `image/jpeg` + 穿越 404；M6 单测 `Citation.image_path` 正确填充。`npx tsc -b` 与 `npm run build` 通过。⚠️ **浏览器目视未完成** —— camofox 浏览器启动依赖外部 geoip 公网 IP 查询，当前出口不可用（与代码无关），M8 仅到「类型检查 + 构建 + 后端契约」级证据 |
+| **5. 端到端** | 上传一份 PDF → preview 接口返回 `image_url` → 浏览器预览面板显示图片；检索「XX 图标含义」类问题能召回对应块 | ✅ **全链已验证**（2026-10-01，CHANGELOG v5.25.3）：走**真实 M7 上传路径**（`POST /docs`）建临时库 `col_b7b876b1`，上传融柏 LSP-1C + 铭昇 H2-5000IBP 两份说明书（入库 11m16s）。M1 视觉 38 图→31 caption（0 error）→ M2 130/45 units（31/9 drawing，均带 `image_path`）→ M3 PG 173 块 → M5 sparse 含图片描述。**4 道「答案只在图上」问题全部答对**，引用全带 `image_path`，4 张引用图经 M7 路由取回均 200 `image/jpeg`；检索 top-5 中 drawing 块占 3/5~**5/5**（内径题 drawing **rank-1**）。负对照（问蓝牙/App）正确答「无法确认」不编造。✅ **浏览器目视已完成**（2026-10-01，CHANGELOG v5.25.5，chrome-devtools-mcp）：预览面板 9 个 drawing 块全部渲染原图（懒加载 9/9 加载成功）、lightbox 放大与遮罩关闭正常、引用卡片缩略图正常（提问静态压力 → 答 20.00 kPa，缩略图即该界面截图 673×487）。另发现语料质量点见 §7 |
 
 > 降级验收口径的修正：初稿写「与现状逐字节一致」，实施时发现 MinerU 图注**并非全空**（§2.2），
 > 且视觉调用失败会让块退化为「图 13」——故口径改为 **「不因视觉产生块」**：关闭视觉后，
@@ -321,6 +330,13 @@ VISION_MIN_AREA=10000         # px²，成本兜底：小于此面积不调模�
 - **不做图片视觉问答**（VQA）：生成侧仍为纯文本，图片只以描述文本参与。
 - **不覆盖 Docling 链路**：第一版只做 MinerU（PDF/office）。docling 的 `picture` 块后续按同一模式扩展。
 - **不做图片去重（跨文档）**：同一厂商多份说明书可能有相同截图，第一版不去重（成本可控）。
+- **装饰图噪声过滤（v5.25.4 已修）**：视觉 prompt 设了 `NO_INFO="无有效信息"` 逃生口（`vision.py`），
+  意图是「无检索价值的图（logo/纯装饰）只输出该标记，上层丢弃」，但 `deepseek-flash` 实测**总是**
+  填满 `类型|有/无|描述` 三段格式、从不输出裸标记 ⇒ 原 `NO_INFO not in cap` 过滤永不命中。
+  **修法**：新增 `_is_noise(cap)` 改按字段判定 —— 第 2 字段「是否有可读文字」为 `无` 且第 1 字段
+  ∈ `{装饰图, 其他, 按键图标}` 时丢弃（非三段格式退回裸标记判定）。实测 40 个 drawing 块中 4 个噪声
+  全部滤除（M2 drawing 31/9 → **29/7**）。**边界**：该判定依赖模型如实自评第 2 字段；若模型把
+  装饰图误判为「有文字」，仍会漏网 —— 属概率性过滤，非硬保证。
 - **不改 M3/M5 任何代码**：这是本方案的核心约束（透传式接入）。
 - **不做扫描件 OCR 增强**：MinerU pipeline 已含 OCR，本方案不重复。
 
@@ -330,6 +346,19 @@ VISION_MIN_AREA=10000         # px²，成本兜底：小于此面积不调模�
 
 ## 9. Changelog
 
+- **2026-10-01 · v0.3.6（验证库收尾）**：多模态线收尾 —— 删残库 `col_d2fb1ad8`（mm_e2e：无上传原件、PG 0 行、检索不可用）；`col_b7b876b1` **转正**为「**有源器械说明书**」库，并按 v5.25.4 口径**重建**（M1 重生成 `blocks.jsonl` 走 `image_captions.json` 缓存、视觉调用零成本 → `rebuild_standard_lib.py --execute`，耗时 **8m28s**）。实测：drawing 31/9 → **29/7**（全带 `image_path`）、PG doc_chunks 173 → **167**、噪声 caption 残留 4 → **0**，三源对齐通过；端到端复验答对 **20.00kPa** 且引用带图。该库含两份 PDF 原件（`<col>/uploads/`），是仓库里**唯一**的器械语料，作为垂直场景落地的底子。登记 CHANGELOG **v5.25.6**。
+- **2026-10-01 · v0.3.5（浏览器目视验证完成）**：补齐 v0.3.2 起一直挂着的「M8 浏览器目视未做」。改用 **chrome-devtools-mcp**（v1.10.1，替代因 geoip 依赖不可用的 camofox）驱动独立 Chrome 实例，对临时库 `col_b7b876b1` 实测：
+  - **文档预览**：铭昇 45 片段中 9 个 `block_type=drawing` 块全部渲染为 `<img>`，`loading="lazy"` 懒加载正常（逐张滚入视口后 9/9 `naturalWidth` 非 0，尺寸 445×409 / 726×476 / 390×285 / 732×499 / 146×70 / 623×453 / 673×487 / 670×484 / 673×490，与 §2.3 尺寸形态吻合）；每张图下方显示视觉描述文本。
+  - **Lightbox**：点击图片 → 遮罩变暗 + 居中放大原图；点击遮罩关闭（`DocumentPreview.tsx:141` 的 `onClick={() => setZoom(null)}`）。
+  - **引用缩略图**：提问「有创压气体静态压力界面上显示的压力值是多少 kPa？」→ 答 **20.00 kPa**（[1]，置信度 80%，P9–P9）；引用卡片的 `.cite-thumb` 缩略图即 `c2cb4c0e…jpg`（该界面截图，673×487，加载成功）—— 答案确实取自图片描述，非文本层。
+  - **图片路由**：前端经 `apiUrl()` 补全的 `/api/docs/<doc>/images/<sha>.jpg?collection_id=…` 全部 200。
+  - 登记 CHANGELOG **v5.25.5**。**零代码改动**（纯验证）。
+- **2026-10-01 · v0.3.4（装饰图噪声过滤已修）**：修复 v0.3.3 记录的「`NO_INFO` 逃生口未生效」。根因是 `deepseek-flash` 从不输出 prompt 约定的裸标记 `无有效信息`，总是填满 `类型|有/无|描述` 三段格式 ⇒ 原 `NO_INFO not in cap` 过滤永不命中。改为新增 `_is_noise(cap)` 按**字段判定**（第 2 字段=「无」且第 1 字段 ∈ {装饰图, 其他, 按键图标} 丢弃），非三段格式退回裸标记判定。**实测**（复用落盘缓存，零 API 成本）：M1 有效 caption 40 → **36**，M2 drawing 31/9 → **29/7**，总 units 130/45 → 127/41；滤掉的 4 张图均无 MinerU 图注 ⇒ 失描述后 content 空被 M2 丢弃。登记 CHANGELOG **v5.25.4**。
+- **2026-10-01 · v0.3.3（端到端全链已验证）**：承接 v0.3.2 的「端到端可用性未验证」，按 §6 步骤 5 走**真实 M7 上传路径**（`POST /docs`）建临时库 `col_b7b876b1`，上传两份器械说明书跑通 M0→M8 全链（**零代码改动**，纯验证）。
+  - **链路**：M1 视觉 38 图→31 caption（0 error）→ M2 130/45 units（31/9 drawing）→ M3 PG 173 块 → M5 sparse 含图片描述 → M6/M7 引用带 `image_path`。
+  - **检索+生成**：4 道「答案只在图上」问题（融柏厂商名/内径值/运行速度、铭昇 kPa）**全部答对**，引用全带图；top-5 中 drawing 占 3/5~5/5；内径题 drawing **rank-1**；负对照不编造。
+  - **语料质量核查**：`pdftotext` 逐词核对确认测试点「答案只在图上」（融柏厂商名/内径/302.8、铭昇 20.00 文本层 0 命中），避开有泄漏的 150/9600/波特率/收缩压/脉率。
+  - **新发现**：`NO_INFO` 逃生口未生效（装饰图仍进索引，10%），详见 §7。**已于 v0.3.4 修复**。登记 CHANGELOG **v5.25.3**。
 - **2026-10-01 · v0.3.2（M6/M7/M8 展示层已实施）**：按 §4.5–4.7 落地展示层，多模态链路 M0→M8 全线打通。
   - **M6**：`sidecar.py` `ChunkMeta` 加 `image_path`；**方案外补充** `cite.py` `Citation.image_path` + `to_dict()`（§4.7 缩略图必需）。
   - **M7**：`preview_doc()` 返回 unit 加 `image_url`；新增 `GET /docs/{doc_id}/images/{name}` 静态路由（注册在 StaticFiles catch-all 之前），doc_id/name 白名单 + resolve 归属校验防穿越。
