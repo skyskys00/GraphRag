@@ -14,6 +14,7 @@ REQUIRED_FIELDS = {
 VALID_CATEGORIES = {
     "fact_single", "fact_cross_doc", "proper_noun",
     "comparison", "table_numeric", "summary", "unanswerable",
+    "image_only",  # 答案只在图上（视觉描述），文本层 0 命中 —— 器械场景新增
 }
 
 VALID_DIFFICULTIES = {"easy", "medium", "hard"}

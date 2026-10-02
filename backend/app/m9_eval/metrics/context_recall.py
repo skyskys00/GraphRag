@@ -17,7 +17,10 @@ from ..judge import judge
 # judge reason 自述否定却判 hit 时，仅当是「空洞否定」（reason 无任何证据信号）
 # 才校正为 miss；有证据信号（数值锚点/推导缺口/块引用/核心词组）或负向断言型
 # fact 则保留原判定。改此 prompt 必须同步升级 _PROMPT_VERSION 使缓存失效
-_PROMPT_VERSION = "p0_evidence"
+# P1（v5.29）采信裁判显式 hit：judge 曾丢弃 LLM 输出的 hit 字段，只能用 score>=0.5
+# 反推，导致「hit=false 但 score 高」被误判为命中；现优先用 hit（缺失时回退 score）。
+# 解析逻辑变更同样需 bump 版本，使旧缓存（无 hit 字段）失效。
+_PROMPT_VERSION = "p1_llm_hit"
 
 SYSTEM_PROMPT = """你是一个严谨的 RAG 评测裁判。你的任务是判断给定的事实陈述能否在检索到的上下文（retrieved contexts）中找到明确依据。
 判断规则：
@@ -268,8 +271,10 @@ async def _judge_fact(query_func: Callable, fact: str, prompt: str, cache_parts:
             "error": result["error"],
         }
 
-    raw_hit = result["score"] >= 0.5
     raw_score = result["score"]
+    llm_hit = result.get("hit")
+    # 优先采信裁判显式输出的 hit；缺失（旧缓存 / 未输出）时回退 score 阈值
+    raw_hit = llm_hit if llm_hit is not None else raw_score >= 0.5
     hit, score = _enforce_evidence(fact, result["reason"], raw_hit, raw_score)
     if hit != raw_hit:
         # 证据强制校正（P0 精准化）：记录原始判定，reason 标注入档可追溯

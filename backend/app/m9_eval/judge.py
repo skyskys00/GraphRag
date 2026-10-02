@@ -79,7 +79,7 @@ def _cache_read(key: str, metric: str) -> dict | None:
     return None
 
 
-_EXTRA_FIELDS = ("total_facts", "correct_facts", "incorrect")
+_EXTRA_FIELDS = ("total_facts", "correct_facts", "incorrect", "hit")
 
 
 def _cache_write(key: str, metric: str, result: dict[str, Any]) -> None:
@@ -194,6 +194,12 @@ def _parse_judge_output(raw: str) -> dict[str, Any]:
     for f in _EXTRA_FIELDS:
         if f in data:
             payload[f] = data[f]
+    if "hit" in data:
+        # 归一化为 bool：LLM 可能输出 "true"/"false"/"是"/"否" 等字符串
+        h = data["hit"]
+        if isinstance(h, str):
+            h = h.strip().lower() in ("true", "1", "yes", "是", "命中")
+        payload["hit"] = bool(h)
     return payload
 
 

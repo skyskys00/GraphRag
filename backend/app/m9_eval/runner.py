@@ -40,17 +40,18 @@ def _load_dotenv() -> None:
     _load_dotenv(PROJ / ".env")
 
 
-async def _build_deps(workspace: str):
-    """构建评测所需依赖：rag + sparse_index + query_func(裁判用)。
+async def _build_deps(working_dir: Path, workspace: str):
+    """构建评测所需依赖：rag + sparse_index + query_func(裁判用) + entities。
 
-    Phase 1 只需要检索能力 + 裁判 LLM，不需要 sidecar / entities / 流式生成。
+    Phase 1 只需要检索能力 + 裁判 LLM，不需要 sidecar / 流式生成。
     但 retriever 需要 rag（aquery_data）和 sparse_doc（关键词路 + 元数据）。
+    entities 用于查询预处理的同义词/专名扩展（与 M7 线上链路口径一致）。
     """
     from app.m3_index.providers import build_llm_func
     from app.m3_index.runner import build_rag
+    from app.m5_retrieve.query_preprocess import load_entities_async
     from app.m5_retrieve.sparse_index import SPARSE_FILE, load as load_sparse
 
-    working_dir = PROJ / "data" / workspace
     rag = await build_rag(working_dir, workspace=workspace)
 
     sparse_path = working_dir / SPARSE_FILE
@@ -58,9 +59,95 @@ async def _build_deps(workspace: str):
         raise FileNotFoundError(f"稀疏索引不存在: {sparse_path}，请先建库")
     sparse = load_sparse(sparse_path)
 
+    try:
+        entities = await load_entities_async(workspace)
+    except Exception:  # noqa: BLE001 —— 实体名只是 query 预处理的可选项
+        entities = None
+
     _, query_func = build_llm_func()
 
-    return rag, sparse, query_func
+    return rag, sparse, query_func, entities
+
+
+# 旧式扁平库：collection id → LightRAG workspace 名（数据目录 = data/<ws>）
+_LEGACY_WS = {
+    "default": "default_ws",
+    "eval_cservice": "eval_cservice_ws",
+    "eval_admin": "eval_admin_ws",
+}
+
+
+def _resolve_collection(collection: str) -> tuple[Path, str]:
+    """collection → (working_dir 绝对路径, LightRAG workspace 名)。
+
+    旧三库保持扁平布局 data/<ws>；新式 col_* 库走 M7 的 collection_paths
+    （data/collections/<id>），workspace 名即 collection id。
+    """
+    if collection in _LEGACY_WS:
+        ws = _LEGACY_WS[collection]
+        return PROJ / "data" / ws, ws
+
+    from app.m7_interact.collections import collection_paths
+
+    paths = collection_paths(PROJ, collection)
+    return PROJ / paths["working_dir"], collection
+
+
+def _load_doc_name_map(working_dir: Path) -> dict[str, str]:
+    """filename → full_doc_id 映射（comparison 题 per-doc 检索用）。"""
+    p = working_dir / "documents.json"
+    if not p.exists():
+        return {}
+    try:
+        data = json.loads(p.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001 —— 映射缺失时退回单查询即可
+        return {}
+    out: dict[str, str] = {}
+    for v in (data.values() if isinstance(data, dict) else data):
+        fn, did = v.get("filename"), v.get("doc_id")
+        if fn and did and not v.get("deleted"):
+            out[fn] = did
+    return out
+
+
+def _comparison_targets(
+    q: dict[str, Any], name_map: dict[str, str], allowed_docs: list[str] | None
+) -> list[tuple[str, str]]:
+    """comparison 题 → [(doc_id, 子查询)]；<2 个则返回空（退回单查询）。
+
+    对齐线上 M7 compare.py 的跑法：query 是「参数名」而非含全部型号的完整问题。
+    实测（v5.29）：用完整对比问题做 per-doc 检索时，其他型号名会把该文档的向量
+    召回打到 0（LightRAG cosine=0.2 阈值），故子查询取自题集 per_doc_queries[文件名]，
+    缺省退回完整 question。
+    """
+    if q.get("category") != "comparison":
+        return []
+    pdq = q.get("per_doc_queries") or {}
+    targets: list[tuple[str, str]] = []
+    for fn in (q.get("source_docs") or []):
+        did = name_map.get(fn)
+        if did:
+            targets.append((did, pdq.get(fn) or q["question"]))
+    if allowed_docs:
+        allow = set(allowed_docs)
+        targets = [(d, s) for d, s in targets if d in allow]
+    seen: set[str] = set()
+    out: list[tuple[str, str]] = []
+    for d, s in targets:
+        if d not in seen:
+            seen.add(d)
+            out.append((d, s))
+    return out if len(out) >= 2 else []
+
+
+def _interleave(lists: list[list[dict[str, Any]]]) -> list[dict[str, Any]]:
+    """按位交错合并多路结果（doc1[0],doc2[0],doc1[1],…），使 top-k 窗口对各文档公平。"""
+    merged: list[dict[str, Any]] = []
+    for i in range(max((len(l) for l in lists), default=0)):
+        for l in lists:
+            if i < len(l):
+                merged.append(l[i])
+    return merged
 
 
 async def evaluate_retrieval(
@@ -71,6 +158,7 @@ async def evaluate_retrieval(
     entities: list[str] | None = None,
     allowed_docs: list[str] | None = None,
     exclude_docs: list[str] | None = None,
+    doc_name_map: dict[str, str] | None = None,
     *,
     gold_rank_mode: str = "lexical",
     eval_top_n: int = 8,
@@ -110,24 +198,38 @@ async def evaluate_retrieval(
 
             # 1. 检索（取 eval_top_n 块）
             try:
-                retr = await retrieve(
-                    rag, question_text, sparse,
-                    entities=entities,
-                    allowed_docs=allowed_docs,
-                    exclude_docs=exclude_docs,
-                    ablation_routes=ablation_routes,
-                )
-                if reranker == "llm":
-                    # LLM listwise 终审重排（正式可选 reranker，绕过 cross-encoder 表格失明）
-                    from .llm_rerank import rerank_with_llm
-
-                    contexts = await rerank_with_llm(
-                        query_func, question_text, retr, sparse,
-                        top_n=eval_top_n, pool_size=LLM_POOL_SIZE,
-                    )
-                    retr["results"] = contexts  # 后续统一走 contexts
+                targets = _comparison_targets(q, doc_name_map or {}, allowed_docs)
+                if targets:
+                    lists = []
+                    for did, sub_q in targets:
+                        r = await retrieve(
+                            rag, sub_q, sparse,
+                            entities=entities,
+                            allowed_docs=[did],
+                            exclude_docs=exclude_docs,
+                            ablation_routes=ablation_routes,
+                        )
+                        lists.append(r.get("results", []))
+                    contexts = _interleave(lists)
                 else:
-                    contexts = retr.get("results", [])
+                    retr = await retrieve(
+                        rag, question_text, sparse,
+                        entities=entities,
+                        allowed_docs=allowed_docs,
+                        exclude_docs=exclude_docs,
+                        ablation_routes=ablation_routes,
+                    )
+                    if reranker == "llm":
+                        # LLM listwise 终审重排（正式可选 reranker，绕过 cross-encoder 表格失明）
+                        from .llm_rerank import rerank_with_llm
+
+                        contexts = await rerank_with_llm(
+                            query_func, question_text, retr, sparse,
+                            top_n=eval_top_n, pool_size=LLM_POOL_SIZE,
+                        )
+                        retr["results"] = contexts  # 后续统一走 contexts
+                    else:
+                        contexts = retr.get("results", [])
             except Exception as e:
                 print(f"  ⚠️  检索失败: {e}", flush=True)
                 contexts = []
@@ -286,6 +388,7 @@ async def evaluate_answer(
     entities: list[str] | None = None,
     allowed_docs: list[str] | None = None,
     exclude_docs: list[str] | None = None,
+    doc_name_map: dict[str, str] | None = None,
     *,
     gold_rank_mode: str = "lexical",
     eval_top_n: int = 8,
@@ -314,20 +417,40 @@ async def evaluate_answer(
 
             t0 = time.time()
 
-            # 1. 调用 M6 answer（内部会自己做检索）
+            # 1. 调用 M6 answer（内部会自己做检索）；comparison 题 per-doc 各跑一次再合并
             try:
-                ans = await m6_answer(
-                    rag, question_text, sparse,
-                    entities=entities,
-                    query_func=query_func,
-                    allowed_docs=allowed_docs,
-                    exclude_docs=exclude_docs,
-                )
-                answer_text = ans.get("text", "")
-                citations = ans.get("citations", [])
-                retr = ans.get("retrieval", {})
-                contexts = retr.get("results", [])
-                gen_meta = ans.get("meta", {})
+                targets = _comparison_targets(q, doc_name_map or {}, allowed_docs)
+                if targets:
+                    ans_list = []
+                    ctx_lists = []
+                    for did, sub_q in targets:
+                        a = await m6_answer(
+                            rag, sub_q, sparse,
+                            entities=entities,
+                            query_func=query_func,
+                            allowed_docs=[did],
+                            exclude_docs=exclude_docs,
+                        )
+                        ans_list.append(a)
+                        ctx_lists.append(a.get("retrieval", {}).get("results", []))
+                    answer_text = "\n\n".join(a.get("text", "") for a in ans_list)
+                    citations = [c for a in ans_list for c in (a.get("citations") or [])]
+                    contexts = _interleave(ctx_lists)
+                    gen_meta = ans_list[0].get("meta", {})
+                    retr = ans_list[0].get("retrieval", {})
+                else:
+                    ans = await m6_answer(
+                        rag, question_text, sparse,
+                        entities=entities,
+                        query_func=query_func,
+                        allowed_docs=allowed_docs,
+                        exclude_docs=exclude_docs,
+                    )
+                    answer_text = ans.get("text", "")
+                    citations = ans.get("citations", [])
+                    retr = ans.get("retrieval", {})
+                    contexts = retr.get("results", [])
+                    gen_meta = ans.get("meta", {})
             except Exception as e:
                 print(f"  ⚠️  answer 失败: {e}", flush=True)
                 answer_text = ""
@@ -551,38 +674,39 @@ async def main_async(args: argparse.Namespace) -> None:
     print(f"  难度分布：{ts_stats['by_difficulty']}")
     print()
 
-    # 确定 workspace
+    # 确定 collection / workspace / 数据目录
     if args.workspace:
         workspace = args.workspace
         collection = args.collection or workspace.rstrip("_ws")
+        working_dir = PROJ / "data" / workspace
     else:
         collection = args.collection or testset.get("collection", "default")
-        if collection == "default":
-            workspace = "default_ws"
-        elif collection == "eval_cservice":
-            workspace = "eval_cservice_ws"
-        elif collection == "eval_admin":
-            workspace = "eval_admin_ws"
-        else:
-            workspace = collection  # 假设 collection id 即 workspace 名
+        working_dir, workspace = _resolve_collection(collection)
 
     print(f"评测模式: {args.mode}")
     print(f"Collection: {collection} → workspace: {workspace}")
+    print(f"数据目录: {working_dir}")
     print()
 
     # 构建依赖
-    print("初始化 RAG / 稀疏索引 / 裁判 LLM...", flush=True)
-    rag, sparse, query_func = await _build_deps(workspace)
-    print(f"  稀疏索引 chunks: {len(sparse.get('chunks', {}))}", flush=True)
+    print("初始化 RAG / 稀疏索引 / 实体 / 裁判 LLM...", flush=True)
+    rag, sparse, query_func, entities = await _build_deps(working_dir, workspace)
+    print(f"  稀疏索引 chunks: {len(sparse.get('chunks', {}))}"
+          f"｜实体 {len(entities) if entities else 0}", flush=True)
+    doc_name_map = _load_doc_name_map(working_dir)
+    print(f"  文档名映射: {len(doc_name_map)} 份（comparison 题 per-doc 检索用）", flush=True)
     print("  初始化完成\n", flush=True)
 
     # 执行评测
     t_start = time.time()
     if args.mode in ("answer", "e2e"):
-        results = await evaluate_answer(testset, rag, sparse, query_func)
+        results = await evaluate_answer(testset, rag, sparse, query_func,
+                                        entities=entities, doc_name_map=doc_name_map)
     else:
         ablation_routes = args.ablation_routes.split(",") if args.ablation_routes else None
         results = await evaluate_retrieval(testset, rag, sparse, query_func,
+                                           entities=entities,
+                                           doc_name_map=doc_name_map,
                                            reranker=args.reranker,
                                            ablation_routes=ablation_routes)
     total_time = round(time.time() - t_start, 1)
@@ -594,6 +718,7 @@ async def main_async(args: argparse.Namespace) -> None:
         "workspace": workspace,
         "reranker": args.reranker,
         "ablation_routes": args.ablation_routes,
+        "comparison_mode": "per_doc",
     }
     report = build_report(testset, results, config=config)
     report["summary"]["total_time_s"] = total_time

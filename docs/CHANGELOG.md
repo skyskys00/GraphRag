@@ -23,6 +23,46 @@
 
 ---
 
+## [v5.29] 2026-10-03 —— 器械 30 题评测集跑通 + M9 裁判 `hit` 字段修复
+
+**影响模块**：M9 `judge.py`（解析并归一化 `hit`）、`metrics/context_recall.py`（采信 `hit`，`_PROMPT_VERSION` bump 至 `p1_llm_hit`）、`runner.py`（新式 collection 兼容 + comparison per-doc 检索）、`testset.py`（`VALID_CATEGORIES` 补 `image_only`）；新增 `backend/tests/testsets/testset_device_30.json`；方案文档 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) v0.5→v0.6（新增 §11 实测结果）、[`M9_evaluation.md`](modules/M9_evaluation.md)（状态行 + 变更历史）。
+
+### 一、器械场景 30 题评测集
+
+题集 `testset_device_30.json`，配比 `table_numeric` 8 / `fact_single` 8 / `image_only` 6 / `comparison` 4 / `unanswerable` 4，跑在器械库 `col_b7b876b1`（10 份说明书 / 857 chunk）。
+
+**关键纪律（v5.25.3 起，v5.29 修正口径）**：`image_only` 题的**答案完整内容必须存在于 `block_type=drawing` 块**——这是"多模态有贡献"的必要条件。既不能用 `pdftotext` 文本层 0 命中当基线（图片里的字文本层当然查不到，不够严），也不能要求"`paragraph`/`table` 全 0 命中"（功能项名天然跨界面重合，过严）。实测 6 题 **5 题严格合格**；DV-IO-004 保留为**已知例外**——其 KF3 除命中 `drawing`（第 19 页设置图）外还在 `table`（第 20 页）命中，原因是 **MinerU 把第 20 页「绑定医生机构」子页图误判为 `type=table`**（该条目同时带 `img_path`，本质是图片），属 M1 解析质量缺陷而非出题错误。附带发现：10 份文档 69 个 `table` 块中约 2 个属此类误判（博声 1、KE-2000 1），低频，暂不修。
+
+### 二、M9 runner 跑新式 collection 的 4 处兼容改动
+
+新式 `col_<uuid8>` 库与旧式扁平库（`default_ws` 等）布局不同，runner 原本只认后者。改动：① `testset.py` 补 `image_only` 类别（原缺失致 6 题校验失败）；② `runner.py` 新增 `_resolve_collection()`（`col_*` 走 `collection_paths()` → `data/collections/<col_id>/`，旧三库保持扁平映射，零回归）；③ `_build_deps()` 补 `load_entities_async()`（原缺失会**系统性低估**生产 recall，线上 `retriever.py` 是加载的）；④ comparison 题走 **per-doc 检索**（`_comparison_targets` + `_interleave`）。旧三库（行政/cservice）跑法不变。
+
+**per-doc 为何必须配子查询**（实测，可复现）：用完整对比问题（含两个型号名）做 per-doc 检索时，**其他型号名会把该文档的向量召回打到 0**（LightRAG 向量路 `cosine=0.2` 阈值）。实测 `allowed_docs=[LSP-1C]`：完整对比 query → **0 条**；去掉其他型号名 → **5 条**。复跑：`cd backend && python3 scripts/probe_perdoc_subquery.py`（新增探针脚本）。故题集 comparison 题须配 `per_doc_queries`（key = `source_docs` 文件名）。线上 `compare.py` 用的是「参数名 + 指定文档」，评测题面是完整对比问题——跑法对齐了但输入形态没对齐，这是补子查询的原因。
+
+### 三、M9 裁判 `hit` 字段修复（假阳性）
+
+**缺陷**：`judge.py:_parse_judge_output` 只提取 `score`/`reason`，**丢弃了 LLM 输出的 `hit` 字段**；`context_recall.py` 遂用 `score >= 0.5` 反推命中。而 prompt 里 `score` 的语义是「**判定置信度**」而非"命中度"——`hit=false, score=0.95` 意为「95% 确信上下文里没有」，被 `score>=0.5` 错误翻转成命中。
+
+**扫描 4255 条缓存实测矛盾率**：`context_recall` **13.4%**（172/183 是 `hit=false, score 0.95-1.0`）、`context_precision` 5.2%（109/109 是 `relevant=true, score<0.5`，属 LLM 自身不一致，语义上 `score>=0.5` 判相关合理，**不改**）、`citation_accuracy` 0.3%（**不改**）。`faithfulness`/`correctness`/`answer_relevance` 的 score 是**比例**，无此 bug。
+
+**修复**：judge 解析并归一化 `hit`（兼容 `"true"`/`"是"` 等字符串）；`_judge_fact` 优先采信 `hit`，缺失时（旧缓存）回退 `score` 阈值；`_PROMPT_VERSION` bump 使旧缓存失效。既有 `_enforce_evidence` 正则兜底保留（修复后触发数 9 → 0，已基本空转）。
+
+### 四、实测（器械库 `col_b7b876b1`）
+
+**检索（`--mode retrieval`，30 题，867.5s）**：Context Recall **0.7436** / nDCG@8 **0.7730** / Context Precision 0.2492 / 平均 gold_rank 2.30。按题型 Recall：`table_numeric` 0.8125、`fact_single` 0.8125、`image_only` 0.7500、`comparison` 0.4583（`unanswerable` 跳过）。按难度：easy 0.9167 / medium 0.8958 / **hard 0.3854**。
+
+**修复前口径（`*_pre_hitfix.json`，仅供参考、不可直接比较）**：Context Recall 0.9199——其中约 13.4% 是裁判假阳性。修复后 0.7436 为**真实值**。comparison 从旧口径 0.625 变 0.4583，混合了两个方向相反的改动（per-doc 提升召回、hit 修复压低假阳性），净效果为下降。
+
+**生成（`--mode e2e`，30 题，1243.9s）**：Faithfulness **0.7757** / Answer Relevance **0.8650** / Correctness 0.7950 / Citation Accuracy 0.6707。按题型正确性：`fact_single` 0.8812 > `unanswerable` 0.8500 > `table_numeric` 0.8187 > `image_only` 0.7500 > **`comparison` 0.5875**；`table_numeric` 忠实度满分 1.0，`fact_single` 引用准确率最高 0.9167。**`comparison` 四项生成指标全为最低，与检索侧 Recall 0.4583 同源**（漏召回 ⇒ 生成阶段拿不到第二个型号的数据）。**诚实性验证：4/4 `unanswerable` 题全部正确拒答、无编造**（如 DV-UA-003「双相波脉冲宽度」→「所有材料均未提及脉冲宽度（ms）这一参数」）。
+
+**`unanswerable` 口径**：runner 对这类题**跳过 recall 计算**，`by_category.unanswerable.context_recall = 0.0` 只是占位值；**总体 Recall 分母是 26 道可答题**。这类题考的是 e2e 的**拒答行为**（上段已验证）。
+
+报告：`backend/tests/reports/run_retrieval_device30.json`、`run_e2e_device30.json`（正式跑）、`device30_smoke.json`（2 题冒烟，跑全量前验证链路）；旧报告归档为 `*_pre_hitfix.json`。详细读数见 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §11。
+
+**遗留**：comparison 题实测有**真实漏召回**——答案 chunk 存在但三路候选池（graph 20 / vector 20 / keyword 40）**全不含**。例：LSP-1C「行程必须大于 0 小于 120mm」在 PG chunk `chunk-bb7dc287…`，关键词「行程」被正确提取（权重 2.0）却排不进 keyword top40 → 根因指向 **M2 切分粒度**（该 chunk 一块塞了内径/行程/时钟三个主题，被长度归一化稀释）+ M5 稀疏权重。属 M5/M2 独立任务，另按"探底实验三条纪律"处理。
+
+---
+
 ## [v5.28.1] 2026-10-02 —— M6 sidecar 索引键修正（PG chunk 主键 + first-wins）
 
 **影响模块**：M6 `app/m6_generate/sidecar.py`（键与去重口径）、M6 `cite.py` + M7 `compare.py`（调用点）；文档 [`M6_generate.md`](modules/M6_generate.md) v1.5→v1.6、[`M7_interact.md`](modules/M7_interact.md) v10.5→v10.6、[`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) v0.4→v0.5；`backend/scripts/ingest_device_corpus.py`（过期提醒）。**更正 v5.28 条目内「入库后必须重启」的表述**（该说法在 `build_workspace_deps` 进入 `ingest()` 后已过时）。

@@ -1,0 +1,418 @@
+{
+  "testset_id": "testset_device_30",
+  "domain": "家用/医用器械说明书库（10 份，含注射泵、血压、血氧、心电、除颤、水质检测）",
+  "version": "2026-10-02",
+  "timestamp": "2026-10-02 21:28:25",
+  "config": {
+    "mode": "retrieval",
+    "collection": "col_b7b876b1",
+    "workspace": "col_b7b876b1",
+    "reranker": "standard",
+    "ablation_routes": "graph,vector,keyword"
+  },
+  "summary": {
+    "total_questions": 2,
+    "overall": {
+      "context_recall": 1.0,
+      "context_precision": 0.2,
+      "context_precision_weighted": 0.438,
+      "context_recall_top5": 1.0,
+      "context_recall_top8": 1.0,
+      "context_precision_top5": 0.2,
+      "context_precision_top8": 0.125,
+      "context_precision_weighted_top5": 0.438,
+      "context_precision_weighted_top8": 0.3679,
+      "gold_rank_avg": 1.0,
+      "gold_rank_median": 1.0,
+      "gold_rank_min": 1.0,
+      "gold_rank_max": 1.0,
+      "gold_rank_top1_recall": 1.0,
+      "gold_rank_top3_recall": 1.0,
+      "gold_rank_top5_recall": 1.0,
+      "gold_rank_top8_recall": 1.0,
+      "ndcg_top5": 0.9838,
+      "ndcg_top8": 0.997,
+      "ndcg": 0.9838,
+      "faithfulness": 0.0,
+      "answer_relevance": 0.0,
+      "correctness": 0.0,
+      "citation_accuracy": 0.0,
+      "judge_failed_judgments": 0
+    },
+    "by_category": {
+      "table_numeric": {
+        "count": 2,
+        "context_recall": 1.0,
+        "context_precision": 0.2,
+        "context_recall_top5": 1.0,
+        "context_recall_top8": 1.0,
+        "context_precision_top5": 0.2,
+        "context_precision_top8": 0.125,
+        "gold_rank_avg": 1.0,
+        "gold_rank_median": 1.0,
+        "gold_rank_top5_recall": 1.0,
+        "gold_rank_top8_recall": 1.0,
+        "ndcg_top5": 0.9838,
+        "ndcg_top8": 0.997,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "count": 1,
+        "context_recall": 1.0,
+        "context_precision": 0.2,
+        "context_recall_top5": 1.0,
+        "context_recall_top8": 1.0,
+        "context_precision_top5": 0.2,
+        "context_precision_top8": 0.125,
+        "gold_rank_avg": 1.0,
+        "gold_rank_median": 1.0,
+        "gold_rank_top5_recall": 1.0,
+        "gold_rank_top8_recall": 1.0,
+        "ndcg_top5": 1.0,
+        "ndcg_top8": 1.0,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "medium": {
+        "count": 1,
+        "context_recall": 1.0,
+        "context_precision": 0.2,
+        "context_recall_top5": 1.0,
+        "context_recall_top8": 1.0,
+        "context_precision_top5": 0.2,
+        "context_precision_top8": 0.125,
+        "gold_rank_avg": 1.0,
+        "gold_rank_median": 1.0,
+        "gold_rank_top5_recall": 1.0,
+        "gold_rank_top8_recall": 1.0,
+        "ndcg_top5": 0.9676,
+        "ndcg_top8": 0.994,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      }
+    },
+    "judge_failed_questions": 0,
+    "total_time_s": 130.9
+  },
+  "questions": [
+    {
+      "id": "DV-TN-001",
+      "category": "table_numeric",
+      "difficulty": "medium",
+      "question": "瑞创RSP系列注射泵（Cchippump-2）说明书附「标准注射器流量参数表」中，60mL 规格注射器对应的内径和流量范围分别是多少？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4"
+        ],
+        "time_s": 15.31
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "60mL 注射器内径 = 29.15mm",
+              "gold_rank": 1,
+              "chunk_id": "chunk-bcf190de4ce0c03495793f2e74b06163",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "60mL 流量范围 = 3.133-227.837 uL/min-mL/min",
+              "gold_rank": 1,
+              "chunk_id": "chunk-bcf190de4ce0c03495793f2e74b06163",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "60mL 注射器内径 = 29.15mm",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的表格中明确列出“60mL | 29.15 | 3.133-227.837”，即60mL注射器对应直径（内径）为29.15mm。"
+            },
+            {
+              "fact": "60mL 流量范围 = 3.133-227.837 uL/min-mL/min",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的表格中明确列出：“| 60mL | 29.15 | 3.133-227.837 |”，其中对应“流量范围uL/min-mL/min”列，即60mL注射器的流量范围为3.133-227.837 uL/min-mL/min。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "60mL 注射器内径 = 29.15mm",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的表格中明确列出“60mL | 29.15 | 3.133-227.837”，即60mL注射器对应直径（内径）为29.15mm。"
+            },
+            {
+              "fact": "60mL 流量范围 = 3.133-227.837 uL/min-mL/min",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的表格中明确列出：“| 60mL | 29.15 | 3.133-227.837 |”，其中对应“流量范围uL/min-mL/min”列，即60mL注射器的流量范围为3.133-227.837 uL/min-mL/min。"
+            }
+          ],
+          "hit_facts_top5": 2
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.125,
+        "context_precision_weighted_top8": 0.3679,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本表格中明确列出60mL注射器内径29.15mm、流量范围3.133-227.837（uL/min-mL/min），与【关键数值】清单中的60、29.15、3.133、227.837逐项一致，直接回答了问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "检索文本虽提到60mL注射器并给出每微步注射量0.052uL，但未提供标准答案所需的60mL注射器内径29.15mm和流量范围3.133-227.837（uL/min-mL/min），无法回答问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本虽包含标准注射器流量参数表，但仅列出5uL、10uL、25uL规格的数据，未出现60mL规格，也未出现关键数值29.15、3.133、227.837，无法回答60mL注射器的内径和流量范围。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "检索文本列出的是20mL、30mL、50mL规格的数据，缺少问题所需的60mL规格，且未出现关键数值60、29.15、3.133、227.837，无法回答60mL注射器的内径和流量范围。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅列出3mL、5mL、10mL注射器的内径和流量范围，未出现60mL规格，也未出现关键数值29.15、3.133、227.837，无法回答60mL注射器的问题。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅列出50uL、100uL、250uL注射器的直径和流量参数，未出现60mL规格，也未包含关键数值29.15、3.133、227.837，无法帮助回答60mL注射器的内径和流量范围。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅列出500uL、1mL、2.5mL注射器的直径和流量范围，未出现60mL规格、29.15mm、3.133或227.837等任何关键数值，无法回答60mL注射器的内径和流量范围。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅列出注射器适用类型范围为5uL-60mL，虽出现数字60，但未提供60mL注射器的内径29.15mm和流量范围3.133-227.837（uL/min-mL/min），对回答问题没有帮助。"
+            }
+          ],
+          "reason": "1/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.2,
+        "context_precision_weighted_top5": 0.438,
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "ndcg_top8": 0.994,
+        "ndcg_top5": 0.9676,
+        "ndcg": 0.9676
+      },
+      "time_s": 93.75
+    },
+    {
+      "id": "DV-TN-002",
+      "category": "table_numeric",
+      "difficulty": "easy",
+      "question": "Cchippump-2 双通道分体式注射泵的控制精度和重复精度指标分别是多少？",
+      "retrieval": {
+        "num_results": 8,
+        "top_docs": [
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4"
+        ],
+        "time_s": 14.48
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "控制精度：>30% 满行程时 ≤±0.5%",
+              "gold_rank": 1,
+              "chunk_id": "chunk-2b22c5a61e8450927acaf06de1c510fc",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "重复精度 ≤±0.3%",
+              "gold_rank": 1,
+              "chunk_id": "chunk-2b22c5a61e8450927acaf06de1c510fc",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall_top8": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "控制精度：>30% 满行程时 ≤±0.5%",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确给出“控制精度 | 当>30%满行程时，控制误差≤±0.5%”，与事实陈述“控制精度：>30% 满行程时 ≤±0.5%”直接对应。"
+            },
+            {
+              "fact": "重复精度 ≤±0.3%",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确列出：'| 重复精度 | ≤±0.3% |'，与事实陈述'重复精度 ≤±0.3%'完全一致。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top8",
+          "per_fact_top5": [
+            {
+              "fact": "控制精度：>30% 满行程时 ≤±0.5%",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确给出“控制精度 | 当>30%满行程时，控制误差≤±0.5%”，与事实陈述“控制精度：>30% 满行程时 ≤±0.5%”直接对应。"
+            },
+            {
+              "fact": "重复精度 ≤±0.3%",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确列出：'| 重复精度 | ≤±0.3% |'，与事实陈述'重复精度 ≤±0.3%'完全一致。"
+            }
+          ],
+          "hit_facts_top5": 2
+        },
+        "context_recall_top5": 1.0,
+        "context_recall": 1.0,
+        "context_precision_top8": 0.125,
+        "context_precision_weighted_top8": 0.3679,
+        "context_precision_detail": {
+          "total_chunks": 8,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本明确列出Cchippump-2的控制精度为‘当>30%满行程时，控制误差≤±0.5%’，重复精度为‘≤±0.3%’，与标准答案要点及关键数值清单（30%、0.5%、0.3%）逐字一致，可直接回答问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅介绍产品名称、研发方和应用领域，未提及控制精度（满行程>30%时误差≤±0.5%）或重复精度（≤±0.3%）等任何关键数值，故与问题无关。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅列出Cchippump-2的每微步距离、每微步注射量和线速度范围，未出现控制精度或重复精度相关内容，也未包含关键数值30%、0.5%或0.3%，对回答问题无帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该检索文本仅列出Cchippump-2的外观与适用注射器等基本信息，未提及控制精度或重复精度，也未出现【关键数值】清单中的30%、0.5%、0.3%。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅列出Cchippump-2的流量范围、线性推力和最大步速，未提及控制精度（>30%满行程时≤±0.5%）或重复精度（≤±0.3%），与问题所需信息无关。"
+            },
+            {
+              "rank": 6,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该检索文本仅描述Cchippump-2的操作界面（模式选择、内径、注射容量、流速、快退快进等），未提及控制精度、重复精度或任何关键数值（30%、0.5%、0.3%），对回答问题无帮助。"
+            },
+            {
+              "rank": 7,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅列出了注射泵类型和尺寸重量信息，未包含控制精度（>30%满行程时≤±0.5%）或重复精度（≤±0.3%）的任何数值，与问题所需关键数值30%、0.5%、0.3%均无关。"
+            },
+            {
+              "rank": 8,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅列出 Cchippump-2 的电压、工作环境和尺寸，未提及控制精度或重复精度，未包含关键数值 30%、0.5%、0.3%，对回答问题无帮助。"
+            }
+          ],
+          "reason": "1/8 个 chunk 与问题相关",
+          "window": "top8"
+        },
+        "context_precision_top5": 0.2,
+        "context_precision_weighted_top5": 0.438,
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "ndcg_top8": 1.0,
+        "ndcg_top5": 1.0,
+        "ndcg": 1.0
+      },
+      "time_s": 37.17
+    }
+  ]
+}

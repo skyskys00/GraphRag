@@ -1,14 +1,14 @@
 # 器械说明书垂直场景落地方案
 
-> **版本：** v0.5（§5.1 参数对比 + §5.2 场景 chip + 语料 10 份已落地；v5.28.1 更正 sidecar 键与「入库无需重启」；评测集待做）
-> **状态：** 部分实施 —— 场景特化功能 ✅（v5.26 参数对比 / v5.27 场景 chip）｜ 语料扩充 ✅（v5.28，10 份）｜ 评测集 ⏳
-> **更新：** 2026-10-02
+> **版本：** v0.6（§5.1 参数对比 + §5.2 场景 chip + 语料 10 份 + 30 题评测集均已落地并跑出指标；§11 实测结果）
+> **状态：** 部分实施 —— 场景特化功能 ✅（v5.26 参数对比 / v5.27 场景 chip）｜ 语料扩充 ✅（v5.28，10 份）｜ 评测集 ✅（v5.29，30 题跑通，见 §11）
+> **更新：** 2026-10-03
 > **定位：** 把「有源器械说明书」库从验证态做成**可展示的垂直场景**——回答 内部参考资料 P1「找一个垂直场景落地」
 > **契约：** 复用现有 M7 接口；新增 `POST /compare`（见 §5.1，已落地）
 > **上游：** [M5 检索层](M5_retrieve.md) / [M6 生成层](M6_generate.md) / [M7 交互层](M7_interact.md) | **下游：** [M8 前端](M8_frontend.md) / [M9 评测层](M9_evaluation.md)
 > **依据：** [`内部参考资料.md`](../内部参考资料.md) P1 ｜ memory `medical-device-corpus-sources` ｜ [MULTIMODAL.md](MULTIMODAL.md)
 > **运行：** 语料走 M7 `POST /docs` 上传（多模态自动生效；批量用 `backend/scripts/ingest_device_corpus.py`）；对比见 M8 侧栏「参数对比」；场景 chip 见问答页输入框上方（器械库）
-> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md) v5.26（§5.1 落地）/ v5.27（§5.2 落地）/ v5.28（语料 10 份）/ v5.28.1（sidecar 键更正）
+> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md) v5.26（§5.1 落地）/ v5.27（§5.2 落地）/ v5.28（语料 10 份）/ v5.28.1（sidecar 键更正）/ v5.29（30 题评测集 + M9 裁判 hit 修复 + comparison per-doc）
 
 ## 1. 场景与用户
 
@@ -176,14 +176,40 @@ POST /compare
 | `comparison` | 4 | 「H2-5000IBP 与 LSP-1C 的精度等级分别是多少」 |
 | `unanswerable` | 4 | 「支持蓝牙吗」（负对照，防编造） |
 
-**关键纪律**（v5.25.3 教训）：写题前用 `pdftotext -layout` 逐词核对，确认 `image_only` 题的答案在**文本层 0 命中**，否则测的是文本链路而非多模态。避免选有泄漏的 token。
+> `comparison` 题须额外配 `per_doc_queries` 字段（每个型号一条**不含其他型号名**的子查询），评测按子查询逐 doc 检索——原因见 §6.1 第 4 项。
 
-**运行**：复用 M9 runner，无需改代码——
+**关键纪律**（v5.25.3 教训，2026-10-02 收紧；v5.29 修正口径）：`image_only` 题的**答案完整内容必须存在于 `block_type=drawing` 块**——多模态有贡献的必要条件。
+
+> ⚠️ **不要用 `pdftotext -layout` 文本层 0 命中当基线**——它不够严。实测 `YASEE`、`实时压力`、`绑定医生`、`多语言`、`UNITS`/`HOLD`/`DIF` 等串在文本层「0 命中」（图片里的字），却出现在 chunk 的 `paragraph`/`table` 块 content 中。文本层基线会误判为「干净」。
+>
+> 核验：在 `data/collections/<col_id>/chunks*.jsonl` 上按 `block_type` 过滤，逐串确认答案命中 `drawing` 块。注意 `page_range` 是 **0-based**（`page_range=N` = 人类第 N+1 页）。
+>
+> **口径修正（v5.29）**：早期「非 drawing 块 0 命中」过严。实测 6 题 **5 题严格合格**；**DV-IO-004 保留并记为已知例外**——其 KF3（绑定医生/医生解绑/多语言）除命中 `drawing`（第 19 页设置图，答案完整）外，还在 `table`（第 20 页）命中。原因非出题错误：**MinerU 把第 20 页「绑定医生机构」子页图误判为 `type=table`**（该条目同时带 `img_path`，本质是图片），OCR 出的子页功能名与设置页功能项重合。不变量应为「**答案完整存在于 drawing 块**」（DV-IO-004 满足），而非「答案词不许出现在其他块」。
+>
+> 附带发现：10 份文档 69 个 `table` 块中约 2 个属此类「图片被误判为 table」（博声 1、KE-2000 1），低频，是 M1 解析质量的真实缺陷，暂不修。
+
+**运行**：需先补 4 处 runner 兼容改动（见 §6.1，已落地），再执行——
 
 ```bash
-python -m app.m9_eval.runner --testset testsets/testset_device_30.json \
-    --collection col_b7b876b1 --report reports/run_device_30.json
+python -m app.m9_eval.runner --testset tests/testsets/testset_device_30.json \
+    --mode retrieval --collection col_b7b876b1 \
+    --report tests/reports/run_retrieval_device30.json
 ```
+
+### 6.1 runner 兼容改动（2026-10-02，v5.29）
+
+新式 collection（`col_<uuid8>`）与旧式扁平库（`default_ws` 等）布局不同，M9 runner 原本只认后者，跑器械库会解析到不存在的 `data/col_b7b876b1/`。改动四处：
+
+| # | 文件 | 改动 |
+|---|---|---|
+| 1 | `app/m9_eval/testset.py` | `VALID_CATEGORIES` 补 `"image_only"`（原缺失 → 6 题校验失败） |
+| 2 | `app/m9_eval/runner.py` | 新增 `_resolve_collection()`：`col_*` 走 `collection_paths()` 解析到 `data/collections/<col_id>/`，旧三库（`default`/`eval_cservice`/`eval_admin`）保持扁平映射，零回归 |
+| 3 | `app/m9_eval/runner.py` | `_build_deps()` 补加载 entities（`load_entities_async`）——原缺失会系统性低估生产 recall（线上 `retriever.py` 是加载的） |
+| 4 | `app/m9_eval/runner.py` | comparison 题走 **per-doc 检索**（`_comparison_targets` + `_interleave`）：按题集 `per_doc_queries[文件名]` 子查询逐 doc 检索、交错合并，对齐线上 `compare.py` 的「参数名 + 指定文档」用法 |
+
+**per-doc 为何必需子查询**（v5.29 实测，可复现）：用完整对比问题（含两个型号名）做 per-doc 检索时，**其他型号名会把该文档的向量召回打到 0**（LightRAG 向量路 `cosine=0.2` 阈值下相似度不足）。实测 `allowed_docs=[LSP-1C]`：完整对比 query → **0 条**；去掉其他型号名 → **5 条**。复跑：`cd backend && python3 scripts/probe_perdoc_subquery.py`。故题集 comparison 题须配 `per_doc_queries`（key = `source_docs` 里的文件名，value = 该型号的子查询）。
+
+旧三库（行政/cservice）跑法不变，`--workspace <ws>` 仍走扁平路径。
 
 ## 7. 验证方法
 
@@ -192,7 +218,7 @@ python -m app.m9_eval.runner --testset testsets/testset_device_30.json \
 | 1. 语料入库 ✅ | 10 份全部 `ready`（v5.28 已达成）；PG `lightrag_doc_chunks` 计数与 M2 产出对齐 |
 | 2. 多模态生效 ✅ | 149 个 drawing 块带 `image_path`（v5.28 实测）；预览面板图片可渲染 |
 | 3. 参数对比 | 对 3 个型号问同一参数 → 各自返回正确片段 + 页码；缺参数的型号如实留空 |
-| 4. 评测集 | 30 题跑通，输出检索 + 生成指标；`image_only` 类别的 recall 显著高于纯文本基线（证明多模态贡献） |
+| 4. 评测集 | 30 题跑通，输出检索 + 生成指标（实测见 §11） |
 | 5. 诚实性 | `unanswerable` 题正确拒答，不编造 |
 
 ## 8. 不做的事
@@ -209,7 +235,7 @@ python -m app.m9_eval.runner --testset testsets/testset_device_30.json \
 | M1 | 语料扩充到 ~10 份并入库 | ✅ **已落地（v5.28，10 份 / 857 chunk / 149 图）** |
 | M2 | 参数对比接口 + 前端对比卡 | ✅ **已落地（v5.26）** |
 | M2.5 | 场景化入口 chip（查询模板） | ✅ **已落地（v5.27）** |
-| M3 | 器械 30 题评测集 + 跑指标 | ⏳ 待 M1 |
+| M3 | 器械 30 题评测集 + 跑指标 | ✅ **题集已落地（v5.29）；指标见 §11** |
 | M4 | README 场景化重写（作品集材料） | ⏳ 待 M2/M3 |
 
 ## 10. 待用户确认
@@ -217,3 +243,84 @@ python -m app.m9_eval.runner --testset testsets/testset_device_30.json \
 1. ~~语料来源走哪条路~~ → **已定：用户自行搜集下载**（§4.2 路径 A），收齐后批量入库
 2. ~~场景特化功能怎么做~~ → **已定并落地：§5.1 参数对比**（v5.26）
 3. **评测集 30 题是否合适**（vs 扩到 50 题）—— 待语料到位后再定
+
+## 11. 实测结果（2026-10-03）
+
+> 库 `col_b7b876b1`（10 份器械说明书 / 857 chunk / 149 带图 drawing 块）。
+> 跑法：`python -m app.m9_eval.runner --testset tests/testsets/testset_device_30.json --collection col_b7b876b1 --mode <retrieval|e2e>`。
+> 报告：`backend/tests/reports/run_retrieval_device30.json`、`run_e2e_device30.json`。
+> **修复前旧报告已归档**为 `*_pre_hitfix.json`（口径不同，数字不可与新报告直接比较，见 §11.3）。
+
+### 11.1 检索指标（`--mode retrieval`，30 题，耗时 867.5s）
+
+| 指标 | top5 | top8 |
+|---|---|---|
+| Context Recall | **0.7436** | 0.7436 |
+| Context Precision | 0.2492 | 0.1833 |
+| Context Precision（加权） | 0.3538 | 0.3113 |
+| nDCG | 0.7140 | **0.7730** |
+
+**Gold Rank**：平均 2.30 / 中位 2.33（min 1.92、max 2.62）。事实覆盖率：top1 **0.5192** → top3 0.7308 → top5 0.7596 → top8 **0.8590**。
+
+**按题型**：
+
+| 题型 | 题数 | Recall@5 | Recall@8 | Prec@5 | nDCG@5 | GoldRank avg |
+|---|---|---|---|---|---|---|
+| table_numeric | 8 | 0.8125 | 0.8125 | 0.2250 | **0.8654** | 1.88 |
+| fact_single | 8 | 0.8125 | 0.8125 | 0.2750 | 0.7076 | 2.91 |
+| image_only | 6 | 0.7500 | 0.7500 | **0.4000** | 0.6652 | 2.50 |
+| comparison | 4 | 0.4583 | 0.4583 | 0.2188 | 0.8129 | **1.50** |
+| unanswerable | 4 | —（跳过） | — | 0.0500 | 0.3986 | — |
+
+**按难度**：easy（6 题）Recall 0.9167｜medium（16 题）0.8958｜**hard（8 题）0.3854**。
+
+**读数**：
+
+- `table_numeric` 表现最好（Recall 0.8125 / nDCG 0.8654 / GoldRank 1.88）——参数表格在切分与检索上最"干净"，且 8 题中有多题答案集中在单块。
+- `image_only` Recall 0.75、**Precision 最高（0.40）**——说明多模态链路有效：答案确实落在 drawing 块并被召回，且上下文噪声低于其他题型。
+- `comparison` 的 GoldRank 最低（1.50，即命中的事实点普遍排在最前），但 Recall 仅 0.4583——**瓶颈在"漏召回"而非"排序"**（根因见 `CHANGELOG.md` v5.29「遗留」段；生成侧同样垫底，见 §11.2）。
+- `hard` 难度（8 题）Recall 0.3854 是整体拉低主因。
+- **Context Precision 整体偏低（0.25）**：每题取 20 条上下文，而多数题只需 1-3 条即可覆盖全部事实点 ⇒ 分母天然偏大，绝对值不宜单独解读；应结合 GoldRank（top1 覆盖 0.52、top8 覆盖 0.86）一起看。
+
+### 11.2 生成指标（`--mode e2e`，30 题，耗时 1243.9s）
+
+| 指标 | 得分 |
+|---|---|
+| Faithfulness（忠实度） | 0.7757 |
+| Answer Relevance（答案相关性） | **0.8650** |
+| Correctness（正确性） | 0.7950 |
+| Citation Accuracy（引用准确率） | 0.6707 |
+
+**按题型**：
+
+| 题型 | 题数 | Faithfulness | Answer Rel. | Correctness | Citation Acc. |
+|---|---|---|---|---|---|
+| table_numeric | 8 | **1.0000** | 0.9375 | 0.8187 | 0.5542 |
+| fact_single | 8 | 0.7188 | 0.9125 | 0.8812 | **0.9167** |
+| image_only | 6 | 0.8750 | 0.9333 | 0.7500 | 0.8750 |
+| comparison | 4 | **0.4300** | 0.7375 | 0.5875 | **0.2807** |
+| unanswerable | 4 | 0.6375 | 0.6500 | 0.8500 | 0.4955 |
+
+**拒答验证（§7 第 5 项「诚实性」）—— 4/4 全部正确拒答，无编造**：
+
+| 题 | 问的是 | 答案首句 |
+|---|---|---|
+| DV-UA-001 | 哪款支持 Wi-Fi | 「无法判断…材料中没有出现任何关于 Wi-Fi 或无线联网的说明」 |
+| DV-UA-002 | 电池循环充放电次数 | 「依据现有检索材料，无法回答…没有出现任何设备给出该具体数值」 |
+| DV-UA-003 | 双相波脉冲宽度 | 「根据现有检索材料，无法回答…所有材料均未提及脉冲宽度（ms）这一参数」 |
+| DV-UA-004 | 手机 App 远程固件升级（OTA） | 「现有检索材料不足以回答…没有出现任何关于远程固件升级（OTA）的功能说明」 |
+
+**读数**：
+
+- `table_numeric` **忠实度满分（1.0）**——答案严格抄自参数表，零外推。
+- `fact_single` **引用准确率最高（0.9167）**——单点事实的引用最容易与原文对齐。
+- **`comparison` 四项全为最低**（忠实度 0.43 / 正确性 0.5875 / 引用 0.2807），与检索侧 Recall 0.4583 **同源**：漏召回导致生成阶段拿不到第二个型号的数据 ⇒ 答案不完整、引用对不上。**这是本场景当前最大短板**，根因（M5/M2 漏召回）见 `CHANGELOG.md` v5.29「遗留」段与 memory，另立任务处理。
+- `table_numeric` 引用准确率仅 0.5542 值得注意（忠实度满分但引用偏低）——参数表格常以整表为一块，模型复述了正确数值却未必标对块号。
+
+**残留观察（未定论）**：`unanswerable` 题忠实度 0.5–0.75 偏低，裁判理由多为「答案中若干归因到 `[6]`/`[7]`/`[8]` 的陈述在上下文中找不到依据」「关于『材料中未出现 X』的元断言无法直接验证」。4 题正确性 3 题 1.0 / 1 题 0.4（DV-UA-001）。属**裁判对拒答型答案的严格性**，未确认是缺陷，本轮不改。
+
+### 11.3 口径说明（重要）
+
+1. **`unanswerable` 题不参与 Recall 计算**：runner 对这类题跳过 recall（`context_recall_detail=None`），`by_category.unanswerable.context_recall = 0.0` 只是**占位值**；**总体 Recall 的分母是 26 道可答题**（校验：4×0.4583 + 8×0.8125 + 6×0.75 + 8×0.8125 = 19.3332，19.3332/26 = 0.7436 ✓）。这类题的考点在 e2e 的**拒答行为**（防编造），见 §11.2。
+2. **旧报告（`*_pre_hitfix.json`）数字偏高，不可比**：其 Context Recall 0.9199 是**裁判 bug 造成的假阳性**——`judge.py` 曾丢弃 LLM 输出的 `hit` 字段，`context_recall.py` 遂用 `score >= 0.5` 反推命中；而 prompt 里 `score` 是「**判定置信度**」（`hit=false, score=0.95` = 95% 确信"上下文里没有"），被错误翻转成命中。扫 4255 条缓存实测矛盾率 **13.4%**。修复后（v5.29，`_PROMPT_VERSION` bump 至 `p1_llm_hit`）为 0.7436。
+3. **comparison 的 0.625 → 0.4583 混合了两个改动**：旧报告既无 per-doc 检索（`comparison_mode` 缺失）也未修 hit。per-doc + 子查询**提升**该题型召回（机制与可复现证据见 §6.1：同一文档 `allowed_docs=[LSP-1C]`，完整对比问题 → **0 条**、去其他型号名 → **5 条**，`backend/scripts/probe_perdoc_subquery.py` 可复跑），hit 修复**压低**假阳性，净效果为下降。两项改动方向相反但都正确，详见 §6.1 与 memory。
