@@ -47,6 +47,32 @@
 
 ---
 
+## [v5.28] 2026-10-02 —— 器械语料扩充到 10 份（批量入库）
+
+**影响模块**：新增 `backend/scripts/ingest_device_corpus.py`（批量入库脚本）；M7 `POST /docs` 上传链路零改动（复用）。方案文档 [`docs/modules/DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §4。
+
+**能力**：器械库「有源器械说明书」`col_b7b876b1` 语料 **2 份 → 10 份**，覆盖监护/注射泵/除颤/血氧/心电/血压模拟/差压计等品类。多模态链路自动生效，无需额外步骤。
+
+**关键设计**：
+- **幂等入库**：脚本先查库内文档，跳过同名且 `ready`/`processing` 的——`processing` 也跳是关键（后端入库是后台任务，轮询脚本中断不代表入库停止，重跑不能重复提交）。
+- **轮询容错**：后端串行处理多份文档时 `GET /docs` 可能响应很慢，超时给到 300s 并在失败时重试而非退出（首轮 60s 超时导致脚本在 1:40 崩溃，但后端入库未受影响）。
+- **入库后必须重启**：`image_path` 不落 PG（`lightrag_doc_chunks.sidecar` 为空），而由 M6 `Sidecar` 从 `data/chunks/*.jsonl` 在**启动时全量加载**、按 `(full_doc_id, content)` 匹配。故 `./dev.sh restart api` 不只是刷 AppDeps 缓存，也是刷新 Sidecar 快照。
+
+**实测**（10 份，串行处理约 47 分钟）：
+
+| 项 | 数值 |
+|---|---|
+| 文档 | 10 份全部 `ready` |
+| chunk 合计 | 857 |
+| 带 `image_path` 的 drawing 块 | 149 |
+| 视觉成本 | 约 4.6 万 tokens（`VISION_MIN_AREA` 过滤掉大量小图标，实际送视觉数远低于图片总数） |
+
+单份最大：智能便携式检测仪 223 chunk / 39 图；最小：数字差压计 22 chunk / 2 图。
+
+**验证**：问「脉搏血氧仪的正常血氧饱和度范围」→ 生成正确（`SpO₂测量范围 35%~99%`，来自新入库 `9134cbc78eca13e9`）✓；引用带 `image_path` 指向真实界面截图 ✓。
+
+---
+
 ## [v5.27] 2026-10-02 —— 器械场景化入口：问答页查询模板 chip（纯前端）
 
 **影响模块**：M8 前端（`components/InputBar.tsx` 新增 `deviceMode` prop + `DEVICE_TEMPLATES` 常量 + 场景 chip 行；`App.tsx` 按当前库名判断并传参；`App.css` 新增 `.scene-row` 样式）。方案文档 [`docs/modules/DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §5.2。
