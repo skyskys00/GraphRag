@@ -1,6 +1,6 @@
 # 器械说明书垂直场景落地方案
 
-> **版本：** v0.4（§5.1 参数对比 + §5.2 场景 chip + 语料 10 份已落地；评测集待做）
+> **版本：** v0.5（§5.1 参数对比 + §5.2 场景 chip + 语料 10 份已落地；v5.28.1 更正 sidecar 键与「入库无需重启」；评测集待做）
 > **状态：** 部分实施 —— 场景特化功能 ✅（v5.26 参数对比 / v5.27 场景 chip）｜ 语料扩充 ✅（v5.28，10 份）｜ 评测集 ⏳
 > **更新：** 2026-10-02
 > **定位：** 把「有源器械说明书」库从验证态做成**可展示的垂直场景**——回答 内部参考资料 P1「找一个垂直场景落地」
@@ -8,7 +8,7 @@
 > **上游：** [M5 检索层](M5_retrieve.md) / [M6 生成层](M6_generate.md) / [M7 交互层](M7_interact.md) | **下游：** [M8 前端](M8_frontend.md) / [M9 评测层](M9_evaluation.md)
 > **依据：** [`内部参考资料.md`](../内部参考资料.md) P1 ｜ memory `medical-device-corpus-sources` ｜ [MULTIMODAL.md](MULTIMODAL.md)
 > **运行：** 语料走 M7 `POST /docs` 上传（多模态自动生效；批量用 `backend/scripts/ingest_device_corpus.py`）；对比见 M8 侧栏「参数对比」；场景 chip 见问答页输入框上方（器械库）
-> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md) v5.26（§5.1 落地）/ v5.27（§5.2 落地）/ v5.28（语料 10 份）
+> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md) v5.26（§5.1 落地）/ v5.27（§5.2 落地）/ v5.28（语料 10 份）/ v5.28.1（sidecar 键更正）
 
 ## 1. 场景与用户
 
@@ -109,7 +109,7 @@ cd backend && python3 scripts/ingest_device_corpus.py \
 - **轮询容错**：后端串行处理多份文档时 `GET /docs` 可能响应很慢，超时给到 300s 并在失败时重试而非退出。
 - 单份耗时参考：v5.25.3 实测 2 份 11m16s（视觉 + 建图）；v5.28 实测 10 份串行约 47 分钟。
 - 视觉调用有成本（`deepseek-flash`，单价极低）；`image_captions.json` 落盘缓存，重跑零成本。
-- **入库后必须 `./dev.sh restart api`**：不只是刷 AppDeps 缓存——`image_path` 不落 PG（`lightrag_doc_chunks.sidecar` 为空），由 M6 `Sidecar` 从 `data/chunks/*.jsonl` 在**启动时全量加载**，重启才能让新文档的图片溯源生效。
+- **入库后无需重启**：`image_path` 不落 PG（`lightrag_doc_chunks.sidecar` 为空），由 M6 `Sidecar` 从 `data/chunks/*.jsonl` 构建，键 = PG chunk 主键（`make_custom_chunk_id`，见 M6_generate §4.2）。M7 入库任务（`documents.ingest`）完成时会在**同一个 AppDeps 对象上就地重建 sidecar**，故新文档图片溯源即时生效，不必 `./dev.sh restart api`。（该「必须重启」说法在 `build_workspace_deps` 引入 `ingest()` 后已过时，v5.28.1 更正。）
 
 **实测结果（v5.28，10 份全部 `ready`）**：857 chunk / 149 个带图 drawing 块 / 约 4.6 万视觉 tokens。
 单份最大智能便携式检测仪 223 chunk·39 图，最小数字差压计 22 chunk·2 图。

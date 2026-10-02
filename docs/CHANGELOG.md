@@ -23,27 +23,33 @@
 
 ---
 
-## [v5.25] 2026-09-29 —— 多模态：说明书图片入索引（M0+M1+M2 三段）
+## [v5.28.1] 2026-10-02 —— M6 sidecar 索引键修正（PG chunk 主键 + first-wins）
 
-**影响模块**：M0 契约（`parse.md` §3 加 `img_path`；`textunit.schema.json`/`textunit.md` 加 `image_path`）+ M1 解析（新增 `app/m1_parse/vision.py`；`blocks_builder.py` image 分支独立 + 图注过滤；`mineru_adapter.py` 调视觉）+ M2 切分（`chunker.py` 新增 `drawing` 分支 + `_build_image_unit()`）。方案文档 [`docs/modules/MULTIMODAL.md`](modules/MULTIMODAL.md) v0.3。M6/M7/M8 展示层不在本次范围。
+**影响模块**：M6 `app/m6_generate/sidecar.py`（键与去重口径）、M6 `cite.py` + M7 `compare.py`（调用点）；文档 [`M6_generate.md`](modules/M6_generate.md) v1.5→v1.6、[`M7_interact.md`](modules/M7_interact.md) v10.5→v10.6、[`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) v0.4→v0.5；`backend/scripts/ingest_device_corpus.py`（过期提醒）。**更正 v5.28 条目内「入库后必须重启」的表述**（该说法在 `build_workspace_deps` 进入 `ingest()` 后已过时）。
 
-**能力**：PDF 说明书里的界面截图/图片型表格 → 视觉模型描述文本 → 独立 TextUnit 进索引。视觉通路复用已有 `DEEPSEEK_API_KEY`（官方 `deepseek-flash`，`input_modalities` 含 image），无新增凭据。开关 `VISION_ENABLED`。
+**缺陷**：sidecar 用 `(full_doc_id, content)` 做键、`dict` 覆盖写（last-wins），而 PG 侧 LightRAG 按 `make_custom_chunk_id(doc_key, content)` 去重且**保留首条**（first-wins）。jsonl 保留全部重复行、PG 只留首条 ⇒ 两边可能指向不同行。实测器械库有一例：两个 `drawing` 块 content 完全相同但 `image_path`/`page_range` 不同（`chunk-002` p[0,0] vs `chunk-021` p[8,8]），引用会展示**错误图片**。
 
-**关键实现**：
-- **面积口径修正**：`VISION_MIN_AREA` 作用于**图片像素面积**（PIL 读文件头），非 MinerU bbox 面积 —— bbox 是归一化 0–1000 坐标，其面积在阈值 10000 下滤 7/15 与 5/35，与实测尺寸形态对不上；像素口径滤 6/16 与 4/38，吻合。
-- **MinerU 图注过滤**：实测融柏 `image_caption` 23/35 有值（初稿曾断言全空，有误），其中 19 条是纯图号噪声（`图 13`、`图 9\n图 10`、`如图 22`）⇒ 新增 `_usable_mineru_caption`（剥掉 `图\s*\d+` 后剩余正文 ≥6 字才保留），保留 3 条真图注；`image_footnote` 不过滤（实测仅 1 条且有实义）。
-- **降级口径修正**：由「输出与现状逐字节一致」改为「**不因视觉产生块**」——因图注非空 + 视觉调用失败会退化为纯图号块，原口径不成立。
+**修复**：sidecar 改用 LightRAG 生成主键的同一函数 `make_custom_chunk_id(full_doc_id, content)` 建索引，并同样 first-wins（与 LightRAG 的 `seen_chunk_ids` 去重取舍一致）；`resolve()` 直接按 M5 返回的 `chunk_id`（= PG `lightrag_doc_chunks.id`）查表。`cite.py` / `compare.py` 调用点由 `resolve(full_doc_id, content)` 改为 `resolve(chunk_id)`。
 
-**实测（两份器械说明书）**：
+**实测**（器械库 `col_b7b876b1`）：
+- jsonl 857 行 → 唯一键 **844** = PG 行数（差值为 LightRAG 同文档去重）；**844 个键与 PG id 集完全一致（零对称差）**。
+- 修复前 857 行里有 5 组重复键（13 行冗余）；修复后 sidecar 命中 **844/844 PG id，0 失败**。
+- 冲突回归：原错例现解析为 `chunk-002` p[0,0] `…e7b00a53508ab2b972fa.jpg`（首条），与 PG 存活行一致。
+- 端到端（`./dev.sh restart api` 后）：问「血糖仪界面截图上的显示内容」→ 2 条引用均带 `image_path`，含上述原错块且指向正确；问「脉搏血氧仪…血氧饱和度范围」→ 2 条引用均带 `page_range`。`POST /compare`（「电池」）→ `score=0.3647 page=[8,8] bt=paragraph`，sidecar 命中。
 
-| | 视觉 OFF | 视觉 ON |
-|---|---|---|
-| 铭昇 H2-5000IBP | 29 units / **0** drawing | 45 units / 9 drawing |
-| 融柏 LSP-1C | 83 units / **4** drawing（零垃圾） | 123 units / 27 drawing |
+**附带更正（已 E2E 实测）**：入库完成后**无需** `./dev.sh restart api` —— `api.py` 把同一个缓存 `deps` 对象交给 `ingest_task`，`ingest()` 内 `build_workspace_deps` 就地重建 `sparse`/`sidecar`/`entities`（`documents.py:125/140`），新文档可检索 + 图片溯源即时生效。此更正同步到 `DEVICE_SCENARIO.md` §4.3 与入库脚本 docstring。
 
-视觉全量成本：54 张图 16,782 tokens / 10.0s（5 并发）。`RemoteDisconnected` 3/50 张记 error 不阻塞、下次重试。
+**实测（临时库 `col_41a863ce`，全程不重启 API，进程 PID 19635 自 17:45:50 起未变）**：
 
-**未做**：M6 溯源 / M7 接口 / M8 前端。（M3/M5 零改动验证已于 v5.25.1 完成）
+| 步骤 | 结果 |
+|---|---|
+| 新建临时库 + 上传 `英菲泰克动态心电记录仪.pdf` | `ready`，377s，70 chunk / 6 带图块 |
+| 同一进程直接查询（未重启） | 命中新文档；3 条引用**全部**带 `page_range` + `image_path`，页码/图名与 jsonl 逐一吻合 |
+| sidecar 键对齐 | 70 jsonl 行 = 70 唯一键 = 70 PG chunk；resolve 失败 **0**；对称差 **0** |
+| 图片 URL | `GET /docs/…/images/…jpg` → **HTTP 200**，21895 字节 |
+| 删库收尾 | 目录 / `collections.json` / PG `lightrag_*` 残留 **均为 0** |
+
+**为什么不动 PG**：PG `lightrag_doc_chunks.sidecar`（jsonb，全 844 行为空 `{}`）是更规范的落点，但问题出在**键**而非存储位置——不换键只搬数据无济于事。本次只改键（最小改动）；把溯源写进该列作为后续可选项。
 
 ---
 
@@ -56,7 +62,7 @@
 **关键设计**：
 - **幂等入库**：脚本先查库内文档，跳过同名且 `ready`/`processing` 的——`processing` 也跳是关键（后端入库是后台任务，轮询脚本中断不代表入库停止，重跑不能重复提交）。
 - **轮询容错**：后端串行处理多份文档时 `GET /docs` 可能响应很慢，超时给到 300s 并在失败时重试而非退出（首轮 60s 超时导致脚本在 1:40 崩溃，但后端入库未受影响）。
-- **入库后必须重启**：`image_path` 不落 PG（`lightrag_doc_chunks.sidecar` 为空），而由 M6 `Sidecar` 从 `data/chunks/*.jsonl` 在**启动时全量加载**、按 `(full_doc_id, content)` 匹配。故 `./dev.sh restart api` 不只是刷 AppDeps 缓存，也是刷新 Sidecar 快照。
+- ~~**入库后必须重启**：`image_path` 不落 PG（`lightrag_doc_chunks.sidecar` 为空），而由 M6 `Sidecar` 从 `data/chunks/*.jsonl` 在**启动时全量加载**、按 `(full_doc_id, content)` 匹配。故 `./dev.sh restart api` 不只是刷 AppDeps 缓存，也是刷新 Sidecar 快照。~~ **此结论已过时，见 v5.28.1**（sidecar 键已改；入库会就地重建 sidecar，无需重启）。
 
 **实测**（10 份，串行处理约 47 分钟）：
 
@@ -259,6 +265,30 @@
 | 回归（现有标准库） | `default_ws`(34)/`eval_cservice_ws`(99)/`eval_admin_ws`(203) 三库**同文档重复内容组均为 0** ⇒ 序号==PG 序号 ⇒ 新旧 join 逐块一致，**历史评测结论有效** |
 
 **结论**：v5.25 的核心约束「**M3/M5 零改动**」经实测成立（图片块透传进两侧索引）；同时修掉重建链一个既有对齐缺陷。
+
+---
+
+## [v5.25] 2026-09-29 —— 多模态：说明书图片入索引（M0+M1+M2 三段）
+
+**影响模块**：M0 契约（`parse.md` §3 加 `img_path`；`textunit.schema.json`/`textunit.md` 加 `image_path`）+ M1 解析（新增 `app/m1_parse/vision.py`；`blocks_builder.py` image 分支独立 + 图注过滤；`mineru_adapter.py` 调视觉）+ M2 切分（`chunker.py` 新增 `drawing` 分支 + `_build_image_unit()`）。方案文档 [`docs/modules/MULTIMODAL.md`](modules/MULTIMODAL.md) v0.3。M6/M7/M8 展示层不在本次范围。
+
+**能力**：PDF 说明书里的界面截图/图片型表格 → 视觉模型描述文本 → 独立 TextUnit 进索引。视觉通路复用已有 `DEEPSEEK_API_KEY`（官方 `deepseek-flash`，`input_modalities` 含 image），无新增凭据。开关 `VISION_ENABLED`。
+
+**关键实现**：
+- **面积口径修正**：`VISION_MIN_AREA` 作用于**图片像素面积**（PIL 读文件头），非 MinerU bbox 面积 —— bbox 是归一化 0–1000 坐标，其面积在阈值 10000 下滤 7/15 与 5/35，与实测尺寸形态对不上；像素口径滤 6/16 与 4/38，吻合。
+- **MinerU 图注过滤**：实测融柏 `image_caption` 23/35 有值（初稿曾断言全空，有误），其中 19 条是纯图号噪声（`图 13`、`图 9\n图 10`、`如图 22`）⇒ 新增 `_usable_mineru_caption`（剥掉 `图\s*\d+` 后剩余正文 ≥6 字才保留），保留 3 条真图注；`image_footnote` 不过滤（实测仅 1 条且有实义）。
+- **降级口径修正**：由「输出与现状逐字节一致」改为「**不因视觉产生块**」——因图注非空 + 视觉调用失败会退化为纯图号块，原口径不成立。
+
+**实测（两份器械说明书）**：
+
+| | 视觉 OFF | 视觉 ON |
+|---|---|---|
+| 铭昇 H2-5000IBP | 29 units / **0** drawing | 45 units / 9 drawing |
+| 融柏 LSP-1C | 83 units / **4** drawing（零垃圾） | 123 units / 27 drawing |
+
+视觉全量成本：54 张图 16,782 tokens / 10.0s（5 并发）。`RemoteDisconnected` 3/50 张记 error 不阻塞、下次重试。
+
+**未做**：M6 溯源 / M7 接口 / M8 前端。（M3/M5 零改动验证已于 v5.25.1 完成）
 
 ---
 

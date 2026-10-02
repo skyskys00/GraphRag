@@ -47,7 +47,7 @@ async def compare_params(
         )
         snippets: list[dict[str, Any]] = []
         for r in (retr.get("results") or [])[:top_k]:
-            meta = deps.sidecar.resolve(r["full_doc_id"], r["content"]) if deps.sidecar else None
+            meta = deps.sidecar.resolve(r["chunk_id"]) if deps.sidecar else None
             img = meta.image_path if meta else None
             snippets.append(
                 {

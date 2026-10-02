@@ -75,7 +75,7 @@ def parse_citations(
         if not ref:
             unmatched += 1
             continue
-        cs = sidecar.resolve(ref["full_doc_id"], ref["content"]) if sidecar else None
+        cs = sidecar.resolve(ref["chunk_id"]) if sidecar else None
         meta: ChunkMeta | None = cs
         citations.append(
             Citation(

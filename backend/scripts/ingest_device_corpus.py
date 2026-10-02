@@ -2,7 +2,8 @@
 """器械说明书语料批量入库（走 M7 POST /docs，多模态自动生效）。
 
 上传目录下所有 PDF 到指定知识库，轮询直到全部 ready/error。
-入库完成后需 `./dev.sh restart api` 刷新 AppDeps 缓存，检索才能看到新文档。
+入库任务完成时后端会就地重建 sparse/sidecar/entities（`documents.ingest` → `build_workspace_deps`），
+新文档立即可检索、图片溯源即时生效，无需 `./dev.sh restart api`。
 
 用法：
     cd backend && python scripts/ingest_device_corpus.py \
@@ -109,7 +110,6 @@ def main() -> None:
         err = f" error={d['error']}" if d.get("error") else ""
         print(f"  [{st}] {name}{extra}{err}", flush=True)
     print(f"[完成] ready {ok}/{len(tasks)}｜耗时 {(time.time() - t0) / 60:.1f} 分钟", flush=True)
-    print("[提醒] 入库后执行 ./dev.sh restart api 刷新缓存", flush=True)
 
 
 if __name__ == "__main__":

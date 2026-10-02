@@ -1,6 +1,6 @@
 # M7 模块记录：交互层（FastAPI + SSE + 上传/调度）
 
-> **版本：** v10.5
+> **版本：** v10.6
 > **状态：** 已落地
 > **更新：** 2026-10-02
 > **定位：** HTTP API + SSE 流式问答 + 文档上传调度 + 图谱查询 + 多知识库 + 多会话 + 参数对比
@@ -66,7 +66,13 @@ app/m6_generate/orchestrator.answer
 | `respond.py` | 组装请求 → 调 `answer()` → 产出 JSON 或事件流；收 M6 meta 做成事件负载 |
 | `history.py` | 多轮最小注入：`history: list[dict]` 拼进 query/生成 prompt（不建会话存储） |
 | `web/` | 轻量 WebUI：静态 HTML/JS 单页（提问 → 答案 + 引用定位），无框架依赖，后续可换 G6 工程 |
+| `bootstrap.py` | 依赖装配：按 collection 构建 RAG/稀疏索引/实体/溯源 sidecar/query_func，`dict` 缓存（`get_deps` / `evict_deps`）；复用 `m6_generate.runner` 的构建路径 |
+| `collections.py` | 知识库（Collection）注册表：`col_<uuid8>` 兼作 workspace 与目录名，`data/collections.json` 落盘（只存非默认库），CRUD + 删库时清 PG workspace 行 |
+| `conversations.py` | 会话（Conversation）注册表（collection 作用域）：注册表与明细分离，`conv_<uuid8>`，首问自动命名 |
 | `documents.py` | 文档入库编排（v3）：`ingest`（M1 `process_one` → M2 `process_document` → M3 `ainsert_custom_chunks` 增量 → `build_workspace_deps` 重建 sparse/sidecar/entities）+ `documents.json` 注册表 + 软删过滤（`excluded_doc_ids`），模块级 `asyncio.Lock` 串行入库；**上传原件保留 `uploads/` 供追溯**（v9.3，不再清理） |
+| `compare.py` | 参数对比（v5.26）：对每个 `doc_id` 单独 `retrieve(..., allowed_docs=[id])` 取 top-k，**检索式并排、不做 LLM 归并**；相关性门槛 `max(MIN_SCORE=0.2, top1×0.35)` 保证「没有该参数就留空」 |
+| `graph.py` | 图谱导出（M8 v4.0）：实体级（LightRAG 全量 + 软删过滤 + 关系关键词分类）+ 文档级（Jaccard 概念关联 + 引用关系 + 社区发现）双层，数据全由实体归属与 TextUnit 派生、不新增表 |
+| `runner.py` | 启动入口：`python -m app.m7_interact.runner [--host/--port/-w/--chunks]` |
 
 ### 4.3 契约（HTTP / SSE）
 
@@ -153,6 +159,8 @@ DELETE /docs/{doc_id}         → {deleted: doc_id}   // 软删：注册表标�
 
 ## 10. 版本
 
+- **v10.6**（2026-10-02）：`compare.py` 的 sidecar 调用改为按 PG chunk 主键解析（`sidecar.resolve(chunk_id)`），随 M6 sidecar 键修正同步（CHANGELOG v5.28.1）；同批**补登记 §4.2 组件表**——`bootstrap.py`/`collections.py`/`conversations.py`/`compare.py`/`graph.py`/`runner.py` 六项此前从未登记（文档滞后，非本次新增）。
+- **v10.5**（2026-10-02）：参数对比 `POST /compare` + `app/m7_interact/compare.py`（检索式对比，不做 LLM 归并；CHANGELOG v5.26 / DEVICE_SCENARIO §5.1）。
 - **v10.2**（2026-09-21）：检索/生成 query 分离（Bug4 根因修复，方案 D，详见 CHANGELOG v5.3）。
 - **v9.3**（2026-09-20）：上传原件保留——`ingest_task` 不再 unlink 上传临时文件，原件留 `uploads/` 供追溯（CHANGELOG v4.0.4）。
 - **v5**（2026-09-15）：文档预览 `GET /docs/{id}/preview` + 图谱按文档过滤 `GET /graph?doc_id=` + 引用置信度排序修复。

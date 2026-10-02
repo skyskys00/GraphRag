@@ -1,8 +1,8 @@
 # M6 模块记录：生成层（编排 + 引用标注）
 
-> **版本：** v1.5
+> **版本：** v1.6
 > **状态：** 已落地
-> **更新：** 2026-10-01
+> **更新：** 2026-10-02
 > **定位：** 上下文组装 + DeepSeek 生成 + 引用标注 + 流式
 > **契约：** query + M5 精排 context → Answer（text + citations + meta）
 > **上游：** [M5 检索层](M5_retrieve.md) | **下游：** [M7 交互层](M7_interact.md)
@@ -31,7 +31,7 @@ M6 = **从「精排 chunk 列表」到「带引用的最终答案」** 这一段
 1. **上下文组装器**：M5 精排 top-N chunk → 按 token 预算压缩成生成用 context（带 marker）。
 2. **生成**：中文 prompt + DeepSeek v4-flash（关思考模式），要求按 marker 输出 grounded 引用标注。
 3. **引用解析**：把正文 `[n]` 映射回 TextUnit 级引用（text_unit_id / full_doc_id / file_path / page_range / anchor / snippet），输出结构化 citations。
-4. **M6 溯源 sidecar**：chunk_id → {file_path, title_path, page_range, anchor, block_type}，从 M2 产物 `data/chunks/*.jsonl` 构建并启动加载（**不改 M5 返回结构**，解耦）。
+4. **M6 溯源 sidecar**：chunk_id → {file_path, title_path, page_range, anchor, block_type, image_path}，从 M2 产物 `data/chunks/*.jsonl` 构建，**按 PG chunk 主键索引**（见 §4.2），启动 / 入库 / 删除后各重建一次（**不改 M5 返回结构**，解耦）。
 
 **暂不做**（列入二期 / 他模块）：
 - map-reduce 跨文档综述（意图路由 v1 固定 single-window，函数位先留）；
@@ -59,11 +59,16 @@ query ─┬─► M5 retrieve() ─► results[chunk_id/content/full_doc_id/sco
 
 | 文件 | 职责 |
 |---|---|
-| `sidecar.py` | 构建/加载 chunk 溯源映射（读 `data/chunks/*.jsonl` → `{text_unit_id: {file_path,title_path,page_range,anchor,block_type}}`） |
+| `sidecar.py` | 构建/加载 chunk 溯源映射（读 `data/chunks/*.jsonl`，键 = `make_custom_chunk_id(full_doc_id, content)`，与 PG `lightrag_doc_chunks.id` 同一身份函数；值 = {file_path,title_path,page_range,anchor,block_type,image_path}） |
 | `assemble.py` | `assemble(query, results, max_tokens) -> (context, marker_map)`：按 score 顺序拼原文块，超预算截断；marker 与 chunk_id 一一对应 |
 | `generate.py` | 中文 RAG prompt（含 `response_type`）+ DeepSeek flash 调用（复用 M0/M3 providers 的 `extra_body=thinking disabled`），要求 grounded 标注 |
 | `cite.py` | `parse_citations(text, marker_map, sidecar)`：`[n]` → Citation 列表；越界/缺失回退提示 |
 | `orchestrator.py` | `async answer(rag, query, ...) -> Answer`：编排 A→B→C→D；意图路由函数位（v1 常量 single-window） |
+
+**sidecar 的键 = PG chunk 主键**（v1.6 修正）。M5 返回的 `chunk_id` 就是 PG `lightrag_doc_chunks.id`，而该 id 由 LightRAG 的 `make_custom_chunk_id(doc_key, content)` 生成、并在入库时按它去重（`seen_chunk_ids`，保留首条）。因此 sidecar 用同一个函数建索引、同样 first-wins，可与 PG **逐行对齐**：
+
+- 早先用 `(full_doc_id, content)` 做键，语义与 PG 的去重键相同但**去重行为不同**——jsonl 保留全部重复行、PG 只留首条。实测器械库 jsonl 857 行 → 唯一键 844 个 = PG 行数；`dict` 覆盖写导致 sidecar 指向的是**末条**，而 PG 里存活的是**首条**，两者可能指向不同 `page_range`/`image_path`（实测有一例两个 drawing 块 content 相同、图不同，会展示错图）。
+- 改为按 chunk_id 索引 + first-wins 后，实测 844 个键与 PG id 集**完全一致（零对称差）**。
 
 ### 4.3 输出契约（dataclass）
 
@@ -93,7 +98,7 @@ class Answer:
 | 项 | 现状 | 缺口 |
 |---|---|---|
 | M5 精排结果 | `retrieve()` 带 chunk_id/content/full_doc_id/score | **无 file_path/page_range/anchor**（M5_retrieve §8 遗留 #4 已点出）→ M6 用 sidecar 补齐（§4.2），不动 M5 返回 |
-| chunk 级溯源数据 | M2 产物 `data/chunks/<doc_id>.jsonl` 含 page_range/anchor/title_path（textunit 契约 v2 §4） | 需从 JSONL 构建 sidecar（1 次性离线，启动加载） |
+| chunk 级溯源数据 | M2 产物 `data/chunks/<doc_id>.jsonl` 含 page_range/anchor/title_path（textunit 契约 v2 §4） | 需从 JSONL 构建 sidecar（启动 / 入库 / 删除后各重建一次，见 §4.2） |
 | 生成模型 | DeepSeek v4-flash 全链路已定（不用 pro，thinking 已 disable） | 复用 M0/M3 providers，不新增 |
 | 中文 prompt | LightRAG 自带 prompt 基于英文场景 | 需中文化 response_type / 引用指令 |
 | 依赖 | conda env 目前仅 lightrag-hku / langchain-text-splitters / 解析三件套 | **MVP 决定不引入 langchain/langgraph**（§6） |
@@ -130,10 +135,12 @@ class Answer:
 - **模型自标 `[n]` 与 context 错位 / 漏标** → prompt 强约束 + parse 兜底回退；若频繁则升级为"按段落强制引用"指令。
 - **中文生成格式不稳定** → `response_type` 中文模板（分点/先总后分）先零样本试，效果差再 few-shot。
 - **预算超窗** → assemble 截断 + 记录截断日志，供 M8 评估召回是否够。
+- **同文档重复 content 导致溯源错位** → sidecar 键改为 PG chunk 主键（`make_custom_chunk_id`）+ first-wins，与 LightRAG 入库去重同取舍（§4.2）；若未来 LightRAG 改动去重策略，需同步此处。
 - **与已有模块耦合** → M6 只入 M0/读 M5 结果与 M2 产物，不反向改 M3/M4/M5 内部，遵守"低耦合三原则"。
 
 ## 10. 版本
 
+- **v1.6**（2026-10-02）：sidecar 索引键由 `(full_doc_id, content)` 改为 PG chunk 主键（`make_custom_chunk_id`）+ first-wins，修同文档重复 content 导致的图片/页码溯源错位（详见 CHANGELOG v5.28.1）。
 - **v1.1**（2026-09-14）：软删 `exclude_docs` 透传 M5。
 - **v1.4**（2026-09-21）：检索/生成 query 分离（Bug4 根因修复，方案 D，详见 CHANGELOG v5.3）。
 - **v1.3**（2026-09-21）：引用置信度相对阈值过滤（Bug4 方案 B，详见 CHANGELOG v5.2）。
