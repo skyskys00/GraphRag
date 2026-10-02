@@ -17,6 +17,8 @@
 # 各步幂等：已在运行/已停止的组件直接跳过并提示。
 #
 # 注意：
+#   - Docker 运行时用 OrbStack：start 时若守护进程未运行，会自动 `orb start`
+#     拉起并等待就绪（最多 120s），避免 PG 因 socket 缺失启动失败。
 #   - Xinference 用绝对路径 python 启动（勿用 conda run）。
 #   - 重启后 Xinference 不会自带恢复模型：start 会逐一核对 bge-m3 /
 #     bge-reranker-v2-m3，缺失则用 xinference launch 载入（CPU）。
@@ -94,7 +96,28 @@ xin_ensure_models() {
 }
 
 # ---------- 启动 ----------
+# Docker 守护进程（OrbStack）就绪检查：未运行则拉起并等待。
+# 只在选中 pg 时触发，`./dev.sh start web` 等不依赖 docker 的场景不受影响。
+docker_ensure() {
+  if docker info >/dev/null 2>&1; then return 0; fi
+  warn "Docker 守护进程未运行（OrbStack），尝试启动 ..."
+  if command -v orb >/dev/null 2>&1; then
+    orb start >/dev/null 2>&1 || true
+  elif [ -d /Applications/OrbStack.app ]; then
+    open -a OrbStack >/dev/null 2>&1 || true
+  else
+    fail "未找到 OrbStack（orb CLI / OrbStack.app），请手动启动 Docker 后重试"
+    exit 1
+  fi
+  local n=0
+  until docker info >/dev/null 2>&1; do
+    n=$((n+1)); [ $n -ge 60 ] && { fail "Docker 120s 未就绪，见 OrbStack 状态"; exit 1; }; sleep 2
+  done
+  say "Docker 就绪（OrbStack）"
+}
+
 pg_start() {
+  docker_ensure
   if docker ps --format '{{.Names}}' | grep -qx "$PG_CONTAINER"; then
     say "PG  已运行（$PG_CONTAINER）"
   elif docker ps -a --format '{{.Names}}' | grep -qx "$PG_CONTAINER"; then
