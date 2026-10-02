@@ -47,6 +47,24 @@
 
 ---
 
+## [v5.27] 2026-10-02 —— 器械场景化入口：问答页查询模板 chip（纯前端）
+
+**影响模块**：M8 前端（`components/InputBar.tsx` 新增 `deviceMode` prop + `DEVICE_TEMPLATES` 常量 + 场景 chip 行；`App.tsx` 按当前库名判断并传参；`App.css` 新增 `.scene-row` 样式）。方案文档 [`docs/modules/DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §5.2。
+
+**能力**：切到器械库时，问答页输入框上方出现「器械场景」三个查询模板 chip —— **报警含义 / 操作步骤 / 规格参数**。点击把模板文本填入输入框，光标停在待补全处，用户补上型号/报警码即可提问。
+
+**关键设计**：
+- **纯前端，不新增接口**：chip 本质是 query 模板，复用现有问答链路（`onSend`）。显式约束（用户 2026-10-02 拍板）。
+- **显示条件**：`currentCollection.name.includes('器械')` —— 按库名判断而非硬编码 collection_id，用户新建器械库自动生效；非器械库（客服/行政/销售）不显示，避免「报警含义」错位。
+- **填入而非直接发送**：模板留空待补全（如「___的报警含义是什么？」），因为模板原文太短、直接检索质量差。光标落点用 `pendingCursor` state + effect 在 DOM 更新后 `setSelectionRange`。
+
+**实测**（chrome-devtools-mcp 驱动，库「有源器械说明书」）：
+- 器械库下三个 chip 正常渲染；点「报警含义」→ 输入框值 `的报警含义是什么？`、`selectionStart=0`、已聚焦 ✓
+- 切到「销售业绩」库 → `.scene-row` 消失 ✓；切回器械库恢复 ✓
+- `tsc -b` + `npm run build` 通过。
+
+---
+
 ## [v5.26] 2026-10-02 —— 器械场景参数对比（M7 接口 + M8 视图）
 
 **影响模块**：M7 交互层（新增 `app/m7_interact/compare.py` + `POST /compare`）｜ M8 前端（新增 `components/DeviceCompare.tsx` + 侧栏「参数对比」导航项 + `App.css` 样式）。方案文档 [`docs/modules/DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §5.1。

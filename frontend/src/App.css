@@ -811,6 +811,24 @@
   color: var(--text-soft);
   padding-left: 2px;
 }
+/* 器械场景查询模板 chip（仅器械库显示） */
+.scene-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding-left: 2px;
+  font-size: 12px;
+  color: var(--text-soft);
+}
+.scene-row .scene-label {
+  margin-right: 2px;
+  letter-spacing: 0.5px;
+}
+.scene-row .chip {
+  padding: 4px 11px;
+  font-size: 12px;
+}
 .opt-row .tpl {
   display: inline-flex;
   gap: 6px;

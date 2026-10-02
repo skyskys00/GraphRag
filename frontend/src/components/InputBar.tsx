@@ -5,6 +5,7 @@ interface InputBarProps {
   onUpload: (files: File[]) => void
   disabled?: boolean
   uploading?: boolean
+  deviceMode?: boolean
 }
 
 const TEMPLATES = [
@@ -13,10 +14,18 @@ const TEMPLATES = [
   { label: '一句话', value: '用一句话概括' },
 ]
 
-export function InputBar({ onSend, onUpload, disabled, uploading }: InputBarProps) {
+// 器械场景查询模板：点击填入输入框，光标停在开头待补全型号/报警码
+const DEVICE_TEMPLATES = [
+  { label: '报警含义', text: '的报警含义是什么？' },
+  { label: '操作步骤', text: '的操作步骤是什么？' },
+  { label: '规格参数', text: '的规格参数有哪些？' },
+]
+
+export function InputBar({ onSend, onUpload, disabled, uploading, deviceMode }: InputBarProps) {
   const [text, setText] = useState('')
   const [responseType, setResponseType] = useState('')
   const [showOpts, setShowOpts] = useState(false)
+  const [pendingCursor, setPendingCursor] = useState<number | null>(null)
   const taRef = useRef<HTMLTextAreaElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -26,6 +35,22 @@ export function InputBar({ onSend, onUpload, disabled, uploading }: InputBarProp
     ta.style.height = 'auto'
     ta.style.height = Math.min(ta.scrollHeight, 160) + 'px'
   }, [text])
+
+  useEffect(() => {
+    if (pendingCursor === null) return
+    const ta = taRef.current
+    if (ta) {
+      ta.focus()
+      ta.setSelectionRange(pendingCursor, pendingCursor)
+    }
+    setPendingCursor(null)
+  }, [pendingCursor])
+
+  const applyTemplate = (t: { text: string }) => {
+    if (disabled) return
+    setText(t.text)
+    setPendingCursor(0)
+  }
 
   const handleSend = () => {
     const q = text.trim()
@@ -44,6 +69,16 @@ export function InputBar({ onSend, onUpload, disabled, uploading }: InputBarProp
 
   return (
     <div className="input-area">
+      {deviceMode && (
+        <div className="scene-row">
+          <span className="scene-label">器械场景</span>
+          {DEVICE_TEMPLATES.map((t) => (
+            <span key={t.label} className="chip" onClick={() => applyTemplate(t)}>
+              {t.label}
+            </span>
+          ))}
+        </div>
+      )}
       <div className="opt-row">
         <button className="link-btn" onClick={() => setShowOpts((s) => !s)}>
           回答要求 {showOpts ? '▴' : '▾'}

@@ -499,6 +499,7 @@ function App() {
           onUpload={handleUpload}
           disabled={isStreaming || backendOnline === false}
           uploading={uploading}
+          deviceMode={currentCollection.name.includes('器械')}
         />
       )}
 
