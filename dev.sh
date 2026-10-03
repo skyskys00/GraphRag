@@ -10,8 +10,12 @@
 #
 # 用法：
 #   ./dev.sh start|stop|restart|status|logs [pg|xin|api|web]   （省略组件 = 全部）
+#   ./dev.sh down               # 停四件套 + 关 OrbStack 本体（释放 VM 内存）
 #   例：./dev.sh start web      # 只重拉前端
 #       ./dev.sh logs api       # 跟踪后端日志
+#
+# 默认 stop 不动 OrbStack（只停 graphrag-pg 容器），以免连带停掉机器上其他容器；
+# 需要彻底释放内存时用 down。
 #
 # 日志落盘 logs/{xin,api,web}.log（根 logs/ 已被 .gitignore 忽略）。
 # 各步幂等：已在运行/已停止的组件直接跳过并提示。
@@ -49,10 +53,12 @@ bg() { local log=$1; shift; nohup "$@" >>"$log" 2>&1 & }
 check_xin_token() { [ -n "$(xin_token)" ]; }
 
 xin_token() {
+  # 失败时返回空串而非非零退出：本函数被 stop 路径调用，
+  # 若在 set -e 下硬失败会中断整个停止流程（XIN 已停时跳过后面的 PG 停止）。
   curl -s --max-time 3 -X POST "http://127.0.0.1:${XIN_PORT}/token" \
     -H 'Content-Type: application/json' \
     -d '{"username":"admin","password":"graphrag_local"}' \
-    | python3 -c "import sys,json;print(json.load(sys.stdin).get('access_token',''))" 2>/dev/null
+    | python3 -c "import sys,json;print(json.load(sys.stdin).get('access_token',''))" 2>/dev/null || true
 }
 
 # 已加载模型 uid 列表（每行一个）
@@ -206,6 +212,23 @@ pg_stop() {
     say "PG  已停止"
   fi
 }
+
+# OrbStack 本体停止（释放 Linux VM 内存）。仅 `down` 显式触发：
+# 默认 `stop` 不动 OrbStack，避免连带停掉机器上其他容器（如 github-mcp-server）。
+orb_stop() {
+  if ! command -v orbctl >/dev/null 2>&1; then
+    warn "未找到 orbctl，跳过 OrbStack 停止"; return 0
+  fi
+  if ! orbctl status 2>/dev/null | grep -qi '^running'; then
+    say "OrbStack 已停止"; return 0
+  fi
+  say "停止 OrbStack（释放 VM 内存）..."
+  if orbctl stop >/dev/null 2>&1; then
+    say "OrbStack 已停止"
+  else
+    warn "orbctl stop 失败，见 OrbStack 状态"; return 1
+  fi
+}
 # Xinference 停止（三层清理，防孤儿 worker 残留）：
 #   1) 优雅卸载各模型（DELETE /v1/models/{uid}，让 server 自己回收 worker）
 #   2) 停 server（9997 监听者，6s 宽限后强杀）
@@ -248,6 +271,8 @@ status() {
 SERVICES="pg xin api web"
 cmd="${1:-}"; svc="${2:-all}"
 case "$svc" in all|pg|xin|api|web) ;; *) fail "未知组件：$svc（可选 pg|xin|api|web）"; exit 1;; esac
+# down = 全量停止（含 OrbStack），忽略组件参数
+if [ "$cmd" = down ]; then svc=all; fi
 
 run_selected() { # $1 = start|stop
   local action=$1 has=0 s
@@ -270,6 +295,8 @@ case "$cmd" in
            echo "  日志  ./dev.sh logs api|web|xin|pg"
            ;;
   stop)    run_selected stop ;;
+  down)    run_selected stop
+           orb_stop ;;
   restart) run_selected stop; run_selected start ;;
   status)  status ;;
   logs)    case "$svc" in
@@ -279,5 +306,5 @@ case "$cmd" in
              web) tail -f -n 50 "$LOGDIR/web.log" ;;
              all) fail "logs 需指定组件：./dev.sh logs api|xin|web|pg"; exit 1 ;;
            esac ;;
-  *)       echo "用法：./dev.sh start|stop|restart|status|logs [pg|xin|api|web]"; exit 1 ;;
+  *)       echo "用法：./dev.sh start|stop|restart|down|status|logs [pg|xin|api|web]"; exit 1 ;;
 esac
