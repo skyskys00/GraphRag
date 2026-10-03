@@ -59,7 +59,11 @@
 
 报告：`backend/tests/reports/run_retrieval_device30.json`、`run_e2e_device30.json`（正式跑）、`device30_smoke.json`（2 题冒烟，跑全量前验证链路）；旧报告归档为 `*_pre_hitfix.json`。详细读数见 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §11。
 
-**遗留**：comparison 题实测有**真实漏召回**——答案 chunk 存在但三路候选池（graph 20 / vector 20 / keyword 40）**全不含**。例：LSP-1C「行程必须大于 0 小于 120mm」在 PG chunk `chunk-bb7dc287…`，关键词「行程」被正确提取（权重 2.0）却排不进 keyword top40 → 根因指向 **M2 切分粒度**（该 chunk 一块塞了内径/行程/时钟三个主题，被长度归一化稀释）+ M5 稀疏权重。属 M5/M2 独立任务，另按"探底实验三条纪律"处理。
+**遗留**：comparison 题实测有**真实漏召回**——答案 chunk 存在但三路候选池（graph 20 / vector 20 / keyword 40）**全不含**。例：LSP-1C「行程必须大于 0 小于 120mm」在 PG chunk `chunk-bb7dc287…`，关键词「行程」被正确提取（权重 2.0）却排不进 keyword top40 → 根因指向 **M2 切分粒度**（该 chunk 一块塞了内径/行程/时钟三个主题，被长度归一化稀释）+ M5 稀疏权重（**已排除**，见下条探底）。属 M2 独立任务，另按"探底实验三条纪律"处理。
+
+**探底：关闭 M5 query 扩展 —— 不采纳，已回滚（2026-10-03）**：动机是 `query_preprocess` 的 A2「实体名反向模糊匹配」把噪声词喂进 vector/keyword 两路（器械库「融柏」→ `保定融柏恒流泵制造有限公司 / 保险 / 特点 / 简介`），稀释真正相关块的分数。探针 `probe_expand_ablation.py` 三库消融显示：**检索排序质量净升**（device nDCG@8 0.7730→**0.8045**、gold_rank 2.30→**2.16**、precision 0.2492→0.2558、precision_w 0.3538→0.3736；recall −0.0096；cservice nDCG +0.0040；admin 不触发扩展、ON=OFF），**但 e2e 生成全面下降**（correctness 0.7950→0.7473、faithfulness 0.7757→0.7490、answer_relevance 0.8650→0.8300）。逐题定位：检索侧改动**只影响 1/30 题**（DV-FS-008 丢「维护周期表」chunk → 生成正确拒答，correct 0.8→0.0），其余 29 题检索逐题**完全相同**却仍升降剧烈 ⇒ 生成降幅约一半是该题真退化、一半是 LLM 噪声。**结论：不采纳，`retriever.py` 维持 `q_vec/q_kw = prep.expanded`（已 `git checkout` 回滚，代码与 M5 文档零净改动）**。
+
+**副产品（排除上条「遗留」的 M5 假设）**：探针 `probe_cmp_miss.py` 逐环定位 comparison 漏召回目标块（`chunk-bb7dc287…`，per-doc 限 LSP）：关扩展后 keyword 路它**擦边进池**（第 39/40 名），但 RRF 是跨路聚合、单路 rank 39 贡献仅 `1/(60+39)≈0.0101`，被多路命中块碾压；该块 vector（第 65/287）/graph（第 92）两路均 0 贡献 ⇒ 仍进不了 RRF 池。**⇒ 「M5 稀疏权重」排除，真瓶颈是目标块语义匹配本身不足（M2 切分粒度）**。报告：`backend/tests/reports/run_ablation_{device30,cservice35,admin30}_expON/OFF_20261003.json`、`run_e2e_device30_expOFF_20261003.json`。
 
 ---
 
