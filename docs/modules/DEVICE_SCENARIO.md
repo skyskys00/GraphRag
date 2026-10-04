@@ -286,44 +286,47 @@ python -m app.m9_eval.runner --testset tests/testsets/testset_device_30.json \
 
 > 库 `col_b7b876b1`（10 份器械说明书 / 857 chunk / 149 带图 drawing 块）。
 > 跑法：`python -m app.m9_eval.runner --testset tests/testsets/testset_device_30.json --collection col_b7b876b1 --mode <retrieval|e2e>`。
-> **§11.1 检索指标为 v5.30 泄漏治理后诚实口径**（报告 `backend/tests/reports/run_retrieval_device30_v531_leakfix.json`）。
+> **§11.1 检索指标为 v5.30 泄漏治理后诚实口径**：报告 `backend/tests/reports/run_retrieval_device30_v531_leakfix.json`（v531 基线，2026-10-03 晚，双窗口时代产物）+ `run_retrieval_device30_v532_localize.json`（**v532 当前生产口径，2026-10-04，纯 top5 单窗口**）。
+> ⚠️ **v531 报告 JSON 内嵌 `per_fact` 为 @8 判定**（judge 可引用 `上下文[6][7][8]`）；与 v532 纯 @5 判定逐 fact 对比会看到三题（DV-FS-002/008、DV-IO-006）「@8 hit / @5 miss」窗口差——**非检索退化**，DV-FS-002/008 正是已知「答案块落 top6-8」案例。逐题对比须以 summary 的 @5 列为准。
 > **⚠️ 口径说明（v5.31 起）**：@8 列已在文档层面作废——`eval_top_n` 默认回 5（对齐生产 `RERANK_TOP`），runner/report 双窗口收敛为单窗口，LLM 调用减半；v5.9 已实测「top5 是最优窗口」（`205b445` commit）。以下只报告 **@5 = 生产口径**，@8 仅作历史对照并标注「已否定诊断残留」。§11.1 摘要数字与报告 JSON 的 `@5` 列一致。
 > **§11.2 生成指标为诚实口径**（2026-10-04 已重跑，报告 `backend/tests/reports/run_e2e_device30_honest.json`）；`run_e2e_device30.json`（v5.29 泄漏窗口口径）仅作上界参考，不可直接比较。
 > **历史报告口径不同，均不可直接比较**：`*_pre_hitfix.json`（judge hit bug 前，假阳性）、`run_retrieval_device30.json`（v5.29 泄漏口径），见 §11.3。
 
-### 11.1 检索指标（`--mode retrieval`，30 题，v5.30 诚实口径，耗时 721.1s，报告 `run_retrieval_device30_v531_leakfix.json`）
+### 11.1 检索指标（`--mode retrieval`，30 题，v5.32 当前生产口径 = 纯 top5 单窗口，耗时 738.9s，报告 `run_retrieval_device30_v532_localize.json`）
 
-| 指标 | @5（生产口径） |
-|---|---|
-| Context Recall | **0.6635** |
-| Context Precision | 0.2362 |
-| Context Precision（加权） | 0.3263 |
-| nDCG | 0.6906 |
+| 指标 | @5（生产口径，v532） | v531 基线 |
+|---|---|---|
+| Context Recall | **0.6763** | 0.6635 |
+| Context Precision | 0.2533 | 0.2362 |
+| Context Precision（加权） | 0.3533 | 0.3263 |
+| nDCG | 0.7508 | 0.6906 |
 
-> @8 对照（历史已否定诊断残留，仅存档）：Recall 0.7019 / Prec 0.1756 / PrecW 0.2861 / nDCG 0.7623。
+> 基线列 = v5.31 收敛前跑法的 summary @5 列（`run_retrieval_device30_v531_leakfix.json`，721.1s，双窗口时代产物）。v531 报告内嵌 `per_fact` 是 @8 判定，不参与对比（见 §11 顶部横幅的 ⚠️ 口径说明）。@8 列自 v5.31 已在文档层面作废，仅存档。
 
-**Gold Rank**：平均 2.43 / 中位 2.46。事实覆盖率：top1 **0.4551** → top3 0.7051 → top5 0.7276。（top8 0.8269 为 8 窗口产物，@8 已作废同上。）
+**Gold Rank**：平均 1.67 / 中位 1.66（v531: 2.43/2.46）。事实覆盖率：top1 **0.5** → top3 0.7308 → top5 0.7404。
 
 **按题型**（Recall —— 仅 @5）：
 
-| 题型 | 题数 | Recall@5 |
-|---|---|---|
-| table_numeric | 8 | 0.8125 |
-| fact_single | 8 | 0.6562 |
-| image_only | 6 | 0.6667 |
-| comparison | 4 | 0.3750 ⚠️ |
-| unanswerable | 4 | —（跳过） |
+| 题型 | 题数 | Recall@5 (v532) | v531 |
+|---|---|---|---|
+| table_numeric | 8 | 0.8125 | 0.8125 |
+| fact_single | 8 | 0.6562 | 0.6562 |
+| image_only | 6 | 0.6667 | 0.6667 |
+| comparison | 4 | **0.4583** ▲ | 0.3750 |
+| unanswerable | 4 | —（跳过） | — |
 
-**逐题 comparison**（报告 `by_question`）：CP-001 0/3；CP-002 0/2；CP-003 2/2（top5 全中）；CP-004 1/2（top5 中博声侧漏 KE-2000 侧——真漏召回）。
+**逐题 comparison**（@5 判定；v531 基线用 summary @5 列）：**CP-001 0/3 → 1/3**（唯一变化，L2 localize 恢复；judge 确认真实：上下文[1] 明确列出「型号 \| LSP01-1BC」的运行模式参数表）；CP-002 0/2（保持，M2 切分真漏，见 CHANGELOG v5.29「遗留」段）；CP-003 2/2（保持，top5 全中）；CP-004 1/2（保持，漏博声侧 KE-2000——真漏召回，属 M2 切分粒度）。
 
-**按难度**（Recall@5）：easy（6 题）0.6667｜medium（16 题）0.8542｜hard（8 题）0.3750。
+**非 comparison 零回归**：table_numeric / fact_single / image_only 三题型 aggregate @5 与 v531 **逐题完全一致**（0.8125/0.6562/0.6667）。⚠️ 直接 diff 两份报告 JSON 的 `per_fact` 会看到 DV-FS-002/008、DV-IO-006 有「v531 hit / v532 miss」——这是 **@8 vs @5 窗口差**（v531 报告 per_fact 来自 8 窗口，judge 引用过 `上下文[6][7][8]`；DV-FS-002/008 正是已知「答案块落 top6-8」案例），**不是 v532 引入的检索退化**。
+
+**按难度**（Recall@5）：easy（6 题）0.6667｜medium（16 题）0.8542｜hard（8 题）0.4167（v531: 0.3750，提升来自 comparison CP-001 hard 题恢复）。
 
 **读数**：
 
-- **总体 Recall 相比 v5.29 泄漏口径（0.7436）下降**——主因是 comparison 从「每文档定制子查询」回落为与生产同形的完整 question 检索（0.4583 → 0.3750@5）。这是泄漏治理的**预期效果**；旧数字不可比（§11.3）。
-- `table_numeric` 依旧最稳（0.8125）——参数表格切分/检索最"干净"。
-- **comparison 0.3750@5 是当前最大短板**——CP-004 fact2（博声 APP）确认为**真漏召回**（top5 上下文缺博声侧块），根因属 M2 切分粒度（`CHANGELOG` v5.29「遗留」段，另立任务）。
-- **Context Precision 整体偏低（0.24）**：每题取 20 条上下文而多数题只需 1-3 条 ⇒ 分母天然偏大，绝对值不宜单独解读；结合 GoldRank（top1 覆盖 0.46、top5 覆盖 0.73）一起看。
+- **comparison 0.3750 → 0.4583@5（+0.0833）**，dv-CP-001 从 0/3 恢复 1/3 —— v5.32 `localize_query` 的 L2（图实体表归属判定）把「其他文档型号名」剔出目标 doc 检索 query，恢复被型号词压没的向量召回。**诚实口径不因修复而动摇**：仍是完整 question + 生产可复现检索，恢复属真实检索能力提升（v5.30 泄漏治理后 comparison 曾回落到 0.375 的「完全 question 压没」缺陷，由生产侧补回）。
+- ⚠️ **数值巧合提醒**：v532 本次 comparison **0.4583 与 v5.29 泄漏口径 0.4583 恰好相等，机制完全不同**——v5.29 = 每文档定制子查询 `per_doc_queries`（评测独有输入，泄漏，已退役）；v532 = 同一完整 question + 生产 `localize_query` 逐 doc 去噪（诚实可复现，生产 `compare.py` 同函数同源）。**不可混为一谈**。
+- **comparison 剩余短板 = 真漏召回**：CP-002 0/2、CP-004 博声侧——目标块语义匹配本身不足（M2 切分粒度遗留，另立任务），非 query 去噪范围。
+- **Context Precision 整体偏低（0.25）**：每题取 20 条上下文而多数题只需 1-3 条 ⇒ 分母天然偏大，绝对值不宜单独解读；结合 GoldRank（top1 覆盖 0.5、top5 覆盖 0.74）一起看。
 
 ### 11.2 生成指标（`--mode e2e`，30 题，诚实口径，耗时 1154.9s，报告 `run_e2e_device30_honest.json`）
 

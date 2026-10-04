@@ -169,7 +169,15 @@
 - 普通 query「报警 E03 怎么处理」：两侧正常返回、零回退。
 - 前端侧栏「参数对比」走同一 `compare_params`，链路自动生效，无需重启前端。
 
-**后续**：完整评测重跑（`--mode retrieval`）估约 20 分钟，结果将回填本条目与 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §11.1（comparison Recall 预期自 0.375 回升，检索侧诚实可复现口径不变）。
+**实测回填（`--mode retrieval` 重跑，30 题，耗时 738.9s，报告 `run_retrieval_device30_v532_localize.json`；基线 = v531 诚实口径 @5）**：
+
+- **comparison Recall 0.375 → 0.4583@5（+0.0833）**，逐题唯一变化 = **CP-001 0/3 → 1/3**（L2 恢复「型号 | LSP01-1BC」运行模式表，judge 判 True 并明确归因上下文[1]）。CP-002 0/2（保持，M2 切分真漏）、CP-003 2/2、CP-004 1/2（保持，博声侧 KE-2000 真漏召回）。
+- **非 comparison 零回归**：table_numeric 0.8125 / fact_single 0.6562 / image_only 0.6667 与 v531 逐题完全一致。总体 Recall 0.6635 → **0.6763**、nDCG 0.6906 → 0.7508、GoldRank 2.43 → 1.67（后两项受 comparison 块进 top5 修正顺带改善）。
+- ⚠️ **数值巧合**：本次 0.4583 与 v5.29 泄漏口径 0.4583 恰好同数，机制完全不同（v5.29 = per_doc_queries 定制子查询泄漏；v532 = 完整 question + 生产 localize 诚实可复现），已入 §11.1 注记以防误读。
+- ⚠️ **口径提醒（误读风险复盘）**：v531 报告 JSON 内嵌 `per_fact` 为双窗口时代 @8 判定，与 v532 纯 @5 判定直接 diff 会误报「非 comparison 三题退化」（DV-FS-002/008、DV-IO-006 均为 @8 hit/@5 miss 窗口差，DV-FS-002/008 正是已知「答案块落 top6-8」案例）。**逐题对比必须以 @5 判定为基**，已入 §11.1 横幅与读数。
+- **执行教训（runner import 作用域）**：首跑 v532 一度 0.0000（comparison 全空）——`_comparison_targets` 调用 `build_side_inputs`/`localize_query`，但两者此前只在 `_build_deps` **函数内部** import，模块级函数引用时 NameError → try/except 吞掉 → contexts 空 → 8 fact 全判「检索上下文为空」。修复：import 移到 `_comparison_targets` 函数内使用点。教训：**改动 import 后必须跑完整评测看真实日志**，单测/诊断脚本从 `module.query_localize` 直接 import 不会暴露 runner 内包 import 作用域问题。
+
+**结论**：v5.32 `localize_query` 落地有效且诚实——恢复 1 个真相（CP-001 运行模式表），零回归，production `compare.py` 与 runner 镜像同一函数。剩余 comparison 短板（CP-002、CP-004 博声侧）为 M2 切分粒度真漏召回，另立任务。数字已回填 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §11.1。
 
 ---
 
