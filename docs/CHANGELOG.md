@@ -55,6 +55,8 @@
 
 **生成（`--mode e2e`，30 题，1243.9s）**：Faithfulness **0.7757** / Answer Relevance **0.8650** / Correctness 0.7950 / Citation Accuracy 0.6707。按题型正确性：`fact_single` 0.8812 > `unanswerable` 0.8500 > `table_numeric` 0.8187 > `image_only` 0.7500 > **`comparison` 0.5875**；`table_numeric` 忠实度满分 1.0，`fact_single` 引用准确率最高 0.9167。**`comparison` 四项生成指标全为最低，与检索侧 Recall 0.4583 同源**（漏召回 ⇒ 生成阶段拿不到第二个型号的数据）。**诚实性验证：4/4 `unanswerable` 题全部正确拒答、无编造**（如 DV-UA-003「双相波脉冲宽度」→「所有材料均未提及脉冲宽度（ms）这一参数」）。
 
+> **⚠️ 本节 e2e 数字为 v5.29 泄漏窗口口径（per_doc_queries + @8），仅作历史对照**；诚实重跑数据见 [v5.31] 段「诚实 e2e 生成重跑」与 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §11.2。
+
 **`unanswerable` 口径**：runner 对这类题**跳过 recall 计算**，`by_category.unanswerable.context_recall = 0.0` 只是占位值；**总体 Recall 分母是 26 道可答题**。这类题考的是 e2e 的**拒答行为**（上段已验证）。
 
 报告：`backend/tests/reports/run_retrieval_device30.json`、`run_e2e_device30.json`（正式跑）、`device30_smoke.json`（2 题冒烟，跑全量前验证链路）；旧报告归档为 `*_pre_hitfix.json`。详细读数见 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §11。
@@ -107,7 +109,7 @@
 
 **⚠️ 非单调异常（@8 < @5）已定论 = LLM 裁判噪声，非 runner bug**：runner 窗口切片无 bug（同列表 `[:5]`/`[:8]`），top8 ⊇ top5 是硬保证，证据块在 top5 被判 hit 则 top8 必然还在。缓存证据：DV-CP-003 fact2（KE-2000 血氧范围）同一事实两次独立 LLM 调用产生两条缓存——top5 判 True（reason 精确引用 doc `0d5c7f07d607e9c4` 中「血氧饱和度测量范围：不窄于35%～100%」规格）、top8 判 False（reason 引用**同样那串**证据却要求上下文必须出现「KE-2000」型号字样）⇒ 裁判归因标准两次不自洽。DV-CP-004 fact1（IDEM）同模式；`by_difficulty.medium` 亦非单调（R5 0.8542 > R8 0.8125）。**诚实读数：comparison 检索能力接近 @5=0.375，@8=0.125 被裁判噪声压低**；DV-CP-004 fact2（博声 APP）才是真漏召回（top8 上下文确实缺博声块）。judge 缓存条目可逐条复核（`app/m9_eval/cache/context_recall_*.json`）。
 
-**e2e 生成未重跑**：`run_e2e_device30.json` 仍是 v5.29 泄漏口径（comparison 用 per_doc_queries），v5.30 退役后生成侧数字待下一轮重跑回填。
+**e2e 生成侧随后在 v5.31 后用诚实口径重跑完成**：见下方 v5.31 段「诚实 e2e 生成重跑」。`run_e2e_device30.json`（v5.29 泄漏窗口口径）仅作上界参考。
 
 ---
 
@@ -124,6 +126,22 @@
 3. `gold_rank.py` `top_ks=[1,3,5,8]` **保留**（词汇模式零 LLM 成本；runner 传入 contexts ≤5 时 top8 覆盖率恒等于 top5，无需改）。
 
 **口径与兼容**：只报 @5 = 生产口径；探底仍可 `--eval-top-n 8` 放宽（window 字段动态标注）。旧报告 JSON/历史条目不受影响，旧三库跑法不变。
+
+**诚实 e2e 生成重跑（2026-10-04，生成项补齐）**：上报 v5.30 遗留的「e2e 生成未重跑」完成。跑法同 §11 引语（退役 per_doc_queries、单窗口 @5、p2 缓存键），报告 `backend/tests/reports/run_e2e_device30_honest.json`（1154.9s，judge_failed=0）。**对比 v5.29 泄漏窗口口径大洗牌**：
+
+| 生成指标 | 诚实（当前） | 旧泄漏口径（仅参考） |
+|---|---|---|
+| Faithfulness | **0.9843** | 0.7757 |
+| Answer Relevance | 0.7617 | 0.8650 |
+| Correctness | 0.6286 | 0.7950 |
+| Citation Accuracy | 0.6764 | 0.6707 |
+
+**关键结论**：
+
+- **忠实度满格 = 泄漏口径 generation「低 faith」是上下文外编造，非能力极限**：诚实口径下 `table_numeric`/`fact_single`/`image_only`/`unanswerable` 各题型 faithfulness 全部 1.0（旧 0.64–1.0 不等）；comparison faith 0.43 → **0.8825**。诚实的「保守」反而让答案收束到上下文内。
+- **comparison Correctness 0.5875 → 0.0875 崩盘**，且 Answer Relevance 0.7375 → 0.5000：诚实口径下 4 题全拒答/答单边（完整对比 query 一个型号块都没进 top5 → 编码到「诚实拒答」而非编造）。**这坐实检索 > 生成：comparison 瓶颈在 M5/M2 检索漏召回，生成层只是忠实呈现**。与 §11.1 comparison Recall 0.375@5 同源。
+- **拒答（unanswerable）4/4 依旧全部正确、无编造**。
+- 读数与旧报告逐题型并存，详见 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §11.2。
 
 ---
 
