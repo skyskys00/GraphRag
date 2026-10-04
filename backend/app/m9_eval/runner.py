@@ -50,7 +50,6 @@ async def _build_deps(working_dir: Path, workspace: str):
     from app.m3_index.providers import build_llm_func
     from app.m3_index.runner import build_rag
     from app.m5_retrieve.query_preprocess import load_entities_async
-    from app.m5_retrieve.query_localize import build_side_inputs, localize_query
     from app.m5_retrieve.sparse_index import SPARSE_FILE, load as load_sparse
 
     rag = await build_rag(working_dir, workspace=workspace)
@@ -135,6 +134,7 @@ def _comparison_targets(
     """
     if q.get("category") != "comparison":
         return []
+    from app.m5_retrieve.query_localize import build_side_inputs, localize_query
     id_to_filename = {did: fn for fn, did in name_map.items()}
     cands_by_doc, doc_text = build_side_inputs(sparse or {}, id_to_filename)
     targets: list[tuple[str, str]] = []
