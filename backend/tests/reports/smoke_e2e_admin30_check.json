@@ -1,0 +1,311 @@
+{
+  "testset_id": "testset_admin_30",
+  "domain": "",
+  "version": "v0.2",
+  "timestamp": "2026-10-04 13:22:12",
+  "config": {
+    "mode": "e2e",
+    "collection": "eval_admin",
+    "workspace": "eval_admin_ws",
+    "reranker": "standard",
+    "ablation_routes": "graph,vector,keyword",
+    "comparison_mode": "per_doc"
+  },
+  "summary": {
+    "total_questions": 1,
+    "overall": {
+      "context_recall": 1.0,
+      "context_precision": 0.6,
+      "context_precision_weighted": 0.7445,
+      "gold_rank_avg": 2.0,
+      "gold_rank_median": 2.0,
+      "gold_rank_min": 2.0,
+      "gold_rank_max": 2.0,
+      "gold_rank_top1_recall": 0.0,
+      "gold_rank_top3_recall": 0.75,
+      "gold_rank_top5_recall": 0.75,
+      "ndcg": 0.8803,
+      "faithfulness": 1.0,
+      "answer_relevance": 1.0,
+      "correctness": 1.0,
+      "citation_accuracy": 1.0,
+      "judge_failed_judgments": 0
+    },
+    "by_category": {
+      "fact_single": {
+        "count": 1,
+        "context_recall": 1.0,
+        "context_precision": 0.6,
+        "gold_rank_avg": 2.0,
+        "gold_rank_median": 2.0,
+        "gold_rank_top5_recall": 0.75,
+        "ndcg": 0.8803,
+        "faithfulness": 1.0,
+        "answer_relevance": 1.0,
+        "correctness": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "count": 1,
+        "context_recall": 1.0,
+        "context_precision": 0.6,
+        "gold_rank_avg": 2.0,
+        "gold_rank_median": 2.0,
+        "gold_rank_top5_recall": 0.75,
+        "ndcg": 0.8803,
+        "faithfulness": 1.0,
+        "answer_relevance": 1.0,
+        "correctness": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    "judge_failed_questions": 0,
+    "total_time_s": 44.5
+  },
+  "questions": [
+    {
+      "id": "adm_q001",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "办公用品分为哪几类？各自的领用方式是什么？",
+      "ground_truth": "办公用品分为三大类：A类（消耗品）——一次性使用、不可回收，月度定额内自由领用；B类（耐用品）——可长期使用（1年以上）的低值办公用品，以旧换新、损坏报废；C类（高值品）——单价较高或需专项管理的物品，专项审批、部门经理签字。",
+      "key_facts": [
+        "A类=消耗品=月度定额内自由领用",
+        "B类=耐用品=以旧换新、损坏报废",
+        "C类=高值品=专项审批、部门经理签字",
+        "共分三大类"
+      ],
+      "answer": "根据检索材料，办公用品分为三大类，各类的领用方式不同 [2]。\n\n具体如下：\n\n1. **A 类（消耗品）**：指一次性使用、不可回收的办公用品，例如中性笔、笔记本、打印纸、便签纸、文件夹、订书钉、回形针、橡皮、涂改液等，领用方式为“月度定额内自由领用” [2]。\n\n2. **B 类（耐用品）**：指可长期使用（1年以上）的低值办公用品，例如订书机、剪刀、计算器、文件架、笔筒、U盘(32G)、键盘、鼠标等，领用方式为“以旧换新，损坏报废” [2]。\n\n3. **C 类（高值品）**：指单价较高或需专项管理的物品，例如移动硬盘、充电宝、降噪耳机、机械键盘、人体工学椅配件等，领用方式为“专项审批，部门经理签字” [2]。其中，C 类高值品需在 OA 系统提交专项申请，注明用途、型号、预估价格，并经过部门经理 → 行政经理 → 财务部审核预算的三级审批 [5]。",
+      "citations": [
+        {
+          "marker": 2,
+          "text_unit_id": "chunk-b9d9d505528946de34277774e2fe305b",
+          "full_doc_id": "ab3a1bb72b4bc3c6",
+          "file_path": "",
+          "title_path": null,
+          "page_range": null,
+          "anchor": null,
+          "snippet": "【列：类别 | 定义 | 示例 | 领用方式】 | 类别 | 定义 | 示例 | 领用方式 | |---|---|---|---| | A 类 （消耗品） | 一次性使用、不可回收的办公用品 | 中性笔、笔记本、打印纸、便签纸、文件夹、订书",
+          "score": 0.7381991931923966,
+          "image_path": null
+        },
+        {
+          "marker": 5,
+          "text_unit_id": "chunk-6936473b097dc34f2da498a1a32c5cfc",
+          "full_doc_id": "ab3a1bb72b4bc3c6",
+          "file_path": "",
+          "title_path": null,
+          "page_range": null,
+          "anchor": null,
+          "snippet": "4.2 C 类高值品 专项申请：需在 OA 系统提交专项申请，注明用途、型号、预估价格。 三级审批：部门经理 → 行政经理 → 财务部审核预算。 资产登记：高值品纳入公司固定资产管理，贴资产标签。 使用期限：最低使用年限为 2 年，未到期遗",
+          "score": 0.5495872035367393,
+          "image_path": null
+        }
+      ],
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "ab3a1bb72b4bc3c6",
+          "ab3a1bb72b4bc3c6",
+          "7878fe49cd0ee82b",
+          "7878fe49cd0ee82b",
+          "ab3a1bb72b4bc3c6"
+        ]
+      },
+      "gen_meta": {
+        "mode": "single-window",
+        "used_chunks": 5,
+        "context_tokens": 401,
+        "unmatched_markers": 0,
+        "source_docs": [
+          "ab3a1bb72b4bc3c6"
+        ]
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 4,
+          "found_facts": 3,
+          "not_found_facts": 1,
+          "min_rank": 2,
+          "median_rank": 2.0,
+          "avg_rank": 2.0,
+          "max_rank": 2,
+          "top_k_recall": {
+            "1": 0.0,
+            "3": 0.75,
+            "5": 0.75,
+            "8": 0.75
+          },
+          "per_fact": [
+            {
+              "fact": "A类=消耗品=月度定额内自由领用",
+              "gold_rank": 2,
+              "chunk_id": "chunk-b9d9d505528946de34277774e2fe305b",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "B类=耐用品=以旧换新、损坏报废",
+              "gold_rank": 2,
+              "chunk_id": "chunk-b9d9d505528946de34277774e2fe305b",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "C类=高值品=专项审批、部门经理签字",
+              "gold_rank": 2,
+              "chunk_id": "chunk-b9d9d505528946de34277774e2fe305b",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "共分三大类",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "A类=消耗品=月度定额内自由领用",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的表格中明确列出：类别“A 类 （消耗品）”，其领用方式为“月度定额内自由领用”，与事实陈述“A类=消耗品=月度定额内自由领用”完全对应。"
+            },
+            {
+              "fact": "B类=耐用品=以旧换新、损坏报废",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的表格中明确写道：“| B 类（耐用品） | 可长期使用（1年以上）的低值办公用品 | 订书机、剪刀、计算器、文件架、笔筒、U盘(32G)、键盘、鼠标 | 以旧换新，损坏报废 |”，其中B类与耐用品对应，领用方式为“以旧换新，损坏报废”，与事实陈述完全一致。"
+            },
+            {
+              "fact": "C类=高值品=专项审批、部门经理签字",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的表格中明确列出：\"| C 类(高值品) | 单价较高或需专项管理的物品 | 移动硬盘、充电宝、降噪耳机、机械键盘、人体工学椅配件 | 专项审批，部门经理签字 |\"，其中\"C 类(高值品)\"对应的领用方式为\"专项审批，部门经理签字\"，与事实陈述完全一致。"
+            },
+            {
+              "fact": "共分三大类",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确写道：\"办公用品分为三大类：\"，与事实陈述\"共分三大类\"一致。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.6,
+        "context_precision_weighted": 0.7445,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 3,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本确认办公用品分为三大类，与问题第一问直接相关，但未列出A/B/C类具体内容及各自的领用方式，也未涉及关键数值1年，信息不完整。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本以表格形式完整列出了A类（消耗品）、B类（耐用品）、C类（高值品）三大类的定义、示例和领用方式，其中B类明确指出'可长期使用（1年以上）'，与【关键数值】清单中的'1年'一致；分类及领用方式（月度定额内自由领用、以旧换新损坏报废、专项审批部门经理签字）与标准答案要点完全对应，可直接用于回答问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本讨论的是设备分类（固定资产、低值耐用品、耗材）及其管理方式，与问题所问的办公用品三分类（A类消耗品、B类耐用品、C类高值品）及领用方式不同；且文本中的'使用期限≥3年'与【关键数值】清单中的'1年'不符，未提供回答问题所需信息。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.3,
+              "reason": "文本提到了C类耗材的领用流程参照《办公用品领用管理办法》执行，与问题中办公用品的领用方式部分相关，但未涉及分类信息及具体领用方式（如专项审批），也未包含或核对关键数值‘1年’，因此相关度较低。"
+            },
+            {
+              "rank": 5,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "该文本介绍了C类高值品的专项申请、三级审批和资产登记等领用管理方式，与问题中C类领用方式（专项审批、部门经理签字）相关，但未完整覆盖A、B类，且文本中的'2年'与【关键数值】清单中的'1年'不一致。"
+            }
+          ],
+          "reason": "3/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.8803,
+        "faithfulness": 1.0,
+        "faithfulness_detail": {
+          "total_statements": 0,
+          "supported_statements": 0,
+          "unsupported": [],
+          "reason": "答案中的所有事实陈述均可在检索上下文中找到明确依据，无幻觉内容。"
+        },
+        "answer_relevance": 1.0,
+        "answer_relevance_detail": {
+          "reason": "答案完整、直接地回应了问题，明确列出办公用品的三大分类及各分类的领用方式，与问题所问内容高度相关。"
+        },
+        "correctness": 1.0,
+        "correctness_detail": {
+          "total_facts": 10,
+          "correct_facts": 10,
+          "incorrect": [],
+          "reason": "答案完整覆盖了标准答案中办公用品三大分类、各自定义特点及领用方式等全部关键事实点，额外信息不矛盾。"
+        },
+        "citation_accuracy": 1.0,
+        "citation_accuracy_detail": {
+          "total_cites": 5,
+          "supported_cites": 5,
+          "details": [
+            {
+              "cite_num": 2,
+              "statement": "根据检索材料，办公用品分为三大类，各类的领用方式不同 [2]",
+              "supported": true,
+              "score": 1.0,
+              "reason": "上下文表格明确列出办公用品分为A类、B类、C类三大类，并分别给出各自对应的领用方式，与陈述完全一致。"
+            },
+            {
+              "cite_num": 2,
+              "statement": "**A 类（消耗品）**：指一次性使用、不可回收的办公用品，例如中性笔、笔记本、打印纸、便签纸、文件夹、订书钉、回形针、橡皮、涂改液等，领用方式为“月度定额内自由领用” [2]",
+              "supported": true,
+              "score": 1.0,
+              "reason": "被引用的表格明确列出 A 类（消耗品）的定义、全部示例以及领用方式为“月度定额内自由领用”，与陈述完全一致。"
+            },
+            {
+              "cite_num": 2,
+              "statement": "**B 类（耐用品）**：指可长期使用（1年以上）的低值办公用品，例如订书机、剪刀、计算器、文件架、笔筒、U盘(32G)、键盘、鼠标等，领用方式为“以旧换新，损坏报废” [2]",
+              "supported": true,
+              "score": 1.0,
+              "reason": "被引用的上下文表格中明确列出了B类（耐用品）的定义、示例和领用方式为“以旧换新，损坏报废”，与陈述完全一致。"
+            },
+            {
+              "cite_num": 2,
+              "statement": "**C 类（高值品）**：指单价较高或需专项管理的物品，例如移动硬盘、充电宝、降噪耳机、机械键盘、人体工学椅配件等，领用方式为“专项审批，部门经理签字” [2]",
+              "supported": true,
+              "score": 1.0,
+              "reason": "上下文中C类（高值品）的定义、示例和领用方式均与陈述完全一致，可直接找到依据。"
+            },
+            {
+              "cite_num": 5,
+              "statement": "其中，C 类高值品需在 OA 系统提交专项申请，注明用途、型号、预估价格，并经过部门经理 → 行政经理 → 财务部审核预算的三级审批 [5]",
+              "supported": true,
+              "score": 1.0,
+              "reason": "被引用的上下文明确写明C类高值品需在OA系统提交专项申请，注明用途、型号、预估价格，并需部门经理→行政经理→财务部审核预算的三级审批，与陈述完全一致。"
+            }
+          ],
+          "reason": "5/5 个引用有依据"
+        }
+      },
+      "time_s": 44.54,
+      "answer_time_s": 14.64
+    }
+  ]
+}

@@ -1,0 +1,563 @@
+/opt/anaconda3/envs/graphrag/lib/python3.11/site-packages/torch/cuda/__init__.py:68: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+测试集: testset_admin_30 ()
+  共 30 题：{'fact_single': 11, 'fact_cross_doc': 4, 'proper_noun': 4, 'comparison': 4, 'table_numeric': 5, 'unanswerable': 2}
+  难度分布：{'easy': 16, 'medium': 13, 'hard': 1}
+
+评测模式: e2e
+Collection: eval_admin → workspace: eval_admin_ws
+数据目录: /Users/kemily/Documents/AI开发/AI_project/GraphRAG/backend/data/eval_admin_ws
+
+初始化 RAG / 稀疏索引 / 实体 / 裁判 LLM...
+INFO: PostgreSQL table: LIGHTRAG_VDB_ENTITY_xinference_bge_m3_1024d
+INFO: PostgreSQL table: LIGHTRAG_VDB_RELATION_xinference_bge_m3_1024d
+INFO: PostgreSQL table: LIGHTRAG_VDB_CHUNKS_xinference_bge_m3_1024d
+INFO: Role LLM Configuration (initialized):
+INFO:  - extract: None/None, host=None, max_async=2, timeout=240
+INFO:  - keyword: None/None, host=None, max_async=4, timeout=240
+INFO:  - query: None/None, host=None, max_async=4, timeout=240
+INFO:  - vlm: None/None, host=None, max_async=4, timeout=240
+INFO: PostgreSQL, Retry config: attempts=10, backoff=3.0s, backoff_max=30.0s, pool_close_timeout=5.0s
+INFO: PostgreSQL, VECTOR extension enabled
+INFO: PostgreSQL, Connected to database at 127.0.0.1:5432/postgres without SSL
+INFO: chunk_id column already exists in LIGHTRAG_LLM_CACHE table
+INFO: cache_type column already exists in LIGHTRAG_LLM_CACHE table
+INFO: queryparam column already exists in LIGHTRAG_LLM_CACHE table
+INFO: mode column does not exist in LIGHTRAG_LLM_CACHE table
+INFO: chunks_list column already exists in LIGHTRAG_DOC_STATUS table
+INFO: llm_cache_list column already exists in LIGHTRAG_DOC_CHUNKS table
+INFO: track_id column already exists in LIGHTRAG_DOC_STATUS table
+INFO: Index on track_id column already exists for LIGHTRAG_DOC_STATUS table
+INFO: metadata column already exists in LIGHTRAG_DOC_STATUS table
+INFO: error_msg column already exists in LIGHTRAG_DOC_STATUS table
+INFO: HNSW vector index idx_lightrag_vdb_entity_xinference_bge_m3_1024d_hnsw_cosine already exists on table LIGHTRAG_VDB_ENTITY_xinference_bge_m3_1024d
+INFO: HNSW vector index idx_lightrag_vdb_relation_xinference_bge_m3_1024d_hnsw_cosine already exists on table LIGHTRAG_VDB_RELATION_xinference_bge_m3_1024d
+INFO: HNSW vector index idx_lightrag_vdb_chunks_xinference_bge_m3_1024d_hnsw_cosine already exists on table LIGHTRAG_VDB_CHUNKS_xinference_bge_m3_1024d
+INFO: [eval_admin_ws] PGTableGraphStorage initialized
+  稀疏索引 chunks: 203｜实体 943
+  文档名映射: 0 份（comparison 题 per-doc 检索用）
+  初始化完成
+
+[1/30] adm_q001 - fact_single - 办公用品分为哪几类？各自的领用方式是什么？...
+WARNING: high_level_keywords is empty
+INFO: Embedding func: 8 new workers initialized (Timeouts: Func: 30s, Worker: 60s, Health Check: 75s)
+INFO: Query nodes: 办公用品 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 52 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 52 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 52 relations
+INFO: Selecting 15 from 15 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 52 relations
+INFO: Round-robin merged chunks: 35 -> 25 (deduplicated 10)
+INFO: Final context: 15 entities, 52 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 E5/2 E2/3 C1/4 E2/4 C1/5 E3/5 C1/6 E1/6 E1/7 C1/8 E1/8 E2/9 C1/10 E1/10 E1/11 C1/12 E1/12 E1/13 E1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.60 (20.9s)  gr_avg=2.0
+[2/30] adm_q002 - fact_single - 普通员工的办公用品月度定额是多少？设计/研发岗呢？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 普通员工, 月度定额, 设计/研发岗, 办公用品 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 33 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 33 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 33 relations
+INFO: Selecting 8 from 8 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 33 relations
+INFO: Round-robin merged chunks: 28 -> 24 (deduplicated 4)
+INFO: Final context: 15 entities, 33 relations, 20 chunks
+INFO: Final chunks S+F/O: E4/1 E6/2 C1/3 E1/3 C1/4 E1/4 C1/5 E1/5 C1/6 E2/6 C1/7 E1/7 C1/8 E2/8 C1/9 C1/10 C1/11 C1/12 C1/13 C1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.40 (18.73s)  gr_avg=1.5
+[3/30] adm_q003 - fact_single - 员工出差结束后，须在多少个工作日内提交报销申请？逾期有什么后果？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 出差, 员工, 报销, 申请, 工作日 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 99 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 99 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 99 relations
+INFO: Selecting 33 from 33 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 99 relations
+INFO: Round-robin merged chunks: 53 -> 37 (deduplicated 16)
+INFO: Final context: 15 entities, 99 relations, 20 chunks
+INFO: Final chunks S+F/O: E3/1 E1/2 C1/3 E3/3 E2/4 E3/5 E1/6 E2/7 E2/8 C1/9 E3/9 E1/10 E1/11 C1/12 E1/12 E2/13 C1/14 E1/14 E1/15 E2/16
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (15.02s)  gr_avg=1.0
+[4/30] adm_q004 - fact_single - 出差到上海，普通员工的住宿标准是多少元一晚？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 住宿标准, 普通员工, 上海, 出差 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 62 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 62 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 62 relations
+INFO: Selecting 13 from 13 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 62 relations
+INFO: Round-robin merged chunks: 33 -> 24 (deduplicated 9)
+INFO: Final context: 15 entities, 62 relations, 20 chunks
+INFO: Final chunks S+F/O: E7/1 E5/2 E3/3 C1/4 E1/4 C1/5 E1/5 E1/6 C1/7 E1/7 C1/8 E3/8 C1/9 E1/9 E3/10 E1/11 E1/12 C1/13 E3/13 C1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.50 precision=0.20 (14.76s)  gr_avg=1.0
+[5/30] adm_q005 - fact_single - IT设备分为哪几类？C类耗材如何管理？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: C类耗材, 设备 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 33 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 33 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 33 relations
+INFO: Selecting 6 from 6 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 33 relations
+INFO: Round-robin merged chunks: 26 -> 22 (deduplicated 4)
+INFO: Final context: 15 entities, 33 relations, 20 chunks
+INFO: Final chunks S+F/O: E9/1 E1/2 C1/3 E4/3 C1/4 E1/4 E1/5 C1/6 E1/6 C1/7 C1/8 C1/9 C1/11 C1/12 C1/13 C1/14 C1/15 C1/16 C1/17 C1/18
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.40 (19.93s)  gr_avg=1.25
+[6/30] adm_q006 - fact_single - 员工离职时，IT设备需要归还吗？什么流程？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 员工, 设备, 离职, 采购流程, 审批流程, 报废流程 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 109 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 109 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 109 relations
+INFO: Selecting 36 from 36 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 109 relations
+INFO: Round-robin merged chunks: 56 -> 41 (deduplicated 15)
+INFO: Final context: 15 entities, 109 relations, 20 chunks
+INFO: Final chunks S+F/O: E2/1 E2/2 E2/3 E2/4 E1/5 E1/6 E2/7 E1/8 E2/9 E1/10 C1/11 E2/11 C1/12 E1/12 E1/13 E1/14 C1/15 E1/15 E1/16 E2/17
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.80 (17.75s)  gr_avg=1.0
+[7/30] adm_q007 - fact_cross_doc - 新员工入职时，需要办理哪些行政/IT方面的领用手续？分别由哪个部门负责？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 分别由哪个部门, 员工, 入职 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 55 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 55 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 55 relations
+INFO: Selecting 25 from 25 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 55 relations
+INFO: Round-robin merged chunks: 45 -> 37 (deduplicated 8)
+INFO: Final context: 15 entities, 55 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 E2/2 E6/3 E3/4 E1/5 E1/6 C1/7 E1/7 C1/8 E1/8 C1/9 E1/9 C1/10 E1/10 C1/11 E2/11 C1/12 E1/12 C1/13 E1/13
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.80 precision=0.80 (21.25s)  gr_avg=1.25
+[8/30] adm_q008 - fact_cross_doc - 员工出差期间，公司配备的笔记本电脑如果丢失了，应该怎么处理？涉及哪些制度？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 出差, 员工, 笔记本, 公司, 电脑 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 96 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 96 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 96 relations
+INFO: Selecting 35 from 35 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 96 relations
+INFO: Round-robin merged chunks: 55 -> 44 (deduplicated 11)
+INFO: Final context: 15 entities, 96 relations, 20 chunks
+INFO: Final chunks S+F/O: E6/1 C1/2 E2/2 E2/3 E3/4 E1/5 E3/6 E1/7 C1/8 E1/8 E1/9 E1/10 C1/11 E1/11 C1/12 E1/12 C1/13 E1/13 C1/14 E1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.80 precision=0.60 (27.15s)  gr_avg=3.75
+[9/30] adm_q009 - proper_noun - 什么是A类消耗品？请举例说明。...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: A类消耗品 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 38 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 38 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 38 relations
+INFO: Selecting 8 from 8 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 38 relations
+INFO: Round-robin merged chunks: 28 -> 23 (deduplicated 5)
+INFO: Final context: 15 entities, 38 relations, 20 chunks
+INFO: Final chunks S+F/O: E12/1 E1/2 E1/3 C1/4 E1/4 C1/5 E4/5 C1/6 E2/6 C1/7 E1/7 C1/8 E3/8 C1/9 C1/10 C1/12 C1/13 C1/14 C1/15 C1/17
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=1.00 precision=0.60 (36.32s)  gr_avg=1.0
+[10/30] adm_q010 - proper_noun - 什么是FAS？在什么语境下使用？...
+INFO: Query nodes: FAS (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 22 relations
+INFO: Query edges: 概念定义, 使用语境 (top_k:15, cosine:0.2)
+INFO: Global query: 22 entites, 15 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 37 entities, 37 relations, 20 vector chunks
+INFO: After truncation: 37 entities, 37 relations
+INFO: Selecting 43 from 43 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 37 relations
+INFO: Round-robin merged chunks: 63 -> 57 (deduplicated 6)
+INFO: Final context: 37 entities, 37 relations, 20 chunks
+INFO: Final chunks S+F/O: C1/1 E1/1 C1/2 E2/2 E1/3 E3/4 C1/5 E1/5 C1/6 E2/6 E3/7 C1/8 E2/8 C1/9 E1/9 C1/10 E2/10 C1/11 E3/11 C1/12
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.25 precision=0.20 (17.33s)  gr_avg=1.0
+[11/30] adm_q011 - comparison - 办公用品的A类、B类、C类在领用方式和管理上有什么区别？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 办公用品, B类(耐用品), B类耐用品, B类(低值耐用品), 子女, 软卧 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 30 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 30 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 30 relations
+INFO: Selecting 8 from 8 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 30 relations
+INFO: Round-robin merged chunks: 28 -> 22 (deduplicated 6)
+INFO: Final context: 15 entities, 30 relations, 20 chunks
+INFO: Final chunks S+F/O: E10/1 C1/2 E3/2 C1/3 E2/3 E1/4 E1/5 C1/6 E3/6 C1/7 E1/7 C1/8 E1/8 C1/9 C1/10 C1/11 C1/12 C1/15 C1/16 C1/17
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.33 precision=0.40 (30.83s)  gr_avg=1.0
+[12/30] adm_q012 - comparison - 普通员工去北京（一类城市）和去合肥（三类城市）出差，住宿标准和餐饮补助分别有什么差别？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 住宿标准, 北京, 普通员工, 一类城市, 三类城市, 出差 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 55 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 55 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 55 relations
+INFO: Selecting 9 from 9 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 55 relations
+INFO: Round-robin merged chunks: 29 -> 22 (deduplicated 7)
+INFO: Final context: 15 entities, 55 relations, 20 chunks
+INFO: Final chunks S+F/O: E7/1 E3/2 E4/3 E4/4 C1/5 E4/5 C1/6 E2/6 C1/7 E1/7 C1/8 E1/8 C1/9 E3/9 C1/10 C1/12 C1/13 C1/14 C1/15 C1/16
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.33 precision=0.40 (24.87s)  gr_avg=1.33
+[13/30] adm_q013 - table_numeric - 一个25人的部门，每月可以领多少箱A4打印纸？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 人的部门, A4打印纸 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 21 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 21 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 21 relations
+INFO: Selecting 14 from 14 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 21 relations
+INFO: Round-robin merged chunks: 34 -> 25 (deduplicated 9)
+INFO: Final context: 15 entities, 21 relations, 20 chunks
+INFO: Final chunks S+F/O: E4/1 E2/2 E1/3 E1/4 C1/5 E2/5 E2/6 E1/7 C1/8 E1/8 C1/9 E2/9 C1/10 E1/10 C1/11 E1/11 C1/12 E2/12 E1/13 E1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.67 precision=0.40 (24.03s)  gr_avg=1.5
+[14/30] adm_q014 - table_numeric - 主管/经理级别到二类城市出差5天3晚，住宿和餐饮补助的标准上限合计是多少钱？（不含超标审批）...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 审批, 主管/经理, 二类城市, 出差, 餐饮补助, 住宿 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 67 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 67 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 67 relations
+INFO: Selecting 13 from 13 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 67 relations
+INFO: Round-robin merged chunks: 33 -> 25 (deduplicated 8)
+INFO: Final context: 15 entities, 67 relations, 20 chunks
+INFO: Final chunks S+F/O: E4/1 E2/2 E3/3 E3/4 E4/5 E2/6 E1/7 C1/8 E1/8 C1/9 E2/9 C1/10 E3/10 C1/11 E1/11 C1/12 E3/12 C1/13 E1/13 C1/15
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.40 precision=0.40 (27.12s)  gr_avg=1.5
+[15/30] adm_q015 - fact_single - 公司的年假有多少天？怎么划分？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 公司, 年假 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 84 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 84 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 84 relations
+INFO: Selecting 30 from 30 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 84 relations
+INFO: Round-robin merged chunks: 50 -> 39 (deduplicated 11)
+INFO: Final context: 15 entities, 84 relations, 20 chunks
+INFO: Final chunks S+F/O: E3/1 E4/2 E2/3 E2/4 E4/5 E1/6 C1/7 E1/7 C1/8 E3/8 C1/9 E2/9 C1/10 E2/10 C1/11 E1/11 C1/12 E1/12 E1/13 E1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.83 precision=0.60 (20.48s)  gr_avg=2.0
+[16/30] adm_q016 - fact_single - 公司实行哪几种工时制度？各自的适用对象是什么？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 工时制度, 公司 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 36 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 36 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 36 relations
+INFO: Selecting 19 from 19 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 36 relations
+INFO: Round-robin merged chunks: 39 -> 30 (deduplicated 9)
+INFO: Final context: 15 entities, 36 relations, 20 chunks
+INFO: Final chunks S+F/O: E2/1 E4/2 E4/3 E3/4 E1/5 E1/6 C1/7 E1/7 C1/8 E1/8 E1/9 E1/10 C1/11 E1/11 C1/12 E1/12 C1/13 E1/13 E1/14 C1/15
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Timeout Error: Request timed out.
+  recall=1.00 precision=0.80 (27.63s)  gr_avg=2.25
+[17/30] adm_q017 - fact_single - 预约公司会议室最迟要提前多久？单次时长上限是多少？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 会议室, 公司, 单次时长 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 46 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 46 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 46 relations
+INFO: Selecting 14 from 14 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 46 relations
+INFO: Round-robin merged chunks: 34 -> 25 (deduplicated 9)
+INFO: Final context: 15 entities, 46 relations, 20 chunks
+INFO: Final chunks S+F/O: E4/1 E2/2 E2/3 E3/4 C1/5 E2/5 E1/6 C1/7 E1/7 E2/8 E1/9 C1/10 E1/10 C1/11 E1/11 C1/12 E1/12 C1/13 E1/13 C1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.40 (14.33s)  gr_avg=1.0
+[18/30] adm_q018 - fact_single - 新员工的试用期是多久？试用期工资怎么算？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 员工, 试用期, 工资 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 96 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 96 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 96 relations
+INFO: Selecting 36 from 36 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 96 relations
+INFO: Round-robin merged chunks: 56 -> 44 (deduplicated 12)
+INFO: Final context: 15 entities, 96 relations, 20 chunks
+INFO: Final chunks S+F/O: E2/1 E4/2 E2/3 E2/4 C1/5 E2/5 E1/6 E4/7 E2/8 E1/9 E2/10 E1/11 C1/12 E2/12 E1/13 E2/14 C1/15 E1/15 C1/16 E1/16
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.60 (15.04s)  gr_avg=2.0
+[19/30] adm_q019 - fact_single - 新员工入职当年可以享受年假吗？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 员工, 入职, 年假 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 100 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 100 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 100 relations
+INFO: Selecting 37 from 41 entity-related chunks by vector similarity
+INFO: Find 4 additional chunks in 4 relations (deduplicated 37)
+INFO: Selecting 4 from 4 relation-related chunks by vector similarity
+INFO: Round-robin merged chunks: 61 -> 49 (deduplicated 12)
+INFO: Final context: 15 entities, 100 relations, 20 chunks
+INFO: Final chunks S+F/O: E4/1 R1/1 E3/2 R1/2 E3/3 R1/3 E1/4 R2/4 E2/5 E2/6 E1/7 E3/8 E1/9 C1/10 E2/10 E1/11 C1/12 E2/12 C1/13 E1/13
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=1.00 precision=0.60 (34.74s)  gr_avg=1.0
+[20/30] adm_q020 - fact_cross_doc - 新员工入职次日的培训在哪里举行？该会议室有什么特点、预约有什么要求？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 培训, 员工, 会议室, 入职 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 63 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 63 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 63 relations
+INFO: Selecting 21 from 21 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 63 relations
+INFO: Round-robin merged chunks: 41 -> 33 (deduplicated 8)
+INFO: Final context: 15 entities, 63 relations, 20 chunks
+INFO: Final chunks S+F/O: E4/1 E1/2 C1/3 E2/3 E2/4 C1/5 E5/5 C1/6 E1/6 E2/7 C1/8 E1/8 C1/9 E1/9 C1/10 E1/10 E1/11 C1/12 E1/12 C1/13
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.50 precision=0.60 (17.1s)  gr_avg=1.5
+[21/30] adm_q021 - fact_cross_doc - 员工出差期间要打卡吗？考勤怎么算？差旅费用按什么制度报销？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 出差, 员工, 报销, 打卡 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 94 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 94 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 94 relations
+INFO: Selecting 31 from 31 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 94 relations
+INFO: Round-robin merged chunks: 51 -> 36 (deduplicated 15)
+INFO: Final context: 15 entities, 94 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 C1/2 E1/2 E1/3 E3/4 E1/5 E3/6 E3/7 C1/8 E1/8 E1/9 E1/10 C1/11 E3/11 E1/12 E1/13 E1/14 E1/15 E1/16 E2/17
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.60 (16.29s)  gr_avg=1.0
+[22/30] adm_q022 - proper_noun - 什么是弹性工作制？有什么要求？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 弹性工作制 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 50 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 50 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 50 relations
+INFO: Selecting 18 from 18 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 50 relations
+INFO: Round-robin merged chunks: 38 -> 29 (deduplicated 9)
+INFO: Final context: 15 entities, 50 relations, 20 chunks
+INFO: Final chunks S+F/O: E8/1 E3/2 E3/3 C1/4 E1/4 E1/5 E2/6 C1/7 E3/7 E1/8 C1/9 E1/9 C1/10 E1/10 C1/11 E1/11 E1/12 C1/13 E1/13 E1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (22.63s)  gr_avg=1.0
+[23/30] adm_q023 - proper_noun - 什么是「爽约」？对应的处罚是什么？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 爽约 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 28 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 28 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 28 relations
+INFO: Selecting 12 from 12 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 28 relations
+INFO: Round-robin merged chunks: 32 -> 28 (deduplicated 4)
+INFO: Final context: 15 entities, 28 relations, 20 chunks
+INFO: Final chunks S+F/O: E3/1 E2/2 C1/3 E2/3 C1/4 E1/4 C1/5 E2/5 C1/6 E1/6 C1/7 E1/7 C1/8 E1/8 C1/9 E1/9 E1/10 C1/11 E1/11 C1/12
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (19.02s)  gr_avg=1.0
+[24/30] adm_q024 - comparison - 标准工时制和弹性工作制有什么核心区别？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 标准工时制, 弹性工作制 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 39 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 39 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 39 relations
+INFO: Selecting 19 from 19 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 39 relations
+INFO: Round-robin merged chunks: 39 -> 32 (deduplicated 7)
+INFO: Final context: 15 entities, 39 relations, 20 chunks
+INFO: Final chunks S+F/O: E5/1 E5/2 E1/3 E3/4 E1/5 C1/6 E1/6 C1/7 E1/7 C1/8 E1/8 C1/9 E1/9 C1/10 E1/10 E1/11 C1/12 E1/12 C1/13 E1/13
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.40 (24.91s)  gr_avg=1.0
+[25/30] adm_q025 - comparison - 工作日和节假日/非工作时间使用会议室，审批要求有什么不同？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 审批, 工作时间, 会议室, 节假日, 工作日 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 31 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 31 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 31 relations
+INFO: Selecting 12 from 12 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 31 relations
+INFO: Round-robin merged chunks: 32 -> 25 (deduplicated 7)
+INFO: Final context: 15 entities, 31 relations, 20 chunks
+INFO: Final chunks S+F/O: E7/1 E1/2 E3/3 C1/4 E1/4 C1/5 E1/5 E1/6 E1/7 C1/8 E1/8 E1/9 C1/10 E1/10 C1/11 E3/11 C1/12 E1/12 C1/14 C1/15
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=1.00 precision=0.20 (37.28s)  gr_avg=1.0
+[26/30] adm_q026 - table_numeric - 累计工龄满5年不满10年的员工年假几天？满10年及以上呢？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 员工, 年假 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 77 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 77 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 77 relations
+INFO: Selecting 31 from 31 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 77 relations
+INFO: Round-robin merged chunks: 51 -> 41 (deduplicated 10)
+INFO: Final context: 15 entities, 77 relations, 20 chunks
+INFO: Final chunks S+F/O: E2/1 E2/2 E4/3 E4/4 C1/5 E1/5 E2/6 E1/7 C1/8 E2/8 E1/9 C1/10 E1/10 E1/11 C1/12 E1/12 C1/13 E1/13 C1/14 E1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.60 (15.45s)  gr_avg=2.0
+[27/30] adm_q027 - table_numeric - 工作日加班、休息日加班、法定节假日加班的待遇分别是多少？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 工作日加班, 法定节假日加班, 休息日加班 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 19 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 19 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 19 relations
+INFO: Selecting 7 from 7 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 19 relations
+INFO: Round-robin merged chunks: 27 -> 21 (deduplicated 6)
+INFO: Final context: 15 entities, 19 relations, 20 chunks
+INFO: Final chunks S+F/O: E8/1 E4/2 E2/3 E1/4 E1/5 E1/6 C1/7 E2/7 C1/8 C1/9 C1/10 C1/11 C1/12 C1/13 C1/14 C1/15 C1/16 C1/17 C1/18 C1/19
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=1.00 precision=0.20 (37.08s)  gr_avg=1.0
+[28/30] adm_q028 - table_numeric - 3F的大会议室可以容纳多少人？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 会议室, 3F (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 49 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 49 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 49 relations
+INFO: Selecting 4 from 4 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 49 relations
+INFO: Round-robin merged chunks: 24 -> 20 (deduplicated 4)
+INFO: Final context: 15 entities, 49 relations, 20 chunks
+INFO: Final chunks S+F/O: E6/1 C1/2 E6/2 E2/3 C1/4 E2/4 C1/5 C1/6 C1/8 C1/9 C1/10 C1/11 C1/12 C1/13 C1/14 C1/15 C1/16 C1/18 C1/19 C1/20
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (13.32s)  gr_avg=1.0
+[29/30] adm_q029 - unanswerable - 公司2026年的年度经营目标是多少？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 公司 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 98 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 98 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 98 relations
+INFO: Selecting 37 from 37 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 98 relations
+INFO: Round-robin merged chunks: 57 -> 53 (deduplicated 4)
+INFO: Final context: 15 entities, 98 relations, 20 chunks
+INFO: Final chunks S+F/O: C1/1 E1/1 C1/2 E1/2 C1/3 E1/3 E1/4 C1/5 E2/5 C1/6 E1/6 C1/7 E1/7 E1/8 E1/9 C1/10 E3/10 E1/11 C1/12 E1/12
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=N/A precision=0.00 (18.02s)
+[30/30] adm_q030 - unanswerable - 公司总裁（CEO）叫什么名字？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 公司 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 98 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 98 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 98 relations
+INFO: Selecting 37 from 37 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 98 relations
+INFO: Round-robin merged chunks: 57 -> 54 (deduplicated 3)
+INFO: Final context: 15 entities, 98 relations, 20 chunks
+INFO: Final chunks S+F/O: C1/1 E4/1 C1/2 E3/2 C1/3 E2/3 C1/4 E1/4 C1/5 E1/5 C1/6 E1/6 C1/7 E1/7 C1/8 E1/8 C1/9 E1/9 C1/10 E1/10
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=N/A precision=0.00 (17.31s)
+INFO: [eval_admin_ws] PGTableGraphStorage finalized
+INFO: Closed PostgreSQL database connection pool
+INFO: Successfully finalized 12 storages
+
+============================================================
+# 评测报告：testset_admin_30
+
+- **领域**：
+- **题目数**：30
+- **时间**：2026-10-04 13:33:34
+- **配置**：{"mode": "e2e", "collection": "eval_admin", "workspace": "eval_admin_ws", "reranker": "standard", "ablation_routes": "graph,vector,keyword", "comparison_mode": "per_doc"}
+
+## 总体指标
+
+| 指标 | 得分 |
+|---|---|
+| Context Recall | 0.8363 |
+| Context Precision | 0.4200 |
+| Context Precision (加权) | 0.5937 |
+| nDCG | 0.8935 |
+
+## 生成质量
+
+| 指标 | 得分 |
+|---|---|
+| Faithfulness（忠实度） | 0.9777 |
+| Answer Relevance（答案相关性） | 0.9567 |
+| Correctness（正确性） | 0.9222 |
+| Citation Accuracy（引用准确率） | 0.8753 |
+
+## Gold Rank（事实最早出现的排名）
+
+- **平均 gold_rank**：1.39
+- **中位 gold_rank**：1.38
+- **min / max**：1.04 / 1.75
+
+| top-K | 事实覆盖率 |
+|---|---|
+| top1 | 0.6661 |
+| top3 | 0.8476 |
+| top5 | 0.8780 |
+
+## 按题型分布
+
+| 题型 | 题数 | Recall@5 | Prec@5 | nDCG@5 | GoldRank avg |
+|---|---|---|---|---|---|
+| comparison | 4 | 0.6666 | 0.3500 | 0.9659 | 1.08 |
+| fact_cross_doc | 4 | 0.7750 | 0.6500 | 0.9305 | 1.88 |
+| fact_single | 11 | 0.9394 | 0.5091 | 0.9631 | 1.45 |
+| proper_noun | 4 | 0.8125 | 0.3000 | 0.9951 | 1.00 |
+| table_numeric | 5 | 0.8133 | 0.3600 | 0.9290 | 1.40 |
+| unanswerable | 2 | 0.0000 | 0.0000 | 0.0000 | — |
+
+## 按难度分布
+
+| 难度 | 题数 | Recall@5 | Prec@5 | GoldRank avg |
+|---|---|---|---|---|
+| easy | 16 | 0.9479 | 0.3750 | 1.27 |
+| hard | 1 | 0.8000 | 0.6000 | 3.75 |
+| medium | 13 | 0.6773 | 0.4615 | 1.35 |
+
+总耗时：666.6 秒
+报告已保存：tests/reports/run_e2e_admin30_v531_check.json
+============================================================
+EXIT=0
