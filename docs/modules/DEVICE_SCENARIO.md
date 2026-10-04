@@ -1,14 +1,14 @@
 # 器械说明书垂直场景落地方案
 
-> **版本：** v0.8（§5.1 参数对比 + §5.2 场景 chip + 语料 10 份 + 30 题评测集 + 泄漏治理 v5.30 + 评测窗口收敛 top5 单窗口 v5.31）
-> **状态：** 部分实施 —— 场景特化功能 ✅（v5.26 参数对比 / v5.27 场景 chip）｜ 语料扩充 ✅（v5.28，10 份）｜ 评测集 ✅（v5.29，30 题跑通，见 §11）｜ comparison 泄漏治理 ✅（v5.30，退役 per_doc_queries，见 §6.1/§11.3）｜ 评测窗口收敛 ✅（v5.31，top5 单窗口对齐生产 RERANK_TOP，见 §11）
+> **版本：** v0.10（v0.9 基础上 §5.4 对比去噪 localize_query 已落地，v5.32）
+> **状态：** 部分实施 —— 场景特化功能 ✅（v5.26 参数对比 / v5.27 场景 chip）｜ 语料扩充 ✅（v5.28，10 份）｜ 评测集 ✅（v5.29，30 题跑通，见 §11）｜ comparison 泄漏治理 ✅（v5.30，退役 per_doc_queries，见 §6.1/§11.3）｜ 评测窗口收敛 ✅（v5.31，top5 单窗口对齐生产 RERANK_TOP，见 §11）｜ §5.4 对比去噪 ✅（v5.32，生产 compare.py + 评测镜像是同一 localize_query，实测见 §5.4）
 > **更新：** 2026-10-04
 > **定位：** 把「有源器械说明书」库从验证态做成**可展示的垂直场景**——回答 内部参考资料 P1「找一个垂直场景落地」
 > **契约：** 复用现有 M7 接口；新增 `POST /compare`（见 §5.1，已落地）
 > **上游：** [M5 检索层](M5_retrieve.md) / [M6 生成层](M6_generate.md) / [M7 交互层](M7_interact.md) | **下游：** [M8 前端](M8_frontend.md) / [M9 评测层](M9_evaluation.md)
 > **依据：** [`内部参考资料.md`](../内部参考资料.md) P1 ｜ memory `medical-device-corpus-sources` ｜ [MULTIMODAL.md](MULTIMODAL.md)
 > **运行：** 语料走 M7 `POST /docs` 上传（多模态自动生效；批量用 `backend/scripts/ingest_device_corpus.py`）；对比见 M8 侧栏「参数对比」；场景 chip 见问答页输入框上方（器械库）
-> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md) v5.26（§5.1 落地）/ v5.27（§5.2 落地）/ v5.28（语料 10 份）/ v5.28.1（sidecar 键更正）/ v5.29（30 题评测集 + M9 裁判 hit 修复 + comparison per-doc）/ v5.30（comparison 泄漏治理：退役 per_doc_queries）
+> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md) v5.26（§5.1 落地）/ v5.27（§5.2 落地）/ v5.28（语料 10 份）/ v5.28.1（sidecar 键更正）/ v5.29（30 题评测集 + M9 裁判 hit 修复 + comparison per-doc）/ v5.30（comparison 泄漏治理：退役 per_doc_queries）/ v5.31（评测窗口收敛 top5 单窗口）/ v5.32（§5.4 localize_query 落地）
 
 ## 1. 场景与用户
 
@@ -161,6 +161,42 @@ POST /compare
 
 - **器械卡片自动摘要**：需要 LLM 逐份抽取 + 存储，收益（展示价值）与成本不匹配，本轮不做
 - **拍照识报警图标**：需要图像检索（CLIP 类），超出当前架构
+
+### 5.4 对比检索 query 去噪 `localize_query` ✅（v5.32 已落地）
+
+**背景**：泄漏治理后 comparison 诚实口径 Rec**0.375@5 / Correctness 0.0875**（§11.1/§11.2），逐题归因（§11.3/探针）：完整对比 query 的两个型号名里，**另一个型号名把本文档向量召回打到 cosine 阈值以下**——`probe_perdoc_subquery.py` 已证（`allowed_docs=[LSP-1C]`：完整 query→0 条、去另一型号名→5 条）。v5.30 退役的 per_doc_queries 是**人工定制子查询**（评测独有输入，泄漏）；本节方案把它改成**生产可复现的自动去噪**。
+
+**方案**：`compare_params` 逐 doc 检索前，对目标 doc 做 `localize_query`——删除 query 中「属于其他文档的型号名」，再喂 `retrieve(..., allowed_docs=[doc_id])`。**所用信息只有两样生产已存在的数据，与评测试题/key_facts 零交集**：
+
+| 层 | 型号名来源 | 归属判定 |
+|---|---|---|
+| L1 | 文档 `documents.json` 文件名提炼的型号 token（正则：`LSP-1C`/`H2-5000IBP`/`KE-2000` 等）+ 品牌短名单（融柏/铭昇/博声/英菲泰克/YASEE…，从本文献封面归纳） | 勿删「目标 doc 自己的候选」 |
+| L2 | L1 ∪ **图实体表**（`lightrag_graph_nodes`，与 `query_preprocess` 同源；补文件名覆盖不到的型号：Cchippump-2/PO-50B/IDEM1000-0N） | **型号名出现在目标 doc 内容（sparse chunks 文本）→ 保留**，否则视为外来删除 |
+
+**关键不变量**：非对比 query（无型号名命中）→ `q_doc == query`，与现状**零回退**；`retrieve()` 签名不动（去噪在调用侧做）。
+
+**红线合规**：这是「**生产能力先落地**，评测镜像同一 `localize_query`（`_comparison_targets` 从生产 `documents.json` 读别名，不读题集）」——v5.30 文档预留的合法通道（产品真做该能力再按生产能力引入评测），不是评测独有输入；`eval_top_n` 维持 top5 不动。
+
+**实现（v5.32）**：`app/m5_retrieve/query_localize.py`（`filename_candidates`/`build_side_inputs`/`localize_query`）；生产 `compare_params` 循环前构建 `cands_by_doc` + `doc_text`，逐 doc `localize_query(query, doc_id, ...)` 后再喂 `retrieve(..., allowed_docs=[doc_id])`；M9 `runner._comparison_targets` 镜像同一函数与同一生产数据源（`documents.json` 文件名、sparse chunk 全文、`load_entities_async`），符合「生产能力先落地、评测镜像同一 localize_query」红线合规通道。
+
+**探针实测（2026-10-04，`backend/scripts/probe_compare_localize.py` 留档可复跑；对 DV-CP 4 题逐 doc 跑 baseline / L1 / L2 三行，比较检索条数 + 判别 token 命中，判别 token 从 key_facts 手抽、属评测侧信号，非检索输入）**：
+
+| 题·侧 | baseline | L1 | L2 | 结论 |
+|---|---|---|---|---|
+| CP-001 融柏 | 0 条 ✗ | 0 条 ✗ | **3 条（行程/运行模式命中）** | L1 单独不够 → L2 恢复 |
+| CP-001 瑞创 | 5 条 ✓ | 5 条 ✓ | 5 条 ✓ | 无退化 |
+| CP-002 铭昇 | 5 条 ✓ | 5 条 ✓ | 5 条 ✓ | 无退化 |
+| CP-002 KE-2000 | 0 条 ✗ | 5 条 ✗（判别未进 top5） | 5 条 ✗（同） | 部分恢复——真漏召回（M2 切分粒度遗留） |
+| CP-003 血氧仪 | 3 条 ✓ | 3 条 ✓ | 3 条 ✓ | 无退化 |
+| CP-003 KE-2000 | 2 条 ✓ | 2 条 ✓ | 2 条 ✓ | 无退化 |
+| CP-004 英菲泰克 | 4 条 ✓ | 4 条 ✓ | 4 条 ✓ | 无退化 |
+| CP-004 博声 | 0 条 ✗ | 0 条 ✗ | **3 条（会诊/APP 命中）** | L1 单独不够 → L2 恢复 |
+
+**读数**：恢复 2/3 的 0 召回（CP-001 融柏、CP-004 博声），且两侧都是 **L1=0、L2 才恢复**——型号 token 不在文件名字面（`LSP01-1BC`/`IDEM1000-0N`），L1 够不着，实锤 **L2 归属判定是恢复召回的关键**；6 个基线良好的文档全部无退化；CP-002 KE-2000 为真漏召回（恢复 5 条但判别 token 在 top5 外），属 M2 切分粒度遗留，非本项目范围。
+
+**生产链路实测（`POST /compare`，col_b7b876b1，v5.32）**：DV-CP-004 完整对比 query → 博声侧（前为空）恢复 **3 条带页码片段**（score_cutoff=0.2463，含健康检测应用/APP 截图描述），英菲泰克侧保持 4 条无退化；普通 query「报警 E03 怎么处理」两侧正常返回、零回退。前端侧栏「参数对比」同走 `compare_params`，自动生效。
+
+**实体候选收紧（探针验证中发现并修复的语义风险）**：实体表「型号形」候选须**含字母且（数字或连字符）且长度 ≥3**（`_ENTITY_MODEL_HAS_TOKEN`）——排除 `APP`/`SDK` 等纯字母通用词、**纯数字**（`100`/`500`/电话号/日期/流水号）被当成外来型号误删 query 语义。纯数字尤其危险：`query` 中 `IDEM1000-0N` 里的 `100` 若整词替换成空格会把型号炸成 `IDEM 0-0N`（仅「数字或连字符」判定有此**子串破坏**风险，实测 3108 实体中该类候选仅 14 个且全是电话号/日期/流水号，无一是真实型号；收紧不误伤任何型号形）。收紧后逐侧复验：8 侧 localize_query 输出与探针 L2 出口一致，恢复/无退化结论不变。
 
 ## 6. 线 3：场景评测集
 

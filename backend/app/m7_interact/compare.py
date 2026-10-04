@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from app.m5_retrieve.query_localize import build_side_inputs, localize_query
 from app.m5_retrieve.retriever import retrieve
 
 from . import documents
@@ -37,13 +38,19 @@ async def compare_params(
     excluded = deps.excluded_docs or set()
     rows: list[dict[str, Any]] = []
 
+    # 对比去噪（§5.4）：逐 doc 剔除 query 中「其他文档」的型号名，避免把本 doc 向量召回到
+    # cosine 阈值以下。所用信息 = 文件名/实体表/目标 doc 全文，均为生产数据，非对比 query 零回退。
+    id_to_filename = {r["doc_id"]: r.get("filename", "") for r in documents.list_docs(deps) if r.get("doc_id")}
+    cands_by_doc, doc_text = build_side_inputs(deps.sparse, id_to_filename)
+
     for doc_id in ids:
         if (allowed is not None and doc_id not in allowed) or doc_id in excluded:
             rows.append({"doc_id": doc_id, "doc_name": doc_id, "error": "文档不存在或已删除", "snippets": []})
             continue
 
+        q_local = localize_query(query, doc_id, cands_by_doc, doc_text, deps.entities)
         retr = await retrieve(
-            deps.rag, query, deps.sparse, entities=deps.entities, allowed_docs=[doc_id]
+            deps.rag, q_local, deps.sparse, entities=deps.entities, allowed_docs=[doc_id]
         )
         snippets: list[dict[str, Any]] = []
         for r in (retr.get("results") or [])[:top_k]:

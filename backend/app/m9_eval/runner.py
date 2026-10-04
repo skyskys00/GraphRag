@@ -50,6 +50,7 @@ async def _build_deps(working_dir: Path, workspace: str):
     from app.m3_index.providers import build_llm_func
     from app.m3_index.runner import build_rag
     from app.m5_retrieve.query_preprocess import load_entities_async
+    from app.m5_retrieve.query_localize import build_side_inputs, localize_query
     from app.m5_retrieve.sparse_index import SPARSE_FILE, load as load_sparse
 
     rag = await build_rag(working_dir, workspace=workspace)
@@ -111,9 +112,14 @@ def _load_doc_name_map(working_dir: Path) -> dict[str, str]:
 
 
 def _comparison_targets(
-    q: dict[str, Any], name_map: dict[str, str], allowed_docs: list[str] | None
+    q: dict[str, Any],
+    name_map: dict[str, str],
+    allowed_docs: list[str] | None,
+    *,
+    sparse: dict | None = None,
+    entities: list[str] | None = None,
 ) -> list[tuple[str, str]]:
-    """comparison 题 → [(doc_id, 完整对比问题)]；<2 个 doc 则返回空（退回单查询）。
+    """comparison 题 → [(doc_id, 对比子查询)]；<2 个 doc 则返回空（退回单查询）。
 
     对齐线上 M7 compare.py 的跑法：同一 query 分别对每个 doc 独立检索（per-doc 空间），
     交错合并后统一窗口。
@@ -121,14 +127,22 @@ def _comparison_targets(
     v5.30 起退役题集 per_doc_queries（每文档定制子查询是评测独有输入，线上 compare.py
     不消费 ⇒ 泄漏红线，见 CLAUDE.md「评测信息泄漏红线」）。每 doc 直接用完整 question
     检索 —— 与生产形态一致，数字反映真实对比检索质量。
+
+    **v5.32 起（生产先落地能力，评测镜像同一函数）**：喂给每个 doc 的子查询 = 生产
+    `query_localize.localize_query` 的输出（剔除 query 中其他文档型号名，见 DEVICE_SCENARIO
+    §5.4）。所用信息（文件名/图实体表/目标 doc 全文）均为生产数据，与题集 key_facts 零交集，
+    属「评测镜像生产能力」合法通道。
     """
     if q.get("category") != "comparison":
         return []
+    id_to_filename = {did: fn for fn, did in name_map.items()}
+    cands_by_doc, doc_text = build_side_inputs(sparse or {}, id_to_filename)
     targets: list[tuple[str, str]] = []
     for fn in (q.get("source_docs") or []):
         did = name_map.get(fn)
         if did:
-            targets.append((did, q["question"]))
+            sub = localize_query(q["question"], did, cands_by_doc, doc_text, entities)
+            targets.append((did, sub))
     if allowed_docs:
         allow = set(allowed_docs)
         targets = [(d, s) for d, s in targets if d in allow]
@@ -199,7 +213,9 @@ async def evaluate_retrieval(
 
             # 1. 检索（取 eval_top_n 块）
             try:
-                targets = _comparison_targets(q, doc_name_map or {}, allowed_docs)
+                targets = _comparison_targets(
+                    q, doc_name_map or {}, allowed_docs, sparse=sparse, entities=entities
+                )
                 if targets:
                     lists = []
                     for did, sub_q in targets:
@@ -372,7 +388,9 @@ async def evaluate_answer(
 
             # 1. 调用 M6 answer（内部会自己做检索）；comparison 题 per-doc 各跑一次再合并
             try:
-                targets = _comparison_targets(q, doc_name_map or {}, allowed_docs)
+                targets = _comparison_targets(
+                    q, doc_name_map or {}, allowed_docs, sparse=sparse, entities=entities
+                )
                 if targets:
                     ans_list = []
                     ctx_lists = []

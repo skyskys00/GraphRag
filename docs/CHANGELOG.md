@@ -145,6 +145,34 @@
 
 ---
 
+## [v5.32] 2026-10-04 —— comparison 对比检索 query 去噪落地（`localize_query`，生产可复现）
+
+**影响模块**：新增 `app/m5_retrieve/query_localize.py`（共享去噪模块）；`app/m7_interact/compare.py`（对比检索前逐 doc localize）、`app/m9_eval/runner.py`（comparison 路径镜像同一函数）；脚本 `backend/scripts/probe_compare_localize.py`（探针留档）；文档 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) v0.9→v0.10（§5.4 探针阶段 → 已落地）。
+
+**背景（§5.4 方案落地）**：v5.30 泄漏治理后 comparison 诚实口径 **Recall 0.375@5 / Correctness 0.0875**，逐题归因：完整对比 query 里**另一个型号名把本文档向量召回打到 cosine 阈值以下**（`probe_perdoc_subquery.py` 已证）。方案：`compare_params` 逐 doc 检索前调 `localize_query`——删 query 中「属于其他文档的型号名」再喂 `retrieve(..., allowed_docs=[doc_id])`。**所用信息只有生产已存在的数据，与评测试题/key_facts 零交集**：L1 文件名提炼型号 token + 品牌短名单；L2 图实体表（与 `query_preprocess` 同源）按「型号名是否出现在目标 doc 全文」判定归属。
+
+**实现**：
+
+- `localize_query` L1：删 query 中出现、但不属于目标 doc 的文件名候选（贪心最长优先）；L2：实体候选若不在目标 doc 全文则删，在则保留。**关键不变量**：非对比 query → `q_doc == query`，零回退。
+- **实体候选收紧（2026-10-04 探针验证中发现并修复的语义风险）**：实体表「型号形」候选须**含字母且（含数字或连字符）且长度 ≥3**（`_ENTITY_MODEL_HAS_TOKEN`）——排除 `APP`/`SDK` 等纯字母通用词、`100`/`500` 等**纯数字**（电话号 `0312-5893777`、日期 `01-17`、长流水号 `123456789`）被当成外来型号误删 query 语义。纯数字尤其危险：`query` 中 `IDEM1000-0N` 里的 `100` 若整词替换成空格会把型号炸成 `IDEM 0-0N`（仅「含数字或连字符」判定有此子串破坏风险，探针场景靠目标 doc 文本恰好含该数字才未触发）。两轮探针（收紧前/后）结论一致，收紧不改变恢复结论。
+- `runner.py` comparison 路径镜像同一函数与同一生产数据源（`documents.json` 文件名、sparse chunk 全文、`load_entities_async`），符合「生产能力先落地、评测镜像同一函数」红线合规通道。
+
+**探针结论（`probe_compare_localize.py`，DV-CP 4 题逐 doc baseline/L1/L2 三行）**：
+
+- **恢复 2/3 的 0 召回**：CP-001 融柏侧、CP-004 博声侧 baseline=0 → L2 **3 条且判别 token 命中**（博声侧保留「博声医疗血氧仪 APP」、删「IDEM1000-0N」）；两侧 L1 单独都无效 → 实锤 **L2 归属判定是恢复关键**。
+- **无退化**：6 个基线良好的文档（baseline 已 4-5 条且命中）L1/L2 全部保持条数与命中不变。
+- **1 个部分恢复**：CP-002 KE-2000 侧 L1/L2 恢复 5 条但判别 token 未进 top5——真漏召回，属 M2 切分粒度遗留（见 CHANGELOG v5.29「遗留」段），非本项目修正范围。
+
+**生产链路验证（`POST /compare`，col_b7b876b1，实测）**：
+
+- DV-CP-004 完整对比 query：博声侧（前为空）→ **3 条带页码片段**（score_cutoff=0.2463，含健康检测应用/APP 截图描述）；英菲泰克侧保持 4 条无退化。
+- 普通 query「报警 E03 怎么处理」：两侧正常返回、零回退。
+- 前端侧栏「参数对比」走同一 `compare_params`，链路自动生效，无需重启前端。
+
+**后续**：完整评测重跑（`--mode retrieval`）估约 20 分钟，结果将回填本条目与 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §11.1（comparison Recall 预期自 0.375 回升，检索侧诚实可复现口径不变）。
+
+---
+
 ## [v5.28.1] 2026-10-02 —— M6 sidecar 索引键修正（PG chunk 主键 + first-wins）
 
 **影响模块**：M6 `app/m6_generate/sidecar.py`（键与去重口径）、M6 `cite.py` + M7 `compare.py`（调用点）；文档 [`M6_generate.md`](modules/M6_generate.md) v1.5→v1.6、[`M7_interact.md`](modules/M7_interact.md) v10.5→v10.6、[`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) v0.4→v0.5；`backend/scripts/ingest_device_corpus.py`（过期提醒）。**更正 v5.28 条目内「入库后必须重启」的表述**（该说法在 `build_workspace_deps` 进入 `ingest()` 后已过时）。
