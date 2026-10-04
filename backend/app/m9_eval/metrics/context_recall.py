@@ -20,7 +20,10 @@ from ..judge import judge
 # P1（v5.29）采信裁判显式 hit：judge 曾丢弃 LLM 输出的 hit 字段，只能用 score>=0.5
 # 反推，导致「hit=false 但 score 高」被误判为命中；现优先用 hit（缺失时回退 score）。
 # 解析逻辑变更同样需 bump 版本，使旧缓存（无 hit 字段）失效。
-_PROMPT_VERSION = "p1_llm_hit"
+# P2（v5.30）缓存键改用**完整** context_str：原键取 context_str[:500] 仅前 500 字符，
+# 当两个窗口（如 top8 / top12）前缀一致时键相同 → 后一轮复用前一轮的旧判定，
+# 窗口放宽（D 方案）被缓存伪影掩盖、测不出真实效果。
+_PROMPT_VERSION = "p2_llm_hit_fullctx"
 
 SYSTEM_PROMPT = """你是一个严谨的 RAG 评测裁判。你的任务是判断给定的事实陈述能否在检索到的上下文（retrieved contexts）中找到明确依据。
 判断规则：
@@ -224,7 +227,7 @@ async def compute_context_recall(
     tasks = []
     for fact in key_facts:
         prompt = FACT_PROMPT_TEMPLATE.format(fact=fact, context_str=context_str)
-        cache_parts = ["context_recall", _PROMPT_VERSION, fact, context_str[:500]]
+        cache_parts = ["context_recall", _PROMPT_VERSION, fact, context_str]
         tasks.append(_judge_fact(query_func, fact, prompt, cache_parts))
 
     results = await asyncio.gather(*tasks)

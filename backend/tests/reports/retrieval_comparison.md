@@ -418,3 +418,22 @@
 **决策**：不采纳、已回滚（`retriever.py` 维持 `q_vec/q_kw = prep.expanded`）。理由：检索净升幅度（nDCG +3pt）不足以抵消一道真实退化题带来的生成损失，且该题正是「扩展恰好帮上忙」的场景（扩展词帮助召回了维护周期表）。
 
 **副产品（排除 comparison 漏召回的「M5 稀疏权重」假设）**：探针 `probe_cmp_miss.py` 逐环定位目标块 `chunk-bb7dc287…`（per-doc 限 LSP）——关扩展后 keyword 路它擦边进池（第 39/40 名），但 RRF 跨路聚合下单路 rank 39 仅贡献 `1/(60+39)≈0.0101`，被多路命中块碾压；该块 vector（第 65/287）/ graph（第 92）两路 0 贡献 ⇒ 仍进不了 RRF 池。**⇒ 真瓶颈是目标块语义匹配本身不足（M2 切分粒度），非 M5 稀疏权重**。
+---
+
+# comparison 评测口径泄漏探查（v5.30 泄漏治理，2026-10-03）
+
+**背景（用户 ML 类比触发）**：器械评测集 comparison 题的 `per_doc_queries`（每文档定制子查询）是**评测独有输入**——线上 `compare.py` 同一 query 打所有 doc，没有任何评测侧定制输入 ⇒ 用定制子查询抬高的 comparison 数字 = 训练/服务偏差 + 标签污染，只配当「检索上界」不能当产品参考。
+
+**证据（探针 `probe_prod_vs_eval_shape.py`，可复跑；需 PG + Xinference）**：取 4 题 `per_doc_queries` 并集（= 生产形态：用户对每台设备各发起一次 compare 调用、参数名相同），两种口径并排跑：
+
+| 题号 | eval-shape（每 doc 定制子查询，top12） | prod-shape（同一套 query 打所有 doc，top3） |
+|---|---|---|
+| DV-CP-001 | 2/3 | **0/3** |
+| DV-CP-002 | 2/2 | 2/2 |
+| DV-CP-003 | 2/2 | 2/2 |
+| DV-CP-004 | 2/2 | 2/2 |
+| **汇总** | **8/9 = 0.8889** | **6/9 = 0.6667** |
+
+**读数**：落差集中在 DV-CP-001（0/3）——该题 `per_doc_queries` 把「X 型号灌注/抽取/连续模式」拆成单型号子查询，生产完整对比问题直接召回失败（其他型号名把向量召回打到 0）。**v5.29 的 comparison Recall 0.4583 是定制子查询抬出来的上界**。
+
+**处置（v5.30 已落地，见 CHANGELOG v5.30 条目）**：① 题集删除 4 题 `per_doc_queries` 字段；② runner 每 doc 直接用完整 `question` + `allowed_docs`（与生产同形）；③ 评测窗口统一回全题型 8（删 `COMPARISON_WINDOW=12`）。诚实口径数字见 `run_retrieval_device30_v531_leakfix.json` 与 `DEVICE_SCENARIO.md` §11。

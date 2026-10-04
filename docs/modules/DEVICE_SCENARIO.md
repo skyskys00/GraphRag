@@ -1,14 +1,14 @@
 # 器械说明书垂直场景落地方案
 
-> **版本：** v0.6（§5.1 参数对比 + §5.2 场景 chip + 语料 10 份 + 30 题评测集均已落地并跑出指标；§11 实测结果）
-> **状态：** 部分实施 —— 场景特化功能 ✅（v5.26 参数对比 / v5.27 场景 chip）｜ 语料扩充 ✅（v5.28，10 份）｜ 评测集 ✅（v5.29，30 题跑通，见 §11）
-> **更新：** 2026-10-03
+> **版本：** v0.8（§5.1 参数对比 + §5.2 场景 chip + 语料 10 份 + 30 题评测集 + 泄漏治理 v5.30 + 评测窗口收敛 top5 单窗口 v5.31）
+> **状态：** 部分实施 —— 场景特化功能 ✅（v5.26 参数对比 / v5.27 场景 chip）｜ 语料扩充 ✅（v5.28，10 份）｜ 评测集 ✅（v5.29，30 题跑通，见 §11）｜ comparison 泄漏治理 ✅（v5.30，退役 per_doc_queries，见 §6.1/§11.3）｜ 评测窗口收敛 ✅（v5.31，top5 单窗口对齐生产 RERANK_TOP，见 §11）
+> **更新：** 2026-10-04
 > **定位：** 把「有源器械说明书」库从验证态做成**可展示的垂直场景**——回答 内部参考资料 P1「找一个垂直场景落地」
 > **契约：** 复用现有 M7 接口；新增 `POST /compare`（见 §5.1，已落地）
 > **上游：** [M5 检索层](M5_retrieve.md) / [M6 生成层](M6_generate.md) / [M7 交互层](M7_interact.md) | **下游：** [M8 前端](M8_frontend.md) / [M9 评测层](M9_evaluation.md)
 > **依据：** [`内部参考资料.md`](../内部参考资料.md) P1 ｜ memory `medical-device-corpus-sources` ｜ [MULTIMODAL.md](MULTIMODAL.md)
 > **运行：** 语料走 M7 `POST /docs` 上传（多模态自动生效；批量用 `backend/scripts/ingest_device_corpus.py`）；对比见 M8 侧栏「参数对比」；场景 chip 见问答页输入框上方（器械库）
-> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md) v5.26（§5.1 落地）/ v5.27（§5.2 落地）/ v5.28（语料 10 份）/ v5.28.1（sidecar 键更正）/ v5.29（30 题评测集 + M9 裁判 hit 修复 + comparison per-doc）
+> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md) v5.26（§5.1 落地）/ v5.27（§5.2 落地）/ v5.28（语料 10 份）/ v5.28.1（sidecar 键更正）/ v5.29（30 题评测集 + M9 裁判 hit 修复 + comparison per-doc）/ v5.30（comparison 泄漏治理：退役 per_doc_queries）
 
 ## 1. 场景与用户
 
@@ -176,7 +176,7 @@ POST /compare
 | `comparison` | 4 | 「H2-5000IBP 与 LSP-1C 的精度等级分别是多少」 |
 | `unanswerable` | 4 | 「支持蓝牙吗」（负对照，防编造） |
 
-> `comparison` 题须额外配 `per_doc_queries` 字段（每个型号一条**不含其他型号名**的子查询），评测按子查询逐 doc 检索——原因见 §6.1 第 4 项。
+> `comparison` 题（v5.29 曾要求配 `per_doc_queries` 子查询字段逐 doc 检索）——**v5.30 已退役**：每文档定制子查询是评测独有输入、线上 `compare.py` 不消费，属 ground_truth 信息泄漏红线（见 `CHANGELOG v5.30` 与项目 `CLAUDE.md`「评测信息泄漏红线」）。现改为每 doc 直接用完整 `question` 检索（与生产同形），字段已从题集删除。历史机制见 §6.1 第 4 项。
 
 **关键纪律**（v5.25.3 教训，2026-10-02 收紧；v5.29 修正口径）：`image_only` 题的**答案完整内容必须存在于 `block_type=drawing` 块**——多模态有贡献的必要条件。
 
@@ -205,9 +205,11 @@ python -m app.m9_eval.runner --testset tests/testsets/testset_device_30.json \
 | 1 | `app/m9_eval/testset.py` | `VALID_CATEGORIES` 补 `"image_only"`（原缺失 → 6 题校验失败） |
 | 2 | `app/m9_eval/runner.py` | 新增 `_resolve_collection()`：`col_*` 走 `collection_paths()` 解析到 `data/collections/<col_id>/`，旧三库（`default`/`eval_cservice`/`eval_admin`）保持扁平映射，零回归 |
 | 3 | `app/m9_eval/runner.py` | `_build_deps()` 补加载 entities（`load_entities_async`）——原缺失会系统性低估生产 recall（线上 `retriever.py` 是加载的） |
-| 4 | `app/m9_eval/runner.py` | comparison 题走 **per-doc 检索**（`_comparison_targets` + `_interleave`）：按题集 `per_doc_queries[文件名]` 子查询逐 doc 检索、交错合并，对齐线上 `compare.py` 的「参数名 + 指定文档」用法 |
+| 4 | `app/m9_eval/runner.py` | comparison 题走 **per-doc 检索**（`_comparison_targets` + `_interleave`）：v5.29 按题集 `per_doc_queries[文件名]` 子查询逐 doc 检索；**v5.30 退役该字段**，每 doc 直接用完整 `question`（见下勘误） |
 
-**per-doc 为何必需子查询**（v5.29 实测，可复现）：用完整对比问题（含两个型号名）做 per-doc 检索时，**其他型号名会把该文档的向量召回打到 0**（LightRAG 向量路 `cosine=0.2` 阈值下相似度不足）。实测 `allowed_docs=[LSP-1C]`：完整对比 query → **0 条**；去掉其他型号名 → **5 条**。复跑：`cd backend && python3 scripts/probe_perdoc_subquery.py`。故题集 comparison 题须配 `per_doc_queries`（key = `source_docs` 里的文件名，value = 该型号的子查询）。
+**per-doc 为何曾需子查询**（v5.29 实测，可复现）：用完整对比问题（含两个型号名）做 per-doc 检索时，**其他型号名会把该文档的向量召回打到 0**（LightRAG 向量路 `cosine=0.2` 阈值下相似度不足）。实测 `allowed_docs=[LSP-1C]`：完整对比 query → **0 条**；去掉其他型号名 → **5 条**。复跑：`cd backend && python3 scripts/probe_perdoc_subquery.py`。
+
+> ⚠️ **v5.30 勘误（泄漏治理）**：上述「配置子查询」机制**已废弃**。每文档定制子查询 = 评测独有输入（生产 `compare.py` 同一 query 打所有 doc），用它抬高的 comparison 数字只配当「检索上界」不能当产品参考——实测揭开：v5.30 退役后 comparison 用完整 question 检索，数字回落至真实对比检索质量。`probe_perdoc_subquery.py` 不改也不删（保留该检索缺陷的可复现证据，供后续检索改进参考）。
 
 旧三库（行政/cservice）跑法不变，`--workspace <ws>` 仍走扁平路径。
 
@@ -248,41 +250,48 @@ python -m app.m9_eval.runner --testset tests/testsets/testset_device_30.json \
 
 > 库 `col_b7b876b1`（10 份器械说明书 / 857 chunk / 149 带图 drawing 块）。
 > 跑法：`python -m app.m9_eval.runner --testset tests/testsets/testset_device_30.json --collection col_b7b876b1 --mode <retrieval|e2e>`。
-> 报告：`backend/tests/reports/run_retrieval_device30.json`、`run_e2e_device30.json`。
-> **修复前旧报告已归档**为 `*_pre_hitfix.json`（口径不同，数字不可与新报告直接比较，见 §11.3）。
+> **§11.1 检索指标为 v5.30 泄漏治理后诚实口径**（报告 `backend/tests/reports/run_retrieval_device30_v531_leakfix.json`）。
+> **⚠️ 口径说明（v5.31 起）**：@8 列已在文档层面作废——`eval_top_n` 默认回 5（对齐生产 `RERANK_TOP`），runner/report 双窗口收敛为单窗口，LLM 调用减半；v5.9 已实测「top5 是最优窗口」（`205b445` commit）。以下只报告 **@5 = 生产口径**，@8 仅作历史对照并标注「已否定诊断残留」。§11.1 摘要数字与报告 JSON 的 `@5` 列一致。
+> **§11.2 生成指标仍是 v5.29 泄漏窗口口径**：v5.30 退役 `per_doc_queries` 后 e2e 未重跑，`run_e2e_device30.json` 未更新——见 §11.2 声明。
+> **历史报告口径不同，均不可直接比较**：`*_pre_hitfix.json`（judge hit bug 前，假阳性）、`run_retrieval_device30.json`（v5.29 泄漏口径），见 §11.3。
 
-### 11.1 检索指标（`--mode retrieval`，30 题，耗时 867.5s）
+### 11.1 检索指标（`--mode retrieval`，30 题，v5.30 诚实口径，耗时 721.1s，报告 `run_retrieval_device30_v531_leakfix.json`）
 
-| 指标 | top5 | top8 |
+| 指标 | @5（生产口径） |
+|---|---|
+| Context Recall | **0.6635** |
+| Context Precision | 0.2362 |
+| Context Precision（加权） | 0.3263 |
+| nDCG | 0.6906 |
+
+> @8 对照（历史已否定诊断残留，仅存档）：Recall 0.7019 / Prec 0.1756 / PrecW 0.2861 / nDCG 0.7623。
+
+**Gold Rank**：平均 2.43 / 中位 2.46。事实覆盖率：top1 **0.4551** → top3 0.7051 → top5 0.7276。（top8 0.8269 为 8 窗口产物，@8 已作废同上。）
+
+**按题型**（Recall —— 仅 @5）：
+
+| 题型 | 题数 | Recall@5 |
 |---|---|---|
-| Context Recall | **0.7436** | 0.7436 |
-| Context Precision | 0.2492 | 0.1833 |
-| Context Precision（加权） | 0.3538 | 0.3113 |
-| nDCG | 0.7140 | **0.7730** |
+| table_numeric | 8 | 0.8125 |
+| fact_single | 8 | 0.6562 |
+| image_only | 6 | 0.6667 |
+| comparison | 4 | 0.3750 ⚠️ |
+| unanswerable | 4 | —（跳过） |
 
-**Gold Rank**：平均 2.30 / 中位 2.33（min 1.92、max 2.62）。事实覆盖率：top1 **0.5192** → top3 0.7308 → top5 0.7596 → top8 **0.8590**。
+**逐题 comparison**（报告 `by_question`）：CP-001 0/3；CP-002 0/2；CP-003 2/2（top5 全中）；CP-004 1/2（top5 中博声侧漏 KE-2000 侧——真漏召回）。
 
-**按题型**：
-
-| 题型 | 题数 | Recall@5 | Recall@8 | Prec@5 | nDCG@5 | GoldRank avg |
-|---|---|---|---|---|---|---|
-| table_numeric | 8 | 0.8125 | 0.8125 | 0.2250 | **0.8654** | 1.88 |
-| fact_single | 8 | 0.8125 | 0.8125 | 0.2750 | 0.7076 | 2.91 |
-| image_only | 6 | 0.7500 | 0.7500 | **0.4000** | 0.6652 | 2.50 |
-| comparison | 4 | 0.4583 | 0.4583 | 0.2188 | 0.8129 | **1.50** |
-| unanswerable | 4 | —（跳过） | — | 0.0500 | 0.3986 | — |
-
-**按难度**：easy（6 题）Recall 0.9167｜medium（16 题）0.8958｜**hard（8 题）0.3854**。
+**按难度**（Recall@5）：easy（6 题）0.6667｜medium（16 题）0.8542｜hard（8 题）0.3750。
 
 **读数**：
 
-- `table_numeric` 表现最好（Recall 0.8125 / nDCG 0.8654 / GoldRank 1.88）——参数表格在切分与检索上最"干净"，且 8 题中有多题答案集中在单块。
-- `image_only` Recall 0.75、**Precision 最高（0.40）**——说明多模态链路有效：答案确实落在 drawing 块并被召回，且上下文噪声低于其他题型。
-- `comparison` 的 GoldRank 最低（1.50，即命中的事实点普遍排在最前），但 Recall 仅 0.4583——**瓶颈在"漏召回"而非"排序"**（根因见 `CHANGELOG.md` v5.29「遗留」段；生成侧同样垫底，见 §11.2）。
-- `hard` 难度（8 题）Recall 0.3854 是整体拉低主因。
-- **Context Precision 整体偏低（0.25）**：每题取 20 条上下文，而多数题只需 1-3 条即可覆盖全部事实点 ⇒ 分母天然偏大，绝对值不宜单独解读；应结合 GoldRank（top1 覆盖 0.52、top8 覆盖 0.86）一起看。
+- **总体 Recall 相比 v5.29 泄漏口径（0.7436）下降**——主因是 comparison 从「每文档定制子查询」回落为与生产同形的完整 question 检索（0.4583 → 0.3750@5）。这是泄漏治理的**预期效果**；旧数字不可比（§11.3）。
+- `table_numeric` 依旧最稳（0.8125）——参数表格切分/检索最"干净"。
+- **comparison 0.3750@5 是当前最大短板**——CP-004 fact2（博声 APP）确认为**真漏召回**（top5 上下文缺博声侧块），根因属 M2 切分粒度（`CHANGELOG` v5.29「遗留」段，另立任务）。
+- **Context Precision 整体偏低（0.24）**：每题取 20 条上下文而多数题只需 1-3 条 ⇒ 分母天然偏大，绝对值不宜单独解读；结合 GoldRank（top1 覆盖 0.46、top5 覆盖 0.73）一起看。
 
-### 11.2 生成指标（`--mode e2e`，30 题，耗时 1243.9s）
+### 11.2 生成指标（`--mode e2e`，30 题，耗时 1243.9s）—— ⚠️ **v5.29 泄漏窗口口径，未重跑**
+
+> **声明（v5.30）**：退役 `per_doc_queries` 后 e2e 生成侧**未重跑**，下表是 v5.29 用每文档定制子查询跑出的（comparison 用了检索上界）——`comparison` 行只配当「生产不可复现的上界参考」，不是诚实口径。诚实生成数字待下一轮 `--mode e2e` 重跑（约 20+ 分钟 + LLM 成本，暂未安排）后回填。
 
 | 指标 | 得分 |
 |---|---|
@@ -314,13 +323,18 @@ python -m app.m9_eval.runner --testset tests/testsets/testset_device_30.json \
 
 - `table_numeric` **忠实度满分（1.0）**——答案严格抄自参数表，零外推。
 - `fact_single` **引用准确率最高（0.9167）**——单点事实的引用最容易与原文对齐。
-- **`comparison` 四项全为最低**（忠实度 0.43 / 正确性 0.5875 / 引用 0.2807），与检索侧 Recall 0.4583 **同源**：漏召回导致生成阶段拿不到第二个型号的数据 ⇒ 答案不完整、引用对不上。**这是本场景当前最大短板**，根因（M5/M2 漏召回）见 `CHANGELOG.md` v5.29「遗留」段与 memory，另立任务处理。
+- **`comparison` 四项全为最低**（忠实度 0.43 / 正确性 0.5875 / 引用 0.2807），与检索侧泄漏口径 Recall 0.4583 **同源**：漏召回导致生成阶段拿不到第二个型号的数据 ⇒ 答案不完整、引用对不上。**这是本场景当前最大短板**，根因（M5/M2 漏召回）见 `CHANGELOG.md` v5.29「遗留」段与 memory，另立任务处理。（v5.30 诚实口径下 comparison 检索更低 ≈0.375@5，生成侧预期同向恶化，待重跑确认。）
 - `table_numeric` 引用准确率仅 0.5542 值得注意（忠实度满分但引用偏低）——参数表格常以整表为一块，模型复述了正确数值却未必标对块号。
 
 **残留观察（未定论）**：`unanswerable` 题忠实度 0.5–0.75 偏低，裁判理由多为「答案中若干归因到 `[6]`/`[7]`/`[8]` 的陈述在上下文中找不到依据」「关于『材料中未出现 X』的元断言无法直接验证」。4 题正确性 3 题 1.0 / 1 题 0.4（DV-UA-001）。属**裁判对拒答型答案的严格性**，未确认是缺陷，本轮不改。
 
 ### 11.3 口径说明（重要）
 
-1. **`unanswerable` 题不参与 Recall 计算**：runner 对这类题跳过 recall（`context_recall_detail=None`），`by_category.unanswerable.context_recall = 0.0` 只是**占位值**；**总体 Recall 的分母是 26 道可答题**（校验：4×0.4583 + 8×0.8125 + 6×0.75 + 8×0.8125 = 19.3332，19.3332/26 = 0.7436 ✓）。这类题的考点在 e2e 的**拒答行为**（防编造），见 §11.2。
+> **本节为历史口径调查档案（v5.31 起）**：@8 窗口已在文档层面作废（`eval_top_n` 回 5 对齐生产 `RERANK_TOP`，§11 引语），以下含 @8 数字/切片分析者均为作废前调查记录，只作「为何 @8 不可信」的历史依据与可复现证据；**当前合法口径只有 @5 = 生产口径**。
+
+1. **`unanswerable` 题不参与 Recall 计算**：runner 对这类题跳过 recall（`context_recall_detail=None`），`by_category.unanswerable.context_recall = 0.0` 只是**占位值**；**总体 Recall 的分母是 26 道可答题**（v531 诚实口径校验：4×0.375 + 8×0.8125 + 6×0.6667 + 8×0.6562 = 17.2498，17.2498/26 = **0.6635 ✓**）。这类题的考点在 e2e 的**拒答行为**（防编造），见 §11.2。
 2. **旧报告（`*_pre_hitfix.json`）数字偏高，不可比**：其 Context Recall 0.9199 是**裁判 bug 造成的假阳性**——`judge.py` 曾丢弃 LLM 输出的 `hit` 字段，`context_recall.py` 遂用 `score >= 0.5` 反推命中；而 prompt 里 `score` 是「**判定置信度**」（`hit=false, score=0.95` = 95% 确信"上下文里没有"），被错误翻转成命中。扫 4255 条缓存实测矛盾率 **13.4%**。修复后（v5.29，`_PROMPT_VERSION` bump 至 `p1_llm_hit`）为 0.7436。
 3. **comparison 的 0.625 → 0.4583 混合了两个改动**：旧报告既无 per-doc 检索（`comparison_mode` 缺失）也未修 hit。per-doc + 子查询**提升**该题型召回（机制与可复现证据见 §6.1：同一文档 `allowed_docs=[LSP-1C]`，完整对比问题 → **0 条**、去其他型号名 → **5 条**，`backend/scripts/probe_perdoc_subquery.py` 可复跑），hit 修复**压低**假阳性，净效果为下降。两项改动方向相反但都正确，详见 §6.1 与 memory。
+4. **v5.30：退役 per_doc_queries，comparison 口径归位（泄漏治理，见 §6.1 勘误）**：v5.29 的 comparison Recall **0.4583 是「每文档定制子查询」抬出来的上界**，不是产品能复现的数字——生产 `compare.py` 同一 query 打所有 doc，没有任何评测独有输入。v5.30 起题集删除 `per_doc_queries`，`_comparison_targets` 每 doc 直接用完整 `question` 检索（窗口当时统一为 8；**v5.31 起收敛回 5 对齐生产**，见 §11 引语）。诚实口径实测（v531，§11.1）：总体 Recall **0.6635@5**，comparison **0.3750@5**。v5.29 的 0.4583 保留为「上界参考」。若产品后续真做「每 doc 多轮子查询」能力，再按生产能力重新引入评测方式（从属于检索改进，非本轮泄漏治理范围）。
+5. **comparison Recall@8(0.125) < Recall@5(0.375) 非单调 = 裁判归因噪声，非 runner bug（v531 调查定论）**：排除顺序——① runner 窗口切片无 bug（同一交错列表 `[:5]`/`[:8]`，top8 ⊇ top5 硬保证）② 非检索泄漏 ③ 非缓存串键（`p2_llm_hit_fullctx` 缓存键含完整 `context_str`，top5/top8 上下文不同 ⇒ 键不同 ⇒ 各自独立 LLM 调用）。实证于 judge 缓存：DV-CP-003 fact2（KE-2000）同一事实两次调用判出 True/False 两条缓存——top5 按 doc id 归因判中、top8 要求逐字「KE-2000」型号字符串判 miss，同一证据块在场却两次标准不一。诚实值取 @5=0.3750；DV-CP-004 fact2 才是真漏召回。修复方向（让裁判以「文档归属」归因而非型号字符串逐字匹配）从属于检索改进，非泄漏治理范围，本轮不改。
+6. **v5.29 各题型 @5=@8 精确相等 = p1 缓存键截断的共享产物（2026-10-04 复盘定论）**：p1 缓存键取 `context_str[:500]`（前 500 字符），top5/top8 交错上下文前缀相同 ⇒ 同一 judge 判定被两窗口共享 ⇒ **v5.29 的 @5 从未独立评测**。证据：v5.29 报告 30/30 题「@5 与 @8 逐 fact 全一致」（含 8 题多 fact 的 fact_single / table_numeric），非巧合。v531 键改完整 `context_str` 后独立判定——**fact_single 0.6562@5 / 0.8438@8**：DV-FS-002（满电持续、计时误差）与 DV-FS-008（更换荧光帽）三 fact 均「@5 miss / @8 hit」，v531 reason「上下文仅涉电磁/蓝牙/清洁方法」自洽，答案块真实落 top6-8。故 **v5.29 的 fact_single 0.8125 是 top8 判定回声，0.8125→0.6562 是口径回归而非随机噪声**（诚实的 top5 能力一直 ≈0.65）。

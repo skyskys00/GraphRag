@@ -67,6 +67,66 @@
 
 ---
 
+## [v5.30] 2026-10-03 —— comparison 评测口径泄漏治理（退役 `per_doc_queries`，口径归位）
+
+**影响模块**：M9 评测（`app/m9_eval/runner.py` `_comparison_targets` 每 doc 直接用完整 `question`、删除 `COMPARISON_WINDOW=12`）、`metrics/context_recall.py`（`_PROMPT_VERSION` bump 至 `p2_llm_hit_fullctx`，缓存键含完整 context_str）、题集 `testset_device_30.json`（删 4 题 `per_doc_queries` 字段、DV-CP-004 key_facts 回滚 HEAD 措辞）；新增探针 `backend/scripts/probe_prod_vs_eval_shape.py`；文档 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) v0.6→v0.7；项目 `CLAUDE.md` 新增「评测信息泄漏红线」规则。
+
+### 一、泄漏点（用户 ML 类比：训练/服务偏差 + 标签污染触发）
+
+器械评测集 comparison 题存在三类**评测独有输入**，生产 `compare.py` 均不消费：
+
+| 泄漏点 | 评测侧 | 生产侧 |
+|---|---|---|
+| 定制子查询 | 4 题配 `per_doc_queries`（每文档各自定制子查询） | 同一 query 打所有 doc |
+| key_facts 措辞 | DV-CP-004 从 ground_truth 复制「携带式/内部电源设备/CF 型」等词 | 无此措辞 |
+| 评测窗口 | comparison 窗口 12 | `compare.py` top_k=3 |
+
+用定制子查询抬高的 comparison 数字只配当「检索上界」，不能当产品参考——触发用户把「评测信息泄漏红线」写入项目 `CLAUDE.md`。
+
+### 二、处置（v5.30）
+
+1. 题集删除 4 题 `per_doc_queries` 字段；runner `_comparison_targets` 每 doc 直接用完整 `q["question"]` + `allowed_docs`（与生产同形）。
+2. 窗口统一回全题型 8（删 `COMPARISON_WINDOW=12`/`_main_window`/`_merge_subqueries`）。
+3. DV-CP-004 key_facts 回滚到 HEAD 措辞。
+4. `context_recall.py` 缓存键修复：`_PROMPT_VERSION` bump 至 `p2_llm_hit_fullctx`，缓存键含完整 `context_str`（防不同窗口 top5/top8 上下文互相串换/内容拼错键）——**⑤是真实 bug 修复，保留**。
+
+### 三、泄漏量级证据（`backend/scripts/probe_prod_vs_eval_shape.py`，可复跑）
+
+| 题号 | eval-shape（定制子查询，top12） | prod-shape（同一 query 打所有 doc，top3） |
+|---|---|---|
+| DV-CP-001 | 2/3 | **0/3** |
+| 汇总 4 题 9 fact | **8/9 = 0.8889** | **6/9 = 0.6667** |
+
+落差集中在 DV-CP-001——该题定制子查询把「X 型号灌注/抽取/连续模式」拆成单型号子查询，生产完整对比问题直接召回失败（其他型号名把向量召回打到 0）。**v5.29 的 comparison Recall 0.4583 是定制子查询抬出的上界，非产品口径**。
+
+### 四、诚实口径实测（`--mode retrieval`，30 题，721.1s，报告 `run_retrieval_device30_v531_leakfix.json`）
+
+**总体**：Recall **top5 0.6635 / top8 0.7019**（v5.29 泄漏口径 0.7436 已不可比）；Precision 0.2362/0.1756；nDCG 0.6906/0.7623；gold_rank 均值 2.43；top1 覆盖率 0.4551 / top3 0.7051 / top8 0.8269。
+
+**按题型 Recall（top5/top8）**：`table_numeric` 0.8125/0.8125、`fact_single` 0.6562/0.8438、`image_only` 0.6667/0.7500、**`comparison` 0.3750/0.1250**（v5.29 0.4583=泄漏上界，已不可比）、`unanswerable` 跳过。按难度：easy 0.6667/0.9167、medium 0.8542/0.8125、hard 0.3750/0.3750。
+
+**⚠️ 非单调异常（@8 < @5）已定论 = LLM 裁判噪声，非 runner bug**：runner 窗口切片无 bug（同列表 `[:5]`/`[:8]`），top8 ⊇ top5 是硬保证，证据块在 top5 被判 hit 则 top8 必然还在。缓存证据：DV-CP-003 fact2（KE-2000 血氧范围）同一事实两次独立 LLM 调用产生两条缓存——top5 判 True（reason 精确引用 doc `0d5c7f07d607e9c4` 中「血氧饱和度测量范围：不窄于35%～100%」规格）、top8 判 False（reason 引用**同样那串**证据却要求上下文必须出现「KE-2000」型号字样）⇒ 裁判归因标准两次不自洽。DV-CP-004 fact1（IDEM）同模式；`by_difficulty.medium` 亦非单调（R5 0.8542 > R8 0.8125）。**诚实读数：comparison 检索能力接近 @5=0.375，@8=0.125 被裁判噪声压低**；DV-CP-004 fact2（博声 APP）才是真漏召回（top8 上下文确实缺博声块）。judge 缓存条目可逐条复核（`app/m9_eval/cache/context_recall_*.json`）。
+
+**e2e 生成未重跑**：`run_e2e_device30.json` 仍是 v5.29 泄漏口径（comparison 用 per_doc_queries），v5.30 退役后生成侧数字待下一轮重跑回填。
+
+---
+
+## [v5.31] 2026-10-04 —— 评测窗口收敛 top5 单窗口（对齐生产 RERANK_TOP，@8 文档作废）
+
+**影响模块**：`app/m9_eval/runner.py`（`eval_top_n` 默认 8→5，双窗口收敛单窗口，LLM 调用减半）、`app/m9_eval/report.py`（双列收敛单列）；文档 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) v0.7→v0.8（§11 只报 @5 = 生产口径）。
+
+**背景（口径对齐纪律）**：v5.9 已实测「top5 是最优窗口」并落地 `RERANK_TOP=5`（commit `205b445`）；`eval_top_n` 原默认 8 让评测打 @8 宽口径，与生产不一致，且双窗口跑两遍 context_recall（LLM 约 +50%）。@8 列是 v5.9 已否定的**诊断残留**——v5.30 泄漏治理后的诚实基线 v531 里 @8 只剩「非单调 = 裁判噪声」等调查价值，无产品参考意义。用户拍板：`eval_top_n` 默认回 5，@8 列标注作废 / 只报 @5。
+
+**处置**：
+
+1. `evaluate_retrieval`/`evaluate_answer`：`eval_top_n` 默认 8→5（docstring 注明「对齐生产 RERANK_TOP=5；探底放宽可传更大值」）；删 `contexts_top5/top8` 双切片 → 单窗口 `contexts[:eval_top_n]`；context_recall 只跑一遍（LLM 调用减半）；context_precision 从单窗口 per_chunk 推导 nDCG；detail 的 `window` 字段动态标注 `top{eval_top_n}`。
+2. `report.py`：overall/cat_stats 删 `*_top5/top8` 双字段收敛单列；markdown 总体表/按题型表/GoldRank 覆盖率表（top1/3/5）全部单列，去 `Remember@8` 存根。
+3. `gold_rank.py` `top_ks=[1,3,5,8]` **保留**（词汇模式零 LLM 成本；runner 传入 contexts ≤5 时 top8 覆盖率恒等于 top5，无需改）。
+
+**口径与兼容**：只报 @5 = 生产口径；探底仍可 `--eval-top-n 8` 放宽（window 字段动态标注）。旧报告 JSON/历史条目不受影响，旧三库跑法不变。
+
+---
+
 ## [v5.28.1] 2026-10-02 —— M6 sidecar 索引键修正（PG chunk 主键 + first-wins）
 
 **影响模块**：M6 `app/m6_generate/sidecar.py`（键与去重口径）、M6 `cite.py` + M7 `compare.py`（调用点）；文档 [`M6_generate.md`](modules/M6_generate.md) v1.5→v1.6、[`M7_interact.md`](modules/M7_interact.md) v10.5→v10.6、[`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) v0.4→v0.5；`backend/scripts/ingest_device_corpus.py`（过期提醒）。**更正 v5.28 条目内「入库后必须重启」的表述**（该说法在 `build_workspace_deps` 进入 `ingest()` 后已过时）。

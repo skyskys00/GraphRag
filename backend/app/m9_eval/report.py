@@ -51,13 +51,6 @@ def build_report(
         "context_recall": _avg(results, "context_recall"),
         "context_precision": _avg(results, "context_precision"),
         "context_precision_weighted": _avg(results, "context_precision_weighted"),
-        # 双窗口指标
-        "context_recall_top5": _avg(results, "context_recall_top5"),
-        "context_recall_top8": _avg(results, "context_recall_top8"),
-        "context_precision_top5": _avg(results, "context_precision_top5"),
-        "context_precision_top8": _avg(results, "context_precision_top8"),
-        "context_precision_weighted_top5": _avg(results, "context_precision_weighted_top5"),
-        "context_precision_weighted_top8": _avg(results, "context_precision_weighted_top8"),
         # gold_rank
         "gold_rank_avg": _avg_gr(results, "avg_rank"),
         "gold_rank_median": _avg_gr(results, "median_rank"),
@@ -66,10 +59,7 @@ def build_report(
         "gold_rank_top1_recall": _avg_topk_recall(results, "1"),
         "gold_rank_top3_recall": _avg_topk_recall(results, "3"),
         "gold_rank_top5_recall": _avg_topk_recall(results, "5"),
-        "gold_rank_top8_recall": _avg_topk_recall(results, "8"),
         # nDCG（排序质量，从 CP 的 per_chunk score 推导，零额外 LLM 成本）
-        "ndcg_top5": _avg(results, "ndcg_top5"),
-        "ndcg_top8": _avg(results, "ndcg_top8"),
         "ndcg": _avg(results, "ndcg"),
         # 生成质量指标（Phase 2）
         "faithfulness": _avg(results, "faithfulness"),
@@ -95,16 +85,10 @@ def build_report(
             "count": len(lst),
             "context_recall": _avg(lst, "context_recall"),
             "context_precision": _avg(lst, "context_precision"),
-            "context_recall_top5": _avg(lst, "context_recall_top5"),
-            "context_recall_top8": _avg(lst, "context_recall_top8"),
-            "context_precision_top5": _avg(lst, "context_precision_top5"),
-            "context_precision_top8": _avg(lst, "context_precision_top8"),
             "gold_rank_avg": _avg_gr(lst, "avg_rank"),
             "gold_rank_median": _avg_gr(lst, "median_rank"),
             "gold_rank_top5_recall": _avg_topk_recall(lst, "5"),
-            "gold_rank_top8_recall": _avg_topk_recall(lst, "8"),
-            "ndcg_top5": _avg(lst, "ndcg_top5"),
-            "ndcg_top8": _avg(lst, "ndcg_top8"),
+            "ndcg": _avg(lst, "ndcg"),
             # 生成质量指标（Phase 2）
             "faithfulness": _avg(lst, "faithfulness"),
             "answer_relevance": _avg(lst, "answer_relevance"),
@@ -163,15 +147,15 @@ def to_markdown(report: dict[str, Any]) -> str:
     lines.append("")
     lines.append("## 总体指标")
     lines.append("")
-    lines.append("| 指标 | top5 | top8 |")
-    lines.append("|---|---|---|")
-    lines.append(f"| Context Recall | {overall['context_recall_top5']:.4f} | {overall['context_recall_top8']:.4f} |")
-    lines.append(f"| Context Precision | {overall['context_precision_top5']:.4f} | {overall['context_precision_top8']:.4f} |")
-    lines.append(f"| Context Precision (加权) | {overall['context_precision_weighted_top5']:.4f} | {overall['context_precision_weighted_top8']:.4f} |")
-    lines.append(f"| nDCG | {overall['ndcg_top5']:.4f} | {overall['ndcg_top8']:.4f} |")
+    lines.append("| 指标 | 得分 |")
+    lines.append("|---|---|")
+    lines.append(f"| Context Recall | {overall['context_recall']:.4f} |")
+    lines.append(f"| Context Precision | {overall['context_precision']:.4f} |")
+    lines.append(f"| Context Precision (加权) | {overall['context_precision_weighted']:.4f} |")
+    lines.append(f"| nDCG | {overall['ndcg']:.4f} |")
     gjf = overall.get('judge_failed_judgments', 0)
     if gjf:
-        lines.append(f"| 裁判失败调用数 | {gjf} | — |")
+        lines.append(f"| 裁判失败调用数 | {gjf} |")
 
     # 生成质量指标（Phase 2，有数值才展示）
     gen_keys = ["faithfulness", "answer_relevance", "correctness", "citation_accuracy"]
@@ -207,7 +191,7 @@ def to_markdown(report: dict[str, Any]) -> str:
         lines.append("")
         lines.append("| top-K | 事实覆盖率 |")
         lines.append("|---|---|")
-        for k in ['1', '3', '5', '8']:
+        for k in ['1', '3', '5']:
             v = overall.get(f'gold_rank_top{k}_recall')
             if v is not None:
                 lines.append(f"| top{k} | {v:.4f} |")
@@ -216,15 +200,15 @@ def to_markdown(report: dict[str, Any]) -> str:
     lines.append("")
     lines.append("## 按题型分布")
     lines.append("")
-    lines.append("| 题型 | 题数 | Recall@5 | Recall@8 | Prec@5 | Prec@8 | nDCG@5 | GoldRank avg |")
-    lines.append("|---|---|---|---|---|---|---|---|")
+    lines.append("| 题型 | 题数 | Recall@5 | Prec@5 | nDCG@5 | GoldRank avg |")
+    lines.append("|---|---|---|---|---|---|")
     for cat, st in s["by_category"].items():
         gr_avg = st.get("gold_rank_avg", "—")
         gr_str = f"{gr_avg:.2f}" if isinstance(gr_avg, (int, float)) else "—"
-        ndcg5 = st.get("ndcg_top5", 0.0)
+        ndcg = st.get("ndcg", 0.0)
         lines.append(
-            f"| {cat} | {st['count']} | {st['context_recall_top5']:.4f} | {st['context_recall_top8']:.4f} | "
-            f"{st['context_precision_top5']:.4f} | {st['context_precision_top8']:.4f} | {ndcg5:.4f} | {gr_str} |"
+            f"| {cat} | {st['count']} | {st['context_recall']:.4f} | "
+            f"{st['context_precision']:.4f} | {ndcg:.4f} | {gr_str} |"
         )
     lines.append("")
     lines.append("## 按难度分布")
@@ -235,8 +219,8 @@ def to_markdown(report: dict[str, Any]) -> str:
         gr_avg = st.get("gold_rank_avg", "—")
         gr_str = f"{gr_avg:.2f}" if isinstance(gr_avg, (int, float)) else "—"
         lines.append(
-            f"| {diff} | {st['count']} | {st['context_recall_top5']:.4f} | "
-            f"{st['context_precision_top5']:.4f} | {gr_str} |"
+            f"| {diff} | {st['count']} | {st['context_recall']:.4f} | "
+            f"{st['context_precision']:.4f} | {gr_str} |"
         )
     lines.append("")
 

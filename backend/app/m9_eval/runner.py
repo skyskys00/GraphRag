@@ -113,21 +113,22 @@ def _load_doc_name_map(working_dir: Path) -> dict[str, str]:
 def _comparison_targets(
     q: dict[str, Any], name_map: dict[str, str], allowed_docs: list[str] | None
 ) -> list[tuple[str, str]]:
-    """comparison 题 → [(doc_id, 子查询)]；<2 个则返回空（退回单查询）。
+    """comparison 题 → [(doc_id, 完整对比问题)]；<2 个 doc 则返回空（退回单查询）。
 
-    对齐线上 M7 compare.py 的跑法：query 是「参数名」而非含全部型号的完整问题。
-    实测（v5.29）：用完整对比问题做 per-doc 检索时，其他型号名会把该文档的向量
-    召回打到 0（LightRAG cosine=0.2 阈值），故子查询取自题集 per_doc_queries[文件名]，
-    缺省退回完整 question。
+    对齐线上 M7 compare.py 的跑法：同一 query 分别对每个 doc 独立检索（per-doc 空间），
+    交错合并后统一窗口。
+
+    v5.30 起退役题集 per_doc_queries（每文档定制子查询是评测独有输入，线上 compare.py
+    不消费 ⇒ 泄漏红线，见 CLAUDE.md「评测信息泄漏红线」）。每 doc 直接用完整 question
+    检索 —— 与生产形态一致，数字反映真实对比检索质量。
     """
     if q.get("category") != "comparison":
         return []
-    pdq = q.get("per_doc_queries") or {}
     targets: list[tuple[str, str]] = []
     for fn in (q.get("source_docs") or []):
         did = name_map.get(fn)
         if did:
-            targets.append((did, pdq.get(fn) or q["question"]))
+            targets.append((did, q["question"]))
     if allowed_docs:
         allow = set(allowed_docs)
         targets = [(d, s) for d, s in targets if d in allow]
@@ -161,7 +162,7 @@ async def evaluate_retrieval(
     doc_name_map: dict[str, str] | None = None,
     *,
     gold_rank_mode: str = "lexical",
-    eval_top_n: int = 8,
+    eval_top_n: int = 5,
     reranker: str = "standard",
     ablation_routes: list[str] | None = None,
 ) -> list[dict[str, Any]]:
@@ -169,7 +170,7 @@ async def evaluate_retrieval(
 
     Args:
         gold_rank_mode: 'lexical'（默认，零成本）或 'llm'（精确）
-        eval_top_n: 检索取多少块用于评测（默认 8，可同时出 top5/top8 两套指标）
+        eval_top_n: 检索取多少块用于评测（默认 5，对齐生产 RERANK_TOP=5；探底放宽可传更大值）
         reranker: 'standard'（cross-encoder+融合，默认）或 'llm'（LLM listwise 终审，正式可选）
         ablation_routes: 召回路数对照（ablation）。None=三路全走；子集如 ['vector'] 只走指定路。
     """
@@ -180,7 +181,7 @@ async def evaluate_retrieval(
     from .metrics.gold_rank import compute_gold_rank
     from .metrics.ndcg import compute_ndcg, ndcg_at_k
 
-    # 评测用更大的候选窗口，便于同时出 top5/top8 两套指标
+    # 评测窗口对齐生产（RERANK_TOP=5）；探底放宽时仍可传大值
     orig_rerank_top = ret_mod.RERANK_TOP
     ret_mod.RERANK_TOP = eval_top_n
 
@@ -236,18 +237,17 @@ async def evaluate_retrieval(
 
             retrieval_time = round(time.time() - t0, 2)
 
-            # top5 / top8 切片（不足则取全部）
-            contexts_top5 = contexts[:5]
-            contexts_top8 = contexts[:8]
+            # 评测窗口 = 检索窗口（RERANK_TOP=eval_top_n，默认 5 对齐生产）
+            contexts = contexts[:eval_top_n]
 
-            # 2. 计算指标（只跑 top8 一套 LLM 调用，top5 指标从结果推导，接近零额外成本）
+            # 2. 计算指标（单窗口，一次 LLM 调用）
             metrics: dict[str, Any] = {}
 
             # gold_rank（词汇模式零 LLM 成本，跨窗口诊断）
             if q["category"] != "unanswerable" and q.get("key_facts"):
                 try:
                     gr = await compute_gold_rank(
-                        q["key_facts"], contexts_top8,
+                        q["key_facts"], contexts,
                         mode=gold_rank_mode, query_func=query_func,
                     )
                     metrics["gold_rank"] = gr
@@ -255,98 +255,51 @@ async def evaluate_retrieval(
                     print(f"  ⚠️  gold_rank 计算失败: {e}", flush=True)
                     metrics["gold_rank"] = None
 
-            # context_recall：top5 和 top8 各跑一遍（LLM 调用量约 +50%，35题≈+100次）
-            # 无法从 top8 推导 top5，因为 judge 不记录 fact 命中在第几块
+            # context_recall：单窗口一次 LLM 调用
             if q["category"] != "unanswerable" and q.get("key_facts"):
-                # top8 recall（完整窗口）
                 try:
-                    cr8 = await compute_context_recall(
-                        query_func, question_text, q["key_facts"], contexts_top8,
+                    cr = await compute_context_recall(
+                        query_func, question_text, q["key_facts"], contexts,
                     )
-                    metrics["context_recall_top8"] = cr8["score"]
+                    metrics["context_recall"] = cr["score"]
                     metrics["context_recall_detail"] = {
-                        "total_facts": cr8["total_facts"],
-                        "hit_facts": cr8["hit_facts"],
-                        "failed_facts": cr8.get("failed_facts", 0),
-                        "per_fact": cr8["per_fact"],
-                        "reason": cr8["reason"],
-                        "window": "top8",
+                        "total_facts": cr["total_facts"],
+                        "hit_facts": cr["hit_facts"],
+                        "failed_facts": cr.get("failed_facts", 0),
+                        "per_fact": cr["per_fact"],
+                        "reason": cr["reason"],
+                        "window": f"top{eval_top_n}",
                     }
                 except Exception as e:
-                    print(f"  ⚠️  context_recall top8 计算失败: {e}", flush=True)
-                    metrics["context_recall_top8"] = None
-
-                # top5 recall（窄窗口，回答"top5 够用吗"）
-                try:
-                    cr5 = await compute_context_recall(
-                        query_func, question_text, q["key_facts"], contexts_top5,
-                    )
-                    metrics["context_recall_top5"] = cr5["score"]
-                    metrics["context_recall"] = cr5["score"]  # 兼容字段默认 top5
-                    if metrics.get("context_recall_detail"):
-                        metrics["context_recall_detail"]["per_fact_top5"] = cr5["per_fact"]
-                        metrics["context_recall_detail"]["hit_facts_top5"] = cr5["hit_facts"]
-                except Exception as e:
-                    print(f"  ⚠️  context_recall top5 计算失败: {e}", flush=True)
-                    metrics["context_recall_top5"] = None
+                    print(f"  ⚠️  context_recall 计算失败: {e}", flush=True)
                     metrics["context_recall"] = None
             else:
                 metrics["context_recall"] = None
-                metrics["context_recall_top5"] = None
-                metrics["context_recall_top8"] = None
 
-            # context_precision：只跑 top8（8 次 LLM 调用，top5 从 per_chunk 切片）
+            # context_precision + nDCG（单窗口，len(contexts) 次 LLM 调用）
             try:
-                cp8 = await compute_context_precision(
+                cp = await compute_context_precision(
                     query_func, question_text,
                     q.get("ground_truth", ""), q.get("key_facts", []),
-                    contexts_top8,
+                    contexts,
                 )
-                metrics["context_precision_top8"] = cp8["score"]
-                metrics["context_precision_weighted_top8"] = cp8["weighted_score"]
+                metrics["context_precision"] = cp["score"]
+                metrics["context_precision_weighted"] = cp["weighted_score"]
                 metrics["context_precision_detail"] = {
-                    "total_chunks": cp8["total_chunks"],
-                    "relevant_chunks": cp8["relevant_chunks"],
-                    "failed_chunks": cp8.get("failed_chunks", 0),
-                    "per_chunk": cp8["per_chunk"],
-                    "reason": cp8["reason"],
-                    "window": "top8",
+                    "total_chunks": cp["total_chunks"],
+                    "relevant_chunks": cp["relevant_chunks"],
+                    "failed_chunks": cp.get("failed_chunks", 0),
+                    "per_chunk": cp["per_chunk"],
+                    "reason": cp["reason"],
+                    "window": f"top{eval_top_n}",
                 }
-
-                # top5 precision 从 per_chunk 切片推导
-                per_chunk_top5 = [c for c in cp8["per_chunk"] if c.get("rank") and c["rank"] <= 5]
-                evaluated5 = [c for c in per_chunk_top5 if c.get("relevant") is not None]
-                failed5 = len(per_chunk_top5) - len(evaluated5)
-                if evaluated5:
-                    rel_count5 = sum(1 for c in evaluated5 if c["relevant"])
-                    cp5_score = round(rel_count5 / len(evaluated5), 4)
-                    n5 = len(evaluated5)
-                    weights5 = [1.0 / (i + 1) for i in range(n5)]
-                    total_w5 = sum(weights5)
-                    cp5_weighted = round(
-                        sum(w * (1.0 if c["relevant"] else 0.0)
-                            for w, c in zip(weights5, evaluated5))
-                        / total_w5 if total_w5 else 0.0, 4
-                    )
-                else:
-                    cp5_score = None
-                    cp5_weighted = None
-                metrics["context_precision_top5"] = cp5_score
-                metrics["context_precision_weighted_top5"] = cp5_weighted
-                metrics["context_precision"] = cp5_score  # 兼容字段默认 top5
-                metrics["context_precision_weighted"] = cp5_weighted
-
                 # nDCG：从 per_chunk 的 score（相关度 0~1）推导，零额外 LLM 成本
-                # top8 nDCG 直接用完整 per_chunk 算
-                ndcg8 = ndcg_at_k(cp8["per_chunk"], 8)
-                metrics["ndcg_top8"] = ndcg8
-                # top5 nDCG 用 rank ≤5 的切片（按原始 rank）
-                ndcg5 = ndcg_at_k(cp8["per_chunk"], 5)
-                metrics["ndcg_top5"] = ndcg5
-                metrics["ndcg"] = ndcg5  # 兼容字段默认 top5
+                metrics["ndcg"] = ndcg_at_k(cp["per_chunk"], eval_top_n)
             except Exception as e:
                 print(f"  ⚠️  context_precision 计算失败: {e}", flush=True)
                 metrics["context_precision"] = None
+                metrics["context_precision_weighted"] = None
+                metrics["ndcg"] = None
 
             total_time = round(time.time() - t0, 2)
 
@@ -391,17 +344,17 @@ async def evaluate_answer(
     doc_name_map: dict[str, str] | None = None,
     *,
     gold_rank_mode: str = "lexical",
-    eval_top_n: int = 8,
+    eval_top_n: int = 5,
 ) -> list[dict[str, Any]]:
     """逐题跑 M6 answer + 检索指标 + 生成质量指标。
 
     Phase 2 骨架：先打通 M6 answer 调用链路，生成指标留空（Step 2 实现）。
-    检索指标复用 retrieval 模式的全套（双窗口 + gold_rank + nDCG）。
+    检索指标复用 retrieval 模式的全套（单窗口 + gold_rank + nDCG）。
     """
     from app.m5_retrieve import retriever as ret_mod
     from app.m6_generate.orchestrator import answer as m6_answer
 
-    # 评测用更大的候选窗口，便于同时出 top5/top8 两套指标
+    # 评测窗口对齐生产（RERANK_TOP=eval_top_n，默认 5）；探底放宽时仍可传大值
     orig_rerank_top = ret_mod.RERANK_TOP
     ret_mod.RERANK_TOP = eval_top_n
 
@@ -461,9 +414,8 @@ async def evaluate_answer(
 
             answer_time = round(time.time() - t0, 2)
 
-            # top5 / top8 切片（不足则取全部）
-            contexts_top5 = contexts[:5]
-            contexts_top8 = contexts[:8]
+            # 评测窗口 = 检索窗口（RERANK_TOP=eval_top_n，默认 5 对齐生产）
+            contexts = contexts[:eval_top_n]
 
             # 2. 检索指标（同 retrieval 模式，复用同一套）
             metrics: dict[str, Any] = {}
@@ -473,7 +425,7 @@ async def evaluate_answer(
                 try:
                     from .metrics.gold_rank import compute_gold_rank
                     gr = await compute_gold_rank(
-                        q["key_facts"], contexts_top8,
+                        q["key_facts"], contexts,
                         mode=gold_rank_mode, query_func=query_func,
                     )
                     metrics["gold_rank"] = gr
@@ -481,94 +433,59 @@ async def evaluate_answer(
                     print(f"  ⚠️  gold_rank 计算失败: {e}", flush=True)
                     metrics["gold_rank"] = None
 
-            # context_recall（top5 + top8）
+            # context_recall（单窗口一次 LLM 调用）
             if q["category"] != "unanswerable" and q.get("key_facts"):
                 try:
                     from .metrics.context_recall import compute_context_recall
-                    cr8 = await compute_context_recall(
-                        query_func, question_text, q["key_facts"], contexts_top8,
+                    cr = await compute_context_recall(
+                        query_func, question_text, q["key_facts"], contexts,
                     )
-                    metrics["context_recall_top8"] = cr8["score"]
+                    metrics["context_recall"] = cr["score"]
                     metrics["context_recall_detail"] = {
-                        "total_facts": cr8["total_facts"],
-                        "hit_facts": cr8["hit_facts"],
-                        "failed_facts": cr8.get("failed_facts", 0),
-                        "per_fact": cr8["per_fact"],
-                        "reason": cr8["reason"],
-                        "window": "top8",
+                        "total_facts": cr["total_facts"],
+                        "hit_facts": cr["hit_facts"],
+                        "failed_facts": cr.get("failed_facts", 0),
+                        "per_fact": cr["per_fact"],
+                        "reason": cr["reason"],
+                        "window": f"top{eval_top_n}",
                     }
-                    cr5 = await compute_context_recall(
-                        query_func, question_text, q["key_facts"], contexts_top5,
-                    )
-                    metrics["context_recall_top5"] = cr5["score"]
-                    metrics["context_recall"] = cr5["score"]
-                    if metrics.get("context_recall_detail"):
-                        metrics["context_recall_detail"]["per_fact_top5"] = cr5["per_fact"]
-                        metrics["context_recall_detail"]["hit_facts_top5"] = cr5["hit_facts"]
                 except Exception as e:
                     print(f"  ⚠️  context_recall 计算失败: {e}", flush=True)
                     metrics["context_recall"] = None
-                    metrics["context_recall_top5"] = None
-                    metrics["context_recall_top8"] = None
             else:
                 metrics["context_recall"] = None
-                metrics["context_recall_top5"] = None
-                metrics["context_recall_top8"] = None
 
-            # context_precision + nDCG（top8 跑，top5 推导）
+            # context_precision + nDCG（单窗口，len(contexts) 次 LLM 调用）
             try:
                 from .metrics.context_precision import compute_context_precision
                 from .metrics.ndcg import ndcg_at_k
-                cp8 = await compute_context_precision(
+                cp = await compute_context_precision(
                     query_func, question_text,
                     q.get("ground_truth", ""), q.get("key_facts", []),
-                    contexts_top8,
+                    contexts,
                 )
-                metrics["context_precision_top8"] = cp8["score"]
-                metrics["context_precision_weighted_top8"] = cp8["weighted_score"]
+                metrics["context_precision"] = cp["score"]
+                metrics["context_precision_weighted"] = cp["weighted_score"]
                 metrics["context_precision_detail"] = {
-                    "total_chunks": cp8["total_chunks"],
-                    "relevant_chunks": cp8["relevant_chunks"],
-                    "failed_chunks": cp8.get("failed_chunks", 0),
-                    "per_chunk": cp8["per_chunk"],
-                    "reason": cp8["reason"],
-                    "window": "top8",
+                    "total_chunks": cp["total_chunks"],
+                    "relevant_chunks": cp["relevant_chunks"],
+                    "failed_chunks": cp.get("failed_chunks", 0),
+                    "per_chunk": cp["per_chunk"],
+                    "reason": cp["reason"],
+                    "window": f"top{eval_top_n}",
                 }
-                per_chunk_top5 = [c for c in cp8["per_chunk"] if c.get("rank") and c["rank"] <= 5]
-                evaluated5 = [c for c in per_chunk_top5 if c.get("relevant") is not None]
-                if evaluated5:
-                    rel_count5 = sum(1 for c in evaluated5 if c["relevant"])
-                    cp5_score = round(rel_count5 / len(evaluated5), 4)
-                    n5 = len(evaluated5)
-                    weights5 = [1.0 / (i + 1) for i in range(n5)]
-                    total_w5 = sum(weights5)
-                    cp5_weighted = round(
-                        sum(w * (1.0 if c["relevant"] else 0.0)
-                            for w, c in zip(weights5, evaluated5))
-                        / total_w5 if total_w5 else 0.0, 4
-                    )
-                else:
-                    cp5_score = None
-                    cp5_weighted = None
-                metrics["context_precision_top5"] = cp5_score
-                metrics["context_precision_weighted_top5"] = cp5_weighted
-                metrics["context_precision"] = cp5_score
-                metrics["context_precision_weighted"] = cp5_weighted
-
-                ndcg8 = ndcg_at_k(cp8["per_chunk"], 8)
-                ndcg5 = ndcg_at_k(cp8["per_chunk"], 5)
-                metrics["ndcg_top8"] = ndcg8
-                metrics["ndcg_top5"] = ndcg5
-                metrics["ndcg"] = ndcg5
+                metrics["ndcg"] = ndcg_at_k(cp["per_chunk"], eval_top_n)
             except Exception as e:
                 print(f"  ⚠️  context_precision 计算失败: {e}", flush=True)
                 metrics["context_precision"] = None
+                metrics["context_precision_weighted"] = None
+                metrics["ndcg"] = None
 
             # 3. 生成质量指标
             try:
                 from .metrics.faithfulness import compute_faithfulness
                 fai = await compute_faithfulness(
-                    query_func, question_text, answer_text, contexts_top5,
+                    query_func, question_text, answer_text, contexts,
                 )
                 metrics["faithfulness"] = fai["score"]
                 metrics["faithfulness_detail"] = {
@@ -611,7 +528,7 @@ async def evaluate_answer(
                 from .metrics.citation_accuracy import compute_citation_accuracy
                 ca = await compute_citation_accuracy(
                     query_func, question_text, answer_text,
-                        contexts_top8, citations,
+                        contexts, citations,
                 )
                 metrics["citation_accuracy"] = ca["score"]
                 metrics["citation_accuracy_detail"] = {

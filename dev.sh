@@ -10,12 +10,11 @@
 #
 # 用法：
 #   ./dev.sh start|stop|restart|status|logs [pg|xin|api|web]   （省略组件 = 全部）
-#   ./dev.sh down               # 停四件套 + 关 OrbStack 本体（释放 VM 内存）
 #   例：./dev.sh start web      # 只重拉前端
 #       ./dev.sh logs api       # 跟踪后端日志
 #
-# 默认 stop 不动 OrbStack（只停 graphrag-pg 容器），以免连带停掉机器上其他容器；
-# 需要彻底释放内存时用 down。
+# 全量 stop 会接着关掉 OrbStack 本体（释放 VM 内存）；只停单个组件时
+# （如 stop web）不碰 OrbStack。start 总是确保 OrbStack 就绪。
 #
 # 日志落盘 logs/{xin,api,web}.log（根 logs/ 已被 .gitignore 忽略）。
 # 各步幂等：已在运行/已停止的组件直接跳过并提示。
@@ -213,8 +212,8 @@ pg_stop() {
   fi
 }
 
-# OrbStack 本体停止（释放 Linux VM 内存）。仅 `down` 显式触发：
-# 默认 `stop` 不动 OrbStack，避免连带停掉机器上其他容器（如 github-mcp-server）。
+# OrbStack 本体停止（释放 Linux VM 内存）。仅全量 `stop`（svc=all）时触发，
+# 单组件停止（如 `stop web`）不碰 OrbStack。
 orb_stop() {
   if ! command -v orbctl >/dev/null 2>&1; then
     warn "未找到 orbctl，跳过 OrbStack 停止"; return 0
@@ -271,8 +270,6 @@ status() {
 SERVICES="pg xin api web"
 cmd="${1:-}"; svc="${2:-all}"
 case "$svc" in all|pg|xin|api|web) ;; *) fail "未知组件：$svc（可选 pg|xin|api|web）"; exit 1;; esac
-# down = 全量停止（含 OrbStack），忽略组件参数
-if [ "$cmd" = down ]; then svc=all; fi
 
 run_selected() { # $1 = start|stop
   local action=$1 has=0 s
@@ -294,9 +291,8 @@ case "$cmd" in
            echo "  后端  http://127.0.0.1:$API_PORT/health"
            echo "  日志  ./dev.sh logs api|web|xin|pg"
            ;;
-  stop)    run_selected stop ;;
-  down)    run_selected stop
-           orb_stop ;;
+  stop)    run_selected stop
+           if [ "$svc" = all ]; then orb_stop; fi ;;
   restart) run_selected stop; run_selected start ;;
   status)  status ;;
   logs)    case "$svc" in
@@ -306,5 +302,5 @@ case "$cmd" in
              web) tail -f -n 50 "$LOGDIR/web.log" ;;
              all) fail "logs 需指定组件：./dev.sh logs api|xin|web|pg"; exit 1 ;;
            esac ;;
-  *)       echo "用法：./dev.sh start|stop|restart|down|status|logs [pg|xin|api|web]"; exit 1 ;;
+  *)       echo "用法：./dev.sh start|stop|restart|status|logs [pg|xin|api|web]"; exit 1 ;;
 esac
