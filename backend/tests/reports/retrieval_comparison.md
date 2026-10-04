@@ -437,3 +437,22 @@
 **读数**：落差集中在 DV-CP-001（0/3）——该题 `per_doc_queries` 把「X 型号灌注/抽取/连续模式」拆成单型号子查询，生产完整对比问题直接召回失败（其他型号名把向量召回打到 0）。**v5.29 的 comparison Recall 0.4583 是定制子查询抬出来的上界**。
 
 **处置（v5.30 已落地，见 CHANGELOG v5.30 条目）**：① 题集删除 4 题 `per_doc_queries` 字段；② runner 每 doc 直接用完整 `question` + `allowed_docs`（与生产同形）；③ 评测窗口统一回全题型 8（删 `COMPARISON_WINDOW=12`）。诚实口径数字见 `run_retrieval_device30_v531_leakfix.json` 与 `DEVICE_SCENARIO.md` §11。
+
+---
+
+# comparison 剩余漏召逐路定位（v5.32 探底，2026-10-04，M2 切分假设被证伪）
+
+**动机**：v5.32 localize_query 后 comparison Recall 0.375→0.4583@5，剩余漏召长期归因「M2 切分粒度遗留」（v5.29 `chunk-bb7dc287` 推断）。本次探针 `probe_comparison_miss_paths.py`（只读诊断、可复跑）把每个漏召 fact 的目标块当「鱼」，在生产检索形态（`localize_query` + `retrieve` + `allowed_docs=[doc]`）下逐路解剖：主路三路 rank / RRF 全序 / fused top40 / final top5，加放宽 kw@200、vec@200、graph@100。锚点取自语料 chunk 实测内容，与 ground_truth/key_facts 零交集。
+
+**4 个漏召 fact 逐条结论（0/4 由切分粒度导致）**：
+
+| fact | 目标块 | 主路三路 | RRF 全序 | fused | final top5 | 放宽（200/200/100） | 定论 |
+|---|---|---|---|---|---|---|---|
+| CP-001.f3（瑞创 140mm） | 123 字单行 table | g5 / v3 / k8 全进 | **rank 3** | 7 | **MISS**（rerank 0.42 vs top1 0.957） | — | **精排截断**（= 客服库 CS-TN-003 同款画像，调权重方向已封闭，见末行） |
+| CP-002.f1（KE-2000 血压） | 468 字 paragraph | g12 / v12 / k23 全进 | **rank 11** | 6 | **MISS**（rerank 0.304） | — | **精排截断** |
+| CP-001.f2（融柏 注射器） | 111 字 paragraph | 全 MISS | — | — | — | kw@200=82(0.0965)、vec@200=140、graph MISS | **匹配太弱**（非切分，目标块单主题） |
+| CP-004.f2（博声 会诊） | paragraph | 全 MISS | — | — | — | kw@200=140、vec@200=109 | **匹配太弱** |
+
+**对 v5.29「遗留」归因的直接证伪**：旧归因指向 `chunk-bb7dc287`（LSP-1C「一块塞内径/行程/时钟被长度归一化稀释」）。该 fact（CP-001.f2）语料内可定位目标块实为 **111 字单主题 paragraph**；v5.29 探针自记该块 keyword 第 39 名擦边进池——**稀疏打分可达，差在 RRF 跨路聚合而非切分**。若切分是主因，4 块应全像 f2/博声那样进不了候选；而 2/4 已进 RRF 全序前 11，切分假设不成立。
+
+**后续方向（历史已封闭，勿重复探底）**：f3/CP-002 精排截断 = 客服库 CS-TN-003 同款画像，该方向客服/admin 库已系统探底并封闭——v5.11/12 numeric boost 逐字节无效、v5.13 NL 摘要分数变序不变、v5.20 结构化补召回指标逐位不变，贯穿病根是 bge-reranker 对数字/专名块失明（rerank 主导排名结构）；唯一被验证有效（救池内块）的 v5.21 LLM listwise 终审已决策不接生产（流式不兼容 + 评测同源偏置 + token 成本）。故 f3/CP-002 要动名次需 reranker 侧换赛道（LLM 终审进生产 / 换 reranker 模型），f2/博声属纯匹配问题另案——均属方向决策，非探底能自行开启。本次探底零代码改动，无需回滚；探针留档 `backend/scripts/probe_comparison_miss_paths.py`。

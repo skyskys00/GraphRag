@@ -177,7 +177,17 @@
 - ⚠️ **口径提醒（误读风险复盘）**：v531 报告 JSON 内嵌 `per_fact` 为双窗口时代 @8 判定，与 v532 纯 @5 判定直接 diff 会误报「非 comparison 三题退化」（DV-FS-002/008、DV-IO-006 均为 @8 hit/@5 miss 窗口差，DV-FS-002/008 正是已知「答案块落 top6-8」案例）。**逐题对比必须以 @5 判定为基**，已入 §11.1 横幅与读数。
 - **执行教训（runner import 作用域）**：首跑 v532 一度 0.0000（comparison 全空）——`_comparison_targets` 调用 `build_side_inputs`/`localize_query`，但两者此前只在 `_build_deps` **函数内部** import，模块级函数引用时 NameError → try/except 吞掉 → contexts 空 → 8 fact 全判「检索上下文为空」。修复：import 移到 `_comparison_targets` 函数内使用点。教训：**改动 import 后必须跑完整评测看真实日志**，单测/诊断脚本从 `module.query_localize` 直接 import 不会暴露 runner 内包 import 作用域问题。
 
-**结论**：v5.32 `localize_query` 落地有效且诚实——恢复 1 个真相（CP-001 运行模式表），零回归，production `compare.py` 与 runner 镜像同一函数。剩余 comparison 短板（CP-002、CP-004 博声侧）为 M2 切分粒度真漏召回，另立任务。数字已回填 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §11.1。
+**结论**：v5.32 `localize_query` 落地有效且诚实——恢复 1 个真相（CP-001 运行模式表），零回归，production `compare.py` 与 runner 镜像同一函数。数字已回填 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §11.1。
+
+**探底（2026-10-04 追加）：comparison 剩余漏召 M5 逐路定位——「M2 切分粒度」归因被证伪**
+
+- **探针**：`backend/scripts/probe_comparison_miss_paths.py`（只读诊断，留档可复跑；锚点取自语料 chunk 实测内容，与 ground_truth/key_facts 零交集，不抬指标）。对 v5.32 后 4 个漏召 fact 逐个跑生产形态（`localize_query` + `retrieve` + `allowed_docs=[doc]`）的主路三路 rank / RRF 全序 / fused top40 / final top5，加放宽侧 kw@200 / vec@200 / graph@100。
+- **逐条结论（0/4 由切分导致，三处旧「M2 切分粒度遗留」归因全部推翻）**：
+  - **CP-001.f3（瑞创 Cchippump-2 140mm，123 字单行 table）——精排截断**：三路全进候选（graph 5 / vector 3 / keyword 8）、RRF 全序 **rank 3**、fused rank 7，却未进 final top5——目标 rerank score 0.42，被同语料 6 个 `Cchippump-2` 块（top1 rerank 0.957）在 rerank→特征融合里压过。已是干净最小块，M2 无头寸；此「精排截断」模式与客服库 CS-TN-003 同款，**调权重方向历史已封闭**（见本块末交叉历史）。
+  - **CP-002.f1（KE-2000 血压量程 0-279mmHg，468 字 paragraph）——精排截断**：三路全进（graph 12 / vector 12 / keyword 23）、RRF 全序 **rank 11**、fused rank 6，未进 top5（rerank 0.304，被 KE-2000 产品介绍/安全块压制）。
+  - **CP-001.f2（融柏 注射器内径/行程）、CP-004.f2（博声「会诊」）——内容匹配本身不足**：主路三路全 MISS，放宽到 200/200/100 仍够不着（kw@200=82/0.0965、vec@200=140；博声 kw@200=140、vec@200=109）——真漏召回但属匹配质量问题，目标块非多主题堆叠，M2 无从下手。
+- **对 v5.29「遗留」归因的直接证伪**：旧归因指向 `chunk-bb7dc287`（LSP-1C 行程块「一块塞内径/行程/时钟被长度归一化稀释」）。该 fact（CP-001.f2）语料内可定位目标块实为 **111 字单主题 paragraph**；v5.29 探针自记该块 keyword **第 39 名擦边进池**——稀疏打分可达，差在 RRF 跨路聚合而非切分。若切分是主因，4 块应全像 f2/博声那样进不了候选；而 2/4 已进 RRF 前 11，切分假设不成立。
+- **本次探底零代码改动，无需回滚。交叉历史（勿重复探底）**：f3 / CP-002 的「精排截断」正是客服库 CS-TN-003 同款画像（三路召回、RRF 池内、被 rerank 主导序压出 top5）——客服/admin 库已系统性试过调权重这条路并封闭：v5.11/12 numeric_match boost **逐字节无效**、v5.13 表格 NL 摘要 **分数变序不变**（rerank 0.133→0.352 但排名 13→10 仍不进 top5）、v5.20 结构化补召回 **指标逐位不变**；贯穿病根 = bge-reranker 对数字/专名块语义失明，rerank 输入怎么喂只改量级不改排名结构。**唯一被验证能救池内块的是 v5.21 LLM listwise 终审，而生产决策已定不引入**（流式不兼容 + 评测同源偏置 + token 成本）。故「reranker/特征加权」方向不重复探底；f3/CP-002 要动名次只能 reranker 侧换赛道（LLM 终审进生产 / 换 reranker 模型），属方向决策。已同步 `DEVICE_SCENARIO.md` §5.1/§11.1 归因修正。
 
 ---
 
