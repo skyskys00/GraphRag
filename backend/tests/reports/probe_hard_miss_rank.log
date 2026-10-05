@@ -1,0 +1,299 @@
+/opt/anaconda3/envs/graphrag/lib/python3.11/site-packages/torch/cuda/__init__.py:68: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+INFO: PostgreSQL table: LIGHTRAG_VDB_ENTITY_xinference_bge_m3_1024d
+INFO: PostgreSQL table: LIGHTRAG_VDB_RELATION_xinference_bge_m3_1024d
+INFO: PostgreSQL table: LIGHTRAG_VDB_CHUNKS_xinference_bge_m3_1024d
+INFO: Role LLM Configuration (initialized):
+INFO:  - extract: None/None, host=None, max_async=2, timeout=240
+INFO:  - keyword: None/None, host=None, max_async=4, timeout=240
+INFO:  - query: None/None, host=None, max_async=4, timeout=240
+INFO:  - vlm: None/None, host=None, max_async=4, timeout=240
+INFO: PostgreSQL, Retry config: attempts=10, backoff=3.0s, backoff_max=30.0s, pool_close_timeout=5.0s
+INFO: PostgreSQL, VECTOR extension enabled
+INFO: PostgreSQL, Connected to database at 127.0.0.1:5432/postgres without SSL
+INFO: chunk_id column already exists in LIGHTRAG_LLM_CACHE table
+INFO: cache_type column already exists in LIGHTRAG_LLM_CACHE table
+INFO: queryparam column already exists in LIGHTRAG_LLM_CACHE table
+INFO: mode column does not exist in LIGHTRAG_LLM_CACHE table
+INFO: chunks_list column already exists in LIGHTRAG_DOC_STATUS table
+INFO: llm_cache_list column already exists in LIGHTRAG_DOC_CHUNKS table
+INFO: track_id column already exists in LIGHTRAG_DOC_STATUS table
+INFO: Index on track_id column already exists for LIGHTRAG_DOC_STATUS table
+INFO: metadata column already exists in LIGHTRAG_DOC_STATUS table
+INFO: error_msg column already exists in LIGHTRAG_DOC_STATUS table
+INFO: HNSW vector index idx_lightrag_vdb_entity_xinference_bge_m3_1024d_hnsw_cosine already exists on table LIGHTRAG_VDB_ENTITY_xinference_bge_m3_1024d
+INFO: HNSW vector index idx_lightrag_vdb_relation_xinference_bge_m3_1024d_hnsw_cosine already exists on table LIGHTRAG_VDB_RELATION_xinference_bge_m3_1024d
+INFO: HNSW vector index idx_lightrag_vdb_chunks_xinference_bge_m3_1024d_hnsw_cosine already exists on table LIGHTRAG_VDB_CHUNKS_xinference_bge_m3_1024d
+INFO: [col_b7b876b1] PGTableGraphStorage initialized
+WARNING: high_level_keywords is empty
+INFO: Embedding func: 8 new workers initialized (Timeouts: Func: 30s, Worker: 60s, Health Check: 75s)
+INFO: Query nodes: 500, 有创血压模拟仪, 气压静态压力输出, 精度等级, 气压动态模拟, 量程 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 35 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 35 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 35 relations
+INFO: Selecting 11 from 11 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 35 relations
+INFO: Round-robin merged chunks: 31 -> 23 (deduplicated 8)
+INFO: Final context: 15 entities, 35 relations, 20 chunks
+INFO: Final chunks S+F/O: C1/1 E1/1 E1/2 C1/3 E2/3 C1/4 E1/4 C1/5 E1/5 E2/6 E1/7 C1/8 E1/8 C1/9 E3/9 C1/10 E1/10 C1/11 E1/11 C1/12
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+WARNING: high_level_keywords is empty
+INFO: Query nodes: LH-T600, Sensor Cap, 溶解氧探头, 维护, 荧光帽, 检测 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 66 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 66 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 66 relations
+INFO: Selecting 27 from 27 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 66 relations
+INFO: Round-robin merged chunks: 47 -> 34 (deduplicated 13)
+INFO: Final context: 15 entities, 66 relations, 20 chunks
+INFO: Final chunks S+F/O: E5/1 E4/2 C1/3 E1/3 E1/4 E1/5 E1/6 E2/7 E2/8 E1/9 C1/10 E1/10 C1/11 E1/11 E2/12 E1/13 C1/14 E1/14 E1/15 C1/16
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+WARNING: high_level_keywords is empty
+INFO: Query nodes: APP, 血氧仪, 博声医疗, 设置, App (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 64 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 64 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 64 relations
+INFO: Selecting 23 from 23 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 64 relations
+INFO: Round-robin merged chunks: 43 -> 32 (deduplicated 11)
+INFO: Final context: 15 entities, 64 relations, 20 chunks
+INFO: Final chunks S+F/O: E2/1 E1/2 E1/3 E1/4 C1/5 E1/5 E4/6 E2/7 E2/8 E3/9 E1/10 E1/11 E1/12 C1/13 E1/13 C1/14 E1/14 C1/15 E1/15 C1/16
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+WARNING: high_level_keywords is empty
+INFO: Query nodes: P0, 行程, 运行, 中芯启恒, 注射泵, 工作模式 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 474 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 474 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 175 relations
+INFO: Selecting 37 from 129 entity-related chunks by vector similarity
+INFO: Find 76 additional chunks in 52 relations (deduplicated 4)
+INFO: Selecting 76 from 76 relation-related chunks by vector similarity
+INFO: Round-robin merged chunks: 133 -> 115 (deduplicated 18)
+INFO: Final context: 15 entities, 175 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 R1/1 E2/2 R2/2 E3/3 R3/3 E3/4 R1/4 E4/5 R3/5 E1/6 R2/6 C1/7 E3/7 R9/7 E1/8 R4/8 C1/9 E3/9 R1/9
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 行程, 运行, 中芯启恒, 注射泵, Cchippump-2, 工作模式 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 115 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 115 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 115 relations
+INFO: Selecting 37 from 37 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 115 relations
+INFO: Round-robin merged chunks: 57 -> 37 (deduplicated 20)
+INFO: Final context: 15 entities, 115 relations, 20 chunks
+INFO: Final chunks S+F/O: E4/1 E3/2 E3/3 E4/4 E3/5 E1/6 E2/7 E1/8 E2/9 E1/10 E2/11 E2/12 E1/13 E4/14 E4/15 E3/16 E5/17 E3/18 E4/19 E2/20
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 二者在产品, 100, 适用人群, APP, 英菲泰克, 血氧仪 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 64 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 64 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 64 relations
+INFO: Selecting 21 from 21 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 64 relations
+INFO: Round-robin merged chunks: 41 -> 38 (deduplicated 3)
+INFO: Final context: 15 entities, 64 relations, 20 chunks
+INFO: Final chunks S+F/O: C1/1 E1/1 C1/2 E5/2 C1/3 E4/3 C1/4 E4/4 C1/5 E2/5 C1/6 E1/6 C1/7 E1/7 C1/8 E1/8 C1/9 E1/9 C1/10 E1/10
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 二者在产品, 适用人群, APP, 血氧仪, 博声医疗, App (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 85 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 85 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 85 relations
+INFO: Selecting 30 from 30 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 85 relations
+INFO: Round-robin merged chunks: 50 -> 42 (deduplicated 8)
+INFO: Final context: 15 entities, 85 relations, 20 chunks
+INFO: Final chunks S+F/O: E5/1 E4/2 E2/3 E2/4 C1/5 E3/5 E1/6 E1/7 C1/8 E1/8 C1/9 E1/9 C1/10 E1/10 C1/11 E1/11 E1/12 C1/13 E1/13 C1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 500, 多参数检测仪, 量程, 血压, 徐州铭昇电子科技有限公司, 简介 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 124 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 124 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 124 relations
+INFO: Selecting 33 from 33 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 124 relations
+INFO: Round-robin merged chunks: 53 -> 34 (deduplicated 19)
+INFO: Final context: 15 entities, 124 relations, 20 chunks
+INFO: Final chunks S+F/O: E2/1 E1/2 E2/3 E2/4 E2/5 E2/6 E1/7 E2/8 E11/9 E3/10 E3/11 E3/12 E2/13 E1/14 E1/15 C1/16 E3/16 E3/17 E3/18 E1/19
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+WARNING: high_level_keywords is empty
+INFO: Query nodes: pH, LH-T600, 量程, 精度, 浊度, 探头 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 57 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 57 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 57 relations
+INFO: Selecting 37 from 40 entity-related chunks by vector similarity
+INFO: Find 3 additional chunks in 3 relations (deduplicated 37)
+INFO: Selecting 3 from 3 relation-related chunks by vector similarity
+INFO: Round-robin merged chunks: 60 -> 45 (deduplicated 15)
+INFO: Final context: 15 entities, 57 relations, 20 chunks
+INFO: Final chunks S+F/O: C1/1 E3/1 R1/1 E3/2 R2/2 E2/3 R2/3 E4/4 E3/5 E1/6 E1/7 E3/8 E2/9 E1/10 C1/11 E1/11 E1/12 C1/13 E2/13 E1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 室颤, 电除颤, 室扑, 心跳骤停, 病人, 说明书 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 78 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 78 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 78 relations
+INFO: Selecting 25 from 25 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 78 relations
+INFO: Round-robin merged chunks: 45 -> 33 (deduplicated 12)
+INFO: Final context: 15 entities, 78 relations, 20 chunks
+INFO: Final chunks S+F/O: E4/1 E1/2 E2/3 E5/4 E4/5 E1/6 E1/7 C1/8 E1/8 E2/9 E3/10 C1/11 E3/11 C1/12 E1/12 E2/13 C1/14 E3/14 C1/15 E1/15
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 100, 记录仪, 计时准确性, 监测时间, 英菲泰克 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 28 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 28 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 28 relations
+INFO: Selecting 22 from 22 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 28 relations
+INFO: Round-robin merged chunks: 42 -> 37 (deduplicated 5)
+INFO: Final context: 15 entities, 28 relations, 20 chunks
+INFO: Final chunks S+F/O: C1/1 E2/1 E1/2 C1/3 E1/3 C1/4 E1/4 C1/5 E3/5 C1/6 E1/6 C1/7 E1/7 C1/8 E1/8 C1/9 E1/9 C1/10 E1/10 C1/11
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 连续工作, 500, 有创血压模拟仪, 电池, 时间, 状态 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 108 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 108 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 108 relations
+INFO: Selecting 37 from 44 entity-related chunks by vector similarity
+INFO: Find 7 additional chunks in 6 relations (deduplicated 36)
+INFO: Selecting 7 from 7 relation-related chunks by vector similarity
+INFO: Round-robin merged chunks: 64 -> 46 (deduplicated 18)
+INFO: Final context: 15 entities, 108 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 R1/1 E1/2 R2/2 E3/3 R1/3 E1/4 R1/4 E1/5 R1/5 E2/6 R3/6 E1/7 R1/7 E1/8 E2/9 E2/10 E1/11 C1/12 E1/12
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 融柏恒流泵, 运行, 堵车, 注射泵, 提示 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 424 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 424 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 175 relations
+INFO: Selecting 37 from 125 entity-related chunks by vector similarity
+INFO: Find 74 additional chunks in 50 relations (deduplicated 6)
+INFO: Selecting 74 from 74 relation-related chunks by vector similarity
+INFO: Round-robin merged chunks: 131 -> 116 (deduplicated 15)
+INFO: Final context: 15 entities, 175 relations, 20 chunks
+INFO: Final chunks S+F/O: E4/1 R1/1 E1/2 R1/2 C1/3 E1/3 R4/3 E2/4 R5/4 E1/5 R2/5 E1/6 R1/6 E1/7 R5/7 C1/8 E1/8 R2/8 C1/9 E2/9
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+== 目标块定位 ==
+  DV-TN-005 @ 铭昇电子_H2-5000IBP有创血压模拟仪_操作手册. [P] pNone len=168 | 候选1取最长(168字)
+  DV-FS-008 @ 智能便携式检测仪.pdf                 [T] pNone len=119 | 候选1取最长(119字)
+  DV-IO-004 @ 血氧仪使用手册.pdf                  [IMG] pNone len=252 | 候选1取最长(252字)
+  DV-CP-001 @ 融柏恒流泵_LSP-1C系列注射泵_说明书.pdf    [P] pNone len=111 | 候选1取最长(111字)
+  DV-CP-001 @ 瑞创RSP系列注射泵.pdf               [T] pNone len=123 | 候选1取最长(123字)
+  DV-CP-004 @ 英菲泰克动态心电记录仪.pdf              [H] pNone len=23 | 候选1取最长(23字)
+  DV-CP-004 @ 血氧仪使用手册.pdf                  [H] pNone len=38 | 候选1取最长(38字)
+  DV-CP-002 @ 铭昇电子_H2-5000IBP有创血压模拟仪_操作手册. [P] pNone len=55 | 候选1取最长(55字)
+  DV-TN-007 @ 智能便携式检测仪.pdf                 [H] pNone len=56 | 候选1取最长(56字)
+  DV-FS-006 @ 电除颤.pdf                      [P] pNone len=50 | 候选1取最长(50字)
+  DV-FS-002 @ 英菲泰克动态心电记录仪.pdf              [H] pNone len=41 | 候选1取最长(41字)
+  DV-FS-005 @ 铭昇电子_H2-5000IBP有创血压模拟仪_操作手册. [P] pNone len=127 | 候选1取最长(127字)
+  DV-IO-006 @ 融柏恒流泵_LSP-1C系列注射泵_说明书.pdf    [IMG] pNone len=28 | 候选1取最长(28字)
+
+[DV-TN-005] hard/table_numeric → 铭昇电子_H2-5000IBP有创血压模拟仪_操作手册.pdf
+    target [P] pNone :: 气压静态压力输出：  量 程 ：（0～40）kPa  精度等级 ： ±0.15%F.S  绝对误差 ：<0.75mmHg（0-300mmHg）  静态压力： 20 mmHg 到 255 mm
+    [全库(raw q)] 池: graph=20 vector=20 keyword=40
+    routes → graph=15 vector=MISS keyword=18  | RRF全序=21 fused40=17 final5=MISS
+    ✅ 结论: 进 fused top40(#17) 但精排后掉出 top5 → 精排/特征截断
+
+[DV-FS-008] hard/fact_single → 智能便携式检测仪.pdf
+    target [T] pNone :: 【列：维护任务 | 建议维护频率】  | 维护任务 | 建议维护频率 | |---|---| | 清洗传感器 | 每次使用前、后及时清洗 | | 检查传感器和荧光帽是否损坏 | 每30天检查
+    [全库(raw q)] 池: graph=20 vector=20 keyword=40
+    routes → graph=5 vector=9 keyword=37  | RRF全序=7 fused40=8 final5=MISS
+    ✅ 结论: 进 fused top40(#8) 但精排后掉出 top5 → 精排/特征截断
+
+[DV-IO-004] hard/image_only → 血氧仪使用手册.pdf
+    target [IMG] pNone :: 界面截图|有|设置、绑定医生、医生解绑、多语言、跟随系统、记录设置、密码设置、网页浏览设置、Chrome标签、使用Chrome标签需要您安装了Chrome浏览器，Chrome标签使用Chro
+    [全库(raw q)] 池: graph=20 vector=20 keyword=40
+    routes → graph=11 vector=10 keyword=MISS  | RRF全序=13 fused40=23 final5=MISS
+    ✅ 结论: 进 fused top40(#23) 但精排后掉出 top5 → 精排/特征截断
+
+[DV-CP-001] hard/comparison → 融柏恒流泵_LSP-1C系列注射泵_说明书.pdf
+    target [P] pNone :: 在此界面可以对注射器的内径和行程进行设置（注意：内径必须大于0并且小于50mm;行程必须大于0小于120mm），设置完后对自定义进行勾选。  （7）在设备配置界面可以通过触摸“时钟”按钮，可
+    sub_q(localized) = 融柏 LSP-1C 系列（型号 LSP01-1BC）与中芯启恒 两台注射泵，在运行/工作模式与行程上限上有何不同？
+    [per-doc(localized)] 池: graph=20 vector=20 keyword=40
+    routes → graph=MISS vector=MISS keyword=MISS  | RRF全序=NOT-IN fused40=MISS final5=MISS
+    ✅ 结论: 三路全 miss → 候选池未进（召回侧）
+
+[DV-CP-001] hard/comparison → 瑞创RSP系列注射泵.pdf
+    target [T] pNone :: 【列：注射泵类型 | Cchippump-2】  | 注射泵类型 | Cchippump-2 | |---|---| | 注射器选择 | 内置主要厂家、主要型号 | | 注射器自定义 | 可
+    sub_q(localized) = 系列（型号 ）与中芯启恒 Cchippump-2 两台注射泵，在运行/工作模式与行程上限上有何不同？
+    [per-doc(localized)] 池: graph=20 vector=20 keyword=40
+    routes → graph=5 vector=3 keyword=8  | RRF全序=3 fused40=7 final5=MISS
+    ✅ 结论: 进 fused top40(#7) 但精排后掉出 top5 → 精排/特征截断
+
+[DV-CP-004] hard/comparison → 英菲泰克动态心电记录仪.pdf
+    target [H] pNone :: 1）适用范围  供人体24小时动态心电监测用。
+    sub_q(localized) = 英菲泰克 IDEM1000-0N 与博声医疗血氧仪 APP 都涉及心电监测，二者在产品形态、适用人群与使用方式上有何不同？
+    [per-doc(localized)] 池: graph=20 vector=20 keyword=40
+    routes → graph=MISS vector=16 keyword=34  | RRF全序=24 fused40=16 final5=MISS
+    ✅ 结论: 进 fused top40(#16) 但精排后掉出 top5 → 精排/特征截断
+
+[DV-CP-004] hard/comparison → 血氧仪使用手册.pdf
+    target [H] pNone :: 1.3 运行环境  本软件可在Android 与iSO系统的智能设备上运行。
+    sub_q(localized) = 与博声医疗血氧仪 APP 都涉及心电监测，二者在产品形态、适用人群与使用方式上有何不同？
+    [per-doc(localized)] 池: graph=20 vector=20 keyword=40
+    routes → graph=MISS vector=MISS keyword=MISS  | RRF全序=NOT-IN fused40=MISS final5=MISS
+    ✅ 结论: 三路全 miss → 候选池未进（召回侧）
+
+[DV-CP-002] medium/comparison → 铭昇电子_H2-5000IBP有创血压模拟仪_操作手册.pdf
+    target [P] pNone :: 气压动态压力模拟：  收缩压 ： 30mmHg\~255mmHg  舒张压 ： 10mmHg\~240mmHg
+    sub_q(localized) = 铭昇 H2-5000IBP 与多参数检测仪 都涉及血压，两者的血压相关量程/范围有何不同？
+    [per-doc(localized)] 池: graph=20 vector=20 keyword=40
+    routes → graph=MISS vector=MISS keyword=MISS  | RRF全序=NOT-IN fused40=MISS final5=MISS
+    ✅ 结论: 三路全 miss → 候选池未进（召回侧）
+
+[DV-TN-007] medium/table_numeric → 智能便携式检测仪.pdf
+    target [H] pNone :: 3.3.4 pH 校准  pH 电极支持三点校准。且三个校准点标液需是固定的 4.01，6.86 和 9.18。
+    [全库(raw q)] 池: graph=20 vector=20 keyword=40
+    routes → graph=MISS vector=MISS keyword=MISS  | RRF全序=NOT-IN fused40=MISS final5=MISS
+    ✅ 结论: 三路全 miss → 候选池未进（召回侧）
+
+[DV-FS-006] medium/fact_single → 电除颤.pdf
+    target [P] pNone :: 特征：QRS－T波群消失，而代之以快速而不均匀的.波幅大小不一的颤动波，速率在250～500次/分。
+    [全库(raw q)] 池: graph=20 vector=20 keyword=40
+    routes → graph=MISS vector=MISS keyword=24  | RRF全序=32 fused40=22 final5=MISS
+    ✅ 结论: 进 fused top40(#22) 但精排后掉出 top5 → 精排/特征截断
+
+[DV-FS-002] easy/fact_single → 英菲泰克动态心电记录仪.pdf
+    target [H] pNone :: 3监测时间  连续记录仪在内部电源完全充满电的情况下，持续时间不小于 24 小时。
+    [全库(raw q)] 池: graph=20 vector=20 keyword=40
+    routes → graph=9 vector=MISS keyword=15  | RRF全序=15 fused40=7 final5=MISS
+    ✅ 结论: 进 fused top40(#7) 但精排后掉出 top5 → 精排/特征截断
+
+[DV-FS-005] easy/fact_single → 铭昇电子_H2-5000IBP有创血压模拟仪_操作手册.pdf
+    target [P] pNone :: 特性   内置气泵：用于高压和低压提供压力源   内置密封容器：可以不接袖带，直接对有创血压监护仪进行测试   采用高精度压力传感器，数值更加精准   具有对有创血压仪器进行压力校准
+    [全库(raw q)] 池: graph=20 vector=20 keyword=40
+    routes → graph=19 vector=16 keyword=17  | RRF全序=13 fused40=10 final5=MISS
+    ✅ 结论: 进 fused top40(#10) 但精排后掉出 top5 → 精排/特征截断
+
+[DV-IO-006] easy/image_only → 融柏恒流泵_LSP-1C系列注射泵_说明书.pdf
+    target [IMG] pNone :: 界面截图|有|报警文本：工作被中断！；按钮名：继续、停止
+    [全库(raw q)] 池: graph=20 vector=20 keyword=40
+    routes → graph=10 vector=7 keyword=MISS  | RRF全序=12 fused40=8 final5=MISS
+    ✅ 结论: 进 fused top40(#8) 但精排后掉出 top5 → 精排/特征截断
+

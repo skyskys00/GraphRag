@@ -173,7 +173,17 @@ v5.32 后器械 30 题诚实口径 Recall **0.6763**，用户判断偏低。诊�
 - **拖累项全是旧题**：image_only 0.6667 / comparison 0.4583 / hard 段 0.4815（四题 0：TN-005 / FS-008 / IO-004 / CP-002）。**新语料零回归**：table_numeric / image_only / comparison 三题型 @5 与 v5.32 逐题一致。
 - **读数**：难度配比是器械 aggregate 的主要杠杆——hard 占比 27%→18% 带来 +0.1146，**不是链路变强，而是考核分布变真实**。距用户 80% 目标差 0.91pp。详见 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §11.4。
 
-### 五、收尾
+### 五、未满分题逐 fact 漏召归因（探针实测，2026-10-05 追加）
+
+**探针**：`backend/scripts/probe_hard_miss_rank.py`（只读，留档可复跑），日志 `backend/tests/reports/probe_hard_miss_rank.log`。复现 runner 生产检索形态，把每个失败 fact 的目标块当「鱼」，解剖其在三路候选 / RRF 全序 / fused top40 / 精排 top5 各段排名（定位锚取自语料实测内容，与 key_facts 零交集，红线合规）。
+
+- **前置结论**：15 道未满分题的 **21 个失败 fact，支撑内容 100% 存在于语料**（逐条 grep 实测，含 KE-2000 量程 0-279mmHg、LSP01-1BC 行程 120mm 等）——**失败不是语料缺失，而是检索未把目标块送进 top5**。
+- **二分归因（13 目标块实测）**：**精排截断 9/13（主因）**——目标块已进 fused top40（位次 7–23），cross-encoder 精排后掉出 top5，跨题型普遍（段落 4 / 表格 2 / 图像 2 / 标题 1）；**候选池未进 4/13**——三路召回全 miss，四块**全为短块**（23–56 字：LSP 行程 / 博声运行环境 / 气压动态模拟 / pH 三点校准）。
+- **分层**：easy 0.8720（8 失败 fact = 漏召 4 + **裁判假阴性 4**）/ medium 0.8542（4 失败 fact = 全漏召）/ hard 0.4815（15 失败 fact = 漏召 14 + 假阴性 1）。
+- **非检索因素（诚实标注，不计入检索缺陷）**：① **裁判措辞字面化假阴性**——DV-N-FS-017 语料一句「向护士长、科主任、总值班、护理部口头报告事件情况」被题集拆成 4 个「包括X」fact，裁判逐个要求显式「包括X」→ 3 个 fact 全判否（内容其实全在上下文）；DV-N-FS-012 同理。**属评测口径 artifact**，按泄漏红线不以改写 key_facts 抬分，仅标注 easy/medium 实测值被低估。② **推理型 key_fact**（DV-N-FS-019 案例→Ⅰ级、DV-IO-002 Type 排列顺序比较）语料无直接表述，属出题取向。
+- **修复方向（仅结论，未动手）**：主战场在 **M5 精排侧**（短块/图像/表格块特征补偿，把 fused top40 里位次 7–23 的正确块推入 top5）；次战场是候选池未进 4 例（均短块，稀疏索引失明）。**评测窗口 `eval_top_n=5` 对齐生产 `RERANK_TOP=5`，不得为抬分放宽**（红线）。⚠️ 与 v5.32 探底交叉：客服库已系统性试过调权重并封闭（v5.11/12/13/20 逐字节/逐位无效），精排侧要动名次只能换赛道（LLM 终审进生产 / 换 reranker），属方向决策。详见 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §11.5。
+
+### 六、收尾
 
 - 残留清理：删除前序误改标签实验产物 `run_retrieval_device30_v533_rebalance.json/.log`（difficulty 涂改，已回滚，不占版本）。
 - 报告归档：`run_retrieval_device50.json` + `.log`（本次产物）；`testset_device_50.json` 入库 `backend/tests/testsets/`。
