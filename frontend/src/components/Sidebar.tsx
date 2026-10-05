@@ -7,7 +7,6 @@ const NAV_ITEMS: { key: AppView; label: string; icon: string }[] = [
   { key: 'chat', label: '问答', icon: '◌' },
   { key: 'documents', label: '文档管理', icon: '▤' },
   { key: 'graph', label: '知识图谱', icon: '✳' },
-  { key: 'compare', label: '参数对比', icon: '⇄' },
 ]
 
 interface SidebarProps {

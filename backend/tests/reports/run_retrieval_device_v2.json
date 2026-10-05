@@ -1,0 +1,6146 @@
+{
+  "testset_id": "testset_device_v2",
+  "domain": "家用/医用器械说明书库（12 份，含注射泵、血压、血氧、心电、除颤、水质检测 + 骨科手术器械审评规范 + 护理不良事件上报）",
+  "version": "2026-10-05",
+  "timestamp": "2026-10-05 18:07:24",
+  "config": {
+    "mode": "retrieval",
+    "collection": "col_b7b876b1",
+    "workspace": "col_b7b876b1",
+    "reranker": "standard",
+    "ablation_routes": "graph,vector,keyword",
+    "comparison_mode": "per_doc"
+  },
+  "summary": {
+    "total_questions": 50,
+    "overall": {
+      "context_recall": 0.8833,
+      "context_precision": 0.296,
+      "context_precision_weighted": 0.4723,
+      "gold_rank_avg": 1.39,
+      "gold_rank_median": 1.36,
+      "gold_rank_min": 1.17,
+      "gold_rank_max": 1.68,
+      "gold_rank_top1_recall": 0.747,
+      "gold_rank_top3_recall": 0.862,
+      "gold_rank_top5_recall": 0.906,
+      "ndcg": 0.9305,
+      "faithfulness": 0.0,
+      "answer_relevance": 0.0,
+      "correctness": 0.0,
+      "citation_accuracy": 0.0,
+      "judge_failed_judgments": 0
+    },
+    "by_category": {
+      "fact_single": {
+        "count": 18,
+        "context_recall": 1.0,
+        "context_precision": 0.2889,
+        "gold_rank_avg": 1.0,
+        "gold_rank_median": 1.0,
+        "gold_rank_top5_recall": 0.9333,
+        "ndcg": 0.9836,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "image_only": {
+        "count": 10,
+        "context_recall": 0.9,
+        "context_precision": 0.28,
+        "gold_rank_avg": 1.2,
+        "gold_rank_median": 1.1,
+        "gold_rank_top5_recall": 0.95,
+        "ndcg": 0.9821,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "summary": {
+        "count": 10,
+        "context_recall": 0.7667,
+        "context_precision": 0.38,
+        "gold_rank_avg": 2.23,
+        "gold_rank_median": 2.28,
+        "gold_rank_top5_recall": 0.8,
+        "ndcg": 0.8127,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "table_numeric": {
+        "count": 12,
+        "context_recall": 0.7917,
+        "context_precision": 0.25,
+        "gold_rank_avg": 1.48,
+        "gold_rank_median": 1.41,
+        "gold_rank_top5_recall": 0.9167,
+        "ndcg": 0.9059,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "count": 25,
+        "context_recall": 0.88,
+        "context_precision": 0.256,
+        "gold_rank_avg": 1.04,
+        "gold_rank_median": 1.04,
+        "gold_rank_top5_recall": 0.912,
+        "ndcg": 0.9736,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "hard": {
+        "count": 10,
+        "context_recall": 0.7667,
+        "context_precision": 0.36,
+        "gold_rank_avg": 2.32,
+        "gold_rank_median": 2.28,
+        "gold_rank_top5_recall": 0.8,
+        "ndcg": 0.8024,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "medium": {
+        "count": 15,
+        "context_recall": 0.9667,
+        "context_precision": 0.32,
+        "gold_rank_avg": 1.36,
+        "gold_rank_median": 1.3,
+        "gold_rank_top5_recall": 0.9667,
+        "ndcg": 0.944,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      }
+    },
+    "judge_failed_questions": 0,
+    "total_time_s": 1669.0
+  },
+  "questions": [
+    {
+      "id": "DV-TN-001",
+      "category": "table_numeric",
+      "difficulty": "easy",
+      "question": "这台注射泵的最大步速是多少？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "f33baf8f00190aa4",
+          "8a22bfff101b31f1",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4"
+        ],
+        "time_s": 14.66
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 1,
+          "found_facts": 1,
+          "not_found_facts": 0,
+          "min_rank": 2,
+          "median_rank": 2.0,
+          "avg_rank": 2.0,
+          "max_rank": 2,
+          "top_k_recall": {
+            "1": 0.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "最大步速 = 867 steps/sec",
+              "gold_rank": 2,
+              "chunk_id": "chunk-ec7e904e0b9ae07455e9980498544b1a",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 1,
+          "hit_facts": 1,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "最大步速 = 867 steps/sec",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]中明确列出：型号 LSP01-1BC 的参数表中有“| 最大步速 | 867 steps/sec |”，与事实陈述“最大步速 = 867 steps/sec”完全一致。"
+            }
+          ],
+          "reason": "1/1 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.219,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本中的最大步速为1243step/sec，与标准答案关键数值867不一致，因此对回答该问题没有帮助。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本中的表格明确列出了该型号的最大步速为 867 steps/sec，与标准答案要点及关键数值清单完全一致，直接回答了问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅列出线速度范围（4.68um/min-270.00mm/min）等参数，未包含最大步速867 steps/sec或任何可直接换算为步速的信息。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该检索文本列出了注射泵类型、注射器选择、最大行程等信息，但完全没有提及最大步速，未包含回答所需的数值867 steps/sec，因此对回答问题没有帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本列出了 Cchippump-2 的最小步速为 0、控制精度和重复精度，但未提及最大步速，也没有出现关键数值 867，因此无助于回答问题。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.6403
+      },
+      "time_s": 14.66
+    },
+    {
+      "id": "DV-FS-001",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "这台注射泵可以用来做人体临床试验吗？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "f33baf8f00190aa4",
+          "8a22bfff101b31f1",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4"
+        ],
+        "time_s": 7.67
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "不能用于人类的临床实验",
+              "gold_rank": 1,
+              "chunk_id": "chunk-a2c61e330bb690f1a10410885ba4d44f",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "只能用于科学研究",
+              "gold_rank": 1,
+              "chunk_id": "chunk-a2c61e330bb690f1a10410885ba4d44f",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "不能用于人类的临床实验",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确记载“此泵没有在FDA注册，不能用于人类的临床实验”，上下文[2]也记载“此泵不能用于人类的临床实验，只能用于科学研究”，均直接支持该事实陈述。"
+            },
+            {
+              "fact": "只能用于科学研究",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[2]中明确表述：\"此泵不能用于人类的临床实验，只能用于科学研究\"。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.6,
+        "context_precision_weighted": 0.8029,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 3,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本第(9)条明确写明‘此泵没有在FDA注册，不能用于人类的临床实验’，直接包含标准答案要点中的‘不可以’和‘不能用于人类的临床实验’，对回答问题有直接帮助。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本明确表述“此泵不能用于人类的临床实验，只能用于科学研究”，与标准答案要点“不可以”“只能用于科学研究”完全一致，直接回答了问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本介绍了注射泵的应用领域，涵盖动物药物注射等，但没有直接说明是否可以用于人体临床试验，仅提供了部分背景信息。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "这段文本仅为产品说明书中的公司联系方式及版权声明，未提及注射泵能否用于人体临床试验或任何相关限制说明，对回答问题没有帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅罗列注射泵的产品特点（屏幕、通讯、记忆功能等），完全未提及是否可用于人体临床试验或相关限制，对回答问题没有帮助。"
+            }
+          ],
+          "reason": "3/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 7.68
+    },
+    {
+      "id": "DV-FS-002",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "这台注射泵的电源开关装在机器的哪个位置？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "8a22bfff101b31f1",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4",
+          "8a22bfff101b31f1",
+          "f33baf8f00190aa4"
+        ],
+        "time_s": 14.38
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 1,
+          "found_facts": 1,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "电源开关位于注射泵后面的右侧",
+              "gold_rank": 1,
+              "chunk_id": "chunk-a0e951dbb2a5917b2a1b773cbfdd70d9",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 1,
+          "hit_facts": 1,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "电源开关位于注射泵后面的右侧",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确记载：“电源开关安装在注射泵后面的右侧。”这与事实陈述“电源开关位于注射泵后面的右侧”完全一致。"
+            }
+          ],
+          "reason": "1/1 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本明确写出“电源开关安装在注射泵后面的右侧”，与标准答案要点1完全一致，直接回答了开关位置。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.2,
+              "reason": "检索文本提到电源开关但说明其位置在注射泵背面左侧，而标准答案要求电源开关安装在后面右侧，关键位置信息（左/右）矛盾，不能辅助回答问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅描述产品外观、结构组成和用途，未提及电源开关位置，与问题及标准答案要点“电源开关安装在注射泵后面的右侧”无任何关联。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该检索文本详细描述了注射器的安装步骤和注意事项，完全未提及注射泵电源开关的位置，因此对回答该问题没有帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅提及打开电源开关启动系统的操作步骤，未涉及电源开关在机器上的位置，与问题及标准答案中的“注射泵后面的右侧”完全无关。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 16.43
+    },
+    {
+      "id": "DV-IO-001",
+      "category": "image_only",
+      "difficulty": "medium",
+      "question": "在流量校准界面里，当前显示的校正系数是多少？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "8a22bfff101b31f1",
+          "8a22bfff101b31f1",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4",
+          "e10aa9a02b70ae74"
+        ],
+        "time_s": 6.09
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 1,
+          "found_facts": 1,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "流量校准界面当前校正系数 = 1.000",
+              "gold_rank": 1,
+              "chunk_id": "chunk-3af6c2c01f19558abe386ed2e0c14041",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 1,
+          "hit_facts": 1,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "流量校准界面当前校正系数 = 1.000",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确出现“流量校准；流量 200.0 uL/min；运行时间 50 s；灌注量 100.0 uL；当前校正系数：1.000；启动/停止；退出”，其中“当前校正系数：1.000”与事实陈述“流量校准界面当前校正系数 = 1.000”直接对应。"
+            }
+          ],
+          "reason": "1/1 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本明确包含“当前校正系数：1.000”，与标准答案要点及关键数值清单中的1.000完全一致，直接回答了问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本内容为流量校准界面操作说明，未出现任何校正系数数值，也未提及1.000，无法回答当前校正系数是多少。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅为“3.5校准界面”，未包含任何校正系数数值，无法与【关键数值】1.000比对，对回答问题无帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本描述的是“注射器校准”界面，显示的系数为0.000，且界面完全不同，未出现清单中的关键数值1.000，对回答当前校正系数问题无帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本描述的是第一点校准流程（如 100.0 %、93.64、Success 等），未出现标准答案要点中要求的校正系数 1.000，对回答问题无帮助。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.9812
+      },
+      "time_s": 7.93
+    },
+    {
+      "id": "DV-FS-003",
+      "category": "fact_single",
+      "difficulty": "medium",
+      "question": "用 RS485 把多台泵连到一台计算机上时，最多能控制多少台泵？泵的通讯地址范围是多少，出厂默认地址是几号？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "8a22bfff101b31f1",
+          "8a22bfff101b31f1",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4",
+          "8a22bfff101b31f1"
+        ],
+        "time_s": 8.42
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 3,
+          "found_facts": 3,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "一台计算机最多控制 30 台泵",
+              "gold_rank": 1,
+              "chunk_id": "chunk-58479f9b59f05808d513b7ef980638b0",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "通讯地址 1-30 可选",
+              "gold_rank": 1,
+              "chunk_id": "chunk-58479f9b59f05808d513b7ef980638b0",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "地址出厂默认值为 1",
+              "gold_rank": 1,
+              "chunk_id": "chunk-58479f9b59f05808d513b7ef980638b0",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 3,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "一台计算机最多控制 30 台泵",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“一台计算机最多可以控制30台泵”，与事实陈述完全一致。"
+            },
+            {
+              "fact": "通讯地址 1-30 可选",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述“通讯地址1-30可选，出厂默认值为1”，与事实陈述“通讯地址 1-30 可选”直接一致。"
+            },
+            {
+              "fact": "地址出厂默认值为 1",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：“通讯地址1-30可选，出厂默认值为1。”"
+            }
+          ],
+          "reason": "3/3 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本明确提到一台计算机最多可控制30台泵，通讯地址1-30可选，出厂默认值为1，与【关键数值】清单中的30和1逐项一致，完整覆盖问题所需信息。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅提及RS485接口可与上位机相连，未涉及泵的数量上限（30台）、通讯地址范围（1-30）或出厂默认地址（1）等关键数值，对回答实际问题无实质帮助。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本讲的是RS232通信控制两台泵，与问题所问的RS485最多控制30台泵及地址范围1-30、默认值1完全无关，且未出现关键数值30或1。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅提到RS485通信接口，未涉及最多控制泵数（30台）、通讯地址范围（1-30）或出厂默认地址（1号）等关键数值，对回答问题无帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅为目录和公司名称，未包含任何关于RS485控制泵数量或通讯地址范围的信息，与问题完全无关。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 30.06
+    },
+    {
+      "id": "DV-SUM-001",
+      "category": "summary",
+      "difficulty": "hard",
+      "question": "如果要用程序列表里没有的注射器，自定义设置最多能保存几组？对注射器内径和行程的取值范围分别有什么要求？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "8a22bfff101b31f1",
+          "f33baf8f00190aa4",
+          "8a22bfff101b31f1",
+          "8a22bfff101b31f1",
+          "8a22bfff101b31f1"
+        ],
+        "time_s": 15.5
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 3,
+          "found_facts": 3,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 3.0,
+          "avg_rank": 2.33,
+          "max_rank": 3,
+          "top_k_recall": {
+            "1": 0.3333,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "最多存储四组自定义注射器内径值和行程",
+              "gold_rank": 1,
+              "chunk_id": "chunk-8cebbc84a5b900281c5bb22c9dcbb65b",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "内径必须大于 0 且小于 50 mm",
+              "gold_rank": 3,
+              "chunk_id": "chunk-bb7dc2875933cadbb12c70ed3dc51252",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "行程必须大于 0 且小于 120 mm",
+              "gold_rank": 3,
+              "chunk_id": "chunk-bb7dc2875933cadbb12c70ed3dc51252",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 3,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "最多存储四组自定义注射器内径值和行程",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：‘可以存储四组用户自定义的注射器内径值和行程’，与事实陈述‘最多存储四组自定义注射器内径值和行程’直接对应。"
+            },
+            {
+              "fact": "内径必须大于 0 且小于 50 mm",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[3]中明确记载：“注意：内径必须大于0并且小于50mm;行程必须大于0小于120mm”，与事实陈述“内径必须大于 0 且小于 50 mm”完全一致。"
+            },
+            {
+              "fact": "行程必须大于 0 且小于 120 mm",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[3]明确表述：‘行程必须大于0小于120mm’，与事实陈述‘行程必须大于 0 且小于 120 mm’一致。"
+            }
+          ],
+          "reason": "3/3 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.4,
+        "context_precision_weighted": 0.5839,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 2,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本确认了最多可存储四组自定义注射器内径值和行程，与标准答案第1点一致；但未提及内径和行程的具体取值范围（0、50、120），故相关度中等。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅提到自定义注射器时可手动输入内径，但未涉及最多可保存几组、内径范围（0到50mm）或行程范围（0到120mm）等标准答案所需的关键数值，对回答问题帮助极小。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本明确给出内径必须大于0且小于50mm、行程必须大于0且小于120mm，与关键数值0、50、120逐一核对一致，对回答取值范围要求有直接帮助，但未提及最多保存四组自定义的设置数量，信息不完整。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅提到可自定义设置注射器内径和行程，但未说明最多可保存的组数，也未给出内径大于0且小于50 mm、行程大于0且小于120 mm的取值范围，因此对回答问题没有实质帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅说明标准注射器列表中选定后内径值自动输入，未提及自定义设置最多可保存几组，也未涉及内径和行程的取值范围（关键数值 0、50、120），与问题所需信息完全无关。"
+            }
+          ],
+          "reason": "2/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.9014
+      },
+      "time_s": 37.36
+    },
+    {
+      "id": "DV-FS-004",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "这台有创血压模拟仪的软件主菜单里，有一个只有选配了心电参数的型号才会出现的窗口，它叫什么？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "a07ebcfa1b858095",
+          "a07ebcfa1b858095",
+          "a07ebcfa1b858095",
+          "a07ebcfa1b858095",
+          "a07ebcfa1b858095"
+        ],
+        "time_s": 25.77
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "该窗口名为『扩展窗口』",
+              "gold_rank": 1,
+              "chunk_id": "chunk-d28ac71659b55bb87e4cfd0b52bd0039",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "只有选配心电参数的型号才有此窗口",
+              "gold_rank": 1,
+              "chunk_id": "chunk-d28ac71659b55bb87e4cfd0b52bd0039",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "该窗口名为『扩展窗口』",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]主菜单列表中明确列出『扩展窗口』，并说明『扩 展 窗 口 ：只有选择具有心电参数的型号才有此窗口，关于心电参数的设置』，与事实陈述『该窗口名为扩展窗口』一致。"
+            },
+            {
+              "fact": "只有选配心电参数的型号才有此窗口",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确写道：'扩 展 窗 口 ：只有选择具有心电参数的型号才有此窗口，关于心电参数的设置'，与事实陈述'只有选配心电参数的型号才有此窗口'直接对应。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "该文本明确说明软件主菜单共有六个项目，且『扩展窗口』只有选择具有心电参数的型号才有此窗口，直接对应问题与标准答案要点中的数值。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本介绍的是设置窗口内的各项参数（语言选择、型号选择、按键延时等），并未提及标准答案要点中的『扩展窗口』或它与心电参数选配型号的关系，因此对回答问题没有帮助。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本描述有创血压模拟仪的电信号输出设置和压力校零功能，未提及软件主菜单、『扩展窗口』或心电参数选配型号等相关信息，与问题完全无关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本只介绍按键操作方式（共8个按键）及各按键功能，未提及软件主菜单、心电参数选配或『扩展窗口』，与问题所需信息完全无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅描述『有创动态模拟』窗口的进入方式，未提及『扩展窗口』或心电参数选配条件，与问题所需信息完全无关。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 28.25
+    },
+    {
+      "id": "DV-TN-002",
+      "category": "table_numeric",
+      "difficulty": "easy",
+      "question": "在系统参数设置界面里，厂家密码的默认数值是多少？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "a07ebcfa1b858095",
+          "e10aa9a02b70ae74",
+          "a07ebcfa1b858095",
+          "a07ebcfa1b858095",
+          "8a22bfff101b31f1"
+        ],
+        "time_s": 7.77
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 1,
+          "found_facts": 1,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "厂家密码 = 00000",
+              "gold_rank": 1,
+              "chunk_id": "chunk-3da8a02e6c49daed912cd30a8597de2f",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 1,
+          "hit_facts": 1,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "厂家密码 = 00000",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[1]的表格中明确列出：『厂家密码 | 00000』，与事实陈述『厂家密码 = 00000』完全一致。"
+            }
+          ],
+          "reason": "1/1 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本明确列出厂家密码为 00000，与【关键数值】清单中的 00000 完全一致，直接可用于回答该问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "检索文本仅描述按键操作（短按开机、短按确认设置、短按进入校准界面等），未提及系统参数设置界面的厂家密码，也未出现关键数值00000。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本只展示了系统参数设置界面的语言、型号、按键延时等选项，完全没有出现厂家密码或关键数值00000，对回答无帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅为H2-5000IBP系统参数设置界面的选项列表（如电信号、气压信号、扩展功能、保存设置、默认设置），未出现厂家密码或其默认数值00000，与问题所需信息无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅涉及RS485通讯地址和波特率设置，未提及厂家密码或数字 00000，与问题完全无关。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 9.57
+    },
+    {
+      "id": "DV-IO-002",
+      "category": "image_only",
+      "difficulty": "medium",
+      "question": "在有创动态模拟（电信号输出）窗口的示例界面中，收缩压、舒张压和脉率三个数值分别显示为多少？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "a07ebcfa1b858095",
+          "a07ebcfa1b858095",
+          "a07ebcfa1b858095",
+          "a07ebcfa1b858095",
+          "a07ebcfa1b858095"
+        ],
+        "time_s": 26.11
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 3,
+          "found_facts": 3,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "收缩压 150mmHg",
+              "gold_rank": 1,
+              "chunk_id": "chunk-b41777f72a70fa1bebb6dd957f7ad230",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "舒张压 100mmHg",
+              "gold_rank": 1,
+              "chunk_id": "chunk-b41777f72a70fa1bebb6dd957f7ad230",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "脉率 60bpm",
+              "gold_rank": 1,
+              "chunk_id": "chunk-b41777f72a70fa1bebb6dd957f7ad230",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 3,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "收缩压 150mmHg",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确出现“收缩压(mmHg) 150”，上下文[2]中明确出现“150/100/mmHg 为收缩压和舒张压”，上下文[4]中明确出现“收缩压|150”，均直接表明收缩压为 150mmHg。"
+            },
+            {
+              "fact": "舒张压 100mmHg",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]和[4]中均出现“舒张压(mmHg) 100”的明确表述，表明舒张压为100mmHg。"
+            },
+            {
+              "fact": "脉率 60bpm",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确出现“脉率(bpm) 60”，且上下文[2]中明确说明“60 为脉率，单位 bpm，可以更改脉率值进行模拟”，与事实陈述“脉率 60bpm”一致。"
+            }
+          ],
+          "reason": "3/3 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.6,
+        "context_precision_weighted": 0.7664,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 3,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本明确给出收缩压 150 mmHg、舒张压 100 mmHg、脉率 60 bpm，与标准答案要点中的关键数值 150、100、60 完全一致。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本明确显示收缩压和舒张压为150/100 mmHg、脉率为60 bpm，与关键数值150、100、60逐项一致，完整覆盖问题所需信息。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅列出收缩压/舒张压/脉率的可调范围（30~300mmHg、10~250mmHg、10~250bpm），未给出示例界面显示的具体数值，与标准答案要点中的150、100、60不对应。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "检索文本直接包含收缩压150、舒张压100，与关键数值150、100逐一吻合；但未出现脉率60，缺少一个数值，故相关度略低于满分。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本未出现收缩压150mmHg、舒张压100mmHg或脉率60bpm等关键数值，无法回答示例界面中三个数值分别显示为多少的问题。"
+            }
+          ],
+          "reason": "3/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.9739
+      },
+      "time_s": 37.25
+    },
+    {
+      "id": "DV-SUM-002",
+      "category": "summary",
+      "difficulty": "hard",
+      "question": "这台模拟仪的电信号输出有『有创动态压力模拟』和『有创静压检测』两种功能，它们各自输出什么压力、范围是多少，静态那一项对应的是有创压的什么数值？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "a07ebcfa1b858095",
+          "a07ebcfa1b858095",
+          "a07ebcfa1b858095",
+          "a07ebcfa1b858095",
+          "a07ebcfa1b858095"
+        ],
+        "time_s": 26.41
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 5,
+          "found_facts": 5,
+          "not_found_facts": 0,
+          "min_rank": 2,
+          "median_rank": 2.0,
+          "avg_rank": 2.4,
+          "max_rank": 4,
+          "top_k_recall": {
+            "1": 0.0,
+            "3": 0.8,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "有创动态压力模拟收缩压 30mmHg~300mmHg",
+              "gold_rank": 2,
+              "chunk_id": "chunk-9fab6b2f11a703a91969960049b9cc98",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "有创动态压力模拟舒张压 10mmHg~250mmHg",
+              "gold_rank": 2,
+              "chunk_id": "chunk-9fab6b2f11a703a91969960049b9cc98",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "有创动态压力模拟脉率 10bpm~250bpm",
+              "gold_rank": 2,
+              "chunk_id": "chunk-9fab6b2f11a703a91969960049b9cc98",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "有创静压检测静态压力输出 10mmHg~300mmHg，压力分辨率 1mmHg",
+              "gold_rank": 2,
+              "chunk_id": "chunk-9fab6b2f11a703a91969960049b9cc98",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "有创静压检测对应有创压的平均压力数值",
+              "gold_rank": 4,
+              "chunk_id": "chunk-9eab8e6b28b25c92546033e924a0dbed",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 5,
+          "hit_facts": 5,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "有创动态压力模拟收缩压 30mmHg~300mmHg",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[3]明确记载：“有创动态压力模拟：收缩压：30mmHg\\~300mmHg”，与事实陈述“有创动态压力模拟收缩压 30mmHg~300mmHg”完全一致。"
+            },
+            {
+              "fact": "有创动态压力模拟舒张压 10mmHg~250mmHg",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[3]中明确写有“有创动态压力模拟：……舒张压：10mmHg\\~250mmHg”，与事实陈述一致。"
+            },
+            {
+              "fact": "有创动态压力模拟脉率 10bpm~250bpm",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[3]明确记载：'脉 率：10bpm\\~250bpm'，与事实陈述'有创动态压力模拟脉率 10bpm~250bpm'一致。"
+            },
+            {
+              "fact": "有创静压检测静态压力输出 10mmHg~300mmHg，压力分辨率 1mmHg",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]明确记载：'有创静压检测：静态压力输出 ：10mmHg~300mmHg 压力分辨率 ： 1mmHg'，与事实陈述完全一致。"
+            },
+            {
+              "fact": "有创静压检测对应有创压的平均压力数值",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[4]中明确写道：'静态压力：设置输出信号的静态压力，对应为有创压的平均压力数值'，与事实陈述'有创静压检测对应有创压的平均压力数值'完全对应。"
+            }
+          ],
+          "reason": "5/5 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.8,
+        "context_precision_weighted": 0.9124,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 4,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本涉及有创压动态模拟的电信号输出，提到了收缩压、舒张压和脉率，与问题中的动态压力模拟功能相关，但未给出标准答案要点中的范围值（30mmHg~300mmHg、10mmHg~250mmHg、10bpm~），也未涉及有创静压检测功能。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本包含有创静压检测的静态压力输出10mmHg~300mmHg和压力分辨率1mmHg，与关键数值10、300、1一致，能部分回答静态压力范围，但未涉及有创动态压力模拟的收缩压30mmHg~300mmHg、舒张压10mmHg~250mmHg等内容，故仅部分相关。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.8,
+              "reason": "文本提供了有创动态压力模拟的收缩压30mmHg~300mmHg、舒张压10mmHg~250mmHg及脉率数值，与标准答案要点1的关键数值清单中的30、300、10、250逐一吻合，但缺少有创静压检测的静态压力10mmHg~300mmHg及其对应有创压平均压力数值的信息，故相关但不完整。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本提到了静态压力对应有创压平均压力数值，与标准答案要点2一致；但未提及动态压力模拟的输出范围和任何关键数值（30、300、10、250、1），信息不完整。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本为有创压气体压力动态模拟的界面截图，仅出现150、100、0、20.00、13.33、1.0等数值，与标准答案要点及关键数值清单（30、300、10、250、1）均不匹配，未涉及有创静压检测输出静态压力范围或平均压力数值。"
+            }
+          ],
+          "reason": "4/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.9444
+      },
+      "time_s": 28.88
+    },
+    {
+      "id": "DV-FS-005",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "多参数检测仪的血压袖带每次用完之后应该怎么清洁？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "0d5c7f07d607e9c4",
+          "0d5c7f07d607e9c4",
+          "9134cbc78eca13e9",
+          "0d5c7f07d607e9c4",
+          "0d5c7f07d607e9c4"
+        ],
+        "time_s": 24.65
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 1,
+          "found_facts": 1,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "用75%的医用酒精进行清洁处理",
+              "gold_rank": 1,
+              "chunk_id": "chunk-a9d9b115fd0457045d03fd5bfffd6da8",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 1,
+          "hit_facts": 1,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "用75%的医用酒精进行清洁处理",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确记载：“血压袖带在使用过程中需要与人体皮肤直接接触，因此在使用完成后应对该部件进行清洁处理，用75%的医用酒精进行清洁处理。”"
+            }
+          ],
+          "reason": "1/1 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本明确说明血压袖带在使用完成后应用75%的医用酒精进行清洁处理，与标准答案要点中的关键数值75%完全一致，直接回答清洁方法。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本列举了多参数检测仪的安全注意事项、禁忌症等内容，但完全没有提及血压袖带的清洁方法，也未出现标准答案要点中的关键数值75%。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本讲的是脉搏血氧仪的清洁步骤，完全未提及血压袖带，也未出现【关键数值】清单中的75%医用酒精，对回答该问题没有帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅介绍多参数检测仪的产品结构组成，未提及血压袖带的清洁方法，也未出现关键数值75%，对回答问题没有帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅为“多参数检测仪”标题，未包含血压袖带清洁方法或关键数值75%的相关信息，对回答问题无帮助。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 27.49
+    },
+    {
+      "id": "DV-IO-003",
+      "category": "image_only",
+      "difficulty": "easy",
+      "question": "说明书里讲测量血压时的正确坐姿，对桌子和椅子的高度差是怎么要求的？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "0d5c7f07d607e9c4",
+          "0d5c7f07d607e9c4",
+          "0d5c7f07d607e9c4",
+          "ad3dd5b95dd4221b",
+          "0d5c7f07d607e9c4"
+        ],
+        "time_s": 25.68
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "桌子和椅子的理想高度差是25cm-30cm",
+              "gold_rank": 1,
+              "chunk_id": "chunk-fdf8af249f065d08cb8cf27588a587b7",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "家庭中桌子和椅子的高度差一般是20cm-35cm",
+              "gold_rank": 1,
+              "chunk_id": "chunk-fdf8af249f065d08cb8cf27588a587b7",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "桌子和椅子的理想高度差是25cm-30cm",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确写有：“桌子和椅子的理想高度差是25cm-30cm”，与事实陈述完全一致。"
+            },
+            {
+              "fact": "家庭中桌子和椅子的高度差一般是20cm-35cm",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：\"家庭中桌子和椅子的高度差一般是20cm-35cm\"，与事实陈述完全一致。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本直接包含桌子和椅子的理想高度差是25cm-30cm、家庭中一般是20cm-35cm，与【关键数值】清单中的25、30、20、35逐一吻合，完整回答了问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅为标题“1.1.1.4测量血压时的正确坐姿”，未包含任何关于桌子和椅子高度差的具体数值（如25、30、20、35），无法为回答问题提供实质信息。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本为血压计安全注意事项与禁忌症，未提及坐姿、桌子或椅子高度差，也没有出现【关键数值】清单中的25、30、20、35，对回答问题无帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅提到'数字差压计使用说明书'，未包含任何关于测量血压坐姿或桌子和椅子高度差（25cm-30cm、20cm-35cm）的信息，无法回答问题。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅提供测量前的行为建议和高血压分级信息，未提及桌子和椅子的高度差，也未出现关键数值25、30、20、35，与问题及标准答案无关。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 27.83
+    },
+    {
+      "id": "DV-TN-003",
+      "category": "table_numeric",
+      "difficulty": "medium",
+      "question": "按说明书里的血压分级，如果一个人的收缩压是165mmHg、舒张压是105mmHg，依据2018年中国高血压防治指南属于哪一级？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "0d5c7f07d607e9c4",
+          "0d5c7f07d607e9c4",
+          "0d5c7f07d607e9c4",
+          "0d5c7f07d607e9c4",
+          "a07ebcfa1b858095"
+        ],
+        "time_s": 25.81
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 3,
+          "found_facts": 3,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "2级高血压（中度）",
+              "gold_rank": 1,
+              "chunk_id": "chunk-b99dbbd63b11c5eb30234ccb10416525",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "收缩压160~179和（或）",
+              "gold_rank": 1,
+              "chunk_id": "chunk-b99dbbd63b11c5eb30234ccb10416525",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "舒张压100~109",
+              "gold_rank": 1,
+              "chunk_id": "chunk-b99dbbd63b11c5eb30234ccb10416525",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 3,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "2级高血压（中度）",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[1]的血压分级表中明确列出了「2级高血压(中度) | 160~179和(或) | 100~109」，与事实陈述「2级高血压（中度）」完全一致。"
+            },
+            {
+              "fact": "收缩压160~179和（或）",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的表格中明确列出：“2级高血压(中度) | 160~179和(或) | 100~109”，其中收缩压一栏为“160~179和(或)”。"
+            },
+            {
+              "fact": "舒张压100~109",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的表格中明确列出：| 2级高血压(中度) | 160~179和(或) | 100~109 |，其中舒张压(mmHg)对应值为“100~109”。"
+            }
+          ],
+          "reason": "3/3 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.4,
+        "context_precision_weighted": 0.6569,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 2,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本中的分级表明确列出2级高血压（中度）为收缩压160~179mmHg和（或）舒张压100~109mmHg，与标准答案的2级高血压及关键数值2、160、179、100、109完全一致，直接支持判断165/105mmHg属于2级高血压。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "该文本包含‘2018年中国高血压防治指南高血压定义及分级’这一与问题直接相关的章节标题，表明后续内容应涉及2018年指南的血压分级，对定位和回答该分级问题有背景指引价值；但文本本身未直接列出160~179mmHg、100~109mmHg等关键数值，故相关度有限。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "检索文本仅列出正常血压、正常高值和高血压（≥140/≥90）的简要分级，未包含标准答案要点中区分2级高血压所需的收缩压160~179mmHg和(或)舒张压100~109mmHg等关键数值，故对回答该问题无实质帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅列出单纯收缩期高血压（收缩压≥140且舒张压<90），未涉及2级高血压的收缩压160~179mmHg或舒张压100~109mmHg等关键数值，不能回答165/105mmHg的分级问题。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本是血压监测仪的界面截图内容，收缩压150、舒张压100，仅提及设备读数，未包含2018年中国高血压防治指南中关于2级高血压（收缩压160~179mmHg和/或舒张压100~109mmHg）的任何分级信息或数值，与问题无关。"
+            }
+          ],
+          "reason": "2/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 28.39
+    },
+    {
+      "id": "DV-SUM-003",
+      "category": "summary",
+      "difficulty": "hard",
+      "question": "用这台多参数检测仪测血糖或尿酸时，如果屏幕出现HI或LO，说明书建议怎么处理？另外，如果测量结果偏高，可能是哪些原因造成的？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "0d5c7f07d607e9c4",
+          "0d5c7f07d607e9c4",
+          "0d5c7f07d607e9c4",
+          "0d5c7f07d607e9c4",
+          "0d5c7f07d607e9c4"
+        ],
+        "time_s": 25.35
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 4,
+          "found_facts": 1,
+          "not_found_facts": 3,
+          "min_rank": 5,
+          "median_rank": 5.0,
+          "avg_rank": 5.0,
+          "max_rank": 5,
+          "top_k_recall": {
+            "1": 0.0,
+            "3": 0.0,
+            "5": 0.25,
+            "8": 0.25
+          },
+          "per_fact": [
+            {
+              "fact": "HI/LO：重复插入新试纸测量",
+              "gold_rank": 5,
+              "chunk_id": "chunk-332588dd7823ca6466316a14049f4e87",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "第二次仍出现HI/LO则超出仪器测试范围，请向医师求助",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "结果偏高原因：消毒液错误（用碘酒或其他消毒液）或采样点不干净",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "结果偏高原因：试纸受潮",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 0.25,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 1,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "HI/LO：重复插入新试纸测量",
+              "hit": false,
+              "score": 0.95,
+              "reason": "上下文中未见“HI/LO”或“重复插入新试纸测量”的相关表述。上下文[3]仅提到“每片试纸仅能使用一次，请勿重复使用”，但未涉及HI/LO指示或重复插入新试纸测量的说明。"
+            },
+            {
+              "fact": "第二次仍出现HI/LO则超出仪器测试范围，请向医师求助",
+              "hit": false,
+              "score": 0.95,
+              "reason": "在检索到的全部上下文中，未出现'第二次仍出现HI/LO则超出仪器测试范围，请向医师求助'这一表述，也未出现'H I'、'LO'、'超出仪器测试范围'等与之等价的原文描述，无法在上下文中找到该事实的直接或等价依据。"
+            },
+            {
+              "fact": "结果偏高原因：消毒液错误（用碘酒或其他消毒液）或采样点不干净",
+              "hit": false,
+              "score": 0.95,
+              "reason": "上下文中未出现‘消毒液错误’‘碘酒’或‘采样点不干净’等相关内容，无法找到该事实陈述的任何依据。"
+            },
+            {
+              "fact": "结果偏高原因：试纸受潮",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文中明确提到试纸受潮相关的注意事项，原文为“取出试纸后应立即使用，并马上盖回罐盖以免受潮”，表明受潮是需要避免的情况，从而可以推导出试纸受潮可能导致结果偏高。"
+            }
+          ],
+          "reason": "1/4 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.0,
+        "context_precision_weighted": 0.0,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 0,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "检索文本为多参数检测仪的通用安全注意事项和血压相关警示，未提及HI/LO的处理方法（重复插入新试纸测量、第二次仍出现则超出测试范围并向医师求助），也未提及结果偏高的原因（消毒液错误、采样点不干净、试纸受潮），与问题实质内容无关。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅描述各模块工作原理、测量范围声明和精度偏差（血糖±20%，尿酸/甘油三酯/总胆固醇±30%），未提及HI/LO提示的处理方法，也未列出结果偏高的可能原因（消毒液错误或采样点不干净、试纸受潮），与问题及标准答案要点完全无关。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅介绍试纸插入、采血、读数等基本操作步骤和存储注意事项，未提及HI/LO错误代码的处理方法，也未说明结果偏高的原因（如消毒液错误或试纸受潮导致的偏高），因此对回答问题无实质帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "文本仅说明尿酸测量准确度误差不超过±30%、回收率为80%-120%，未提及HI/LO的处理方式，也未说明结果偏高的原因，与标准答案要点完全无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅为说明书目录，没有涉及HI/LO的处理方法或结果偏高的原因，无法提供回答所需信息。"
+            }
+          ],
+          "reason": "0/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.7763
+      },
+      "time_s": 27.68
+    },
+    {
+      "id": "DV-FS-006",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "这款数字差压计用单一通道测量时，显示的是什么压力值？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "ad3dd5b95dd4221b",
+          "ad3dd5b95dd4221b",
+          "ad3dd5b95dd4221b",
+          "ad3dd5b95dd4221b",
+          "ad3dd5b95dd4221b"
+        ],
+        "time_s": 25.1
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "单一通道测量的是当前检测压力值",
+              "gold_rank": 1,
+              "chunk_id": "chunk-c224200248ca391f22138ebda9ff1b21",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "该压力值是相对于当前大气压的",
+              "gold_rank": 1,
+              "chunk_id": "chunk-c224200248ca391f22138ebda9ff1b21",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "单一通道测量的是当前检测压力值",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确写道：“通过单一通道可以快速的测量当前检测压力值（相对于当前的大气压）”，与事实陈述“单一通道测量的是当前检测压力值”直接对应。"
+            },
+            {
+              "fact": "该压力值是相对于当前大气压的",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述“通过单一通道可以快速的测量当前检测压力值（相对于当前的大气压）”，与事实陈述“该压力值是相对于当前大气压的”直接对应。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.4,
+        "context_precision_weighted": 0.6569,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 2,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本明确说明通过单一通道可以快速测量当前检测压力值（相对于当前的大气压），与标准答案要点完全一致。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "文本第5条明确说明测量单一通道压力时仪表显示的是当前测量口与大气压的差值，与标准答案要点'当前检测压力值，即相对于当前大气压的压力值'一致，提供了回答问题所需的关键信息。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅列出产品部件名称和操作说明（如P1/P2通道、单位切换、存储数据等），未提及单一通道测量时显示的是相对于当前大气压的压力值，与标准答案要点无关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅介绍按键功能，未提及单一通道测量时显示的压力值，与标准答案要点（当前检测压力值）无实质关联。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "检索文本仅为“数字差压计使用说明书”标题，未提供任何关于单一通道测量显示何种压力值的信息，对回答问题无实质帮助。"
+            }
+          ],
+          "reason": "2/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.9974
+      },
+      "time_s": 27.42
+    },
+    {
+      "id": "DV-TN-004",
+      "category": "table_numeric",
+      "difficulty": "medium",
+      "question": "TC-169A 型号用 inHg 作为测量单位时，它的量程范围和精度分别是多少？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "ad3dd5b95dd4221b",
+          "ad3dd5b95dd4221b",
+          "ad3dd5b95dd4221b",
+          "ad3dd5b95dd4221b",
+          "ad3dd5b95dd4221b"
+        ],
+        "time_s": 26.28
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.5,
+          "avg_rank": 1.5,
+          "max_rank": 2,
+          "top_k_recall": {
+            "1": 0.5,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "TC-169A 在 inHg 单位下的量程范围为 ±203.6",
+              "gold_rank": 2,
+              "chunk_id": "chunk-146dd1b75fcbb1fc24834fa612d56131",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "TC-169A 在 inHg 单位下的精度为 0.1",
+              "gold_rank": 1,
+              "chunk_id": "chunk-9af0ec2a0ae4ec8d87404a2b45636fad",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "TC-169A 在 inHg 单位下的量程范围为 ±203.6",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的表格中明确列出：inHg 行下 TC-169A 的对应范围值为 ±203.6，即原文“| inHg | ±6.106 | 0.001 | ±203.6 | 0.1 |”。"
+            },
+            {
+              "fact": "TC-169A 在 inHg 单位下的精度为 0.1",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的表格中 inHg 行明确列出：TC-169A 的精度为 0.1（原文：'| inHg | ±6.106 | 0.001 | ±203.6 | 0.1 |'，其中 TC-169A 对应列的范围为 ±203.6、精度为 0.1）。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.219,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本列出了 TC-169A 在 kPa 和 Psi 单位下的量程与精度，但未提供问题所要求的 inHg 单位下的数据；其中 kPa 精度 0.1 与关键数值清单中精度 0.1 一致，但量程 ±689.4 与清单要求的 203.6 不符，且文本完全不含 inHg 量程信息，无法回答该问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "该检索文本的表格在 inHg 行、TC-169A 列下明确给出量程 ±203.6、精度 0.1，与【关键数值】清单中的 203.6 和 0.1 逐一核对完全一致，直接包含回答问题所需信息。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本中 TC-169A 列仅包含 InH2O、ftH20、cmH20 的量程和精度，没有问题所问的 inHg 单位数据，未提供关键数值 ±203.6 或 0.1 的信息。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本列出了TC-169A的测量单位为±100Psi及包含inHg等单位名称，但未给出以inHg为单位的量程范围±203.6或精度0.1，与标准答案关键数值不匹配。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅给出 TC-169A 的测量范围为 ±100Psi，未涉及 inHg 单位下的 ±203.6 量程或 0.1 精度，与关键数值 203.6 和 0.1 均不匹配。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.7029
+      },
+      "time_s": 28.85
+    },
+    {
+      "id": "DV-IO-004",
+      "category": "image_only",
+      "difficulty": "hard",
+      "question": "看说明书里的产品外观示意图，液晶显示屏、正压输入通道和负压输入通道分别是几号标号？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "ad3dd5b95dd4221b",
+          "ad3dd5b95dd4221b",
+          "8a22bfff101b31f1",
+          "ad3dd5b95dd4221b",
+          "ad3dd5b95dd4221b"
+        ],
+        "time_s": 25.46
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 3,
+          "found_facts": 3,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 2.0,
+          "max_rank": 4,
+          "top_k_recall": {
+            "1": 0.6667,
+            "3": 0.6667,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "液晶显示屏对应 7 号标号",
+              "gold_rank": 4,
+              "chunk_id": "chunk-513870280d664a94ca22d72d10b96e3e",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "正压输入通道 P1 对应 8 号标号",
+              "gold_rank": 1,
+              "chunk_id": "chunk-ecd420058527d469fbece13906bdd52c",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "负压输入通道 P2 对应 9 号标号",
+              "gold_rank": 1,
+              "chunk_id": "chunk-ecd420058527d469fbece13906bdd52c",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 3,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "液晶显示屏对应 7 号标号",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[4]中明确列出“7 液晶显示屏”，直接表述了标号7对应液晶显示屏。"
+            },
+            {
+              "fact": "正压输入通道 P1 对应 8 号标号",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确列出“8. 正压输入通道P1”，即标号8对应正压输入通道P1，与事实陈述一致。"
+            },
+            {
+              "fact": "负压输入通道 P2 对应 9 号标号",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确列出“9. 负压输入通道P2”，与事实陈述“负压输入通道 P2 对应 9 号标号”完全一致。"
+            }
+          ],
+          "reason": "3/3 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.4,
+        "context_precision_weighted": 0.5474,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 2,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本列出的标号与标准答案完全吻合：7对应压力数据和单位显示区（液晶显示屏）、8对应正压输入通道P1、9对应负压输入通道P2，且引用的7、8、9均在【关键数值】清单7；1；8；2；9范围内。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅提到数字标号10和11（电池仓盖板等），未涉及液晶显示屏、正压输入通道、负压输入通道对应的标号7、8、9，与问题所需信息无关。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅说明示意图中有数字序号1至12，但未指出7对应液晶显示屏、8对应正压输入通道P1、9对应负压输入通道P2，无法帮助回答标号对应关系。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.8,
+              "reason": "该文本包含产品外观示意图标号，7号明确为液晶显示屏，8号和9号均标注为“进气口”，与标准答案中正压输入通道8号、负压输入通道9号的标号一致，虽未出现“正压/负压”字样，但标号信息能直接支持回答。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅列出产品型号的测量范围、超量程显示和工作温度，未出现液晶显示屏、正压输入通道或负压输入通道的标号信息，与问题及标准答案要点中的关键数值7、8、9均无关。"
+            }
+          ],
+          "reason": "2/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.897
+      },
+      "time_s": 46.89
+    },
+    {
+      "id": "DV-TN-005",
+      "category": "table_numeric",
+      "difficulty": "easy",
+      "question": "LH-T600 智能便携式检测仪这台仪表本体有多重？外形尺寸是多少？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74"
+        ],
+        "time_s": 20.18
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 0,
+          "not_found_facts": 2,
+          "min_rank": null,
+          "median_rank": null,
+          "avg_rank": null,
+          "max_rank": null,
+          "top_k_recall": {
+            "1": 0.0,
+            "3": 0.0,
+            "5": 0.0,
+            "8": 0.0
+          },
+          "per_fact": [
+            {
+              "fact": "重量 460g",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "尺寸 220 × 96 × 44mm",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 0.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 0,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "重量 460g",
+              "hit": false,
+              "score": 0.95,
+              "reason": "在检索上下文的所有段落中均未出现“460g”或“重量”相关的表述，无法找到该事实的明确依据。"
+            },
+            {
+              "fact": "尺寸 220 × 96 × 44mm",
+              "hit": false,
+              "score": 1.0,
+              "reason": "检索上下文中未出现任何关于尺寸‘220 × 96 × 44mm’的表述。上下文仅包含 LH-T600 智能便携式检测仪的型号名称、数据存储说明、用户须知、产品照描述以及连接电脑的操作说明，均未提及该仪器的具体尺寸数值。"
+            }
+          ],
+          "reason": "0/2 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.0,
+        "context_precision_weighted": 0.0,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 0,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "检索文本仅重复了产品名称，未包含重量460g或外形尺寸220×96×44mm等任何关键数值，无法回答该问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅介绍数据存储功能与4096个测量结果容量，完全未提及仪表重量460g或外形尺寸220×96×44mm，对回答问题无帮助。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅为说明书前言与售后须知，未提及仪表重量460g或外形尺寸220×96×44mm等关键数值，对回答问题无帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅描述产品外观、屏幕显示和按键，未提及仪表重量或外形尺寸，与问题所需信息无关，且未出现关键数值460、220、96、44中的任何一项。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅介绍电脑连接和软件操作，未提及仪表重量或外形尺寸，也未出现关键数值460、220、96、44中的任何一个，与问题完全无关。"
+            }
+          ],
+          "reason": "0/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 22.52
+    },
+    {
+      "id": "DV-TN-006",
+      "category": "table_numeric",
+      "difficulty": "easy",
+      "question": "LH-T613 蓝绿藻（BGA）传感器的检出限是多少？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74"
+        ],
+        "time_s": 9.03
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "LH-T613 BGA 传感器检出限 300 cells/mL",
+              "gold_rank": 1,
+              "chunk_id": "chunk-8c40a3baec1632c944b2574ff1ef4bd4",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "量程 0-200000 cells/mL",
+              "gold_rank": 1,
+              "chunk_id": "chunk-8c40a3baec1632c944b2574ff1ef4bd4",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "LH-T613 BGA 传感器检出限 300 cells/mL",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确列出\"LH-T613 BGA 传感器\"规格，其中\"检出限 | 300 cells/mL\"，与事实陈述\"LH-T613 BGA 传感器检出限 300 cells/mL\"完全一致。"
+            },
+            {
+              "fact": "量程 0-200000 cells/mL",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确出现「LH-T613 BGA 传感器 | 量程 | 0-200000 cells/mL」，与事实陈述「量程 0-200000 cells/mL」完全一致。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本明确列出 LH-T613 BGA 传感器的检出限为 300 cells/mL，与关键数值清单中的 300 完全一致，可直接回答问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅展示界面截图示例数值10.65 cells/mL，与标准答案要求的检出限关键数值300 cells/mL不符，未提供检出限相关信息。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本是LH-T617水中油传感器的规格，内容关于油类检测的量程和检出限（5ppb、1ppb），未提及LH-T613蓝绿藻传感器，也未出现关键数值300（cells/mL），对回答问题无帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅列出了LH-T613 BGA传感器的选配项目及配件，未提及检出限，且未出现关键数值300，无法为回答提供任何信息。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本内容为LH-T615叶绿素传感器的规格，未提及LH-T613蓝绿藻传感器，也未出现检出限或关键数值300，与问题无关。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 11.34
+    },
+    {
+      "id": "DV-IO-005",
+      "category": "image_only",
+      "difficulty": "easy",
+      "question": "说明书「主界面」一节展示的叶绿素测量界面示意图上，叶绿素读数显示为多少？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74"
+        ],
+        "time_s": 20.86
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "叶绿素读数 1.54 ug/L",
+              "gold_rank": 1,
+              "chunk_id": "chunk-b06bc597a03abd05ca4e82651eab6ceb",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "RFU 显示 0 RFU",
+              "gold_rank": 1,
+              "chunk_id": "chunk-b06bc597a03abd05ca4e82651eab6ceb",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "叶绿素读数 1.54 ug/L",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确出现原文“CHL|1.54 ug/L|0 RFU|27.07 ℃”，与事实陈述“叶绿素读数 1.54 ug/L”一致。"
+            },
+            {
+              "fact": "RFU 显示 0 RFU",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确出现「0 RFU」的原文表述（界面截图|有|11:25|CHL|1.54 ug/L|0 RFU|27.07 ℃），与事实陈述「RFU 显示 0 RFU」直接对应。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本明确列出叶绿素读数为 1.54 ug/L、RFU 为 0 RFU，与标准答案要点逐字核对一致（1.54；0），可直接回答该问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本描述的是蓝绿藻界面（显示10.65 cells/mL、0 RFU、27.07 °C），未出现叶绿素读数1.54 ug/L，与问题要求的1.54 ug/L叶绿素测量界面无关。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅说明一点校准的操作流程和单位ug/L，未出现关键数值1.54或0，也未提及主界面叶绿素测量界面示意图的读数。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本为pH校准界面截图内容，含pH 4.01、pH 6.86、-10.21 mV等数值，均非关键数值清单中的1.54或0，与叶绿素测量界面读数问题无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本讲的是叶绿素两点校准流程和单位换算，未出现说明书主界面示意图上的叶绿素读数1.54或RFU读数0，与问题无关。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 42.35
+    },
+    {
+      "id": "DV-FS-007",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "仪表的电源自动关机（Auto Power）默认是多久无操作后自动关机？这个设置掉电后会不会保存？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "e10aa9a02b70ae74",
+          "9134cbc78eca13e9",
+          "ad3dd5b95dd4221b",
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74"
+        ],
+        "time_s": 21.07
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "默认 5 分钟无操作后自动关机",
+              "gold_rank": 1,
+              "chunk_id": "chunk-9ad0602e0a60dfff6865f616018d4e13",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "该设置掉电不保存",
+              "gold_rank": 1,
+              "chunk_id": "chunk-9ad0602e0a60dfff6865f616018d4e13",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "默认 5 分钟无操作后自动关机",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确写道：“该设置掉电不保存，默认5分钟自动关机。”"
+            },
+            {
+              "fact": "该设置掉电不保存",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“该设置掉电不保存，默认5分钟自动关机。”，直接支持该事实陈述。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.4,
+        "context_precision_weighted": 0.5255,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 2,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本明确说明“该设置掉电不保存，默认5分钟自动关机”，其中默认值与关键数值清单中的5一致，直接回答了默认关机时间和掉电是否保存两个问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本讨论电源丧失30s后参数报警设置恢复，未提及Auto Power默认关机时间，也未涉及设置掉电是否保存，与问题及标准答案中的关键数值5完全无关。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "检索文本提到自动关机约15分钟，与标准答案关键数值'5'分钟不符；且未提及掉电是否保存，对回答问题无实质帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅说明 Date/Time 菜单的日期时间设置与保存操作，未提及电源自动关机（Auto Power）、默认 5 分钟或掉电保存相关内容，与问题无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本提到 Auto Power 及 5 min 选项，与关键数值 5 一致，提供了默认自动关机时间相关线索，但未涉及掉电是否保存。"
+            }
+          ],
+          "reason": "2/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.8855
+      },
+      "time_s": 23.81
+    },
+    {
+      "id": "DV-FS-008",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "更换溶解氧电极的荧光帽时，需要向仪表输入该电极帽的特征参数，这些参数一共有几组？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74"
+        ],
+        "time_s": 26.06
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "荧光帽特征参数共 8 组",
+              "gold_rank": 1,
+              "chunk_id": "chunk-33c08d596a5b8998bc169cc294b8b7a3",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "编号为 K0-K7",
+              "gold_rank": 1,
+              "chunk_id": "chunk-33c08d596a5b8998bc169cc294b8b7a3",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "荧光帽特征参数共 8 组",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述“有K0-K7 一共 8 组参数”，上下文[3]也表述“此时会出现 K0-K7 8 组数据”，均直接支持荧光帽特征参数共 8 组。"
+            },
+            {
+              "fact": "编号为 K0-K7",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述“有K0-K7 一共 8 组参数”，上下文[3]中也出现“K0-K7 8 组数据”，均直接支持该事实。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.4,
+        "context_precision_weighted": 0.5839,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 2,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本明确说明更换荧光帽时需输入K0-K7共8组参数，与标准答案要点的关键数值8、0、7逐一吻合。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅提到更换荧光帽后需设置特征参数到仪表，但未给出参数组数，未出现关键数值 8、0、7，无法回答共有几组参数的问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.95,
+              "reason": "检索文本明确提到写入荧光帽参数界面出现K0-K7 8组数据，与标准答案的8组参数及编号K0-K7一致，直接回答了几组的问题。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅描述传感器清洁、线缆检查和保存方法，未提及更换荧光帽时需输入的参数组数，也未出现与【关键数值】清单中8组参数相关的信息。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "检索文本提到荧光帽防护罩和校准菜单选项，但未提及向仪表输入特征参数的组数，也未出现关键数值8、0、7中的任何数字编号信息，无法帮助回答问题。"
+            }
+          ],
+          "reason": "2/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.9177
+      },
+      "time_s": 29.24
+    },
+    {
+      "id": "DV-TN-007",
+      "category": "table_numeric",
+      "difficulty": "medium",
+      "question": "用罗丹明 B 标液校准叶绿素时，需要查表换算，其中 20℃ 对应的系数是多少？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74"
+        ],
+        "time_s": 21.09
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 3.0,
+          "avg_rank": 3.0,
+          "max_rank": 5,
+          "top_k_recall": {
+            "1": 0.5,
+            "3": 0.5,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "温度 20℃ 对应系数 328",
+              "gold_rank": 1,
+              "chunk_id": "chunk-5e28a269c777fd9f09c9085b3e3edf9f",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "叶绿素校准需按罗丹明 B 换算表查表",
+              "gold_rank": 5,
+              "chunk_id": "chunk-c89d0312395842fed7713581d349584c",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "温度 20℃ 对应系数 328",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的表格中明确列出「| 20 | 328 |」，即温度 20℃ 对应系数 328。"
+            },
+            {
+              "fact": "叶绿素校准需按罗丹明 B 换算表查表",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[5]明确表述：“叶绿素的校准单位为 ug/L, 如果使用罗丹明B 标液进行校准，则需要查表进行换算。” 与事实陈述“叶绿素校准需按罗丹明 B 换算表查表”一致。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本中的温度系数表明确列出 20℃ 对应系数为 328，与【关键数值】清单中“20”“328”逐一核对一致，可直接回答所需信息。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "表格中18℃、16℃、14℃的系数分别为345.6、363.2、372.8，未出现标准答案关键数值20℃或系数328，对回答20℃对应系数无帮助。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本的表格只列出12℃、10℃、8℃对应的系数，未出现关键数值清单中的20℃或328，无法回答20℃对应的系数。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本中的表格只列出了30℃、28℃、26℃对应的系数（290.4、296.4、302.4），未包含问题所问的20℃及关键数值328，无法回答问题。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本虽提到罗丹明B标液校准叶绿素时需查表换算，但未出现20℃或328等关键数值，未提供回答问题所需的具体换算系数信息。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.9898
+      },
+      "time_s": 23.26
+    },
+    {
+      "id": "DV-FS-009",
+      "category": "fact_single",
+      "difficulty": "medium",
+      "question": "电导校准的时候，低量程探头和高量程探头分别建议选用什么浓度的电导率标准液？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74"
+        ],
+        "time_s": 21.72
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "低量程探头建议 1.4083 mS/cm 标准液",
+              "gold_rank": 1,
+              "chunk_id": "chunk-b16b05fb71994365ea2fc7d4e8730c5a",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "高量程探头建议 12.852 mS/cm 标准液",
+              "gold_rank": 1,
+              "chunk_id": "chunk-b16b05fb71994365ea2fc7d4e8730c5a",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "低量程探头建议 1.4083 mS/cm 标准液",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确写道：“如果是低量程探头，建议选用 1.4083mS/cm 的电导率标准液校准”，直接支持该事实陈述。"
+            },
+            {
+              "fact": "高量程探头建议 12.852 mS/cm 标准液",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“如果是高量程的探头，建议选用 12.852mS/cm 的电导率标准液进行校准。”"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本明确给出低量程探头建议使用1.4083 mS/cm、高量程探头建议使用12.852 mS/cm的电导率标准液，与【关键数值】清单中的1.4083和12.852完全一致，直接回答了问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本描述的是浊度标准液的一点校准流程，未涉及电导率标准液，也未出现关键数值 1.4083 或 12.852。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本讲的是COD零点校准，未提及电导率标准液，也未出现关键数值1.4083或12.852，与问题无关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本讲的是叶绿素标准液零点校准，未涉及电导率标准液浓度，也未出现关键数值 1.4083 或 12.852。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本讲的是污泥浓度（mg/L）的一点校准流程，未涉及电导率标准液，也未出现关键数值 1.4083 或 12.852，对回答问题无帮助。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 24.05
+    },
+    {
+      "id": "DV-SUM-004",
+      "category": "summary",
+      "difficulty": "hard",
+      "question": "这款检测仪里，支持「零点校准」的传感器电极有哪几种？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74",
+          "e10aa9a02b70ae74"
+        ],
+        "time_s": 19.51
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 4,
+          "found_facts": 4,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "浊度电极支持零点校准",
+              "gold_rank": 1,
+              "chunk_id": "chunk-791aa76e0522568a92066f545e40d125",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "叶绿素电极支持零点校准",
+              "gold_rank": 1,
+              "chunk_id": "chunk-791aa76e0522568a92066f545e40d125",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "水中油电极支持零点校准",
+              "gold_rank": 1,
+              "chunk_id": "chunk-791aa76e0522568a92066f545e40d125",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "COD 电极支持零点校准",
+              "gold_rank": 1,
+              "chunk_id": "chunk-791aa76e0522568a92066f545e40d125",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "浊度电极支持零点校准",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[4]中明确表述：“浊度电极支持零点校准、一点校准和两点校准。”这与事实陈述“浊度电极支持零点校准”直接一致。"
+            },
+            {
+              "fact": "叶绿素电极支持零点校准",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：“本仪表支持叶绿素电极零点校准、一点校准和两点校准。”，直接说明叶绿素电极支持零点校准。"
+            },
+            {
+              "fact": "水中油电极支持零点校准",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[3]明确表述：“水中油电极支持零点，一点和两点校准。”"
+            },
+            {
+              "fact": "COD 电极支持零点校准",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]中明确记载：\"COD电极支持零点，一点和两点校准。\"，直接支持 COD 电极支持零点校准这一事实。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.4,
+        "context_precision_weighted": 0.3285,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 2,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": false,
+              "score": 0.4,
+              "reason": "文本提到叶绿素电极支持零点校准，与标准答案中列举的4种电极之一一致，但未提及其他3种电极或总数4，只能部分佐证。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.5,
+              "reason": "文本明确指出COD电极支持零点校准，属于标准答案列举的4种支持零点校准的电极之一，提供了部分关键信息。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "无法解析JSON: {\n  \"relevant\": true,\n  \"score\": 0.6,\n  \"reason\": \"该文本明确说明水中油电极支持零点校准，与标准答案要点中列出的4种支持零点校准的电极之一（水中油电极）直接相关，但仅涵盖其中1种，未涉及其他3种，故相关度中等。\""
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本明确提到浊度电极支持零点校准，与标准答案中4种电极之一（浊度电极）吻合，虽未覆盖全部4种电极，但提供了部分关键信息，对回答问题有直接帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅说明溶解氧电极不支持零点校准，未提及浊度、叶绿素、水中油、COD这4种支持零点校准的电极，与问题所需信息无关。"
+            }
+          ],
+          "reason": "2/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.874
+      },
+      "time_s": 22.36
+    },
+    {
+      "id": "DV-FS-010",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "这款 Cchippump-2 注射泵有没有在 FDA 注册？它能不能用于人类的临床实验？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4",
+          "8a22bfff101b31f1",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4"
+        ],
+        "time_s": 14.9
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "没有在 FDA 注册",
+              "gold_rank": 1,
+              "chunk_id": "chunk-a2c61e330bb690f1a10410885ba4d44f",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "不能用于人类的临床实验",
+              "gold_rank": 1,
+              "chunk_id": "chunk-a2c61e330bb690f1a10410885ba4d44f",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "没有在 FDA 注册",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确记载：“(9)此泵没有在FDA注册，不能用于人类的临床实验。”，与事实陈述“没有在FDA注册”直接对应。"
+            },
+            {
+              "fact": "不能用于人类的临床实验",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确写有“此泵没有在FDA注册，不能用于人类的临床实验。”，与事实陈述“不能用于人类的临床实验”直接对应；上下文[3]中也写有“此泵不能用于人类的临床实验，只能用于科学研究”。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.4,
+        "context_precision_weighted": 0.5839,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 2,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "该检索文本在第(9)条明确写明“此泵没有在FDA注册，不能用于人类的临床实验”，与标准答案要点完全一致，可直接回答用户的两个问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅介绍Cchippump-2注射泵的产品特点和用途，未提及FDA注册或人类临床实验相关信息，无法帮助回答核心问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.8,
+              "reason": "文本明确说明该泵不能用于人类的临床实验，直接回答了问题中的第二个要点，但未提及FDA注册信息，因此信息部分相关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "检索文本仅为Cchippump-2注射泵说明书标题及适用型号说明，未提及FDA注册或人类临床实验相关内容，对回答该问题无实质帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本是Cchippump-2注射泵的使用说明书操作说明，仅涉及模式选择、内径、注射容量、流速等操作细节，完全未提及FDA注册或人类临床实验相关内容，对回答该问题没有任何帮助。"
+            }
+          ],
+          "reason": "2/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.9426
+      },
+      "time_s": 16.89
+    },
+    {
+      "id": "DV-TN-008",
+      "category": "table_numeric",
+      "difficulty": "easy",
+      "question": "5uL 规格注射器对应的流量范围是多少？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4"
+        ],
+        "time_s": 14.21
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 1,
+          "found_facts": 1,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "5uL 注射器流量范围：0.00045-0.026（uL/min-mL/min）",
+              "gold_rank": 1,
+              "chunk_id": "chunk-3ecae364064652a4159a5b0480a33016",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 1,
+          "hit_facts": 1,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "5uL 注射器流量范围：0.00045-0.026（uL/min-mL/min）",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[1]中的表格明确列出：'| 5uL | 0.35 | 0.00045-0.026 |'，其中注射器规格为5uL对应的流量范围uL/min-mL/min即为0.00045-0.026，与事实陈述完全一致。"
+            }
+          ],
+          "reason": "1/1 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本的表格中明确列出5uL注射器对应直径0.35mm、流量范围0.00045-0.026 uL/min-mL/min，与标准答案要点的关键数值5、0.35、0.00045、0.026逐一对应一致。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅列出3mL、5mL、10mL规格注射器的直径和流量范围，未出现关键数值中的5（规格）、0.35（直径）、0.00045和0.026（流量范围），与问题所需的5uL注射器信息无关。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅列出50uL、100uL、250uL注射器的直径和流量范围，未出现5uL规格及清单中的关键数值0.35、0.00045、0.026，无法用于回答5uL注射器的流量范围。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索表格仅列出60mL、100mL、200mL规格，未出现5uL或直径0.35及流量0.00045-0.026，与问题所需信息无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅列出20mL（直径19.05）、30mL（直径21.59）、50mL（直径28.90）注射器的流量范围，未出现5uL、直径0.35、0.00045或0.026等关键数值，与问题所需的5uL注射器流量范围无关。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 16.48
+    },
+    {
+      "id": "DV-IO-006",
+      "category": "image_only",
+      "difficulty": "medium",
+      "question": "注射器选型界面（图5）里列出了哪些注射器品牌？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4",
+          "8a22bfff101b31f1",
+          "f33baf8f00190aa4",
+          "8a22bfff101b31f1"
+        ],
+        "time_s": 13.66
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 6,
+          "found_facts": 6,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "Air-Tite All Plastic",
+              "gold_rank": 1,
+              "chunk_id": "chunk-d49078eca26284304b4a8bd92b194e22",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "Ranfac",
+              "gold_rank": 1,
+              "chunk_id": "chunk-d49078eca26284304b4a8bd92b194e22",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "XinHua",
+              "gold_rank": 1,
+              "chunk_id": "chunk-d49078eca26284304b4a8bd92b194e22",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "Becton Dickson",
+              "gold_rank": 1,
+              "chunk_id": "chunk-d49078eca26284304b4a8bd92b194e22",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "Hamilton",
+              "gold_rank": 1,
+              "chunk_id": "chunk-d49078eca26284304b4a8bd92b194e22",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "Popper_Sons,Inc",
+              "gold_rank": 1,
+              "chunk_id": "chunk-d49078eca26284304b4a8bd92b194e22",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 6,
+          "hit_facts": 6,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "Air-Tite All Plastic",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确列出注射器型号选择项，原文为“注射器型号选择|Air-Tite All Plastic|Ranfac|XinHua|Becton Dickson|Hamilton|Popper_Sons,Inc”，其中包含“Air-Tite All Plastic”。"
+            },
+            {
+              "fact": "Ranfac",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中注射器选型界面的注射器型号选择列表中明确出现了“Ranfac”一项，原文为“注射器型号选择|Air-Tite All Plastic|Ranfac|XinHua|Becton Dickson|Hamilton|Popper_Sons,Inc”。"
+            },
+            {
+              "fact": "XinHua",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确列出了注射器型号选择，包含'XinHua'，原文为：'注射器型号选择|Air-Tite All Plastic|Ranfac|XinHua|Becton Dickson|Hamilton|Popper_Sons,Inc'。"
+            },
+            {
+              "fact": "Becton Dickson",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中列出的注射器型号选择列表明确包含“Becton Dickson”，原文为“注射器型号选择|Air-Tite All Plastic|Ranfac|XinHua|Becton Dickson|Hamilton|Popper_Sons,Inc|1cc 4.7 mm|2.5cc 9.70 mm|...”。"
+            },
+            {
+              "fact": "Hamilton",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确列出了注射器品牌选项，其中包含“Hamilton”这一项，原文引用：“Air-Tite All Plastic|Ranfac|XinHua|Becton Dickson|Hamilton|Popper_Sons,Inc”。"
+            },
+            {
+              "fact": "Popper_Sons,Inc",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确列出注射器型号选择项包含“Popper_Sons,Inc”，原文为“注射器型号选择|Air-Tite All Plastic|Ranfac|XinHua|Becton Dickson|Hamilton|Popper_Sons,Inc|1cc 4.7 mm...”。"
+            }
+          ],
+          "reason": "6/6 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本直接列出了图5注射器选型界面中的品牌，包括Air-Tite All Plastic、Ranfac、XinHua、Becton Dickson、Hamilton、Popper_Sons,Inc，与标准答案要点中的品牌清单一致，完全有助于回答问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅泛泛说明选型画面包含常用标准注射器型号，未列出任何品牌名称，未包含标准答案要点中要求的 Air-Tite All Plastic、Ranfac、XinHua、Becton Dickson、Ha 等品牌信息，对回答问题没有实质帮助。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅提到当前选择为Popper&Sons 50mL 29.00mm，未列出标准答案中的Air-Tite All Plastic、Ranfac、XinHua、Becton Dickson、Ha等品牌，因此对回答问题没有帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.2,
+              "reason": "文本仅泛泛提及选型界面包含注射器品牌列表和选择品牌的操作，但未列出标准答案要点中要求的任何具体品牌名称（Air-Tite All Plastic、Ranfac、XinHua、Becton Dickson、Ha），无法回答问题。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本描述了选择注射器的操作界面和厂商选择按钮，但未列出任何注射器品牌名称，未包含标准答案要点中 Air-Tite All Plastic、Ranfac、XinHua、Becton Dickson、Ha 等品牌信息。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.9743
+      },
+      "time_s": 35.23
+    },
+    {
+      "id": "DV-SUM-005",
+      "category": "summary",
+      "difficulty": "hard",
+      "question": "这份说明书对注射泵的工作模式前后描述不太一致，技术参数表里列的是哪几种工作模式？功能介绍和模式选择界面里写的又是哪几种？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4"
+        ],
+        "time_s": 8.57
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 3,
+          "found_facts": 3,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 4.0,
+          "avg_rank": 3.0,
+          "max_rank": 4,
+          "top_k_recall": {
+            "1": 0.3333,
+            "3": 0.3333,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "技术参数表工作模式：单推、单拉、单推循环（选配）、推拉循环",
+              "gold_rank": 1,
+              "chunk_id": "chunk-ce82d42db3c26c6493d4d26623252c85",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "功能介绍工作模式：单推、单拉、推拉循环、不工作（4 种）",
+              "gold_rank": 4,
+              "chunk_id": "chunk-e169a9ea0ef1f1e960e241c55d3a6e46",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "模式选择界面：单推、单拉、推拉循环、不工作（4 种）",
+              "gold_rank": 4,
+              "chunk_id": "chunk-e169a9ea0ef1f1e960e241c55d3a6e46",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 3,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "技术参数表工作模式：单推、单拉、单推循环（选配）、推拉循环",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[3]技术参数表中明确列出：\"工作模式 | 单推、单拉、单推循环（选配）、推拉循环\"，与事实陈述完全一致。"
+            },
+            {
+              "fact": "功能介绍工作模式：单推、单拉、推拉循环、不工作（4 种）",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[5]明确表述：'每台泵有4种工作模式选择。分别是：单推、单拉、推拉循环、不工作。'与事实陈述'功能介绍工作模式：单推、单拉、推拉循环、不工作（4 种）'完全一致。"
+            },
+            {
+              "fact": "模式选择界面：单推、单拉、推拉循环、不工作（4 种）",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[5]明确表述：\"每台泵有4种工作模式选择。分别是：单推、单拉、推拉循环、不工作。\"，与事实陈述完全一致。"
+            }
+          ],
+          "reason": "3/3 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.6,
+        "context_precision_weighted": 0.6715,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 3,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.8,
+              "reason": "文本明确列出模式选择界面可选择的模式为单推、单拉、推拉循环、不工作，共4种，与标准答案要点2及关键数值4一致，直接佐证了模式选择界面（3.2）的描述，对回答有实质帮助；但未涉及技术参数表（1.2）和功能介绍（1.3）中的工作模式。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本描述3.1参数设置界面，仅笼统提及工作模式，未列出技术参数表（1.2）或功能介绍（1.3）与模式选择界面（3.2）中的具体工作模式名称，无法回答关于工作模式描述不一致的对比问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "该文本出自技术参数表1.2，明确列出工作模式为“单推、单拉、单推循环（选配）、推拉循环”，与标准答案要点1所述1.2节内容完全一致，直接支撑回答。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.4,
+              "reason": "该文本仅为目录，列出了1.2技术参数、1.3功能介绍、3.2模式选择界面等章节标题，与问题所需位置1.2、1.3、3.2对应，但未包含任何工作模式的具体名称，仅能佐证相关章节存在，对回答问题帮助有限。"
+            },
+            {
+              "rank": 5,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "该文本描述模式选择界面（对应标准答案要点2中的3.2）为4种工作模式：单推、单拉、推拉循环、不工作，与标准答案要点2完全一致，直接提供了回答所需信息。"
+            }
+          ],
+          "reason": "3/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.8574
+      },
+      "time_s": 11.14
+    },
+    {
+      "id": "DV-IO-007",
+      "category": "image_only",
+      "difficulty": "easy",
+      "question": "除颤仪操作面板的照片上，除了监护、AED、起搏这三个模式，面板上还标了哪些按键？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "54f036800deb9dff",
+          "54f036800deb9dff",
+          "54f036800deb9dff",
+          "54f036800deb9dff",
+          "54f036800deb9dff"
+        ],
+        "time_s": 20.15
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "面板上有监护、AED、起搏三种模式",
+              "gold_rank": 1,
+              "chunk_id": "chunk-db0d4693fe5684c747e297b746623b48",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "面板按键包括能量调节、充电、电击、记录、静音、报警复位、铅标记、主菜单",
+              "gold_rank": 1,
+              "chunk_id": "chunk-db0d4693fe5684c747e297b746623b48",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 0.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 0,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "面板上有监护、AED、起搏三种模式",
+              "hit": false,
+              "score": 0.05,
+              "reason": "上下文中仅出现“AED”、“监护”、“手动除量”、“模式选择开关”等零散词语，未出现“起搏”一词，也未出现将“监护、AED、起搏”并列为三种模式的任何表述，无法推导出“面板上有监护、AED、起搏三种模式”。"
+            },
+            {
+              "fact": "面板按键包括能量调节、充电、电击、记录、静音、报警复位、铅标记、主菜单",
+              "hit": false,
+              "score": 0.95,
+              "reason": "上下文[1]中列出的按键为：能量调节、充电、电击、记录、报警暂停、事件标记、主菜单、导联选择键、模式选择开关等，其中出现的为“报警暂停”和“事件标记”，并未出现事实陈述中的“静音”“报警复位”“铅标记”，因此该按键组合在上下文中无明确依据。"
+            }
+          ],
+          "reason": "0/2 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "检索文本列出了除颤仪面板上的能量调节、充电、电击、记录、报警暂停、主菜单等按键，与标准答案要点中的能量调节、充电、电击、记录、报警复位、主菜单等按键高度对应，能直接帮助回答问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅描述AED操作步骤，未提及除颤仪操作面板上除监护、AED、起搏外的其他按键（如能量调节、充电、电击、记录、静音、报警复位、铅标记、主菜单等），对回答问题没有帮助。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本描述的是产品照中除颤操作场景，未提及面板上的能量调节、充电、电击、记录、静音、报警复位、铅标记、主菜单等任何按键信息，对回答问题没有帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅为“除颤仪”一词，未提及任何面板按键信息，无法帮助回答除颤仪操作面板上除监护、AED、起搏外的按键问题。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "文本是除颤仪使用注意事项，未提及面板上除监护、AED、起搏外的任何按键（如能量调节、充电、电击、记录、静音、报警复位、铅标记、主菜单等），对回答问题无帮助。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.9943
+      },
+      "time_s": 42.17
+    },
+    {
+      "id": "DV-FS-011",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "除颤的时候，如果病人身上装了植入性起搏器，电极板要避开什么部位？至少隔开多少距离？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "54f036800deb9dff",
+          "54f036800deb9dff",
+          "54f036800deb9dff",
+          "54f036800deb9dff",
+          "54f036800deb9dff"
+        ],
+        "time_s": 17.82
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 1,
+          "found_facts": 1,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "避开起搏器部位至少10厘米",
+              "gold_rank": 1,
+              "chunk_id": "chunk-b7f6074b70dfe5a7fcf58914a2d38819",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 1,
+          "hit_facts": 1,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "避开起搏器部位至少10厘米",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确记载：“如患者带有植入性起搏器，应注意避开起搏器部位至少10厘米。”"
+            }
+          ],
+          "reason": "1/1 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本明确说明带有植入性起搏器时应避开起搏器部位至少10厘米，与标准答案要点中的关键数值10完全一致，直接回答了问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅提到电极片避开除颤部位，未涉及植入性起搏器，也未提及关键数值10厘米，无法回答核心问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅介绍除颤电极板的各种放置位置，完全未提及植入性起搏器以及需要避开的部位或至少10厘米的距离，与问题所需信息无关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅描述除颤电极板的标准位置（正极心尖区、负极胸骨右缘第二肋间），未提及植入性起搏器、避开部位或10厘米的距离要求，与问题完全无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅描述了AED操作步骤，未提及植入性起搏器或需要避开的距离，完全未涉及标准答案要点中的关键数值10厘米。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 20.2
+    },
+    {
+      "id": "DV-TN-009",
+      "category": "table_numeric",
+      "difficulty": "medium",
+      "question": "按说明书里的除颤能量选择表，心房颤动做同步电复律时，单相波和双相波分别该用多大能量？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "54f036800deb9dff",
+          "54f036800deb9dff",
+          "54f036800deb9dff",
+          "54f036800deb9dff",
+          "54f036800deb9dff"
+        ],
+        "time_s": 25.35
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "房颤同步电复律单相波能量200焦耳",
+              "gold_rank": 1,
+              "chunk_id": "chunk-1b0494989adf517103d03606d7500363",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "房颤同步电复律双相波能量120—200焦耳",
+              "gold_rank": 1,
+              "chunk_id": "chunk-1b0494989adf517103d03606d7500363",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "房颤同步电复律单相波能量200焦耳",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的表格中明确给出：同步电复律对应房颤时，单相波能量(焦耳)为200，即原文“| 同步 | 房颤 | 200 | 120—200 |”，与事实陈述一致。"
+            },
+            {
+              "fact": "房颤同步电复律双相波能量120—200焦耳",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的能量选择表中明确列出：同步 | 房颤 | 单相波200 | 双相波120—200，即房颤同步电复律双相波能量为120—200焦耳。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "该文本中的能量选择表明确指出同步电复律治疗房颤时单相波能量为200焦耳、双相波能量为120—200焦耳，与【关键数值】清单中的200和120完全一致，直接包含回答问题所需信息。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本描述的是非同步除颤（室颤）的能量选择，其中单相波为360 J、双相波为200 J，均与标准答案要点中房颤同步电复律的单相波200 J、双相波120—200 J不符，且未涉及心房颤动同步电复律内容。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅包含非同步电复律（多型性室速、室颤和室扑）的能量表，未涉及心房颤动同步电复律，也未出现标准答案关键数值200或120，因此对回答该问题无帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本讲的是儿童除颤和体内除颤的能量选择，未涉及房颤同步电复律，全文未出现清单中单相波200焦耳或双相波120—200焦耳的相关数值，对回答该问题无帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅说明同步电复律的适应症和同步要求，未提及房颤电复律的单相波或双相波能量数值，不含关键数值200或120，对回答问题无帮助。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.977
+      },
+      "time_s": 27.69
+    },
+    {
+      "id": "DV-SUM-006",
+      "category": "summary",
+      "difficulty": "hard",
+      "question": "电除颤为什么要跟心电同步？同步电复律的时候，放电脉冲要卡在心电周期的哪个时刻，为什么不能随便放？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "54f036800deb9dff",
+          "54f036800deb9dff",
+          "54f036800deb9dff",
+          "54f036800deb9dff",
+          "54f036800deb9dff"
+        ],
+        "time_s": 12.07
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 4,
+          "found_facts": 4,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.5,
+          "avg_rank": 1.5,
+          "max_rank": 2,
+          "top_k_recall": {
+            "1": 0.5,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "同步模式为R波触发",
+              "gold_rank": 1,
+              "chunk_id": "chunk-d9edf6efedf93ca2bbdaa3f678cda088",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "同步电复律时电流应与QRS波群同步，脉冲电流应落在R波下降支",
+              "gold_rank": 1,
+              "chunk_id": "chunk-d9edf6efedf93ca2bbdaa3f678cda088",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "T波升支为“易损期”，此时放电极易诱发室速、室扑或室颤",
+              "gold_rank": 2,
+              "chunk_id": "chunk-faa97767b27757dd5564671cbb8ff876",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "最佳放电时期为R波降支或R波起始后30ms",
+              "gold_rank": 2,
+              "chunk_id": "chunk-faa97767b27757dd5564671cbb8ff876",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "同步模式为R波触发",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：“电复律时电流应与QRS波群同步,脉冲电流应落在R波下降支。”，与“同步模式为R波触发”含义一致，即同步电复律依据R波触发/放电。"
+            },
+            {
+              "fact": "同步电复律时电流应与QRS波群同步，脉冲电流应落在R波下降支",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“同步电复律：主要用于心房颤动、房扑、室上性或室性心动过速。电复律时电流应与QRS波群同步,脉冲电流应落在R波下降支。”与事实陈述完全一致。"
+            },
+            {
+              "fact": "T波升支为“易损期”，此时放电极易诱发室速、室扑或室颤",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]明确表述：“易损期：T波升支部分为‘易损期’，此时放电或受刺激极易诱发室速、室扑或室颤。”"
+            },
+            {
+              "fact": "最佳放电时期为R波降支或R波起始后30ms",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]中明确表述：“◆最佳放电时期：心室肌绝对不应期放电，即R波降支或R波起始后30ms”，与事实陈述完全一致。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.4,
+        "context_precision_weighted": 0.6569,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 2,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "文本提到同步电复律时电流应与QRS波群同步、脉冲电流应落在R波下降支，直接对应标准答案要点2；但未涉及R波触发、易损期及30ms等关键内容，故相关但不完整。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本直接解释了不能随便放电的原因是T波升支为易损期，并指出最佳放电时期为R波降支或R波起始后30ms，与标准答案中的关键数值30一致，内容完全支持回答问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.05,
+              "reason": "该文本仅对电除颤进行分类，未涉及同步电复律的R波触发机制、T波易损期或R波降支/起始后30ms放电时机等关键信息，与问题及标准答案要点无关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本描述的是非同步除颤的操作步骤（能量选择、电极板位置、放电操作等），未涉及同步电复律的R波触发、QRS波群同步、R波下降支、易损期或R波降支30ms等关键信息，与问题完全无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本仅介绍除颤使心脏全部除极并恢复窦性心律的一般工作原理，未提及同步模式、R波触发、QRS波群、T波易损期或R波降支后30ms等任何与问题及标准答案关键数值（30）相关的实质信息。"
+            }
+          ],
+          "reason": "2/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.9216
+      },
+      "time_s": 33.75
+    },
+    {
+      "id": "DV-FS-012",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "这台脉搏血氧仪在测量时，红外发射管发出的是哪两种波长的光？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "9134cbc78eca13e9",
+          "9134cbc78eca13e9",
+          "9134cbc78eca13e9",
+          "9134cbc78eca13e9",
+          "9134cbc78eca13e9"
+        ],
+        "time_s": 24.35
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "波长为660nm的红光",
+              "gold_rank": 1,
+              "chunk_id": "chunk-80f618221a57a81ce77b1f37e514819a",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "波长为940nm的近红外光",
+              "gold_rank": 1,
+              "chunk_id": "chunk-80f618221a57a81ce77b1f37e514819a",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "波长为660nm的红光",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“红外发射管发射波长为660nm的红光和波长为940nm的近红外光照射在待测人指甲上”，其中直接出现了“波长为660nm的红光”，与事实陈述完全一致。"
+            },
+            {
+              "fact": "波长为940nm的近红外光",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“红外发射管发射波长为660nm的红光和波长为940nm的近红外光照射在待测人指甲上”，其中直接出现了“波长为940nm的近红外光”这一事实。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本明确写出红外发射管发射波长为660nm的红光和波长为940nm的近红外光，与【关键数值】清单中的660和940逐一核对一致，直接回答了问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本为脉搏血氧仪的使用注意事项与干扰因素，全文未提及红光和近红外光的波长，也未出现关键数值660或940，因此与问题无关。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该检索文本为脉搏血氧仪的安全警告和使用注意事项，全文未提及660nm或940nm等任何波长信息，与问题所需回答的测量波长内容完全无关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本是便携式RF通信设备与脉搏血氧仪之间的推荐隔离距离表，内容涉及射频干扰和隔离距离，完全没有提到660nm或940nm波长，与问题所问的两种波长无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本是关于电磁发射的指南和制造商声明，未提及脉搏血氧仪红外发射管波长，完全没有出现关键数值660或940，因此与问题无关。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 26.51
+    },
+    {
+      "id": "DV-TN-010",
+      "category": "table_numeric",
+      "difficulty": "easy",
+      "question": "这款脉搏血氧仪在正常运行状态下，适用的大气压力范围是多少？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "9134cbc78eca13e9",
+          "9134cbc78eca13e9",
+          "9134cbc78eca13e9",
+          "9134cbc78eca13e9",
+          "9134cbc78eca13e9"
+        ],
+        "time_s": 20.14
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 1,
+          "found_facts": 1,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "运行大气压力59kPa~107.4kPa",
+              "gold_rank": 1,
+              "chunk_id": "chunk-9d9dd31bb9a0dab4b71cbc5b1de24638",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 0.0,
+        "context_recall_detail": {
+          "total_facts": 1,
+          "hit_facts": 0,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "运行大气压力59kPa~107.4kPa",
+              "hit": false,
+              "score": 0.95,
+              "reason": "上下文中仅出现储运大气压力范围“22kPa～107.4kPa”（上下文[1]：“储运的大气压力22kPa～107.4kPa”），未出现“运行大气压力59kPa～107.4kPa”或与之等价的运行压力范围表述。"
+            }
+          ],
+          "reason": "0/1 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.0,
+        "context_precision_weighted": 0.0,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 0,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "文本提到的是储运大气压力22kPa～107.4kPa，未包含标准答案要点中运行大气压力范围59kPa～107.4kPa的关键数值59kPa，与问题所需信息不符。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本为注意事项和干扰因素，未提及运行大气压力范围，也无59kPa或107.4kPa等关键数值，与问题无关。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本为脉搏血氧仪的安全警告和注意事项，未提及大气压力范围或关键数值59、107.4，与问题所需信息完全无关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅涉及电磁抗扰度声明，未提及大气压力范围，也未出现关键数值59或107.4，与问题完全无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅说明产品适用范围是监测血氧饱和度和脉率，完全未提及大气压力范围，也未出现关键数值59或107.4，对回答问题没有帮助。"
+            }
+          ],
+          "reason": "0/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 41.17
+    },
+    {
+      "id": "DV-IO-008",
+      "category": "image_only",
+      "difficulty": "medium",
+      "question": "在血氧仪设置界面的 Limit Setup（限值设置）那一屏上，血氧饱和度的报警上限和下限默认值分别是多少？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "9134cbc78eca13e9",
+          "ff11a8dc007af2d9",
+          "9134cbc78eca13e9",
+          "9134cbc78eca13e9",
+          "9134cbc78eca13e9"
+        ],
+        "time_s": 20.77
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 1,
+          "not_found_facts": 1,
+          "min_rank": 2,
+          "median_rank": 2.0,
+          "avg_rank": 2.0,
+          "max_rank": 2,
+          "top_k_recall": {
+            "1": 0.0,
+            "3": 0.5,
+            "5": 0.5,
+            "8": 0.5
+          },
+          "per_fact": [
+            {
+              "fact": "血氧饱和度报警上限100",
+              "gold_rank": 2,
+              "chunk_id": "chunk-ca9d6eb11177f7c39a9d88c5bf9b110e",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "血氧饱和度报警下限94",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "血氧饱和度报警上限100",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]界面截图中明确列出报警上限设置：'右屏：Limit Setup *、Sp02 Hi 100、Sp02 Lo 94、PR Hi 130、PR Lo 50、+/- +、Exit'，其中 'Sp02 Hi 100' 即血氧饱和度报警上限100。"
+            },
+            {
+              "fact": "血氧饱和度报警下限94",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确记载了血氧饱和度的下限设置：'右屏：Limit Setup *、Sp02 Hi 100、Sp02 Lo 94、PR Hi 130、PR Lo 50、+/- +、Exit'，其中'Sp02 Lo 94'即为血氧饱和度报警下限94。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本中右屏Limit Setup界面明确列出Sp02 Hi 100与Sp02 Lo 94，与标准答案要点中血氧饱和度报警上限100、下限94的关键数值逐一吻合。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本为检测中界面的截图描述，内容涉及饱和度测量值98/99、脉搏、灌注数等，未涉及Limit Setup限值设置界面，也未出现报警上限100或下限94，与问题无关。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅描述如何进入设置界面及界面切换方法，未提及血氧饱和度报警上限或下限的默认值，缺乏与问题所需数值100和94相关的任何信息。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本为注意事项和测量干扰因素，未提及Limit Setup界面或血氧饱和度报警上限、下限的任何默认值；其中未出现关键数值100和94，与问题完全无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该检索文本仅为界面截图中的界面元素名称，未出现标准答案清单中的数值100或94，无法提供上限和下限默认值信息。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 22.91
+    },
+    {
+      "id": "DV-SUM-007",
+      "category": "summary",
+      "difficulty": "hard",
+      "question": "关于电池和自动关机，说明书里在不同地方都有提到。请综合说明：两节AAA电池满电大约能用多久？检测不到信号时多久会自动关机？电池电量接近用尽时设备会怎样？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "9134cbc78eca13e9",
+          "9134cbc78eca13e9",
+          "9134cbc78eca13e9",
+          "9134cbc78eca13e9",
+          "9134cbc78eca13e9"
+        ],
+        "time_s": 25.99
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 3,
+          "found_facts": 3,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.67,
+          "max_rank": 3,
+          "top_k_recall": {
+            "1": 0.6667,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "两节AAA电池可持续使用50小时",
+              "gold_rank": 1,
+              "chunk_id": "chunk-6ce19e4e5b9dbea12d9b4b8e7d8b525a",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "无信号产生时8秒钟之后自动关机",
+              "gold_rank": 1,
+              "chunk_id": "chunk-6ce19e4e5b9dbea12d9b4b8e7d8b525a",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "电池电量接近用尽时脉搏血氧仪将自动关闭",
+              "gold_rank": 3,
+              "chunk_id": "chunk-da71f0e7135cc6cad488144cc3b7bd32",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 0.6667,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "两节AAA电池可持续使用50小时",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：『产品功率较低，所配两节AAA电池可持续使用50小时』，直接支持该事实陈述。"
+            },
+            {
+              "fact": "无信号产生时8秒钟之后自动关机",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“无信号产生时，产品会在8秒钟之后自动关机，节省电量。” 与事实陈述“无信号产生时8秒钟之后自动关机”完全一致。"
+            },
+            {
+              "fact": "电池电量接近用尽时脉搏血氧仪将自动关闭",
+              "hit": false,
+              "score": 0.0,
+              "reason": "上下文中仅提到‘无信号产生时，产品会在8秒钟之后自动关机’、‘此时不放入手指检测并对仪器无操作，8s后自动关机’以及‘脉搏血氧仪在检测不到信号会在8s后自动关机’，均未出现‘电池电量接近用尽时’自动关闭的相关表述。"
+            }
+          ],
+          "reason": "2/3 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本明确说明两节AAA电池可持续使用50小时，无信号产生时8秒后自动关机，与关键数值50、8一致；虽未提及电量耗尽自动关闭，但已覆盖两问核心信息。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅说明装入两节AAA电池的步骤，未提及清单中的关键数值50（电池使用时长）或8（自动关机时间），也未涉及电量耗尽自动关闭的内容，对回答问题无帮助。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.4,
+              "reason": "文本含'8s后自动关机'，与关键数值8一致，回应了自动关机时长；但未提及电池续航约50小时或电量接近用尽时自动关闭，仅部分相关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.4,
+              "reason": "文本提到脉搏血氧仪在检测不到信号会在8s后自动关机，与标准答案要点2的'8秒钟'完全一致，提供了回答问题所需的部分信息；但未涉及电池续航50小时和电量接近用尽自动关闭的内容。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅列出产品附件包含2节AAA电池，未提及电池续航时间（50小时）、自动关机时间（8秒）或低电量行为，与问题所需信息完全无关。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.9448
+      },
+      "time_s": 60.05
+    },
+    {
+      "id": "DV-FS-013",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "这款动态心电记录仪对计时准确性有什么要求？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "447207be927c51ff",
+          "447207be927c51ff",
+          "447207be927c51ff",
+          "447207be927c51ff",
+          "447207be927c51ff"
+        ],
+        "time_s": 24.19
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 1,
+          "found_facts": 1,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "24h 内总误差应不超 30s",
+              "gold_rank": 1,
+              "chunk_id": "chunk-64a8a2ecd0db75eb2857fdd4dab99350",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 1,
+          "hit_facts": 1,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "24h 内总误差应不超 30s",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[1]中明确写有：‘24h 内总误差应不超 30s。’与事实陈述完全一致。"
+            }
+          ],
+          "reason": "1/1 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本标题为“计时准确性”，明确写出“24h 内总误差应不超 30s”，与标准答案要点及关键数值清单（24、30）逐一核对一致，可直接回答问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅列出产品名称为动态心电记录仪，未提及任何关于计时准确性要求的内容，尤其缺少清单中的关键数值24和30，因此对回答问题没有帮助。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本列出的是动态心电记录仪的电磁兼容、基本性能与蓝牙参数等内容，未提及计时准确性，也未出现与标准答案要点中“24h”“30s”相符的数值信息，因此对回答问题没有帮助。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅说明适用范围为24小时动态心电监测，未提及任何计时准确性或误差要求，与标准答案要点（24h内总误差应不超30s）无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该检索文本为电磁抗扰度声明，未提及计时准确性要求，也未出现关键数值24或30，与问题完全无关。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.9812
+      },
+      "time_s": 26.31
+    },
+    {
+      "id": "DV-IO-009",
+      "category": "image_only",
+      "difficulty": "easy",
+      "question": "佩戴连接示意图里，人物把那个白色长条形设备贴在了身体的什么位置？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "447207be927c51ff",
+          "447207be927c51ff",
+          "54f036800deb9dff",
+          "8a22bfff101b31f1",
+          "8a22bfff101b31f1"
+        ],
+        "time_s": 10.51
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "白色长条形设备贴在左胸处",
+              "gold_rank": 1,
+              "chunk_id": "chunk-e7e30daedcacfa2934d446379ce9113b",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "设备通过线缆连接着另一个白色方形部件",
+              "gold_rank": 1,
+              "chunk_id": "chunk-e7e30daedcacfa2934d446379ce9113b",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "白色长条形设备贴在左胸处",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：“图中展示了一个人体上半身，一只手拿着一个白色长条形设备贴在左胸处”。"
+            },
+            {
+              "fact": "设备通过线缆连接着另一个白色方形部件",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确记载：‘设备通过线缆连接着另一个白色方形部件’，与事实陈述逐字一致。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.4,
+        "context_precision_weighted": 0.6569,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 2,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本明确描述了连接示意图中人物把白色长条形设备贴在左胸处，与标准答案要点'左胸处'完全一致，直接回答了问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.85,
+              "reason": "文本描述白色长条形设备靠近胸部，且胸部有粉色标记用于说明使用位置，与标准答案要点'左胸处'的位置信息一致，能佐证回答。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "无法解析JSON: {\n  \"relevant\": false,\n  \"score\": 0.1,\n  \"reason\": \"检索文本仅提到连接示意图中人体图标注'胸骨导联'和'心尖导联'，未涉及白色长条形设备贴在左胸处的位置信息，与问题及标准答案要点（左胸处）无关。\""
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅含“连接示意图|有|保险管位置”，完全未提及佩戴位置或左胸处，与问题无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅提到接口标识和连线标签（GND、B-、A+），未涉及设备佩戴位置，与问题及标准答案要点“左胸处”完全无关。"
+            }
+          ],
+          "reason": "2/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 31.74
+    },
+    {
+      "id": "DV-TN-011",
+      "category": "table_numeric",
+      "difficulty": "medium",
+      "question": "说明书在电磁兼容章节给出了便携式及移动式射频通信设备与记录仪的推荐隔离距离表。若某射频通信设备的最大额定输出功率为 10W，在 800MHz~2.5GHz 频段下它至少要和记录仪保持多远距离？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "447207be927c51ff",
+          "447207be927c51ff",
+          "9134cbc78eca13e9",
+          "9134cbc78eca13e9",
+          "0d5c7f07d607e9c4"
+        ],
+        "time_s": 20.39
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "发射机最大额定输出功率 10W",
+              "gold_rank": 1,
+              "chunk_id": "chunk-444a9493292201c9c6f3d51e02a0e254",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "对应 800 MHz~2.5GHz 频段的推荐隔离距离为 7.3m",
+              "gold_rank": 1,
+              "chunk_id": "chunk-444a9493292201c9c6f3d51e02a0e254",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 0.5,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 1,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "发射机最大额定输出功率 10W",
+              "hit": false,
+              "score": 0.95,
+              "reason": "上下文中提到的数值为10和100（表格中的功率档位），以及公式中的变量P一般代表'由发射机制造商提供的发射机最大额定输出功率'，但没有任何一处明确表述'发射机最大额定输出功率 10W'这一事实。上下文[2]中仅出现'发射机最大额定输出功率W'作为表头，未给出具体值10W；表格中的'10'是列于隔离距离表的功率档位行，并非对'最大额定输出功率10W'的直接陈述。因此该事实在检索上下文中没有明确依据。"
+            },
+            {
+              "fact": "对应 800 MHz~2.5GHz 频段的推荐隔离距离为 7.3m",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]和[4]的推荐隔离距离表格中，发射机最大额定输出功率为10W一行对应三列隔离距离分别为3.8、3.8、7.3，其中7.3所在列对应上下文[2]中标注的'800 MHz~2.5GHz d = 2.3√P'频段，因此该事实与表格数据一致。"
+            }
+          ],
+          "reason": "1/2 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.8,
+        "context_precision_weighted": 0.854,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 4,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本中的推荐隔离距离表在800MHz~2.5GHz频段、最大额定输出功率10W一行中明确列出距离为7.3，与标准答案要点及关键数值7.3完全一致。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "检索文本给出了800MHz~2.5GHz频段隔离距离公式 d = 2.3√P，代入最大额定输出功率10W可计算得约7.3米，与【关键数值】清单中的7.3一致，直接支持回答问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本虽提及800MHz~2.5GHz频段及隔离距离公式d=2.3√P，但未给出P=10W时的计算结果，仅涉及脉搏血氧仪而非记录仪，且全文未出现7.3米这一关键数值。"
+            },
+            {
+              "rank": 4,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "表格中10W功率对应800MHz~2.5GHz频段的推荐隔离距离为7.3米，与【关键数值】清单中的7.3逐字核对一致，直接回答了问题。"
+            },
+            {
+              "rank": 5,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "检索文本包含800MHz~2.5GHz频段的隔离距离计算公式 d=2.3√p，代入p=10W可算得约7.3米，与标准答案关键数值7.3一致，能直接支撑回答。"
+            }
+          ],
+          "reason": "4/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.9559
+      },
+      "time_s": 42.11
+    },
+    {
+      "id": "DV-SUM-008",
+      "category": "summary",
+      "difficulty": "hard",
+      "question": "关于这款动态心电记录仪的电池，说明书从电池规格、低电量提示、日常保养三个方面分别是怎样要求的？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "447207be927c51ff",
+          "447207be927c51ff",
+          "447207be927c51ff",
+          "447207be927c51ff",
+          "447207be927c51ff"
+        ],
+        "time_s": 20.1
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 3,
+          "found_facts": 0,
+          "not_found_facts": 3,
+          "min_rank": null,
+          "median_rank": null,
+          "avg_rank": null,
+          "max_rank": null,
+          "top_k_recall": {
+            "1": 0.0,
+            "3": 0.0,
+            "5": 0.0,
+            "8": 0.0
+          },
+          "per_fact": [
+            {
+              "fact": "电源：内部电源供电，锂电池 1*3.7V 250mAh，型号：402626",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "电池电压小于 3.15V 时，红色指示灯与绿色指示灯同频闪烁，提示电量较低",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "长时间不使用，请最少每隔六个月对电池进行一次充电",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 0.0,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 0,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "电源：内部电源供电，锂电池 1*3.7V 250mAh，型号：402626",
+              "hit": false,
+              "score": 0.0,
+              "reason": "上下文中未出现‘锂电池 1*3.7V 250mAh’或‘型号：402626’等电源规格描述，仅有关于内部电源供电持续时间的表述，无法找到该事实的直接或等价依据。"
+            },
+            {
+              "fact": "电池电压小于 3.15V 时，红色指示灯与绿色指示灯同频闪烁，提示电量较低",
+              "hit": false,
+              "score": 1.0,
+              "reason": "检索上下文中未出现关于电池电压小于 3.15V 时红色指示灯与绿色指示灯同频闪烁、提示电量较低的任何表述，仅在[5]中出现“连续记录仪在内部电源完全充满电的情况下，持续时间不小于 24 小时”，与事实陈述无关。"
+            },
+            {
+              "fact": "长时间不使用，请最少每隔六个月对电池进行一次充电",
+              "hit": false,
+              "score": 0.0,
+              "reason": "检索上下文中未出现任何关于‘长时间不使用，请最少每隔六个月对电池进行一次充电’的表述或等价内容。上下文仅提及电池相关的‘连续记录仪在内部电源完全充满电的情况下，持续时间不小于 24 小时’，并未涉及长期存放时的充电周期要求。"
+            }
+          ],
+          "reason": "0/3 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.0,
+        "context_precision_weighted": 0.0,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 0,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅提及产品名称“动态心电记录仪”，未涉及电池规格、低电量提示或日常保养的任何内容，与问题无关。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅为说明书标题和版本号，未涉及电池规格（1*3.7V 250mAh、型号402626）、低电量提示（电压小于3.15V时红绿指示灯同频闪烁）或日常保养（每六个月充电一次）中的任何关键数值或要点。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该段文本仅涉及设备工作频率、基本性能、蓝牙参数和附件兼容性等内容，完全未提及电池规格、低电量提示或电池保养要求，也未出现关键数值 1、3.7、250、402626、3.15 中的任何一项。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅涉及附件兼容性与电磁干扰警示，未提及电池规格、低电量提示或电池保养，也未出现关键数值1、3.7、250、402626、3.15，与问题无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅描述连续记录仪的监测时间（不小于24小时），未涉及电池规格（1*3.7V 250mAh、402626）、低电量提示（3.15V）或日常保养（每六个月充电）等任何与问题相关的信息；且24小时不属于【关键数值】清单中的任何数字。"
+            }
+          ],
+          "reason": "0/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.0
+      },
+      "time_s": 22.5
+    },
+    {
+      "id": "DV-FS-014",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "如果用户用试用账号登录这个APP，检测数据和生成的本地报告会有什么限制？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "ff11a8dc007af2d9",
+          "ff11a8dc007af2d9",
+          "ff11a8dc007af2d9",
+          "ff11a8dc007af2d9",
+          "ff11a8dc007af2d9"
+        ],
+        "time_s": 13.56
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "检测数据无法保存",
+              "gold_rank": 1,
+              "chunk_id": "chunk-c59ece8bd8aad8cd7f5fc4ccb0a98731",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "生成的本地报告没有分析结果",
+              "gold_rank": 1,
+              "chunk_id": "chunk-c59ece8bd8aad8cd7f5fc4ccb0a98731",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "检测数据无法保存",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“使用试用账号登录，可简单使用软件检测功能，检测数据无法保存，生成的本地报告没有分析结果。”"
+            },
+            {
+              "fact": "生成的本地报告没有分析结果",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：\"使用试用账号登录，可简单使用软件检测功能，检测数据无法保存，生成的本地报告没有分析结果。\""
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "该文本直接说明使用试用账号登录时检测数据无法保存、生成的本地报告没有分析结果，与标准答案要点完全一致。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅为说明书目录，未包含试用账号登录后检测数据保存或本地报告分析结果的任何信息，与问题完全无关。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅描述登录界面和APP主界面截图元素，未提及试用账号登录后的数据保存或本地报告限制，与标准答案要点完全无关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅说明本地报告的查看流程，未提及试用账号登录时检测数据无法保存或本地报告没有分析结果等限制内容，与问题核心无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅描述登录界面和应用界面的UI元素，未提及试用账号登录时检测数据无法保存或本地报告没有分析结果等限制信息，与问题无关。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.9812
+      },
+      "time_s": 15.77
+    },
+    {
+      "id": "DV-FS-015",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "APP里的「我的消息」页面收到的消息分为哪几类？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "ff11a8dc007af2d9",
+          "ff11a8dc007af2d9",
+          "ff11a8dc007af2d9",
+          "ff11a8dc007af2d9",
+          "447207be927c51ff"
+        ],
+        "time_s": 111.46
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 0,
+          "not_found_facts": 2,
+          "min_rank": null,
+          "median_rank": null,
+          "avg_rank": null,
+          "max_rank": null,
+          "top_k_recall": {
+            "1": 0.0,
+            "3": 0.0,
+            "5": 0.0,
+            "8": 0.0
+          },
+          "per_fact": [
+            {
+              "fact": "医嘱",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "通知",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "医嘱",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[1]中明确表述：用户接收系统发送的消息，分为“医嘱”、“通知”。该处出现了“医嘱”一词，可作为事实依据。"
+            },
+            {
+              "fact": "通知",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确写到“用户接收系统发送的消息，分为“医嘱”、“通知””，直接出现了“通知”这一事实。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本明确指出用户接收的消息分为“医嘱”和“通知”，与标准答案要点完全一致。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅列出界面截图中的菜单项名称（我的消息等），未提及消息分类为「医嘱」和「通知」两类，对回答问题无帮助。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅列出界面元素名称（如“我的消息”），未提及消息分为「医嘱」和「通知」两类，无法回答问题。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅为文档目录，未提及「我的消息」页面或消息分类，与标准答案要点中的「医嘱」和「通知」两类完全无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本描述的是心电图显示与走纸速度设置，未提及「我的消息」页面的消息分类，与问题和标准答案（分为医嘱和通知两类）完全无关。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 114.39
+    },
+    {
+      "id": "DV-IO-010",
+      "category": "image_only",
+      "difficulty": "medium",
+      "question": "网络报告里的心电图报告单上，心率(HR)、PR间期、QRS时限、QT、QTc 的测量结果分别是多少？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "ff11a8dc007af2d9",
+          "ff11a8dc007af2d9",
+          "ff11a8dc007af2d9",
+          "ff11a8dc007af2d9",
+          "ff11a8dc007af2d9"
+        ],
+        "time_s": 19.47
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 5,
+          "found_facts": 5,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "HR 86 bpm",
+              "gold_rank": 1,
+              "chunk_id": "chunk-6d14e89f1cd40e029e21b69de086d854",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "PR 0.126 s",
+              "gold_rank": 1,
+              "chunk_id": "chunk-6d14e89f1cd40e029e21b69de086d854",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "QRS 0.065 s",
+              "gold_rank": 1,
+              "chunk_id": "chunk-6d14e89f1cd40e029e21b69de086d854",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "QT 0.340 s",
+              "gold_rank": 1,
+              "chunk_id": "chunk-6d14e89f1cd40e029e21b69de086d854",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "QTc 0.307 s",
+              "gold_rank": 1,
+              "chunk_id": "chunk-6d14e89f1cd40e029e21b69de086d854",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 5,
+          "hit_facts": 5,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "HR 86 bpm",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“测量结果 HR (bpm) 86”以及“1. 心率:86 bpm，正常范围。”，与事实陈述“HR 86 bpm”一致。"
+            },
+            {
+              "fact": "PR 0.126 s",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确出现“PR (s) 0.126”，与事实陈述“PR 0.126 s”一致。"
+            },
+            {
+              "fact": "QRS 0.065 s",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确记录测量结果「QRS (s) 0.065」，与事实陈述 QRS 0.065 s 完全一致。"
+            },
+            {
+              "fact": "QT 0.340 s",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]的心电图报告测量结果中明确列出“QT (s) 0.340”，与事实陈述“QT 0.340 s”内容一致。"
+            },
+            {
+              "fact": "QTc 0.307 s",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确记载“QTc (s) 0.307”，与事实陈述“QTc 0.307 s”对应。"
+            }
+          ],
+          "reason": "5/5 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本完整包含测量结果：HR 86 bpm、PR 0.126 s、QRS 0.065 s、QT 0.340 s、QTc 0.307 s，与【关键数值】清单逐项核对完全一致。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本中的心率为48 bpm，与标准答案关键数值86不符，且未提供PR间期、QRS时限、QT、QTc的具体测量值，无法用于回答该问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本中的心率数值为66 bpm，与【关键数值】清单中的86不符，且未提供PR间期、QRS时限、QT、QTc对应数值（0.126、0.065、0.340、0.307），因此无法回答该问题。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本中的数值为心率66 bpm，与标准答案要点关键数值86、0.126、0.065、0.340、0.307均不匹配，且未提供PR间期、QRS时限、QT、QTc的具体测量值，对回答问题无帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅描述界面截图中的设备信息、日期和设置等，未出现问题所问的 HR、PR间期、QRS时限、QT、QTc 任何测量结果，所含数值66bpm等也不在【关键数值】清单（86；0.126；0.065；0.340；0.307）之内，对回答没有帮助。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 22.21
+    },
+    {
+      "id": "DV-TN-012",
+      "category": "table_numeric",
+      "difficulty": "medium",
+      "question": "在「记录」页面按「分析灯」给报告分类排序时，除了绿灯（正常）和红灯（异常），还有哪几种分析灯状态，各自代表什么意义？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "ff11a8dc007af2d9",
+          "ff11a8dc007af2d9",
+          "ff11a8dc007af2d9",
+          "ff11a8dc007af2d9",
+          "ff11a8dc007af2d9"
+        ],
+        "time_s": 14.1
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 4,
+          "found_facts": 4,
+          "not_found_facts": 0,
+          "min_rank": 2,
+          "median_rank": 2.0,
+          "avg_rank": 2.75,
+          "max_rank": 5,
+          "top_k_recall": {
+            "1": 0.0,
+            "3": 0.75,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "检测初步显示正常，标记为绿灯",
+              "gold_rank": 2,
+              "chunk_id": "chunk-0f09a048a525051d9d6cc474d0c6a273",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "检测初步显示异常，标记为红灯",
+              "gold_rank": 2,
+              "chunk_id": "chunk-0f09a048a525051d9d6cc474d0c6a273",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "检测受于扰，信号质量差，请重新检测",
+              "gold_rank": 2,
+              "chunk_id": "chunk-0f09a048a525051d9d6cc474d0c6a273",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "检测数据未上传，等待设备联网，报告以网络报告为准",
+              "gold_rank": 5,
+              "chunk_id": "chunk-e2a68be8680c0a3a5446ab192eba92fd",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 4,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "检测初步显示正常，标记为绿灯",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的表格中明确列有“检测初步显示正常，标记为绿灯”，与事实陈述完全一致。"
+            },
+            {
+              "fact": "检测初步显示异常，标记为红灯",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的表格中明确列出：“|  | 检测初步显示异常，标记为红灯 |”，与事实陈述完全一致。"
+            },
+            {
+              "fact": "检测受于扰，信号质量差，请重新检测",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]的表格中明确列出：「检测受于扰，信号质量差，请重新检测」。"
+            },
+            {
+              "fact": "检测数据未上传，等待设备联网，报告以网络报告为准",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[5]的表格中明确列出对应原文：\"检测数据未上传，等待设备联网，报告以网络报告为准\"。"
+            }
+          ],
+          "reason": "4/4 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.4,
+        "context_precision_weighted": 0.3066,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 2,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅介绍了分析灯功能位置和分类排序方式，未提及除绿灯和红灯外其他分析灯状态及其意义，无法回答具体问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.7,
+              "reason": "该文本列出了分析灯几种状态及意义，包含绿灯正常、红灯异常，以及‘检测受干扰、信号质量差，请重新检测’，与标准答案中的一种额外状态一致，但缺少‘检测数据未上传、等待设备联网、报告以网络报告为准’这一状态，因此对回答有部分帮助。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅说明在“记录”页面点击“类型”可按类型分类排序，完全未提及分析灯状态及其意义，与问题无关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本讲的是按“时间”对报告分类排序，未提及任何分析灯状态及其意义，与问题所需信息完全无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": true,
+              "score": 0.8,
+              "reason": "检索文本列出了分析灯状态之一「检测数据未上传，等待设备联网，报告以网络报告为准」，与标准答案要点2完全一致，提供了回答问题所需的部分信息。"
+            }
+          ],
+          "reason": "2/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.6049
+      },
+      "time_s": 16.47
+    },
+    {
+      "id": "DV-SUM-009",
+      "category": "summary",
+      "difficulty": "hard",
+      "question": "用户用血氧计完成一次检测后，要怎样才能拿到医生的诊断结果？请把从检测到最终看到医生诊断报告的主要步骤串起来说。",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "ff11a8dc007af2d9",
+          "ff11a8dc007af2d9",
+          "ff11a8dc007af2d9",
+          "ff11a8dc007af2d9",
+          "ff11a8dc007af2d9"
+        ],
+        "time_s": 27.0
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 4,
+          "found_facts": 3,
+          "not_found_facts": 1,
+          "min_rank": 1,
+          "median_rank": 2.0,
+          "avg_rank": 2.0,
+          "max_rank": 3,
+          "top_k_recall": {
+            "1": 0.25,
+            "3": 0.75,
+            "5": 0.75,
+            "8": 0.75
+          },
+          "per_fact": [
+            {
+              "fact": "选择「血氧计」检测项目完成检测并生成记录",
+              "gold_rank": 2,
+              "chunk_id": "chunk-c070ef263450fb266b2d48d0afa642fe",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "检测数据自动上传服务器生成网络报告",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "在网络报告中申请医生会诊并支付会诊费用",
+              "gold_rank": 3,
+              "chunk_id": "chunk-d63a67540a1eee63c57fb8091b2ea438",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "医生诊断后返回结果，在「记录」-「网络」页面查看会诊报告",
+              "gold_rank": 1,
+              "chunk_id": "chunk-0717f87c44ce2f63459b4431061f5721",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 0.75,
+        "context_recall_detail": {
+          "total_facts": 4,
+          "hit_facts": 3,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "选择「血氧计」检测项目完成检测并生成记录",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]明确记载：'①选择检测项目“血氧计”；……等待过后，血氧计开始测量，完成后点击确认，生成记录；'，与事实陈述“选择「血氧计」检测项目完成检测并生成记录”一致。"
+            },
+            {
+              "fact": "检测数据自动上传服务器生成网络报告",
+              "hit": false,
+              "score": 0.95,
+              "reason": "检索上下文中未找到‘检测数据自动上传服务器生成网络报告’的直接表述或明确等价表述。上下文[5]仅提到‘通过网络报告，预约医生会诊’以及‘点击网络报告’，上下文[3]目录中出现了‘5.2 网络报告’，但均未出现检测数据自动上传服务器以生成网络报告的描述。"
+            },
+            {
+              "fact": "在网络报告中申请医生会诊并支付会诊费用",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[5]“6.1 申请会诊”中明确表述：“通过网络报告，预约医生会诊，支付相应费用后，受理医生可线上查看该网络报告，并对该报告作出分析诊断。医生会诊操作流程如下：①选择底部菜单“记录”，在此页面点击“本地”或“网络”页面中的检测记录，点击网络报告；②打开网络报告，点击“医生会诊”；③在机构列表中，选择医院或者机构医生；④支付会诊费用，完成会诊申请。”该内容与事实陈述“在网络报告中申请医生会诊并支付会诊费用”直接对应。"
+            },
+            {
+              "fact": "医生诊断后返回结果，在「记录」-「网络」页面查看会诊报告",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确记载：\"医生受理诊单后，分析诊断完后，会返回诊断结果。查看医生会诊报告流程如下：①选择底部菜单“记录”，在“网络”页面中，点击所申请会诊的检测记录；②从下拉菜单中，选择会诊报告；③查看医生会诊报告\"，与事实陈述\"医生诊断后返回结果，在「记录」-「网络」页面查看会诊报告\"一致。"
+            }
+          ],
+          "reason": "3/4 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.4,
+        "context_precision_weighted": 0.5255,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 2,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.9,
+              "reason": "该文本明确描述了查看医生会诊报告的流程（记录→网络页面→点击检测记录→下拉菜单选会诊报告），与标准答案第4点对应，对回答问题有直接帮助；虽未涉及检测、上传、申请会诊等前置步骤，但关键查看步骤完全吻合。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.4,
+              "reason": "该文本仅覆盖了检测项目选择、生成记录等初始步骤（要点1），未涉及数据上传、申请会诊、医生诊断结果查看等后续关键环节，对回答有部分帮助但不足以完整回答问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅为软件手册的目录页，未提及血氧计检测、数据上传、医生会诊或查看诊断报告的任何步骤，与问题完全无关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本仅为血氧计检测过程中的界面截图描述，未涉及数据上传服务器、生成网络报告、申请医生会诊或查看诊断报告等后续核心步骤，对回答从检测到取得医生诊断报告的主要流程没有实质帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": true,
+              "score": 0.85,
+              "reason": "文本详细描述了从网络报告中申请医生会诊、支付费用、医生受理诊断的流程，覆盖了标准答案中步骤3的核心信息，对回答问题有直接帮助。"
+            }
+          ],
+          "reason": "2/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.9076
+      },
+      "time_s": 29.61
+    },
+    {
+      "id": "DV-FS-016",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "护理不良事件一共分为几个等级？每个等级分别叫什么名称？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "ac6d599e803fb549",
+          "ac6d599e803fb549",
+          "ac6d599e803fb549",
+          "ac6d599e803fb549",
+          "ac6d599e803fb549"
+        ],
+        "time_s": 104.34
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 5,
+          "found_facts": 4,
+          "not_found_facts": 1,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 0.8,
+            "3": 0.8,
+            "5": 0.8,
+            "8": 0.8
+          },
+          "per_fact": [
+            {
+              "fact": "分为四级（Ⅰ级至Ⅳ级）",
+              "gold_rank": null,
+              "chunk_id": null,
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "Ⅰ级事件：警告事件",
+              "gold_rank": 1,
+              "chunk_id": "chunk-5c1fc50141f827f6dba27be3647f0c08",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "Ⅱ级事件：不良后果事件",
+              "gold_rank": 1,
+              "chunk_id": "chunk-5c1fc50141f827f6dba27be3647f0c08",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "Ⅲ级事件：未造成后果的事件",
+              "gold_rank": 1,
+              "chunk_id": "chunk-5c1fc50141f827f6dba27be3647f0c08",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "Ⅳ级事件：隐患事件",
+              "gold_rank": 1,
+              "chunk_id": "chunk-5c1fc50141f827f6dba27be3647f0c08",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 5,
+          "hit_facts": 5,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "分为四级（Ⅰ级至Ⅳ级）",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]明确列出：'Ⅰ级事件:警告事件 Ⅱ级事件:不良后果事件 Ⅲ级事件:未造成后果的事件 Ⅳ级事件:隐患事件'，与事实陈述'分为四级（Ⅰ级至Ⅳ级）'一致。"
+            },
+            {
+              "fact": "Ⅰ级事件：警告事件",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确列出“**•Ⅰ级事件**（警告事件）”，上下文[2]中也明确列出“Ⅰ级事件:警告事件”，均直接表述了Ⅰ级事件即警告事件。"
+            },
+            {
+              "fact": "Ⅱ级事件：不良后果事件",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确写道‘**•Ⅱ级事件**（不良后果事件）’，上下文[2]中也明确写道‘Ⅱ级事件:不良后果事件’，与事实陈述‘Ⅱ级事件：不良后果事件’完全一致。"
+            },
+            {
+              "fact": "Ⅲ级事件：未造成后果的事件",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]和[2]均明确表述了该事实：[1]中写有“**•Ⅲ级事件**（未造成后果的事件）”，[2]中写有“Ⅲ级事件:未造成后果的事件”，与事实陈述完全一致。"
+            },
+            {
+              "fact": "Ⅳ级事件：隐患事件",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确写出“**•Ⅳ级事件**（隐患事件）”，上下文[2]明确写出“Ⅳ级事件:隐患事件”，两者均直接支持该事实陈述。"
+            }
+          ],
+          "reason": "5/5 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.6,
+        "context_precision_weighted": 0.8029,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 3,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本明确列出护理不良事件的四个等级及名称（Ⅳ级隐患事件、Ⅲ级未造成后果的事件、Ⅱ级不良后果事件、Ⅰ级警告事件），与标准答案要点完全一致，数字逐项核对无误。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本完整列出了护理不良事件的四个等级及名称（Ⅰ级警告事件、Ⅱ级不良后果事件、Ⅲ级未造成后果的事件、Ⅳ级隐患事件），与标准答案要点完全一致，直接回答了问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "文本明确列出护理不良事件分为Ⅰ、Ⅱ、Ⅲ、Ⅳ四个等级，并给出各等级的名称和定义，与标准答案要点完全一致，能直接回答等级数量及各等级名称。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "文本仅列举护理不良事件的类型，未提及四个等级及警告事件、不良后果事件、未造成后果的事件、隐患事件的名称，与标准答案要点中的等级分类完全无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅为标题“护理不良事件的分类”，未提及标准答案要点中护理不良事件分为四个等级及Ⅰ至Ⅳ级的具体名称，无法提供回答问题所需信息。"
+            }
+          ],
+          "reason": "3/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 126.15
+    },
+    {
+      "id": "DV-SUM-010",
+      "category": "summary",
+      "difficulty": "medium",
+      "question": "护理不良事件上报制度对上报时间有哪些规定？从事件发生到组织讨论分析，各环节分别要在多长时间内完成？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "ac6d599e803fb549",
+          "ac6d599e803fb549",
+          "ac6d599e803fb549",
+          "ac6d599e803fb549",
+          "ac6d599e803fb549"
+        ],
+        "time_s": 13.95
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 5,
+          "found_facts": 5,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.2,
+          "max_rank": 2,
+          "top_k_recall": {
+            "1": 0.8,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "发生护理不良事件后当事人员应立即报告护士长和当班医师",
+              "gold_rank": 1,
+              "chunk_id": "chunk-0130170e266248c094b63f45fb8c74cf",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "护士长在24小时内口头或电话向上级汇报",
+              "gold_rank": 1,
+              "chunk_id": "chunk-0130170e266248c094b63f45fb8c74cf",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "重大过失不得超过6小时",
+              "gold_rank": 1,
+              "chunk_id": "chunk-0130170e266248c094b63f45fb8c74cf",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "于24h内上报护理部",
+              "gold_rank": 1,
+              "chunk_id": "chunk-0130170e266248c094b63f45fb8c74cf",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "不良事件发生后7日内组织全科人员进行分析讨论",
+              "gold_rank": 2,
+              "chunk_id": "chunk-ceb1c90fb9f63153b6b9b8a263900986",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 5,
+          "hit_facts": 5,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "发生护理不良事件后当事人员应立即报告护士长和当班医师",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]第2条明确表述：“发生护理不良事件后，当事人员应立即报告护士长（组长或高年资护理人员）和当班医师，立即采取抢救措施，以减少和降低由于过失造成的不良后果。”"
+            },
+            {
+              "fact": "护士长在24小时内口头或电话向上级汇报",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“发生护理过失后，护士长在24小时内口头或电话向上级汇报”，与事实陈述完全一致。"
+            },
+            {
+              "fact": "重大过失不得超过6小时",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确记载：“重大过失应立即汇报科主任、护士长和护理部（不得超过6小时）”，与事实陈述“重大过失不得超过6小时”直接对应。"
+            },
+            {
+              "fact": "于24h内上报护理部",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[3]中明确表述：'报告时间：发生不良事件后，立即报告护士长、科主任，同时向护理部及相关部门报告，于24h内上报护理部。'"
+            },
+            {
+              "fact": "不良事件发生后7日内组织全科人员进行分析讨论",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]明确记载：“不良事件发生后7日内组织全科人员进行分析讨论，查明原因，提出处理意见及防范措施。”"
+            }
+          ],
+          "reason": "5/5 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.6,
+        "context_precision_weighted": 0.8029,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 3,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 0.8,
+              "reason": "文本涵盖了立即报告、24小时内口头或电话汇报、重大过失不超过6小时及及时提交护理部等关键时间节点，与标准答案要点中的24和6相符，但缺少7日内组织讨论这一环节，故相关度略降。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本明确提及不良事件发生后7日内组织全科人员分析讨论，与标准答案要点4及关键数值7对应，但未涉及立即报告、24小时内上报、6小时内重大过失汇报等时间规定，仅部分覆盖问题要求。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本明确提到护理不良事件上报时间要求：'于24h内上报护理部'，与标准答案要点3及关键数值24一致，但缺少护士长6小时内报告重大过失和7日内组织讨论分析的内容，仅部分覆盖问题要点。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本涉及不良事件记录保管、讨论分析、季度反馈和奖励机制，但未提及任何上报时间规定，也未出现关键数值24、6或7，对回答上报时间问题无帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅为标题“护理不良事件报告”，未包含任何关于上报时间或各环节时限的具体规定，与问题及标准答案要点完全无关。"
+            }
+          ],
+          "reason": "3/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 16.59
+    },
+    {
+      "id": "DV-FS-017",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "按这份技术审评规范，骨科手术器械的管理类别是怎么分的？产品类代号又是多少？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "268dffae2382a83a",
+          "9134cbc78eca13e9",
+          "0d5c7f07d607e9c4",
+          "9134cbc78eca13e9",
+          "447207be927c51ff"
+        ],
+        "time_s": 108.23
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 3,
+          "found_facts": 3,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "管理类别分为I类和II类",
+              "gold_rank": 1,
+              "chunk_id": "chunk-77a2fd58e00f3b292f07ed98b8517fd7",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "产品类代号为6810",
+              "gold_rank": 1,
+              "chunk_id": "chunk-77a2fd58e00f3b292f07ed98b8517fd7",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "分类依据是《医疗器械分类目录》",
+              "gold_rank": 1,
+              "chunk_id": "chunk-77a2fd58e00f3b292f07ed98b8517fd7",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 3,
+          "hit_facts": 3,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "管理类别分为I类和II类",
+              "hit": true,
+              "score": 0.95,
+              "reason": "上下文[1]中明确记载：'依据《医疗器械分类目录》，骨科手术器械（以下简称骨科器械）管理类别分为I类和II类，产品类代号为6810。'"
+            },
+            {
+              "fact": "产品类代号为6810",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确记载：“依据《医疗器械分类目录》，骨科手术器械（以下简称骨科器械）管理类别分为I类和II类，产品类代号为6810。”"
+            },
+            {
+              "fact": "分类依据是《医疗器械分类目录》",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确写道：“依据《医疗器械分类目录》，骨科手术器械（以下简称骨科器械）管理类别分为I类和II类”，直接表明分类依据是《医疗器械分类目录》。"
+            }
+          ],
+          "reason": "3/3 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本明确写明依据《医疗器械分类目录》，骨科手术器械管理类别分为I类和II类，产品类代号为6810，与标准答案要点及【关键数值】清单中的6810完全一致，直接回答了问题。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "检索文本仅列出'ⅡI类'和'I组B类设备'，未提及管理类别分为I类和II类，也未出现产品类代号6810，与标准答案的关键数值清单完全不符。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本内容为产品运输储存条件、质保信息及企业注册信息，未提及骨科手术器械管理类别或产品类代号6810，与问题完全无关。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅包含公司信息、注册地址、生产许可证编号等，未提及骨科手术器械管理类别的I类和II类划分，也未出现产品类代号6810，对回答问题无帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本描述的是某设备的型号、规格及电气安全特征（如防电击类型、防护等级等），完全未涉及骨科手术器械管理类别或产品类代号6810，对回答问题没有帮助。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 111.29
+    },
+    {
+      "id": "DV-FS-018",
+      "category": "fact_single",
+      "difficulty": "medium",
+      "question": "电动骨锯这种带电的手术器械，需不需要按这份骨科手术器械技术审评规范来审评？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "268dffae2382a83a",
+          "54f036800deb9dff",
+          "447207be927c51ff",
+          "54f036800deb9dff",
+          "447207be927c51ff"
+        ],
+        "time_s": 105.56
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "本规范适用于无源类常规手术器械",
+              "gold_rank": 1,
+              "chunk_id": "chunk-77a2fd58e00f3b292f07ed98b8517fd7",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "带电手术器械（如电动骨锯）不在此规范涉及范围内",
+              "gold_rank": 1,
+              "chunk_id": "chunk-77a2fd58e00f3b292f07ed98b8517fd7",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "本规范适用于无源类常规手术器械",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[1]中明确表述：“一、适用范围 本规范适用于无源类常规手术器械，带电手术器械（如电动骨锯）不在此规范涉及范围内。”"
+            },
+            {
+              "fact": "带电手术器械（如电动骨锯）不在此规范涉及范围内",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]中明确表述：“本规范适用于无源类常规手术器械，带电手术器械（如电动骨锯）不在此规范涉及范围内。”"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.438,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本的适用范围部分明确写明“本规范适用于无源类常规手术器械，带电手术器械（如电动骨锯）不在此规范涉及范围内”，直接给出了回答该问题所需的全部核心信息（不需要按该规范审评及其理由），与标准答案要点完全一致。"
+            },
+            {
+              "rank": 2,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本是除颤仪的注意事项，未提及电动骨锯或骨科手术器械技术审评规范，与问题完全无关，对回答没有帮助。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该检索文本讨论的是动态心电记录仪的电磁抗扰度声明与测试，内容与电动骨锯是否适用骨科手术器械技术审评规范完全无关，未提供任何回答该问题所需的信息。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本内容为电除颤操作流程，与电动骨锯是否适用骨科手术器械技术审评规范的问题完全无关。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本全部为IDEM1000-0N型动态心电记录仪的电磁抗扰度声明，未提及骨科手术器械、电动骨锯或有源/无源分类，与问题及标准答案完全无关。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 108.09
+    }
+  ]
+}

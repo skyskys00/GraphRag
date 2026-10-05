@@ -27,7 +27,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from app.m9_eval.runner import _build_deps, _resolve_collection  # noqa: E402
 
 COLLECTION = "col_b7b876b1"
-TESTSET = Path(__file__).resolve().parents[1] / "tests/testsets/testset_device_30.json"
+TESTSET = Path(__file__).resolve().parents[1] / "tests/testsets/archive/testset_device_30.json"
 
 # 每个漏召 fact → (doc_id, 定位锚子串)。锚子串全部来自语料 chunk 实测内容。
 # 匹配规则：content 同时含『主锚』；若主锚无命中，回退『备锚』；候选多个取 content 最长。

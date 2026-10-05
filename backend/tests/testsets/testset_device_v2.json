@@ -1,0 +1,1223 @@
+{
+  "testset_id": "testset_device_v2",
+  "collection": "col_b7b876b1",
+  "domain": "家用/医用器械说明书库（12 份，含注射泵、血压、血氧、心电、除颤、水质检测 + 骨科手术器械审评规范 + 护理不良事件上报）",
+  "version": "2026-10-05",
+  "created": "2026-10-05",
+  "description": "器械垂直场景 50 题评测集（v5.34 重建）。覆盖全部 12 份文档，每份文档至少 easy+medium 两档、内容充足的 10 份覆盖 hard。难度 25 易 / 15 中 / 10 难（≈5:3:2）。题型：fact_single 18 / table_numeric 12 / image_only 10 / summary 10。全部为单文档题；跨文档 comparison 与 unanswerable 由留档的旧题集覆盖。",
+  "corpus_docs": [
+    "融柏恒流泵_LSP-1C系列注射泵_说明书.pdf",
+    "铭昇电子_H2-5000IBP有创血压模拟仪_操作手册.pdf",
+    "多参数检测仪KE-2000 说明书.pdf",
+    "数字差压计使用说明书.pdf",
+    "智能便携式检测仪.pdf",
+    "瑞创RSP系列注射泵.pdf",
+    "电除颤.pdf",
+    "脉搏血氧仪.pdf",
+    "英菲泰克动态心电记录仪.pdf",
+    "血氧仪使用手册.pdf",
+    "护理不良事件上报系统培训.pptx",
+    "骨科手术器械类产品技术审评规范.docx"
+  ],
+  "questions": [
+    {
+      "id": "DV-TN-001",
+      "category": "table_numeric",
+      "question": "这台注射泵的最大步速是多少？",
+      "ground_truth": "最大步速为 867 steps/sec。",
+      "key_facts": [
+        "最大步速 = 867 steps/sec"
+      ],
+      "must_have_docs": [
+        "融柏恒流泵_LSP-1C系列注射泵_说明书.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "融柏恒流泵_LSP-1C系列注射泵_说明书.pdf"
+      ],
+      "tags": [
+        "注射泵",
+        "规格表",
+        "步速"
+      ]
+    },
+    {
+      "id": "DV-FS-001",
+      "category": "fact_single",
+      "question": "这台注射泵可以用来做人体临床试验吗？",
+      "ground_truth": "不可以。该泵不能用于人类的临床实验，只能用于科学研究。",
+      "key_facts": [
+        "不能用于人类的临床实验",
+        "只能用于科学研究"
+      ],
+      "must_have_docs": [
+        "融柏恒流泵_LSP-1C系列注射泵_说明书.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "融柏恒流泵_LSP-1C系列注射泵_说明书.pdf"
+      ],
+      "tags": [
+        "注射泵",
+        "安全注意事项",
+        "使用限制"
+      ]
+    },
+    {
+      "id": "DV-FS-002",
+      "category": "fact_single",
+      "question": "这台注射泵的电源开关装在机器的哪个位置？",
+      "ground_truth": "电源开关安装在注射泵后面的右侧。",
+      "key_facts": [
+        "电源开关位于注射泵后面的右侧"
+      ],
+      "must_have_docs": [
+        "融柏恒流泵_LSP-1C系列注射泵_说明书.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "融柏恒流泵_LSP-1C系列注射泵_说明书.pdf"
+      ],
+      "tags": [
+        "注射泵",
+        "操作说明",
+        "电源开关"
+      ]
+    },
+    {
+      "id": "DV-IO-001",
+      "category": "image_only",
+      "question": "在流量校准界面里，当前显示的校正系数是多少？",
+      "ground_truth": "当前校正系数显示为 1.000。",
+      "key_facts": [
+        "流量校准界面当前校正系数 = 1.000"
+      ],
+      "must_have_docs": [
+        "融柏恒流泵_LSP-1C系列注射泵_说明书.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "融柏恒流泵_LSP-1C系列注射泵_说明书.pdf"
+      ],
+      "tags": [
+        "注射泵",
+        "流量校准",
+        "校正系数",
+        "界面截图"
+      ]
+    },
+    {
+      "id": "DV-FS-003",
+      "category": "fact_single",
+      "question": "用 RS485 把多台泵连到一台计算机上时，最多能控制多少台泵？泵的通讯地址范围是多少，出厂默认地址是几号？",
+      "ground_truth": "一台计算机最多可以控制 30 台泵；通讯地址 1-30 可选，出厂默认值为 1。",
+      "key_facts": [
+        "一台计算机最多控制 30 台泵",
+        "通讯地址 1-30 可选",
+        "地址出厂默认值为 1"
+      ],
+      "must_have_docs": [
+        "融柏恒流泵_LSP-1C系列注射泵_说明书.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "融柏恒流泵_LSP-1C系列注射泵_说明书.pdf"
+      ],
+      "tags": [
+        "注射泵",
+        "RS485",
+        "通讯地址",
+        "组网"
+      ]
+    },
+    {
+      "id": "DV-SUM-001",
+      "category": "summary",
+      "question": "如果要用程序列表里没有的注射器，自定义设置最多能保存几组？对注射器内径和行程的取值范围分别有什么要求？",
+      "ground_truth": "最多可存储四组用户自定义的注射器内径值和行程；内径必须大于 0 且小于 50 mm，行程必须大于 0 且小于 120 mm。",
+      "key_facts": [
+        "最多存储四组自定义注射器内径值和行程",
+        "内径必须大于 0 且小于 50 mm",
+        "行程必须大于 0 且小于 120 mm"
+      ],
+      "must_have_docs": [
+        "融柏恒流泵_LSP-1C系列注射泵_说明书.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "hard",
+      "source_docs": [
+        "融柏恒流泵_LSP-1C系列注射泵_说明书.pdf"
+      ],
+      "tags": [
+        "注射泵",
+        "自定义注射器",
+        "内径",
+        "行程"
+      ]
+    },
+    {
+      "id": "DV-FS-004",
+      "category": "fact_single",
+      "question": "这台有创血压模拟仪的软件主菜单里，有一个只有选配了心电参数的型号才会出现的窗口，它叫什么？",
+      "ground_truth": "扩展窗口。软件主菜单共有六个项目，其中『扩展窗口』只有选择具有心电参数的型号才有。",
+      "key_facts": [
+        "该窗口名为『扩展窗口』",
+        "只有选配心电参数的型号才有此窗口"
+      ],
+      "must_have_docs": [
+        "铭昇电子_H2-5000IBP有创血压模拟仪_操作手册.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "铭昇电子_H2-5000IBP有创血压模拟仪_操作手册.pdf"
+      ],
+      "tags": [
+        "铭昇",
+        "H2-5000IBP",
+        "软件界面",
+        "主菜单",
+        "扩展窗口"
+      ]
+    },
+    {
+      "id": "DV-TN-002",
+      "category": "table_numeric",
+      "question": "在系统参数设置界面里，厂家密码的默认数值是多少？",
+      "ground_truth": "厂家密码默认是 00000。",
+      "key_facts": [
+        "厂家密码 = 00000"
+      ],
+      "must_have_docs": [
+        "铭昇电子_H2-5000IBP有创血压模拟仪_操作手册.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "铭昇电子_H2-5000IBP有创血压模拟仪_操作手册.pdf"
+      ],
+      "tags": [
+        "铭昇",
+        "H2-5000IBP",
+        "系统参数设置",
+        "厂家密码",
+        "表格数值"
+      ]
+    },
+    {
+      "id": "DV-IO-002",
+      "category": "image_only",
+      "question": "在有创动态模拟（电信号输出）窗口的示例界面中，收缩压、舒张压和脉率三个数值分别显示为多少？",
+      "ground_truth": "收缩压 150mmHg、舒张压 100mmHg、脉率 60bpm。",
+      "key_facts": [
+        "收缩压 150mmHg",
+        "舒张压 100mmHg",
+        "脉率 60bpm"
+      ],
+      "must_have_docs": [
+        "铭昇电子_H2-5000IBP有创血压模拟仪_操作手册.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "铭昇电子_H2-5000IBP有创血压模拟仪_操作手册.pdf"
+      ],
+      "tags": [
+        "铭昇",
+        "H2-5000IBP",
+        "有创动态模拟",
+        "界面截图",
+        "脉率"
+      ]
+    },
+    {
+      "id": "DV-SUM-002",
+      "category": "summary",
+      "question": "这台模拟仪的电信号输出有『有创动态压力模拟』和『有创静压检测』两种功能，它们各自输出什么压力、范围是多少，静态那一项对应的是有创压的什么数值？",
+      "ground_truth": "有创动态压力模拟输出搏动的收缩压 30mmHg~300mmHg、舒张压 10mmHg~250mmHg、脉率 10bpm~250bpm；有创静压检测输出静态压力 10mmHg~300mmHg（压力分辨率 1mmHg），对应有创压的平均压力数值。",
+      "key_facts": [
+        "有创动态压力模拟收缩压 30mmHg~300mmHg",
+        "有创动态压力模拟舒张压 10mmHg~250mmHg",
+        "有创动态压力模拟脉率 10bpm~250bpm",
+        "有创静压检测静态压力输出 10mmHg~300mmHg，压力分辨率 1mmHg",
+        "有创静压检测对应有创压的平均压力数值"
+      ],
+      "must_have_docs": [
+        "铭昇电子_H2-5000IBP有创血压模拟仪_操作手册.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "hard",
+      "source_docs": [
+        "铭昇电子_H2-5000IBP有创血压模拟仪_操作手册.pdf"
+      ],
+      "tags": [
+        "铭昇",
+        "H2-5000IBP",
+        "电信号",
+        "有创动态压力模拟",
+        "有创静压检测",
+        "参数对比"
+      ]
+    },
+    {
+      "id": "DV-FS-005",
+      "category": "fact_single",
+      "question": "多参数检测仪的血压袖带每次用完之后应该怎么清洁？",
+      "ground_truth": "血压袖带使用完成后，应用75%的医用酒精进行清洁处理。",
+      "key_facts": [
+        "用75%的医用酒精进行清洁处理"
+      ],
+      "must_have_docs": [
+        "多参数检测仪KE-2000 说明书.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "多参数检测仪KE-2000 说明书.pdf"
+      ],
+      "tags": [
+        "多参数检测仪",
+        "保管和保养",
+        "袖带清洁",
+        "酒精消毒"
+      ]
+    },
+    {
+      "id": "DV-IO-003",
+      "category": "image_only",
+      "question": "说明书里讲测量血压时的正确坐姿，对桌子和椅子的高度差是怎么要求的？",
+      "ground_truth": "桌子和椅子的理想高度差是25cm-30cm，家庭中桌子和椅子的高度差一般是20cm-35cm。",
+      "key_facts": [
+        "桌子和椅子的理想高度差是25cm-30cm",
+        "家庭中桌子和椅子的高度差一般是20cm-35cm"
+      ],
+      "must_have_docs": [
+        "多参数检测仪KE-2000 说明书.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "多参数检测仪KE-2000 说明书.pdf"
+      ],
+      "tags": [
+        "多参数检测仪",
+        "血压测量",
+        "正确坐姿",
+        "图示"
+      ]
+    },
+    {
+      "id": "DV-TN-003",
+      "category": "table_numeric",
+      "question": "按说明书里的血压分级，如果一个人的收缩压是165mmHg、舒张压是105mmHg，依据2018年中国高血压防治指南属于哪一级？",
+      "ground_truth": "属于2级高血压（中度）：收缩压160~179mmHg和（或）舒张压100~109mmHg。",
+      "key_facts": [
+        "2级高血压（中度）",
+        "收缩压160~179和（或）",
+        "舒张压100~109"
+      ],
+      "must_have_docs": [
+        "多参数检测仪KE-2000 说明书.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "多参数检测仪KE-2000 说明书.pdf"
+      ],
+      "tags": [
+        "多参数检测仪",
+        "血压分级",
+        "2018年中国高血压防治指南"
+      ]
+    },
+    {
+      "id": "DV-SUM-003",
+      "category": "summary",
+      "question": "用这台多参数检测仪测血糖或尿酸时，如果屏幕出现HI或LO，说明书建议怎么处理？另外，如果测量结果偏高，可能是哪些原因造成的？",
+      "ground_truth": "出现HI/LO时应重复插入新试纸测量；若第二次仍出现HI/LO，则超出仪器测试范围，请向医师求助。结果偏高的可能原因：消毒液错误（只能用清水或酒精，用碘酒或其他消毒液会使结果偏高）或采样点不干净、试纸受潮。",
+      "key_facts": [
+        "HI/LO：重复插入新试纸测量",
+        "第二次仍出现HI/LO则超出仪器测试范围，请向医师求助",
+        "结果偏高原因：消毒液错误（用碘酒或其他消毒液）或采样点不干净",
+        "结果偏高原因：试纸受潮"
+      ],
+      "must_have_docs": [
+        "多参数检测仪KE-2000 说明书.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "hard",
+      "source_docs": [
+        "多参数检测仪KE-2000 说明书.pdf"
+      ],
+      "tags": [
+        "多参数检测仪",
+        "错识信息",
+        "可疑结果分析",
+        "HI/LO"
+      ]
+    },
+    {
+      "id": "DV-FS-006",
+      "category": "fact_single",
+      "question": "这款数字差压计用单一通道测量时，显示的是什么压力值？",
+      "ground_truth": "当前检测压力值，即相对于当前大气压的压力值。",
+      "key_facts": [
+        "单一通道测量的是当前检测压力值",
+        "该压力值是相对于当前大气压的"
+      ],
+      "must_have_docs": [
+        "数字差压计使用说明书.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "数字差压计使用说明书.pdf"
+      ],
+      "tags": [
+        "产品介绍",
+        "测量原理"
+      ]
+    },
+    {
+      "id": "DV-TN-004",
+      "category": "table_numeric",
+      "question": "TC-169A 型号用 inHg 作为测量单位时，它的量程范围和精度分别是多少？",
+      "ground_truth": "量程范围为 ±203.6，精度为 0.1。",
+      "key_facts": [
+        "TC-169A 在 inHg 单位下的量程范围为 ±203.6",
+        "TC-169A 在 inHg 单位下的精度为 0.1"
+      ],
+      "must_have_docs": [
+        "数字差压计使用说明书.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "数字差压计使用说明书.pdf"
+      ],
+      "tags": [
+        "单位与量程",
+        "参数表",
+        "inHg"
+      ]
+    },
+    {
+      "id": "DV-IO-004",
+      "category": "image_only",
+      "question": "看说明书里的产品外观示意图，液晶显示屏、正压输入通道和负压输入通道分别是几号标号？",
+      "ground_truth": "液晶显示屏是 7 号，正压输入通道 P1 是 8 号，负压输入通道 P2 是 9 号。",
+      "key_facts": [
+        "液晶显示屏对应 7 号标号",
+        "正压输入通道 P1 对应 8 号标号",
+        "负压输入通道 P2 对应 9 号标号"
+      ],
+      "must_have_docs": [
+        "数字差压计使用说明书.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "hard",
+      "source_docs": [
+        "数字差压计使用说明书.pdf"
+      ],
+      "tags": [
+        "产品外观",
+        "面板示意图",
+        "标号"
+      ]
+    },
+    {
+      "id": "DV-TN-005",
+      "category": "table_numeric",
+      "question": "LH-T600 智能便携式检测仪这台仪表本体有多重？外形尺寸是多少？",
+      "ground_truth": "仪表重量为 460g，外形尺寸为 220 × 96 × 44mm。",
+      "key_facts": [
+        "重量 460g",
+        "尺寸 220 × 96 × 44mm"
+      ],
+      "must_have_docs": [
+        "智能便携式检测仪.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "智能便携式检测仪.pdf"
+      ],
+      "tags": [
+        "技术参数",
+        "仪表规格",
+        "重量",
+        "尺寸"
+      ]
+    },
+    {
+      "id": "DV-TN-006",
+      "category": "table_numeric",
+      "question": "LH-T613 蓝绿藻（BGA）传感器的检出限是多少？",
+      "ground_truth": "检出限为 300 cells/mL。",
+      "key_facts": [
+        "LH-T613 BGA 传感器检出限 300 cells/mL",
+        "量程 0-200000 cells/mL"
+      ],
+      "must_have_docs": [
+        "智能便携式检测仪.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "智能便携式检测仪.pdf"
+      ],
+      "tags": [
+        "技术参数",
+        "探头规格",
+        "BGA",
+        "检出限"
+      ]
+    },
+    {
+      "id": "DV-IO-005",
+      "category": "image_only",
+      "question": "说明书「主界面」一节展示的叶绿素测量界面示意图上，叶绿素读数显示为多少？",
+      "ground_truth": "叶绿素读数显示为 1.54 ug/L（RFU 显示为 0 RFU）。",
+      "key_facts": [
+        "叶绿素读数 1.54 ug/L",
+        "RFU 显示 0 RFU"
+      ],
+      "must_have_docs": [
+        "智能便携式检测仪.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "智能便携式检测仪.pdf"
+      ],
+      "tags": [
+        "主界面",
+        "叶绿素界面",
+        "界面截图",
+        "图像"
+      ]
+    },
+    {
+      "id": "DV-FS-007",
+      "category": "fact_single",
+      "question": "仪表的电源自动关机（Auto Power）默认是多久无操作后自动关机？这个设置掉电后会不会保存？",
+      "ground_truth": "默认 5 分钟无操作后自动关机，该设置掉电不保存。",
+      "key_facts": [
+        "默认 5 分钟无操作后自动关机",
+        "该设置掉电不保存"
+      ],
+      "must_have_docs": [
+        "智能便携式检测仪.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "智能便携式检测仪.pdf"
+      ],
+      "tags": [
+        "系统设置",
+        "Auto Power",
+        "自动关机"
+      ]
+    },
+    {
+      "id": "DV-FS-008",
+      "category": "fact_single",
+      "question": "更换溶解氧电极的荧光帽时，需要向仪表输入该电极帽的特征参数，这些参数一共有几组？",
+      "ground_truth": "一共有 8 组参数，编号为 K0-K7。",
+      "key_facts": [
+        "荧光帽特征参数共 8 组",
+        "编号为 K0-K7"
+      ],
+      "must_have_docs": [
+        "智能便携式检测仪.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "智能便携式检测仪.pdf"
+      ],
+      "tags": [
+        "校准",
+        "Sensor Cap",
+        "荧光帽参数"
+      ]
+    },
+    {
+      "id": "DV-TN-007",
+      "category": "table_numeric",
+      "question": "用罗丹明 B 标液校准叶绿素时，需要查表换算，其中 20℃ 对应的系数是多少？",
+      "ground_truth": "20℃ 对应的系数是 328。",
+      "key_facts": [
+        "温度 20℃ 对应系数 328",
+        "叶绿素校准需按罗丹明 B 换算表查表"
+      ],
+      "must_have_docs": [
+        "智能便携式检测仪.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "智能便携式检测仪.pdf"
+      ],
+      "tags": [
+        "校准",
+        "叶绿素校准",
+        "罗丹明B",
+        "换算表"
+      ]
+    },
+    {
+      "id": "DV-FS-009",
+      "category": "fact_single",
+      "question": "电导校准的时候，低量程探头和高量程探头分别建议选用什么浓度的电导率标准液？",
+      "ground_truth": "低量程探头建议选用 1.4083 mS/cm 的电导率标准液，高量程探头建议选用 12.852 mS/cm 的电导率标准液。",
+      "key_facts": [
+        "低量程探头建议 1.4083 mS/cm 标准液",
+        "高量程探头建议 12.852 mS/cm 标准液"
+      ],
+      "must_have_docs": [
+        "智能便携式检测仪.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "智能便携式检测仪.pdf"
+      ],
+      "tags": [
+        "校准",
+        "电导校准",
+        "标准液"
+      ]
+    },
+    {
+      "id": "DV-SUM-004",
+      "category": "summary",
+      "question": "这款检测仪里，支持「零点校准」的传感器电极有哪几种？",
+      "ground_truth": "支持零点校准的电极有 4 种：浊度电极、叶绿素电极、水中油电极、COD 电极。",
+      "key_facts": [
+        "浊度电极支持零点校准",
+        "叶绿素电极支持零点校准",
+        "水中油电极支持零点校准",
+        "COD 电极支持零点校准"
+      ],
+      "must_have_docs": [
+        "智能便携式检测仪.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "hard",
+      "source_docs": [
+        "智能便携式检测仪.pdf"
+      ],
+      "tags": [
+        "校准",
+        "零点校准",
+        "跨块综合"
+      ]
+    },
+    {
+      "id": "DV-FS-010",
+      "category": "fact_single",
+      "question": "这款 Cchippump-2 注射泵有没有在 FDA 注册？它能不能用于人类的临床实验？",
+      "ground_truth": "此泵没有在 FDA 注册，不能用于人类的临床实验。",
+      "key_facts": [
+        "没有在 FDA 注册",
+        "不能用于人类的临床实验"
+      ],
+      "must_have_docs": [
+        "瑞创RSP系列注射泵.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "瑞创RSP系列注射泵.pdf"
+      ],
+      "tags": [
+        "警告",
+        "FDA注册",
+        "临床实验",
+        "使用限制"
+      ]
+    },
+    {
+      "id": "DV-TN-008",
+      "category": "table_numeric",
+      "question": "5uL 规格注射器对应的流量范围是多少？",
+      "ground_truth": "5uL 注射器（直径 0.35mm）的流量范围为 0.00045-0.026（uL/min-mL/min）。",
+      "key_facts": [
+        "5uL 注射器流量范围：0.00045-0.026（uL/min-mL/min）"
+      ],
+      "must_have_docs": [
+        "瑞创RSP系列注射泵.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "瑞创RSP系列注射泵.pdf"
+      ],
+      "tags": [
+        "流量参数表",
+        "附表",
+        "流量范围",
+        "注射器规格"
+      ]
+    },
+    {
+      "id": "DV-IO-006",
+      "category": "image_only",
+      "question": "注射器选型界面（图5）里列出了哪些注射器品牌？",
+      "ground_truth": "选型界面列出了 Air-Tite All Plastic、Ranfac、XinHua、Becton Dickson、Hamilton、Popper_Sons,Inc 等注射器品牌。",
+      "key_facts": [
+        "Air-Tite All Plastic",
+        "Ranfac",
+        "XinHua",
+        "Becton Dickson",
+        "Hamilton",
+        "Popper_Sons,Inc"
+      ],
+      "must_have_docs": [
+        "瑞创RSP系列注射泵.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "瑞创RSP系列注射泵.pdf"
+      ],
+      "tags": [
+        "界面截图",
+        "注射器选型",
+        "品牌列表",
+        "图像块"
+      ]
+    },
+    {
+      "id": "DV-SUM-005",
+      "category": "summary",
+      "question": "这份说明书对注射泵的工作模式前后描述不太一致，技术参数表里列的是哪几种工作模式？功能介绍和模式选择界面里写的又是哪几种？",
+      "ground_truth": "技术参数表（1.2）中列的工作模式为：单推、单拉、单推循环（选配）、推拉循环；而功能介绍（1.3）与模式选择界面（3.2）均描述为 4 种模式：单推、单拉、推拉循环、不工作。",
+      "key_facts": [
+        "技术参数表工作模式：单推、单拉、单推循环（选配）、推拉循环",
+        "功能介绍工作模式：单推、单拉、推拉循环、不工作（4 种）",
+        "模式选择界面：单推、单拉、推拉循环、不工作（4 种）"
+      ],
+      "must_have_docs": [
+        "瑞创RSP系列注射泵.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "hard",
+      "source_docs": [
+        "瑞创RSP系列注射泵.pdf"
+      ],
+      "tags": [
+        "工作模式",
+        "跨块综合",
+        "参数不一致",
+        "易混细节"
+      ]
+    },
+    {
+      "id": "DV-IO-007",
+      "category": "image_only",
+      "question": "除颤仪操作面板的照片上，除了监护、AED、起搏这三个模式，面板上还标了哪些按键？",
+      "ground_truth": "面板上还标有能量调节、充电、电击、记录、静音、报警复位、铅标记、主菜单等按键。",
+      "key_facts": [
+        "面板上有监护、AED、起搏三种模式",
+        "面板按键包括能量调节、充电、电击、记录、静音、报警复位、铅标记、主菜单"
+      ],
+      "must_have_docs": [
+        "电除颤.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "电除颤.pdf"
+      ],
+      "tags": [
+        "除颤仪",
+        "操作面板",
+        "按键",
+        "迈瑞"
+      ]
+    },
+    {
+      "id": "DV-FS-011",
+      "category": "fact_single",
+      "question": "除颤的时候，如果病人身上装了植入性起搏器，电极板要避开什么部位？至少隔开多少距离？",
+      "ground_truth": "除颤前应注意避开植入性起搏器部位至少10厘米。",
+      "key_facts": [
+        "避开起搏器部位至少10厘米"
+      ],
+      "must_have_docs": [
+        "电除颤.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "电除颤.pdf"
+      ],
+      "tags": [
+        "注意事项",
+        "起搏器",
+        "电极板"
+      ]
+    },
+    {
+      "id": "DV-TN-009",
+      "category": "table_numeric",
+      "question": "按说明书里的除颤能量选择表，心房颤动做同步电复律时，单相波和双相波分别该用多大能量？",
+      "ground_truth": "房颤同步电复律：单相波能量200焦耳，双相波能量120—200焦耳。",
+      "key_facts": [
+        "房颤同步电复律单相波能量200焦耳",
+        "房颤同步电复律双相波能量120—200焦耳"
+      ],
+      "must_have_docs": [
+        "电除颤.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "电除颤.pdf"
+      ],
+      "tags": [
+        "能量选择",
+        "电复律",
+        "房颤",
+        "焦耳"
+      ]
+    },
+    {
+      "id": "DV-SUM-006",
+      "category": "summary",
+      "question": "电除颤为什么要跟心电同步？同步电复律的时候，放电脉冲要卡在心电周期的哪个时刻，为什么不能随便放？",
+      "ground_truth": "同步模式为R波触发。同步电复律时电流应与QRS波群同步，脉冲电流应落在R波下降支。因为T波升支部分为“易损期”，此时放电或受刺激极易诱发室速、室扑或室颤；最佳放电时期为心室肌绝对不应期放电，即R波降支或R波起始后30ms。",
+      "key_facts": [
+        "同步模式为R波触发",
+        "同步电复律时电流应与QRS波群同步，脉冲电流应落在R波下降支",
+        "T波升支为“易损期”，此时放电极易诱发室速、室扑或室颤",
+        "最佳放电时期为R波降支或R波起始后30ms"
+      ],
+      "must_have_docs": [
+        "电除颤.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "hard",
+      "source_docs": [
+        "电除颤.pdf"
+      ],
+      "tags": [
+        "同步电复律",
+        "易损期",
+        "R波",
+        "工作原理"
+      ]
+    },
+    {
+      "id": "DV-FS-012",
+      "category": "fact_single",
+      "question": "这台脉搏血氧仪在测量时，红外发射管发出的是哪两种波长的光？",
+      "ground_truth": "波长为660nm的红光和波长为940nm的近红外光。",
+      "key_facts": [
+        "波长为660nm的红光",
+        "波长为940nm的近红外光"
+      ],
+      "must_have_docs": [
+        "脉搏血氧仪.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "脉搏血氧仪.pdf"
+      ],
+      "tags": [
+        "测量原理",
+        "光波长"
+      ]
+    },
+    {
+      "id": "DV-TN-010",
+      "category": "table_numeric",
+      "question": "这款脉搏血氧仪在正常运行状态下，适用的大气压力范围是多少？",
+      "ground_truth": "运行的大气压力范围为59kPa~107.4kPa。",
+      "key_facts": [
+        "运行大气压力59kPa~107.4kPa"
+      ],
+      "must_have_docs": [
+        "脉搏血氧仪.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "脉搏血氧仪.pdf"
+      ],
+      "tags": [
+        "技术参数",
+        "环境规格",
+        "大气压力"
+      ]
+    },
+    {
+      "id": "DV-IO-008",
+      "category": "image_only",
+      "question": "在血氧仪设置界面的 Limit Setup（限值设置）那一屏上，血氧饱和度的报警上限和下限默认值分别是多少？",
+      "ground_truth": "血氧饱和度的报警上限默认为100，下限默认为94。",
+      "key_facts": [
+        "血氧饱和度报警上限100",
+        "血氧饱和度报警下限94"
+      ],
+      "must_have_docs": [
+        "脉搏血氧仪.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "脉搏血氧仪.pdf"
+      ],
+      "tags": [
+        "设置界面",
+        "报警限值",
+        "图像"
+      ]
+    },
+    {
+      "id": "DV-SUM-007",
+      "category": "summary",
+      "question": "关于电池和自动关机，说明书里在不同地方都有提到。请综合说明：两节AAA电池满电大约能用多久？检测不到信号时多久会自动关机？电池电量接近用尽时设备会怎样？",
+      "ground_truth": "两节AAA电池可持续使用约50小时；无信号产生（检测不到信号）时约8秒钟之后自动关机；当电池电量接近用尽时，脉搏血氧仪将自动关闭。",
+      "key_facts": [
+        "两节AAA电池可持续使用50小时",
+        "无信号产生时8秒钟之后自动关机",
+        "电池电量接近用尽时脉搏血氧仪将自动关闭"
+      ],
+      "must_have_docs": [
+        "脉搏血氧仪.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "hard",
+      "source_docs": [
+        "脉搏血氧仪.pdf"
+      ],
+      "tags": [
+        "电池",
+        "自动关机",
+        "跨块综合"
+      ]
+    },
+    {
+      "id": "DV-FS-013",
+      "category": "fact_single",
+      "question": "这款动态心电记录仪对计时准确性有什么要求？",
+      "ground_truth": "24h 内总误差应不超 30s。",
+      "key_facts": [
+        "24h 内总误差应不超 30s"
+      ],
+      "must_have_docs": [
+        "英菲泰克动态心电记录仪.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "英菲泰克动态心电记录仪.pdf"
+      ],
+      "tags": [
+        "性能指标",
+        "计时准确性"
+      ]
+    },
+    {
+      "id": "DV-IO-009",
+      "category": "image_only",
+      "question": "佩戴连接示意图里，人物把那个白色长条形设备贴在了身体的什么位置？",
+      "ground_truth": "左胸处。",
+      "key_facts": [
+        "白色长条形设备贴在左胸处",
+        "设备通过线缆连接着另一个白色方形部件"
+      ],
+      "must_have_docs": [
+        "英菲泰克动态心电记录仪.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "英菲泰克动态心电记录仪.pdf"
+      ],
+      "tags": [
+        "佩戴方式",
+        "连接示意图",
+        "图像描述"
+      ]
+    },
+    {
+      "id": "DV-TN-011",
+      "category": "table_numeric",
+      "question": "说明书在电磁兼容章节给出了便携式及移动式射频通信设备与记录仪的推荐隔离距离表。若某射频通信设备的最大额定输出功率为 10W，在 800MHz~2.5GHz 频段下它至少要和记录仪保持多远距离？",
+      "ground_truth": "7.3 米。",
+      "key_facts": [
+        "发射机最大额定输出功率 10W",
+        "对应 800 MHz~2.5GHz 频段的推荐隔离距离为 7.3m"
+      ],
+      "must_have_docs": [
+        "英菲泰克动态心电记录仪.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "英菲泰克动态心电记录仪.pdf"
+      ],
+      "tags": [
+        "电磁兼容",
+        "推荐隔离距离",
+        "表4"
+      ]
+    },
+    {
+      "id": "DV-SUM-008",
+      "category": "summary",
+      "question": "关于这款动态心电记录仪的电池，说明书从电池规格、低电量提示、日常保养三个方面分别是怎样要求的？",
+      "ground_truth": "电池为内部电源供电的锂电池，规格 1*3.7V 250mAh，型号 402626；当电池电压小于 3.15V 时，红色指示灯与绿色指示灯同频闪烁，提示电量较低；为防止电池过放电而无法使用，若电池长时间不使用，请最少每隔六个月对电池进行一次充电。",
+      "key_facts": [
+        "电源：内部电源供电，锂电池 1*3.7V 250mAh，型号：402626",
+        "电池电压小于 3.15V 时，红色指示灯与绿色指示灯同频闪烁，提示电量较低",
+        "长时间不使用，请最少每隔六个月对电池进行一次充电"
+      ],
+      "must_have_docs": [
+        "英菲泰克动态心电记录仪.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "hard",
+      "source_docs": [
+        "英菲泰克动态心电记录仪.pdf"
+      ],
+      "tags": [
+        "电池",
+        "规格",
+        "低电量提示",
+        "维护保养"
+      ]
+    },
+    {
+      "id": "DV-FS-014",
+      "category": "fact_single",
+      "question": "如果用户用试用账号登录这个APP，检测数据和生成的本地报告会有什么限制？",
+      "ground_truth": "使用试用账号登录时，检测数据无法保存，生成的本地报告没有分析结果。",
+      "key_facts": [
+        "检测数据无法保存",
+        "生成的本地报告没有分析结果"
+      ],
+      "must_have_docs": [
+        "血氧仪使用手册.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "血氧仪使用手册.pdf"
+      ],
+      "tags": [
+        "试用登录",
+        "使用限制"
+      ]
+    },
+    {
+      "id": "DV-FS-015",
+      "category": "fact_single",
+      "question": "APP里的「我的消息」页面收到的消息分为哪几类？",
+      "ground_truth": "分为「医嘱」和「通知」两类。",
+      "key_facts": [
+        "医嘱",
+        "通知"
+      ],
+      "must_have_docs": [
+        "血氧仪使用手册.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "血氧仪使用手册.pdf"
+      ],
+      "tags": [
+        "我的消息",
+        "消息分类"
+      ]
+    },
+    {
+      "id": "DV-IO-010",
+      "category": "image_only",
+      "question": "网络报告里的心电图报告单上，心率(HR)、PR间期、QRS时限、QT、QTc 的测量结果分别是多少？",
+      "ground_truth": "HR 86 bpm，PR 0.126 s，QRS 0.065 s，QT 0.340 s，QTc 0.307 s。",
+      "key_facts": [
+        "HR 86 bpm",
+        "PR 0.126 s",
+        "QRS 0.065 s",
+        "QT 0.340 s",
+        "QTc 0.307 s"
+      ],
+      "must_have_docs": [
+        "血氧仪使用手册.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "血氧仪使用手册.pdf"
+      ],
+      "tags": [
+        "心电图报告",
+        "测量结果",
+        "数值"
+      ]
+    },
+    {
+      "id": "DV-TN-012",
+      "category": "table_numeric",
+      "question": "在「记录」页面按「分析灯」给报告分类排序时，除了绿灯（正常）和红灯（异常），还有哪几种分析灯状态，各自代表什么意义？",
+      "ground_truth": "除绿灯（检测初步显示正常）和红灯（检测初步显示异常）外，还有两种：一是检测受干扰、信号质量差，请重新检测；二是检测数据未上传，等待设备联网，报告以网络报告为准。",
+      "key_facts": [
+        "检测初步显示正常，标记为绿灯",
+        "检测初步显示异常，标记为红灯",
+        "检测受于扰，信号质量差，请重新检测",
+        "检测数据未上传，等待设备联网，报告以网络报告为准"
+      ],
+      "must_have_docs": [
+        "血氧仪使用手册.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "血氧仪使用手册.pdf"
+      ],
+      "tags": [
+        "分析灯",
+        "报告分类",
+        "表格"
+      ]
+    },
+    {
+      "id": "DV-SUM-009",
+      "category": "summary",
+      "question": "用户用血氧计完成一次检测后，要怎样才能拿到医生的诊断结果？请把从检测到最终看到医生诊断报告的主要步骤串起来说。",
+      "ground_truth": "先选择检测项目「血氧计」完成检测并生成记录；设备联网后检测数据自动上传服务器，生成网络报告；在网络报告中申请医生会诊并支付会诊费用；医生受理并诊断后会返回诊断结果，用户在「记录」的「网络」页面点击该检测记录、从下拉菜单选择会诊报告即可查看。",
+      "key_facts": [
+        "选择「血氧计」检测项目完成检测并生成记录",
+        "检测数据自动上传服务器生成网络报告",
+        "在网络报告中申请医生会诊并支付会诊费用",
+        "医生诊断后返回结果，在「记录」-「网络」页面查看会诊报告"
+      ],
+      "must_have_docs": [
+        "血氧仪使用手册.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "hard",
+      "source_docs": [
+        "血氧仪使用手册.pdf"
+      ],
+      "tags": [
+        "血氧检测",
+        "网络报告",
+        "医生会诊",
+        "流程综合"
+      ]
+    },
+    {
+      "id": "DV-FS-016",
+      "category": "fact_single",
+      "question": "护理不良事件一共分为几个等级？每个等级分别叫什么名称？",
+      "ground_truth": "护理不良事件分为四个等级：Ⅰ级事件是警告事件，Ⅱ级事件是不良后果事件，Ⅲ级事件是未造成后果的事件，Ⅳ级事件是隐患事件。",
+      "key_facts": [
+        "分为四级（Ⅰ级至Ⅳ级）",
+        "Ⅰ级事件：警告事件",
+        "Ⅱ级事件：不良后果事件",
+        "Ⅲ级事件：未造成后果的事件",
+        "Ⅳ级事件：隐患事件"
+      ],
+      "must_have_docs": [
+        "护理不良事件上报系统培训.pptx"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "护理不良事件上报系统培训.pptx"
+      ],
+      "tags": [
+        "事件分级",
+        "等级划分",
+        "分类"
+      ]
+    },
+    {
+      "id": "DV-SUM-010",
+      "category": "summary",
+      "question": "护理不良事件上报制度对上报时间有哪些规定？从事件发生到组织讨论分析，各环节分别要在多长时间内完成？",
+      "ground_truth": "发生护理不良事件后，当事人应立即报告护士长（组长或高年资护理人员）和当班医师；护士长在24小时内口头或电话向上级汇报，重大过失应立即汇报科主任、护士长和护理部，不得超过6小时；并于24h内上报护理部；不良事件发生后7日内组织全科人员进行分析讨论。",
+      "key_facts": [
+        "发生护理不良事件后当事人员应立即报告护士长和当班医师",
+        "护士长在24小时内口头或电话向上级汇报",
+        "重大过失不得超过6小时",
+        "于24h内上报护理部",
+        "不良事件发生后7日内组织全科人员进行分析讨论"
+      ],
+      "must_have_docs": [
+        "护理不良事件上报系统培训.pptx"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "护理不良事件上报系统培训.pptx"
+      ],
+      "tags": [
+        "上报制度",
+        "上报时间",
+        "上报流程"
+      ]
+    },
+    {
+      "id": "DV-FS-017",
+      "category": "fact_single",
+      "question": "按这份技术审评规范，骨科手术器械的管理类别是怎么分的？产品类代号又是多少？",
+      "ground_truth": "依据《医疗器械分类目录》，骨科手术器械管理类别分为I类和II类，产品类代号为6810。",
+      "key_facts": [
+        "管理类别分为I类和II类",
+        "产品类代号为6810",
+        "分类依据是《医疗器械分类目录》"
+      ],
+      "must_have_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "tags": [
+        "管理类别",
+        "产品类代号",
+        "适用范围"
+      ]
+    },
+    {
+      "id": "DV-FS-018",
+      "category": "fact_single",
+      "question": "电动骨锯这种带电的手术器械，需不需要按这份骨科手术器械技术审评规范来审评？",
+      "ground_truth": "不需要。本规范适用于无源类常规手术器械，带电手术器械（如电动骨锯）不在此规范涉及范围内。",
+      "key_facts": [
+        "本规范适用于无源类常规手术器械",
+        "带电手术器械（如电动骨锯）不在此规范涉及范围内"
+      ],
+      "must_have_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "tags": [
+        "适用范围",
+        "有源器械",
+        "边界判断"
+      ]
+    }
+  ]
+}

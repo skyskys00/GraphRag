@@ -5,7 +5,7 @@
 > **更新：** 2026-10-03
 > **定位：** 中文 RAG 系统量化评测——测试集 + 指标 + ablation + 回归
 > **契约：** 测试集（question + contexts + ground_truth）→ 评测报告（各指标分数 + 对比基线）
-> **上游：** [M5 检索层](M5_retrieve.md) / [M6 生成层](M6_generate.md) / [M7 交互层](M7_interact.md) | **下游：** 回归门禁 / 作品集量化数据 / README 展示
+> **上游：** [M5 检索层](M5_retrieve.md) / [M6 生成层](M6_generate.md) / [M7 交互层](M7_interact.md) | **下游：** 回归门禁 / 评测量化数据 / README 展示
 > **依据：** [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.7 ｜ [`FRAMEWORK_NOTES.md`](../FRAMEWORK_NOTES.md) §3 ｜ [`M9_testset.md`](M9_testset.md)（测试语料与测试集设计规范）
 > **运行：** `cd backend && python -m app.m9_eval.runner --testset testsets/default.json --report reports/run_xxx.json`；重排终审：`--reranker llm`
 > **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md) v5.6（Phase 1 落地）/ v5.7（裁判稳定性 + 测试集 GT 修正 + 表格双表示后新基线）/ v5.14（Phase 2 生成四指标 + 50 题全量）/ v5.15（裁判 prompt 校准：correctness 语义对齐 + judge 明细字段透传）/ v5.21（--reranker llm 可选终审）/ v5.29（裁判 hit 字段修复 + comparison per-doc 检索）
@@ -17,9 +17,9 @@
 ### 1.1 为什么要有 M9
 
 **当前痛点**：全链路跑通了，但「到底好不好」只有主观感受，没有量化数据。
-- 面试官问「你的系统比普通 RAG 好多少」——答不上来。
+- 答不上「你的系统比普通 RAG 好多少」——没有量化依据。
 - 改了检索策略，不知道是变好还是变差——全靠人工试几道题。
-- 作品集上写了「三路召回 + RRF + rerank」，没有数字支撑，没有说服力。
+- 宣称「三路召回 + RRF + rerank」比 baseline 好，没有数字支撑，没有说服力。
 
 **M9 的角色**：量化尺子 + 回归门禁。不参与线上问答链路（旁路评测），但在迭代时提供客观数据支撑。
 
@@ -28,7 +28,7 @@
 1. **可量化**：输出一组标准指标，能说清「当前系统在中文场景下的表现」。
 2. **可对比**：支持 ablation study——关掉某一路/换个策略，分数变化一目了然。
 3. **可回归**：每次大改动跑一遍，快速判断是否劣化。
-4. **可展示**：评测结果能直接放进 README / 作品集，作为项目亮点的数据支撑。
+4. **可展示**：评测结果能直接放进 README，作为项目核心能力的量化支撑。
 
 ### 1.3 边界（M9 不做什么）
 
@@ -248,7 +248,7 @@ answer_result = await answer(query=q, contexts=results, ...)
 
 ## 5. Ablation Study 方案
 
-> 这是作品集上最有说服力的部分——用数据证明「你加的每一层都有用」。
+> 这是最有说服力的部分——用数据证明「系统每一层改动都有可度量收益」。
 
 ### 5.1 实验设计（7 组对比）
 
@@ -285,7 +285,7 @@ ABLATIONS = {
 
 ### 5.3 结果呈现
 
-**主表（README / 作品集用）**：
+**主表（README 展示用）**：
 
 | 配置 | Context Recall ↑ | Faithfulness ↑ | Answer Relevance ↑ | Correctness ↑ | 综合分 ↑ |
 |---|---|---|---|---|---|

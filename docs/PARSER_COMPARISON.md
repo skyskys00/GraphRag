@@ -139,9 +139,9 @@
 |---|---|---|
 | PDF ×2 | 季度销售业绩复盘报告.pdf / EfficientNet-ZSR.pdf | MinerU + Docling 双向 |
 | DOCX ×2 | 农作物季度种植运维工作总结.docx / 智能客服系统产品需求文档.docx | MinerU + Docling 双向 |
-| HTML ×2 | .html / 患者月度诊疗随访报告.html | Docling 单向（MinerU 不支持） |
+| HTML ×2 | 测试模板.html / 随访记录模板.html | Docling 单向（MinerU 不支持） |
 
-> 注：md 不在对比内（MinerU 不支持）；素材清单中 html 两项曾写重，按「测试模板.html + 患者随访.html」执行。
+> 注：md 不在对比内（MinerU 不支持）；两 html 为本地测试模板（`backend/inputs/raw/` 下），无真实个人信息；素材清单中 html 两项曾写重，按「测试模板.html + 随访记录模板.html」执行。
 
 ### 10.2 关键数据（blocks.jsonl 统计）
 
@@ -156,7 +156,7 @@
 | 智能客服PRD.docx | MinerU | 12 | 1697 | 5 | 2 | 5×4 功能表 + 6×4 里程碑表 |
 | 智能客服PRD.docx | Docling | 23 | 1482 | 5 | 2 | 同表（但 Docling 把表头拆成 8 个独立 paragraph 块） |
 | 测试模板.html | Docling | 64 | — | 4 | 0 | — |
-| 患者随访.html | Docling | 13 | — | 5 | 2 | — |
+| 随访记录模板.html | Docling | 13 | — | 5 | 2 | — |
 
 > 注：raw 字符数（含空白与 HTML 标签）对比意义不大——MinerU 表格 HTML 每格带 `rowspan=1 colspan=1` 冗余属性、heading 文本带 `**` markdown 加粗，会虚高 30–60%。**「去空白字符」列为去除空白与 HTML 标签后的纯文本量，是内容保真度的真实口径**。
 

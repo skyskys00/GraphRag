@@ -1,62 +1,66 @@
 # 器械说明书垂直场景落地方案
 
-> **版本：** v0.11（v0.10 基础上题集扩到 50 题、难度收敛 5:3:2、两文档入库，v5.33）
-> **状态：** 部分实施 —— 场景特化功能 ✅（v5.26 参数对比 / v5.27 场景 chip）｜ 语料扩充 ✅（v5.28，10 份 → v5.33 扩到 12 份）｜ 评测集 ✅（v5.29，30 题 → v5.33 扩到 50 题，见 §11）｜ comparison 泄漏治理 ✅（v5.30，退役 per_doc_queries，见 §6.1/§11.3）｜ 评测窗口收敛 ✅（v5.31，top5 单窗口对齐生产 RERANK_TOP，见 §11）｜ §5.4 对比去噪 ✅（v5.32，生产 compare.py + 评测镜像是同一 localize_query，实测见 §5.4）｜ §6.2 扩题 ✅（v5.33，50 题难度 5:3:2，Recall 0.7909，见 §6.2/§11.4）
+> **版本：** v0.13（v0.12 基础上：旧题集/旧实测归档 → [device_scenario_eval_archive.md](../archive/device_scenario_eval_archive.md)；主文档对齐 v5.34 权威数据；参数对比状态更正为 ⏳ 待开发）
+> **状态：** 场景特化功能 —— 参数对比 **⏳ 待开发**（v5.26 曾实现、v5.35 前端入口隐藏、后端 `POST /compare` 保留，视为未交付，设计思路见 §5.1；检索去噪能力已就绪见 §5.4）｜ 场景 chip ✅（v5.27）｜ 语料扩充 ✅（v5.28 10 份 → v5.33 12 份）｜ 评测集 ✅（v5.34，50 题 v2 全删重建，Recall 0.8833 / e2e Correctness 0.8733，见 §11 与 [retrieval_comparison.md](../../backend/tests/reports/retrieval_comparison.md) v5.34 节）
 > **更新：** 2026-10-05
-> **定位：** 把「有源器械说明书」库从验证态做成**可展示的垂直场景**——回答 内部参考资料 P1「找一个垂直场景落地」
-> **契约：** 复用现有 M7 接口；新增 `POST /compare`（见 §5.1，已落地）
+> **定位：** 把「有源器械说明书」库从验证态做成**可展示的垂直场景**
+> **契约：** 复用现有 M7 接口；新增 `POST /compare`（见 §5.1，⏳ 待开发）
 > **上游：** [M5 检索层](M5_retrieve.md) / [M6 生成层](M6_generate.md) / [M7 交互层](M7_interact.md) | **下游：** [M8 前端](M8_frontend.md) / [M9 评测层](M9_evaluation.md)
-> **依据：** [`内部参考资料.md`](../内部参考资料.md) P1 ｜ memory `medical-device-corpus-sources` ｜ [MULTIMODAL.md](MULTIMODAL.md)
-> **运行：** 语料走 M7 `POST /docs` 上传（多模态自动生效；批量用 `backend/scripts/ingest_device_corpus.py`）；对比见 M8 侧栏「参数对比」；场景 chip 见问答页输入框上方（器械库）
-> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md) v5.26（§5.1 落地）/ v5.27（§5.2 落地）/ v5.28（语料 10 份）/ v5.28.1（sidecar 键更正）/ v5.29（30 题评测集 + M9 裁判 hit 修复 + comparison per-doc）/ v5.30（comparison 泄漏治理：退役 per_doc_queries）/ v5.31（评测窗口收敛 top5 单窗口）/ v5.32（§5.4 localize_query 落地）/ v5.33（§6.2 题集扩到 50 题、难度 5:3:2、两文档入库）
+> **依据：** [MULTIMODAL.md](MULTIMODAL.md) ｜ 语料来源调研（`medical-device-corpus-sources`）
+> **运行：** 语料走 M7 `POST /docs` 上传（多模态自动生效；批量用 `backend/scripts/ingest_device_corpus.py`）；评测用 `tests/testsets/testset_device_v2.json`（当前权威，§6.3）；场景 chip 见问答页输入框上方（器械库）
+> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md) v5.26（§5.1 曾实现）/ v5.27（§5.2 落地）/ v5.28（语料 10 份）/ v5.28.1（sidecar 键更正）/ v5.29（30 题评测集 + M9 裁判 hit 修复）/ v5.30（comparison 泄漏治理）/ v5.31（评测窗口收敛 top5）/ v5.32（§5.4 localize_query）/ v5.33（旧题集扩 50 题）/ v5.34（题集全删重建 v2，50 题现行权威）/ v5.35（comparison 弃用：前端入口隐藏、后端保留）；本次为文档修订（v0.13）：旧题集与旧实测归档、§5.1 状态更正为待开发
 
 ## 1. 场景与用户
 
 **场景**：有源医疗器械说明书的**智能问答与参数速查**。
 
-**为什么选它**（不是从 内部参考资料 推荐列表里随便挑的）：
+**为什么选它**：
 
-- 与用户背景天然咬合：医学生 + 图像识别硕士 ⇒「医学垂直 + 多模态」双重契合，面试叙事完整
+- 「医学垂直 + 多模态」双契合：既有垂直领域确定性，又能最大化多模态链路的展示价值
 - 多模态不是硬凑：器械说明书的核心信息形态就是**界面截图与图片型表格**（见 MULTIMODAL.md §2.1 实证），纯文本链路天然召不回
-- 语料有真实结构：参数表（table_numeric）、按键/报警说明（fact_single）、连接图、界面截图、型号对照（comparison）——五类考点齐全
+- 语料有真实结构：参数表与图片型表格（table_numeric）、按键/报警/功能说明（fact_single）、界面截图（image_only）、整档综合描述（summary）——四类考点覆盖 v2 题集口径（型号对照 comparison 因检索短板未闭环已弃用，见 §5.1/§6.3）
 
-**目标用户**（面试叙事用，不实现用户体系）：
+**目标用户**（场景定位参考，不实现用户体系）：
 
 | 角色 | 典型诉求 |
 |---|---|
 | 医院设备科 / 临床工程师 | 「这台模拟仪的静态压力量程是多少」「报警 E03 怎么处理」 |
 | 器械厂商售后 | 「LSP-1C 支持哪些规格的注射器、对应内径多少」 |
-| 采购 / 检验科 | 「A 型号和 B 型号的精度等级差多少」 |
+| 采购 / 检验科 | 「A 型号和 B 型号的精度等级差多少」（参数对比，§5.1 ⏳ 待开发） |
 
 ## 2. 现状与差距
 
-**已有底子**（截至 2026-10-02）：
+**已有底子**（截至 2026-10-05）：
 
-- 库「有源器械说明书」`col_b7b876b1`：**10 份真实说明书**（v5.28 完成扩充），PDF 原件在库内 `uploads/`；合计 857 chunk、149 个带图 drawing 块
+- 库「有源器械说明书」`col_b7b876b1`：**12 份文档**（v5.28 10 份说明书 + v5.33 骨科审评规范.docx / 护理不良事件.pptx），PDF 原件在库内 `uploads/`；合计 888 chunk、149 个带图 drawing 块
 - 多模态全链已打通：图片 → 视觉描述 → 独立 TextUnit → 索引 → 引用带图 → 前端渲染（v5.25 ~ v5.25.6 全部验证通过）
 - 检索/生成/前端/评测骨架齐备（M5 三路召回 + M6 引用溯源 + M8 展示 + M9 评测框架）
+- **评测集已就位**：50 题 v2（`testset_device_v2.json`，v5.34 全删重建），实测 Recall 0.8833 / nDCG 0.9305 / e2e Correctness 0.8733（见 §11）
 
-**对照 内部参考资料 P1 的四项要求**：
+**对照垂直场景落地的四项要求**：
 
-| P1 要求 | 现状 | 本轮目标 |
+| 要求 | 现状 | 本轮目标 |
 |---|---|---|
-| 真实数据 20-50 篇 | **10 份 ✅**（v5.28） | ~~~10 份~~ 已达 |
-| 针对该场景的评测数据 | 无（现有 65 题是客服/行政） | **器械场景 30 题** + 跑指标 |
+| 真实数据 20-50 篇 | **12 份 ✅**（v5.28→v5.33） | 已达（10 份说明书 + 2 份规范/培训文档） |
+| 针对该场景的评测数据 | **50 题 v2 ✅**（v5.34） | 已达：Recall 0.8833 / Correctness 0.8733（§11） |
 | 讲清解决了什么问题 | 有素材未成文 | 写入 README（§7） |
 | 可演示 | 无 | 本轮不做（P3 部署另议） |
 
 ## 3. 方案总览
 
 ```
-线 1：语料扩充（~10 份）
+线 1：语料扩充（~10 份 → 12 份 ✅，v5.28→v5.33）
   厂商官网/公开渠道 → PDF → M7 POST /docs → 多模态自动生效（M1 视觉 → M2 → M3 → M5）
         ↓
 线 2：场景特化功能
-  参数对比（多型号并排）  ← 复用 M5 检索，新增薄接口
-  场景化入口 chip（查询模板）  ← 纯前端，不新增接口
+  参数对比（多型号并排）  ⏳ 待开发 —— 设计方案已定（检索式对比，§5.1）；
+                          v5.26 曾实现、v5.35 前端入口隐藏（视为未交付），
+                          后端接口 + §5.4 去噪能力已就绪，重启只需重做入口/前端
+  场景化入口 chip（查询模板）  ✅ 已落地（v5.27，纯前端）
         ↓
 线 3：场景评测集
-  器械 30 题（5 类考点）→ M9 runner → 检索/生成指标
+  器械 50 题（v5.34 v2 全删重建，12 文档全覆盖、每文档三档）
+      → M9 runner → 检索/生成指标 ✅（Recall 0.8833 / Correctness 0.8733，§11）
 ```
 
 三条线**可并行**：线 1 是线 2/3 的前提（语料不够，功能和评测都撑不起来）。
@@ -114,10 +118,11 @@ cd backend && python3 scripts/ingest_device_corpus.py \
 **实测结果（v5.28，10 份全部 `ready`）**：857 chunk / 149 个带图 drawing 块 / 约 4.6 万视觉 tokens。
 单份最大智能便携式检测仪 223 chunk·39 图，最小数字差压计 22 chunk·2 图。
 验证：问「脉搏血氧仪的正常血氧饱和度范围」→ 生成正确且引用带 `image_path`（新入库文档可检索 + 图片溯源生效）。
+（v5.33 追加骨科审评规范.docx + 护理不良事件.pptx 后，库内 12 份 / 888 chunk / 149 drawing 块，见 §6.3。）
 
 ## 5. 线 2：场景特化功能
 
-### 5.1 多型号参数对比 ✅（v5.26 已落地）
+### 5.1 多型号参数对比 ⏳（待开发）
 
 **场景**：用户想知道「同样一个参数，几个型号分别是多少」。
 
@@ -126,7 +131,7 @@ cd backend && python3 scripts/ingest_device_corpus.py \
 ```
 POST /compare
   body: { collection_id, query: "静态压力量程", doc_ids: ["<id1>", "<id2>", ...] }
-  ↓ 对每个 doc_id 单独跑一次 M5 检索（限定该文档）
+  ↓ 对每个 doc_id 单独跑一次 M5 检索（限定该文档，配合 §5.4 localize_query 去噪）
   ↓ 各取 top-1 片段（含引用溯源）
   → { query, rows: [{ doc_id, doc_name, snippet, page_range, score, image_path? }] }
 ```
@@ -135,17 +140,7 @@ POST /compare
 - **前端**：并排对比卡（列 = 型号，行 = 该参数的原文片段 + 页码 + 可选缩略图）
 - **诚实边界**：某型号没有该参数时**如实留空**，不推断
 
-**实现（v5.26）**：`app/m7_interact/compare.py` + `POST /compare`（M7）｜ `components/DeviceCompare.tsx` + 侧栏「参数对比」（M8）。
-
-**实测**（铭昇 H2-5000IBP + 融柏 LSP-1C，三组 query）：
-
-| query | 融柏（注射泵） | 铭昇（血压模拟仪） |
-|---|---|---|
-| 精度等级 | 未找到（留空） | 0.75 → ±0.15%F.S（P3） |
-| 内径 | 0.717 内径输入（P4）+ 0.567 界面截图（P15） | 未找到（留空） |
-| 电池 | 0.407 电源说明（P3） | 0.721 18650 锂电池（P2） |
-
-相关性门槛实测生效：问「内径」时铭昇的无关片段（0.13 级）被正确滤除，前端显示「未找到该参数」而非硬凑。
+**状态：⏳ 待开发（视为未交付）**。v5.26 曾完整实现并实测（`app/m7_interact/compare.py` + `POST /compare` ｜ `components/DeviceCompare.tsx` + 侧栏「参数对比」），v5.35 前端侧栏入口已隐藏（comparison 弃用），后端接口保留但**无前台入口、不可达**——视为**未交付**。v5.26 三组 query 实测表、v5.32 前后端生产链路实测均已存档到 [device_scenario_eval_archive.md](../archive/device_scenario_eval_archive.md)；后端接口 `compare_params` 与 §5.4 检索去噪能力仍在运行，**重启本功能只需重做前端入口与对比卡**。
 
 ### 5.2 场景化入口 ✅（v5.27 已落地）
 
@@ -162,77 +157,52 @@ POST /compare
 - **器械卡片自动摘要**：需要 LLM 逐份抽取 + 存储，收益（展示价值）与成本不匹配，本轮不做
 - **拍照识报警图标**：需要图像检索（CLIP 类），超出当前架构
 
-### 5.4 对比检索 query 去噪 `localize_query` ✅（v5.32 已落地）
+### 5.4 对比检索 query 去噪 `localize_query`（能力已实现，v5.32）
 
-**背景**：泄漏治理后 comparison 诚实口径 Rec**0.375@5 / Correctness 0.0875**（§11.1/§11.2），逐题归因（§11.3/探针）：完整对比 query 的两个型号名里，**另一个型号名把本文档向量召回打到 cosine 阈值以下**——`probe_perdoc_subquery.py` 已证（`allowed_docs=[LSP-1C]`：完整 query→0 条、去另一型号名→5 条）。v5.30 退役的 per_doc_queries 是**人工定制子查询**（评测独有输入，泄漏）；本节方案把它改成**生产可复现的自动去噪**。
+**定位**：comparison 类对比 query 同时含多个型号名时，**其他文档的型号名会把本文档的向量召回打到 cosine 阈值以下**（`probe_perdoc_subquery.py` 可复现：完整对比 query 检索该文档 → 0 条，去掉其他型号名 → 5 条）。`localize_query` 在逐 doc 检索前**删除 query 中属于其他文档的型号名**，再喂 `retrieve(..., allowed_docs=[doc_id])`。
 
-**方案**：`compare_params` 逐 doc 检索前，对目标 doc 做 `localize_query`——删除 query 中「属于其他文档的型号名」，再喂 `retrieve(..., allowed_docs=[doc_id])`。**所用信息只有两样生产已存在的数据，与评测试题/key_facts 零交集**：
+**数据源（两条，均为生产已存在数据，与评测试题/key_facts 零交集——红线合规）**：
 
 | 层 | 型号名来源 | 归属判定 |
 |---|---|---|
-| L1 | 文档 `documents.json` 文件名提炼的型号 token（正则：`LSP-1C`/`H2-5000IBP`/`KE-2000` 等）+ 品牌短名单（融柏/铭昇/博声/英菲泰克/YASEE…，从本文献封面归纳） | 勿删「目标 doc 自己的候选」 |
-| L2 | L1 ∪ **图实体表**（`lightrag_graph_nodes`，与 `query_preprocess` 同源；补文件名覆盖不到的型号：Cchippump-2/PO-50B/IDEM1000-0N） | **型号名出现在目标 doc 内容（sparse chunks 文本）→ 保留**，否则视为外来删除 |
+| L1 | 文档 `documents.json` 文件名提炼的型号 token + 品牌短名单 | 勿删「目标 doc 自己的候选」 |
+| L2 | L1 ∪ 图实体表（`lightrag_graph_nodes`） | 型号名出现在目标 doc 内容（sparse chunks 文本）→ 保留，否则删除 |
 
-**关键不变量**：非对比 query（无型号名命中）→ `q_doc == query`，与现状**零回退**；`retrieve()` 签名不动（去噪在调用侧做）。
+**关键不变量**：非对比 query（无型号名命中）→ 输出与输入一致，零回退；`retrieve()` 签名不动。
 
-**红线合规**：这是「**生产能力先落地**，评测镜像同一 `localize_query`（`_comparison_targets` 从生产 `documents.json` 读别名，不读题集）」——v5.30 文档预留的合法通道（产品真做该能力再按生产能力引入评测），不是评测独有输入；`eval_top_n` 维持 top5 不动。
-
-**实现（v5.32）**：`app/m5_retrieve/query_localize.py`（`filename_candidates`/`build_side_inputs`/`localize_query`）；生产 `compare_params` 循环前构建 `cands_by_doc` + `doc_text`，逐 doc `localize_query(query, doc_id, ...)` 后再喂 `retrieve(..., allowed_docs=[doc_id])`；M9 `runner._comparison_targets` 镜像同一函数与同一生产数据源（`documents.json` 文件名、sparse chunk 全文、`load_entities_async`），符合「生产能力先落地、评测镜像同一 localize_query」红线合规通道。
-
-**探针实测（2026-10-04，`backend/scripts/probe_compare_localize.py` 留档可复跑；对 DV-CP 4 题逐 doc 跑 baseline / L1 / L2 三行，比较检索条数 + 判别 token 命中，判别 token 从 key_facts 手抽、属评测侧信号，非检索输入）**：
-
-| 题·侧 | baseline | L1 | L2 | 结论 |
-|---|---|---|---|---|
-| CP-001 融柏 | 0 条 ✗ | 0 条 ✗ | **3 条（行程/运行模式命中）** | L1 单独不够 → L2 恢复 |
-| CP-001 瑞创 | 5 条 ✓ | 5 条 ✓ | 5 条 ✓ | 无退化 |
-| CP-002 铭昇 | 5 条 ✓ | 5 条 ✓ | 5 条 ✓ | 无退化 |
-| CP-002 KE-2000 | 0 条 ✗ | 5 条 ✗（判别未进 top5） | 5 条 ✗（同） | 部分恢复——目标块已召回但被精排压出 top5（M5 探底修正，非切分） |
-| CP-003 血氧仪 | 3 条 ✓ | 3 条 ✓ | 3 条 ✓ | 无退化 |
-| CP-003 KE-2000 | 2 条 ✓ | 2 条 ✓ | 2 条 ✓ | 无退化 |
-| CP-004 英菲泰克 | 4 条 ✓ | 4 条 ✓ | 4 条 ✓ | 无退化 |
-| CP-004 博声 | 0 条 ✗ | 0 条 ✗ | **3 条（会诊/APP 命中）** | L1 单独不够 → L2 恢复 |
-
-**读数**：恢复 2/3 的 0 召回（CP-001 融柏、CP-004 博声），且两侧都是 **L1=0、L2 才恢复**——型号 token 不在文件名字面（`LSP01-1BC`/`IDEM1000-0N`），L1 够不着，实锤 **L2 归属判定是恢复召回的关键**；6 个基线良好的文档全部无退化；CP-002 KE-2000 恢复 5 条但判别 token 在 top5 外——目标块已进 fused 池被精排压掉（2026-10-04 M5 探底修正：非 M2 切分，见 CHANGELOG v5.32 探底块）。
-
-**生产链路实测（`POST /compare`，col_b7b876b1，v5.32）**：DV-CP-004 完整对比 query → 博声侧（前为空）恢复 **3 条带页码片段**（score_cutoff=0.2463，含健康检测应用/APP 截图描述），英菲泰克侧保持 4 条无退化；普通 query「报警 E03 怎么处理」两侧正常返回、零回退。前端侧栏「参数对比」同走 `compare_params`，自动生效。
-
-**实体候选收紧（探针验证中发现并修复的语义风险）**：实体表「型号形」候选须**含字母且（数字或连字符）且长度 ≥3**（`_ENTITY_MODEL_HAS_TOKEN`）——排除 `APP`/`SDK` 等纯字母通用词、**纯数字**（`100`/`500`/电话号/日期/流水号）被当成外来型号误删 query 语义。纯数字尤其危险：`query` 中 `IDEM1000-0N` 里的 `100` 若整词替换成空格会把型号炸成 `IDEM 0-0N`（仅「数字或连字符」判定有此**子串破坏**风险，实测 3108 实体中该类候选仅 14 个且全是电话号/日期/流水号，无一是真实型号；收紧不误伤任何型号形）。收紧后逐侧复验：8 侧 localize_query 输出与探针 L2 出口一致，恢复/无退化结论不变。
+**状态：能力已落地（v5.32），但当前无前台消费方**——参数对比 ⏳ 待开发（§5.1）、comparison 题已从评测集剔除（§6.3）。L1/L2 方案设计、8 侧探针实测表、生产链路实测（CP-004 博声侧由空恢复 3 条）、实体候选收紧教训（防纯数字型号token误删）均存档到 [device_scenario_eval_archive.md](../archive/device_scenario_eval_archive.md)。功能重启时直接复用。
 
 ## 6. 线 3：场景评测集
 
-**规模**：30 题（对齐行政库 30 题口径，便于横向对比）。
+**规模**：50 题（`testset_device_v2.json`，v5.34 全删重建，**现行权威**）。
 
-**五类考点分布**（器械场景特有）：
+**考题类型与分布**（v5.34 定，**全部为单文档题**）：
 
-| 题型 | 题量 | 示例 |
+| 题型 | 题量 | 说明 |
 |---|---|---|
-| `table_numeric` | 8 | 「50cc 规格注射器的内径是多少毫米」（图片型表格） |
-| `fact_single` | 8 | 「静态压力量程是多少 kPa」 |
-| `image_only`（**新增考点**） | 6 | 「灌注模式下界面显示的运行速度是多少」（答案只在图上） |
-| `comparison` | 4 | 「H2-5000IBP 与 LSP-1C 的精度等级分别是多少」 |
-| `unanswerable` | 4 | 「支持蓝牙吗」（负对照，防编造） |
+| `fact_single` | 18 | 单文档事实题（参数/按键/报警/功能说明） |
+| `table_numeric` | 12 | 表格数字题（图片型表格在内） |
+| `image_only` | 10 | 答案只在界面截图/图上（纪律见下） |
+| `summary` | 10 | 整档综合/总结型（hard 段主力） |
 
-> `comparison` 题（v5.29 曾要求配 `per_doc_queries` 子查询字段逐 doc 检索）——**v5.30 已退役**：每文档定制子查询是评测独有输入、线上 `compare.py` 不消费，属 ground_truth 信息泄漏红线（见 `CHANGELOG v5.30` 与项目 `CLAUDE.md`「评测信息泄漏红线」）。现改为每 doc 直接用完整 `question` 检索（与生产同形），字段已从题集删除。历史机制见 §6.1 第 4 项。
+- **难度**：25 easy / 15 medium / 10 hard（≈5:3:2），12 文档全覆盖、每文档≥2 档、内容充足的 10 份覆盖 hard。
+- **主动剔除**：`comparison`（跨文档归属模糊，破坏「每文档三档」）与 `unanswerable`（无文档归属）——设计理由见 §6.3，旧题集含这两类并已归档（§6.2）。
+- **出题流程**：12 并行 agent 各出一文档 → `assemble_device_testset.py` 统一重编号 + 校验（key_facts「数字/英文 token 全命中 + 中文 2-gram 覆盖率 ≥0.5」，容忍 paraphrase、拒绝编造，50 题 0 编造）。
 
-**关键纪律**（v5.25.3 教训，2026-10-02 收紧；v5.29 修正口径）：`image_only` 题的**答案完整内容必须存在于 `block_type=drawing` 块**——多模态有贡献的必要条件。
+**关键纪律（image_only）**：`image_only` 题的**答案完整内容必须存在于 `block_type=drawing` 块**——多模态有贡献的必要条件。核验：在 `data/collections/<col_id>/chunks*.jsonl` 按 `block_type` 过滤，逐串确认答案命中 `drawing` 块。
 
-> ⚠️ **不要用 `pdftotext -layout` 文本层 0 命中当基线**——它不够严。实测 `YASEE`、`实时压力`、`绑定医生`、`多语言`、`UNITS`/`HOLD`/`DIF` 等串在文本层「0 命中」（图片里的字），却出现在 chunk 的 `paragraph`/`table` 块 content 中。文本层基线会误判为「干净」。
+> ⚠️ **不要用 `pdftotext -layout` 文本层 0 命中当基线**——它不够严。实测 `YASEE`、`实时压力`、`绑定医生`、`UNITS`/`HOLD`/`DIF` 等串在文本层「0 命中」（图片里的字），却出现在 chunk 的 `paragraph`/`table` 块 content 中，文本层基线会误判为「干净」。另注意 `page_range` 是 **0-based**。
 >
-> 核验：在 `data/collections/<col_id>/chunks*.jsonl` 上按 `block_type` 过滤，逐串确认答案命中 `drawing` 块。注意 `page_range` 是 **0-based**（`page_range=N` = 人类第 N+1 页）。
->
-> **口径修正（v5.29）**：早期「非 drawing 块 0 命中」过严。实测 6 题 **5 题严格合格**；**DV-IO-004 保留并记为已知例外**——其 KF3（绑定医生/医生解绑/多语言）除命中 `drawing`（第 19 页设置图，答案完整）外，还在 `table`（第 20 页）命中。原因非出题错误：**MinerU 把第 20 页「绑定医生机构」子页图误判为 `type=table`**（该条目同时带 `img_path`，本质是图片），OCR 出的子页功能名与设置页功能项重合。不变量应为「**答案完整存在于 drawing 块**」（DV-IO-004 满足），而非「答案词不许出现在其他块」。
->
-> 附带发现：10 份文档 69 个 `table` 块中约 2 个属此类「图片被误判为 table」（博声 1、KE-2000 1），低频，是 M1 解析质量的真实缺陷，暂不修。
+> 已知例外与 M1 解析缺陷（MinerU 偶将图片误判为 `type=table`，VC-IO 类题有先例）的完整记录见 [device_scenario_eval_archive.md](../archive/device_scenario_eval_archive.md)（image_only 纪律节）。
 
-**运行**：需先补 4 处 runner 兼容改动（见 §6.1，已落地），再执行——
+**运行**：runner 兼容改动已落地（§6.1），当前跑法：
 
 ```bash
-python -m app.m9_eval.runner --testset tests/testsets/testset_device_30.json \
-    --mode retrieval --collection col_b7b876b1 \
-    --report tests/reports/run_retrieval_device30.json
+cd backend && python -m app.m9_eval.runner --testset tests/testsets/testset_device_v2.json \
+    --mode retrieval --collection col_b7b876b1
 ```
 
-### 6.1 runner 兼容改动（2026-10-02，v5.29）
+### 6.1 runner 兼容改动（2026-10-02，v5.29，已落地）
 
 新式 collection（`col_<uuid8>`）与旧式扁平库（`default_ws` 等）布局不同，M9 runner 原本只认后者，跑器械库会解析到不存在的 `data/col_b7b876b1/`。改动四处：
 
@@ -241,101 +211,51 @@ python -m app.m9_eval.runner --testset tests/testsets/testset_device_30.json \
 | 1 | `app/m9_eval/testset.py` | `VALID_CATEGORIES` 补 `"image_only"`（原缺失 → 6 题校验失败） |
 | 2 | `app/m9_eval/runner.py` | 新增 `_resolve_collection()`：`col_*` 走 `collection_paths()` 解析到 `data/collections/<col_id>/`，旧三库（`default`/`eval_cservice`/`eval_admin`）保持扁平映射，零回归 |
 | 3 | `app/m9_eval/runner.py` | `_build_deps()` 补加载 entities（`load_entities_async`）——原缺失会系统性低估生产 recall（线上 `retriever.py` 是加载的） |
-| 4 | `app/m9_eval/runner.py` | comparison 题走 **per-doc 检索**（`_comparison_targets` + `_interleave`）：v5.29 按题集 `per_doc_queries[文件名]` 子查询逐 doc 检索；**v5.30 退役该字段**，每 doc 直接用完整 `question`（见下勘误） |
-
-**per-doc 为何曾需子查询**（v5.29 实测，可复现）：用完整对比问题（含两个型号名）做 per-doc 检索时，**其他型号名会把该文档的向量召回打到 0**（LightRAG 向量路 `cosine=0.2` 阈值下相似度不足）。实测 `allowed_docs=[LSP-1C]`：完整对比 query → **0 条**；去掉其他型号名 → **5 条**。复跑：`cd backend && python3 scripts/probe_perdoc_subquery.py`。
-
-> ⚠️ **v5.30 勘误（泄漏治理）**：上述「配置子查询」机制**已废弃**。每文档定制子查询 = 评测独有输入（生产 `compare.py` 同一 query 打所有 doc），用它抬高的 comparison 数字只配当「检索上界」不能当产品参考——实测揭开：v5.30 退役后 comparison 用完整 question 检索，数字回落至真实对比检索质量。`probe_perdoc_subquery.py` 不改也不删（保留该检索缺陷的可复现证据，供后续检索改进参考）。
+| 4 | `app/m9_eval/runner.py` | comparison 题 per-doc 检索（`_comparison_targets` + `_interleave`）——**v2 题集已无 comparison 题，此路径保留但无题集触发**；其 v5.29 子查询 / v5.30 退役的泄漏治理史见 [归档](../archive/device_scenario_eval_archive.md) |
 
 旧三库（行政/cservice）跑法不变，`--workspace <ws>` 仍走扁平路径。
 
-### 6.2 扩充到 50 题（v5.33，2026-10-05）
+### 6.2 旧题集（v5.29 30 题 / v5.33 50 题）—— 已归档
 
-**动机（用户拍板）**：30 题的难度配比是 **6 易 / 16 中 / 8 难**（易 20%、难 27%），**偏难、不贴近真实使用**——真实场景里简单查询占多数。用户要求把题集扩到 **50 题、难度分布 5:3:2（易:中:难 = 25:15:10）**，并明确「**改题不改标签**」：通过**真出更多简单题**抬高占比，而不是把难题的 `difficulty` 字段涂成 easy（后者是糊弄自己，且难度标签根本不参与 recall 计算——recall 按题平均，difficulty 只是分组维度）。
+> 30 题版（v5.29）的五类考点分布蓝图（table_numeric 8 / fact_single 8 / image_only 6 / comparison 4 / unanswerable 4）、DV-IO-004 已知例外与文本层基线警告、v5.33 扩 50 题方案（难度 5:3:2 配比算术、新增 20 题清单、实测 Recall 0.7909），以及全部旧实测（30/50 题检索与生成、口径调查档案、漏召逐 fact 归因）均归档到 → **[device_scenario_eval_archive.md](../archive/device_scenario_eval_archive.md)**。
+>
+> 旧题集 JSON：`backend/tests/testsets/archive/testset_device_30.json` / `testset_device_50.json`。**数值与现行 v2 题集（§6.3/§11）不可横比**——题集全删重建非增量。
 
-**目标**：证明「多格式（PDF/PPTX/DOCX）+ 表格 + 多模态」的通用 RAG，在 5:3:2 的**贴近真实**难度下能拿到 **80%+ Recall**，不再死磕 hard 段的精度天花板。
+### 6.3 题集全删重建 v2（v5.34，2026-10-05，现行权威）
 
-**语料新增 2 份**（用户 2026-10-05 上传，`~/Downloads/device_pdfs`）：
+**用户指令（2026-10-05）**：「50 全部删除，重新出题，考虑器械库所有文档。按照难度 5:3:2 的比例，但是每个文档应该都有三个难度的题！」
 
-| 文件 | 来源格式 | 入库路径 | 内容 |
-|---|---|---|---|
-| 护理不良事件上报系统培训.pptx | pptx | MinerU | 27 页：不良事件分类 / 四级等级划分（Ⅰ~Ⅳ，含 A~H 损害程度）/ 报告制度（口头·书面·网络）/ 案例分析 |
-| 骨科手术器械类产品技术审评规范.doc | 老式 OLE2 doc | `textutil` 预转 docx → MinerU | 2012 版：适用范围（无源类，带电不在范围）/ 管理类别 I·II 类 / 产品类代号 6810 / 材料·硬度·耐腐蚀性·表面粗糙度等主要技术要求 / 注册单元划分 |
+**拍板三点（AskUserQuestion）**：
+1. **N=50 近似 5:3:2**（25/15/10）——数学约束：12 文档 × 每档≥1 ⇒ 各档≥12，5:3:2 ⇒ hard=0.2N≥12 ⇒ **N≥60**，N=50 严格无解，接受近似。
+2. **骨科审评规范.docx（全文仅 1 chunk）豁免 hard**，只出 easy/medium。
+3. **旧题集全部归档不改**（`testset_device_30.json` + `testset_device_50.json` → `tests/testsets/archive/`）。
 
-> ⚠️ `.doc` 是**老式 OLE2 格式**，Docling 路由需 LibreOffice（本机未装）→ 用 macOS `textutil -convert docx` 预转换。**代价：原文件嵌入的器械示意图全部丢失**（2MB→9KB），仅保留文字。本规范价值在条文（材料牌号/硬度值/粗糙度/标准号），图片为辅助示意，**丢失不影响出题**。
+**成果**：`backend/tests/testsets/testset_device_v2.json`（50 题）——
 
-**难度配比（算术说明，重要）**：现有 30 题冻结不动（用户已明令「回滚标签」），新增 20 题可达的最近配比是——
+- 难度 **25 easy / 15 medium / 10 hard**，12 文档全覆盖、每文档≥2 档、内容充足的 10 份覆盖 hard，逐文档达标（含校验脚本 per-doc 配比核对）。
+- 题型 `fact_single` 18 / `table_numeric` 12 / `image_only` 10 / `summary` 10。**全部为单文档题**：comparison（跨文档归属模糊，破坏「每文档三档」）与 unanswerable（无文档归属）**主动剔除**，由归档旧题集覆盖。
+- **流程**：`scripts/dump_device_chunks.py` dump 12 文档全部 chunk → **12 个并行 agent 各出一文档**（逐题记 `_evidence_idx`）→ `scripts/assemble_device_testset.py` 合并、校验、**统一重编号**（agent 自拟 id 跨文档冲突，如多份同用 DV-FS-009）。
+- **校验口径**：key_facts 为出题改写概括，按「数字/英文 token 全命中 + 中文 2-gram 覆盖率 ≥0.5」判据（容忍 paraphrase、拒绝编造），50 题全通过、0 编造。
+- **验证**：结构加载校验通过；`--mode retrieval --limit 2` 冒烟（Recall 1.0 / nDCG 0.82，`run_1791192530.json`）后跑 **50 题全量 retrieval + e2e**：
+  - **检索**（`run_retrieval_device_v2.json`）：Recall **0.8833** / nDCG 0.9305；按难度 easy 0.8800 / medium 0.9667 / hard 0.7667；按题型 fact_single **1.0** / table_numeric 0.7917 / image_only 0.9 / summary 0.7667。
+  - **生成**（`run_e2e_device_v2.json`）：Faithfulness **0.9950** / Correctness **0.8733** / Answer Relevance 0.9314 / Citation 0.8960；按难度 medium **1.0**（15 题全对）/ easy 0.8400 / hard 0.7667。
+  - **未满分 8 题**与检索漏题对应：easy 三题（DV-IO-007、DV-TN-005、DV-TN-010，recall 0）+ DV-TN-011（medium 0.5）+ summary hard 四题（DV-SUM-003/007/008/009，0.25–0.75）→ summary 新题型 hard 段为当前最大拖累项；DV-FS-001 / IO-005 为「主 fact 答、副 fact 漏」非检索缺口。**详表与逐题归因见 [retrieval_comparison.md](../../backend/tests/reports/retrieval_comparison.md) v5.34 节**。
 
-| | 易 | 中 | 难 | 合计 |
-|---|---|---|---|---|
-| 现有 30 题（冻结） | 6 | 16 | 8 | 30 |
-| 新增 20 题 | **19** | 0 | **1** | 20 |
-| **合计** | **25** | **16** | **9** | **50** |
-| 占比 | 50% | 32% | 18% | — |
-| 目标 5:3:2 | 25 | 15 | 10 | — |
+**读数**：
 
-> **精确 25/15/10 无法在「不动现有题」前提下达成**（需把现有 1 道 medium 降为 easy、并新增 2 道 hard，前者要动现有题标签——已禁止）。取最近配比 **25/16/9**（易=50% 精确达标；中/难各偏 1）。若后续允许微调现有题，再收敛到精确 5:3:2。
-
-**新增 20 题清单**（ID 延续 `DV-` 前缀；两文档均覆盖）：
-
-| ID | 题型 | 难度 | 来源文档 | 考点 |
-|---|---|---|---|---|
-| DV-N-FS-001 | fact_single | easy | 骨科审评规范 | 管理类别（I·II 类）与产品类代号 6810 |
-| DV-N-FS-002 | fact_single | easy | 骨科审评规范 | 适用范围（无源类；带电如电动骨锯不在范围） |
-| DV-N-FS-003 | fact_single | easy | 骨科审评规范 | 产品工作原理（机械力学原理） |
-| DV-N-FS-004 | fact_single | easy | 骨科审评规范 | 咬骨钳（剪）头部可选材料（32Cr13Mo/30Cr13/40Cr13） |
-| DV-N-FS-005 | fact_single | easy | 骨科审评规范 | 骨锯锯片材料（65Mn/60SiMn） |
-| DV-N-FS-006 | fact_single | easy | 骨科审评规范 | 骨凿材料（40Cr13/90Cr18MoV） |
-| DV-N-FS-007 | fact_single | easy | 骨科审评规范 | 咬骨钳 30Cr13 头部硬度（47~53 HRC） |
-| DV-N-FS-008 | fact_single | easy | 骨科审评规范 | 咬骨钳 32Cr13Mo 头部硬度（48~56 HRC） |
-| DV-N-FS-009 | fact_single | easy | 骨科审评规范 | 左右两片头部硬度之差（≤4HRC） |
-| DV-N-FS-010 | fact_single | easy | 骨科审评规范 | 骨凿 90Cr18MoV 头部硬度（53~58 HRC） |
-| DV-N-FS-011 | fact_single | easy | 骨科审评规范 | 咬骨钳表面粗糙度（头部凹槽/光亮/无光亮外表面） |
-| DV-N-FS-012 | fact_single | easy | 护理不良事件 | 不良事件分类（用药错误/输液问题/预防不足/医嘱错误/其他） |
-| DV-N-FS-013 | fact_single | easy | 护理不良事件 | 输液问题包含（化疗药外渗/输液反应/输血反应） |
-| DV-N-FS-014 | fact_single | easy | 护理不良事件 | Ⅰ级事件定义（造成患者死亡） |
-| DV-N-FS-015 | fact_single | easy | 护理不良事件 | Ⅳ级事件定义（隐患，A 级） |
-| DV-N-FS-016 | fact_single | easy | 护理不良事件 | 报告形式（口头/书面/网络） |
-| DV-N-FS-017 | fact_single | easy | 护理不良事件 | 口头报告对象（护士长/科主任/总值班/护理部） |
-| DV-N-FS-018 | fact_single | easy | 护理不良事件 | 护理部反馈周期（每季度） |
-| DV-N-FS-019 | fact_single | easy | 护理不良事件 | 案例：青霉素过敏史误用致死亡 = Ⅰ级 |
-| DV-N-SUM-001 | summary | hard | 骨科审评规范 | 产品标准主要技术要求包含哪几项（材料/硬度/耐腐蚀性/外观/规格尺寸/使用性能/表面粗糙度/组件） |
-
-**题型分布（新增 20）**：fact_single 19 / summary 1（护理 pptx 与器械说明书**不同子域**、无同型号可比，无法生成 comparison 题；pptx 的图片页未经 OCR 核验，暂不出 image_only）。
-
-**出题规范**：遵循 `docs/modules/M9_testset.md` §4.3（字段格式）、§6.2（质检：key_facts 原子化、数字题来自原文、must_have_docs 人工标注）。
-
-**说明（2026-10-05 用户澄清，替代原「已识别风险」）**：
-
-- 骨科审评规范属器械域（骨科手术器械），**契合**器械库。
-- **护理不良事件 pptx 与「器械说明书」子域不同，但同属医疗大领域**；用户**有意**纳入，目的是**验证通用 RAG 对多格式（pptx）的处理能力**——即「多格式 + 表格 + 多模态」这条能力线的真实覆盖，而非追求单一器械子域的纯净化。故本条**不视为违背 `M9_testset.md` §0.1 铁律 1**（该铁律反对的是「跨越大的领域」，医疗内部子域差异属可接受的格式/子域扩展；用户已拍板）。
-- **保留的诚实注记**：50 题里 8 题来自护理子域，aggregate Recall 混合了两个子域，严格说不再等同「纯器械说明书库」的单一域表现——**读数时按子域分层看**（§11.4 已单列「骨科 / 护理」新增分组）。
-
-**运行**：
-
-```bash
-cd backend && python -m app.m9_eval.runner --testset tests/testsets/testset_device_50.json \
-    --mode retrieval --collection col_b7b876b1 \
-    --report tests/reports/run_retrieval_device50.json
-```
-
-**✅ 执行结果（2026-10-05，50 题，耗时 2645.8s，judge_failed=0，报告 `run_retrieval_device50.json`）**：
-
-- **入库**：12 份 `ready` / 888 jsonl chunk 行 / 149 drawing 块（新文档无图，drawing 数不变）。骨科 docx 被 MinerU 切成**单块 4265 字符**（其他 PDF 约 70 块/份），护理 pptx 30 块。
-- **总体 Recall 0.7909**（分母 46，4 题 unanswerable 跳过）——**距 80% 目标差 0.91pp**。30 题基线 0.6763 → **+0.1146**。
-- **新增 20 题平均 ≈0.915**（17 题满分；未满分：DV-N-FS-012 0.8 / DV-N-FS-017 0.5 / DV-N-FS-019 0.0）。
-- **拖累项全是旧题**：image_only 0.6667 / comparison 0.4583 / hard 段 0.4815（四题 0：TN-005 / FS-008 / IO-004 / CP-002）。
-- 详细分层见 §11.4。
+1. **hard 段 0.7667（旧 0.4815 → +0.2852）是 v5.34 最大变化**，但**不是链路变强**——题集全删重建、题目完全重出，hard 更多是「单文档多 fact 聚合/综合型」（summary）而非旧题的 comparison/表格变态。**跨题集对比必须按题型/难度分层读**。
+2. **未满分 8 题画像**：DV-TN-005 跨题集复现 0（同一文档同一张表的检索性短板稳定复现，属「表格数值块被精排压出 top5」经典画像，v5.13 NL 摘要/权重探底均已闭源勿重复）；summary hard 4 题全漏 = 新最大拖累项（gold 需跨块聚合，与精排截断同源）。
+3. **检索满分但 e2e correctness 掉分 2 题**（DV-FS-001 / DV-IO-005，0.5）——主 fact 回答、副 fact 遗漏（如 FS-001「不能用于人体临床」答出、遗漏「只能用于科学研究」），材料在上下文（recall 1.0），是生成覆盖问题非检索缺口。
 
 ## 7. 验证方法
 
 | 步骤 | 检查项 |
 |---|---|
-| 1. 语料入库 ✅ | **12 份全部 `ready`**（v5.33 扩充：10 份 v5.28 + 骨科审评规范.docx + 护理不良事件.pptx）；PG `lightrag_doc_chunks` 计数与 M2 产出对齐 |
+| 1. 语料入库 ✅ | **12 份全部 `ready`**（v5.28 10 份 + v5.33 2 份）；PG `lightrag_doc_chunks` 计数与 M2 产出对齐 |
 | 2. 多模态生效 ✅ | 149 个 drawing 块带 `image_path`（v5.28 实测）；预览面板图片可渲染 |
-| 3. 参数对比 | 对 3 个型号问同一参数 → 各自返回正确片段 + 页码；缺参数的型号如实留空 |
-| 4. 评测集 | **50 题跑通**（v5.33，难度 5:3:2），输出检索指标（实测见 §11.4） |
-| 5. 诚实性 | `unanswerable` 题正确拒答，不编造 |
+| 3. 参数对比 | ⏳ **待开发**（§5.1）：验证口径已定——对 3 个型号问同一参数 → 各自返回正确片段 + 页码；缺参数的型号如实留空（设计见 §5.1，后端接口与去噪就绪） |
+| 4. 评测集 ✅ | **50 题 v2 跑通**（v5.34），检索 Recall 0.8833 / nDCG 0.9305 / e2e Correctness 0.8733（§11） |
+| 5. 诚实性 ✅ | e2e Faithfulness **0.9950**、judge_failed=0（v2 已无 unanswerable 负对照题，诚实性由 Faithfulness 判决，见 §11.2） |
 
 ## 8. 不做的事
 
@@ -348,232 +268,66 @@ cd backend && python -m app.m9_eval.runner --testset tests/testsets/testset_devi
 
 | 阶段 | 内容 | 依赖 |
 |---|---|---|
-| M1 | 语料扩充到 ~10 份并入库 | ✅ **已落地（v5.28，10 份 / 857 chunk / 149 图）** |
-| M2 | 参数对比接口 + 前端对比卡 | ✅ **已落地（v5.26）** |
+| M1 | 语料扩充（~10 份 → 12 份）并入库 | ✅ **已落地（v5.28→v5.33）** |
+| M2 | 参数对比接口 + 前端对比卡 | ⏳ **待开发**（§5.1；后端接口与检索去噪 v5.26/v5.32 已实现，v5.35 移除前端入口，视为未交付——重启只需重做入口/前端） |
 | M2.5 | 场景化入口 chip（查询模板） | ✅ **已落地（v5.27）** |
-| M3 | 器械 30 题评测集 + 跑指标 | ✅ **题集已落地（v5.29）；指标见 §11** |
-| M4 | README 场景化重写（作品集材料） | ⏳ 待 M2/M3 |
+| M3 | 器械真题评测集 + 跑指标 | ✅ **已落地（v5.34，50 题 v2，Recall 0.8833 / Correctness 0.8733，§11）** |
+| M4 | README 场景化重写（展示材料） | ⏳ 主要待 M2（评测 ✅ 可先行补工作流/成绩） |
 
 ## 10. 待用户确认
 
 1. ~~语料来源走哪条路~~ → **已定：用户自行搜集下载**（§4.2 路径 A），收齐后批量入库
-2. ~~场景特化功能怎么做~~ → **已定并落地：§5.1 参数对比**（v5.26）
-3. **评测集 30 题是否合适**（vs 扩到 50 题）—— 待语料到位后再定
+2. ~~场景特化功能怎么做~~ → **已定并落地：§5.2 场景 chip**（v5.27）
+3. ~~评测集 30 题 vs 50 题~~ → **已定：v5.34 全删重建 50 题 v2**（§6.3）
+4. **参数对比是否重启**（§5.1 ⏳ 待开发）——前端入口已隐藏、视为未交付；后端接口 + §5.4 去噪已就绪，如需重启由用户确认重新开放前端
 
-## 11. 实测结果（2026-10-03 检索恢复 / 2026-10-04 生成项补齐）
+## 11. 实测结果（v5.34 v2 题集，当前权威）
 
-> 库 `col_b7b876b1`（10 份器械说明书 / 857 chunk / 149 带图 drawing 块）。
-> 跑法：`python -m app.m9_eval.runner --testset tests/testsets/testset_device_30.json --collection col_b7b876b1 --mode <retrieval|e2e>`。
-> **§11.1 检索指标为 v5.30 泄漏治理后诚实口径**：报告 `backend/tests/reports/run_retrieval_device30_v531_leakfix.json`（v531 基线，2026-10-03 晚，双窗口时代产物）+ `run_retrieval_device30_v532_localize.json`（**v532 当前生产口径，2026-10-04，纯 top5 单窗口**）。
-> ⚠️ **v531 报告 JSON 内嵌 `per_fact` 为 @8 判定**（judge 可引用 `上下文[6][7][8]`）；与 v532 纯 @5 判定逐 fact 对比会看到三题（DV-FS-002/008、DV-IO-006）「@8 hit / @5 miss」窗口差——**非检索退化**，DV-FS-002/008 正是已知「答案块落 top6-8」案例。逐题对比须以 summary 的 @5 列为准。
-> **⚠️ 口径说明（v5.31 起）**：@8 列已在文档层面作废——`eval_top_n` 默认回 5（对齐生产 `RERANK_TOP`），runner/report 双窗口收敛为单窗口，LLM 调用减半；v5.9 已实测「top5 是最优窗口」（`205b445` commit）。以下只报告 **@5 = 生产口径**，@8 仅作历史对照并标注「已否定诊断残留」。§11.1 摘要数字与报告 JSON 的 `@5` 列一致。
-> **§11.2 生成指标为诚实口径**（2026-10-04 已重跑，报告 `backend/tests/reports/run_e2e_device30_honest.json`）；`run_e2e_device30.json`（v5.29 泄漏窗口口径）仅作上界参考，不可直接比较。
-> **历史报告口径不同，均不可直接比较**：`*_pre_hitfix.json`（judge hit bug 前，假阳性）、`run_retrieval_device30.json`（v5.29 泄漏口径），见 §11.3。
+> 库 `col_b7b876b1`（12 份文档 / 888 chunk / 149 带图 drawing 块）。
+> 跑法：`python -m app.m9_eval.runner --testset tests/testsets/testset_device_v2.json --collection col_b7b876b1 --mode <retrieval|e2e>`（standard reranker，@5 生产口径）。
+> 报告：`backend/tests/reports/run_retrieval_device_v2.json` / `run_e2e_device_v2.json`；**详表与逐题归因见 [retrieval_comparison.md](../../backend/tests/reports/retrieval_comparison.md) v5.34 节**。
+> ⚠️ **旧题集（30/50 题）全部实测已归档**：[device_scenario_eval_archive.md](../archive/device_scenario_eval_archive.md)。题集全删重建非增量，**数值与 v2 不可横比**。
 
-### 11.1 检索指标（`--mode retrieval`，30 题，v5.32 当前生产口径 = 纯 top5 单窗口，耗时 738.9s，报告 `run_retrieval_device30_v532_localize.json`）
+### 11.1 检索指标（`--mode retrieval`，50 题 v2，@5 生产口径，`run_retrieval_device_v2.json`）
 
-| 指标 | @5（生产口径，v532） | v531 基线 |
-|---|---|---|
-| Context Recall | **0.6763** | 0.6635 |
-| Context Precision | 0.2533 | 0.2362 |
-| Context Precision（加权） | 0.3533 | 0.3263 |
-| nDCG | 0.7508 | 0.6906 |
+| 指标 | 数值 |
+|---|---|
+| Context Recall | **0.8833** |
+| Context Precision | 0.2960 |
+| Context Precision（加权） | 0.4723 |
+| nDCG | **0.9305** |
+| gold_rank（平均/中位） | 1.39 / 1.36 |
+| gold_rank 事实覆盖率 top1/top3/top5 | 0.747 / 0.862 / 0.906 |
 
-> 基线列 = v5.31 收敛前跑法的 summary @5 列（`run_retrieval_device30_v531_leakfix.json`，721.1s，双窗口时代产物）。v531 报告内嵌 `per_fact` 是 @8 判定，不参与对比（见 §11 顶部横幅的 ⚠️ 口径说明）。@8 列自 v5.31 已在文档层面作废，仅存档。
-
-**Gold Rank**：平均 1.67 / 中位 1.66（v531: 2.43/2.46）。事实覆盖率：top1 **0.5** → top3 0.7308 → top5 0.7404。
-
-**按题型**（Recall —— 仅 @5）：
-
-| 题型 | 题数 | Recall@5 (v532) | v531 |
-|---|---|---|---|
-| table_numeric | 8 | 0.8125 | 0.8125 |
-| fact_single | 8 | 0.6562 | 0.6562 |
-| image_only | 6 | 0.6667 | 0.6667 |
-| comparison | 4 | **0.4583** ▲ | 0.3750 |
-| unanswerable | 4 | —（跳过） | — |
-
-**逐题 comparison**（@5 判定；v531 基线用 summary @5 列）：**CP-001 0/3 → 1/3**（唯一变化，L2 localize 恢复；judge 确认真实：上下文[1] 明确列出「型号 \| LSP01-1BC」的运行模式参数表）；CP-002 0/2（保持——目标块已召回被精排压出 top5，M5 探底已定位，属已封闭的精排截断画像）、CP-003 2/2（保持，top5 全中）；CP-004 1/2（保持，漏博声侧——内容匹配不足，M5 探底已定位）。
-
-**非 comparison 零回归**：table_numeric / fact_single / image_only 三题型 aggregate @5 与 v531 **逐题完全一致**（0.8125/0.6562/0.6667）。⚠️ 直接 diff 两份报告 JSON 的 `per_fact` 会看到 DV-FS-002/008、DV-IO-006 有「v531 hit / v532 miss」——这是 **@8 vs @5 窗口差**（v531 报告 per_fact 来自 8 窗口，judge 引用过 `上下文[6][7][8]`；DV-FS-002/008 正是已知「答案块落 top6-8」案例），**不是 v532 引入的检索退化**。
-
-**按难度**（Recall@5）：easy（6 题）0.6667｜medium（16 题）0.8542｜hard（8 题）0.4167（v531: 0.3750，提升来自 comparison CP-001 hard 题恢复）。
-
-**读数**：
-
-- **comparison 0.3750 → 0.4583@5（+0.0833）**，dv-CP-001 从 0/3 恢复 1/3 —— v5.32 `localize_query` 的 L2（图实体表归属判定）把「其他文档型号名」剔出目标 doc 检索 query，恢复被型号词压没的向量召回。**诚实口径不因修复而动摇**：仍是完整 question + 生产可复现检索，恢复属真实检索能力提升（v5.30 泄漏治理后 comparison 曾回落到 0.375 的「完全 question 压没」缺陷，由生产侧补回）。
-- ⚠️ **数值巧合提醒**：v532 本次 comparison **0.4583 与 v5.29 泄漏口径 0.4583 恰好相等，机制完全不同**——v5.29 = 每文档定制子查询 `per_doc_queries`（评测独有输入，泄漏，已退役）；v532 = 同一完整 question + 生产 `localize_query` 逐 doc 去噪（诚实可复现，生产 `compare.py` 同函数同源）。**不可混为一谈**。
-- **comparison 剩余短板（2026-10-04 M5 探针逐路定位，修正原「M2 切分粒度遗留」归因，见 CHANGELOG v5.32 探底块）**：CP-001 瑞创侧、CP-002 = 目标块**已召回但被精排 top5 截断**（RRF 全序 rank 3/11、fused rank 7/6，rerank score 0.42/0.304 被同语料更相关块压过——即客服库 CS-TN-003 同款「精排截断」画像，**调权重方向已被 v5.11-21 系统探底并封闭**，见 CHANGELOG v5.32 探底块交叉历史）；CP-001 融柏注射器参数、CP-004 博声会诊 = **内容匹配本身不足**（放宽扩池到 kw@200/vec@200/graph@100 仍够不着）。四个漏召 fact 无一是 M2 切分粒度所致。
-- **Context Precision 整体偏低（0.25）**：每题取 20 条上下文而多数题只需 1-3 条 ⇒ 分母天然偏大，绝对值不宜单独解读；结合 GoldRank（top1 覆盖 0.5、top5 覆盖 0.74）一起看。
-
-### 11.2 生成指标（`--mode e2e`，30 题，诚实口径，耗时 1154.9s，报告 `run_e2e_device30_honest.json`）
-
-> **声明（诚实口径）**：2026-10-04 用 v5.31 收敛后 runner 重跑（退役 `per_doc_queries`、单窗口 @5、p2 缓存键）——下表为**生产可复现口径**。旧表（v5.29 泄漏窗口口径，`run_e2e_device30.json`，1243.9s）仍在 `device30.json` 归档，仅作「comparison 检索上界」参考，数字不可直接比较（comparison 用 per_doc_queries 定制子查询 + @8 窗口）。
->
-> **对比要点**：诚实口径下 `table_numeric`/`fact_single`/`image_only` **忠实度满格（1.0）**（旧泄漏口径 0.72–1.0 不等）——证 v5.29 的 comparison 低 faith 是**生成阶段拿不到第二型号而在上下文外编造**所致，非能力极限；诚实口径生成层整体显著更"诚实"。
-
-| 指标 | 诚实（当前） | 旧泄漏口径（仅参考） |
-|---|---|---|
-| Faithfulness（忠实度） | **0.9843** | 0.7757 |
-| Answer Relevance（答案相关性） | 0.7617 | 0.8650 |
-| Correctness（正确性） | **0.6286** | 0.7950 |
-| Citation Accuracy（引用准确率） | 0.6764 | 0.6707 |
-
-**按题型**：
-
-| 题型 | 题数 | Faithfulness | Answer Rel. | Correctness | Citation Acc. |
-|---|---|---|---|---|---|
-| table_numeric | 8 | **1.0000** | 0.9000 | 0.8571 | 0.5214 |
-| fact_single | 8 | 1.0000 | 0.6937 | 0.5938 | 0.8396 |
-| image_only | 6 | 1.0000 | 0.9333 | 0.7500 | 0.6833 |
-| comparison | 4 | 0.8825 | 0.5000 | **0.0875** ⚠️ | 0.5312 |
-| unanswerable | 4 | 1.0000 | 0.6250 | 0.6000 | 0.7947 |
-
-**拒答验证（§7 第 5 项「诚实性」）—— 4/4 全部正确拒答，无编造**（诚实口径下依旧成立）：
-
-| 题 | 问的是 | 答案首句 |
-|---|---|---|
-| DV-UA-001 | 哪款支持 Wi-Fi | 「根据现有检索材料，无法确认…没有出现任何关于"Wi-Fi""无线联网"…的描述」 |
-| DV-UA-002 | 电池循环充放电次数 | 「根据现有检索材料，无法回答"是否有设备给出了电池循环充放电次数…"这一问题」 |
-| DV-UA-003 | 双相波脉冲宽度 | 「根据给定的检索材料，无法回答…没有任何关于双相波除颤脉冲宽度（ms）的记载」 |
-| DV-UA-004 | 手机 App 远程固件升级（OTA） | 「现有材料不足以回答该问题。材料中没有提到任何设备支持通过手机 App 进行远程固件升级（OTA）」 |
-
-**读数**：
-
-- **忠实度全面满格（0.9843）且零判例失败（judge_failed=0）**——生成层在诚实口径下几乎不再编造上下文外事实。这直接反证 v5.29 comparison 低 faith（0.43）= 泄漏上界喂出的上下文根本支撑不住答案的产物，诚实口径下答案自动收敛到上下文内。
-- **comparison Correctness 0.0875 崩盘、faith 反升至 0.8825**——诚实口径下 4 题全部答非所问/只答一边：DV-CP-001/002/003 直接「现有检索材料中没有…无法比较」拒答（因为完整对比 query 一个型号的块都没进 top5），DV-CP-004 只答出英菲泰克一侧、博声侧数据没进上下文。**这是「诚实的失败」**：模型宁可拒答也不编造，但 Correctness 归零。根因仍在**检索侧 comparison 漏召回**（§11.1 Recall 0.375@5 + §6.1 完整对比 query 向量召回打 0 的机制），生成只是忠实呈现了检索短板。整条链路归因：**comparison 的瓶颈在 M5/M2 检索，不在生成**。
-- **Answer Relevance 0.7617**（旧 0.8650）：诚实口径下比较题被迫拒答/答单边，相关性天然降低——同样归因于检索。
-- `table_numeric` Correctness 0.8571 **夺冠且忠实度满分**（旧泄漏口径 0.8187）——唯一"检索+生成双稳"的题型。
-- **Citation Accuracy 与旧口径基本持平（0.6764 vs 0.6707）**，`fact_single`/`table_numeric`/`unanswerable` 均 ≥0.52——引用准确率受检索短板影响小（引用对得上上下文即可）。`table_numeric` 引用仅 0.5214 维持低位现象依旧（参数表整表一块、复述正确数值但标块偏差）。
-
-> **旧泄漏口径表格存档**（`run_e2e_device30.json`，仅上界参考，不可比较）：Faithfulness 0.7757 / Answer Relevance 0.8650 / Correctness 0.7950 / Citation Accuracy 0.6707；按题型——table_numeric 1.0/0.9375/0.8187/0.5542、fact_single 0.7188/0.9125/0.8812/0.9167、image_only 0.8750/0.9333/0.7500/0.8750、comparison 0.4300/0.7375/0.5875/0.2807、unanswerable 0.6375/0.6500/0.8500/0.4955。当时 4/4 拒答亦全部正确。
-
-### 11.3 口径说明（重要）
-
-> **本节为历史口径调查档案（v5.31 起）**：@8 窗口已在文档层面作废（`eval_top_n` 回 5 对齐生产 `RERANK_TOP`，§11 引语），以下含 @8 数字/切片分析者均为作废前调查记录，只作「为何 @8 不可信」的历史依据与可复现证据；**当前合法口径只有 @5 = 生产口径**。
-
-1. **`unanswerable` 题不参与 Recall 计算**：runner 对这类题跳过 recall（`context_recall_detail=None`），`by_category.unanswerable.context_recall = 0.0` 只是**占位值**；**总体 Recall 的分母是 26 道可答题**（v531 诚实口径校验：4×0.375 + 8×0.8125 + 6×0.6667 + 8×0.6562 = 17.2498，17.2498/26 = **0.6635 ✓**）。这类题的考点在 e2e 的**拒答行为**（防编造），见 §11.2。
-2. **旧报告（`*_pre_hitfix.json`）数字偏高，不可比**：其 Context Recall 0.9199 是**裁判 bug 造成的假阳性**——`judge.py` 曾丢弃 LLM 输出的 `hit` 字段，`context_recall.py` 遂用 `score >= 0.5` 反推命中；而 prompt 里 `score` 是「**判定置信度**」（`hit=false, score=0.95` = 95% 确信"上下文里没有"），被错误翻转成命中。扫 4255 条缓存实测矛盾率 **13.4%**。修复后（v5.29，`_PROMPT_VERSION` bump 至 `p1_llm_hit`）为 0.7436。
-3. **comparison 的 0.625 → 0.4583 混合了两个改动**：旧报告既无 per-doc 检索（`comparison_mode` 缺失）也未修 hit。per-doc + 子查询**提升**该题型召回（机制与可复现证据见 §6.1：同一文档 `allowed_docs=[LSP-1C]`，完整对比问题 → **0 条**、去其他型号名 → **5 条**，`backend/scripts/probe_perdoc_subquery.py` 可复跑），hit 修复**压低**假阳性，净效果为下降。两项改动方向相反但都正确，详见 §6.1 与 memory。
-4. **v5.30：退役 per_doc_queries，comparison 口径归位（泄漏治理，见 §6.1 勘误）**：v5.29 的 comparison Recall **0.4583 是「每文档定制子查询」抬出来的上界**，不是产品能复现的数字——生产 `compare.py` 同一 query 打所有 doc，没有任何评测独有输入。v5.30 起题集删除 `per_doc_queries`，`_comparison_targets` 每 doc 直接用完整 `question` 检索（窗口当时统一为 8；**v5.31 起收敛回 5 对齐生产**，见 §11 引语）。诚实口径实测（v531，§11.1）：总体 Recall **0.6635@5**，comparison **0.3750@5**。v5.29 的 0.4583 保留为「上界参考」。若产品后续真做「每 doc 多轮子查询」能力，再按生产能力重新引入评测方式（从属于检索改进，非本轮泄漏治理范围）。
-5. **comparison Recall@8(0.125) < Recall@5(0.375) 非单调 = 裁判归因噪声，非 runner bug（v531 调查定论）**：排除顺序——① runner 窗口切片无 bug（同一交错列表 `[:5]`/`[:8]`，top8 ⊇ top5 硬保证）② 非检索泄漏 ③ 非缓存串键（`p2_llm_hit_fullctx` 缓存键含完整 `context_str`，top5/top8 上下文不同 ⇒ 键不同 ⇒ 各自独立 LLM 调用）。实证于 judge 缓存：DV-CP-003 fact2（KE-2000）同一事实两次调用判出 True/False 两条缓存——top5 按 doc id 归因判中、top8 要求逐字「KE-2000」型号字符串判 miss，同一证据块在场却两次标准不一。诚实值取 @5=0.3750；DV-CP-004 fact2 才是真漏召回。修复方向（让裁判以「文档归属」归因而非型号字符串逐字匹配）从属于检索改进，非泄漏治理范围，本轮不改。
-6. **v5.29 各题型 @5=@8 精确相等 = p1 缓存键截断的共享产物（2026-10-04 复盘定论）**：p1 缓存键取 `context_str[:500]`（前 500 字符），top5/top8 交错上下文前缀相同 ⇒ 同一 judge 判定被两窗口共享 ⇒ **v5.29 的 @5 从未独立评测**。证据：v5.29 报告 30/30 题「@5 与 @8 逐 fact 全一致」（含 8 题多 fact 的 fact_single / table_numeric），非巧合。v531 键改完整 `context_str` 后独立判定——**fact_single 0.6562@5 / 0.8438@8**：DV-FS-002（满电持续、计时误差）与 DV-FS-008（更换荧光帽）三 fact 均「@5 miss / @8 hit」，v531 reason「上下文仅涉电磁/蓝牙/清洁方法」自洽，答案块真实落 top6-8。故 **v5.29 的 fact_single 0.8125 是 top8 判定回声，0.8125→0.6562 是口径回归而非随机噪声**（诚实的 top5 能力一直 ≈0.65）。
-
-### 11.4 50 题扩充后实测（v5.33，2026-10-05，报告 `run_retrieval_device50.json`）
-
-> 库 `col_b7b876b1`（**12 份** / 888 jsonl chunk 行 / 149 drawing 块）。题集 `testset_device_50.json`（50 题，难度 5:3:2）。`--mode retrieval`（standard reranker，无 LLM 终审），耗时 **2645.8s**，judge_failed=0。方案见 §6.2。
-
-**总体指标**（分母 46 = 50 − 4 题 unanswerable）：
-
-| 指标 | 50 题（v5.33） | 30 题基线（v532） | Δ |
-|---|---|---|---|
-| Context Recall | **0.7909** | 0.6763 | **+0.1146** |
-| Context Precision | 0.2520 | 0.2533 | −0.0013 |
-| Context Precision（加权） | 0.3702 | 0.3533 | +0.0169 |
-| nDCG | 0.7737 | 0.7508 | +0.0229 |
-| gold_rank（平均/中位） | 1.47 / 1.46 | 1.67 / 1.66 | 更好 |
-
-事实覆盖率：top1 **0.6533** → top3 0.8054 → top5 0.8217（v532: top1 0.5 → top5 0.7404）。
+**按难度**（Recall@5）：easy **0.8800**（25 题）｜medium **0.9667**（15 题）｜hard **0.7667**（10 题）。
 
 **按题型**（Recall@5）：
 
-| 题型 | 题数 | Recall@5 | 对比 v532（30 题口径） |
+| 题型 | 题数 | Recall@5 | nDCG |
 |---|---|---|---|
-| fact_single | 27 | **0.8537** | 0.6562（+19 新题多为简单事实题，命中率高） |
-| table_numeric | 8 | 0.8125 | 0.8125（不变） |
-| image_only | 6 | 0.6667 | 0.6667（不变） |
-| comparison | 4 | 0.4583 | 0.4583（不变） |
-| summary | 1 | **1.0000** | 新增题型 |
-| unanswerable | 4 | —（跳过） | — |
+| fact_single | 18 | **1.0000** | 0.9836 |
+| table_numeric | 12 | 0.7917 | 0.9059 |
+| image_only | 10 | **0.9000** | 0.9821 |
+| summary | 10 | 0.7667 | 0.8127 |
 
-**按难度**（Recall@5，5:3:2 分布）：
+### 11.2 生成指标（`--mode e2e`，50 题 v2，`run_e2e_device_v2.json`）
 
-| 难度 | 题数 | Recall@5 | gold_rank |
-|---|---|---|---|
-| easy | 25 | **0.8720** | 1.38 |
-| medium | 16 | **0.8542** | 1.40 |
-| hard | 9 | 0.4815 | 2.00 |
+| 指标 | 数值 |
+|---|---|
+| Faithfulness | **0.9950** |
+| Answer Relevance | 0.9314 |
+| Correctness | **0.8733** |
+| Citation Accuracy | **0.8960** |
 
-**新增 20 题分组表现**：
+**按难度**（Correctness）：easy 0.8400（25）｜medium **1.0**（15 题全对）｜hard 0.7667（10）。
 
-| 分组 | 题数 | Recall@5 |
-|---|---|---|
-| 骨科审评规范（FS-001~011 + SUM-001） | 12 | **1.0000**（全满分） |
-| 护理不良事件（FS-012~019） | 8 | 0.7875 |
-| **新增合计** | 20 | **0.9150** |
-| 旧 30 题（26 可答） | 26 | 0.6955 |
+**按题型**（Correctness / Faithfulness）：fact_single 0.9722 / 1.0 ｜ table_numeric 0.8333 / 1.0 ｜ image_only 0.85 / 1.0 ｜ summary 0.7667 / 0.975。
 
-**未满分题清单**（recall<1，共 15 题，4 题 unanswerable 不计）：
-
-| 题 | 题型 | 难度 | recall | 归因 |
-|---|---|---|---|---|
-| DV-TN-005 | table_numeric | hard | 0.00 | 旧题 |
-| DV-TN-007 | table_numeric | medium | 0.50 | 旧题 |
-| DV-FS-002 | fact_single | easy | 0.50 | 旧题（已知答案块落 top6-8） |
-| DV-FS-005 | fact_single | easy | 0.50 | 旧题 |
-| DV-FS-006 | fact_single | medium | 0.75 | 旧题 |
-| DV-FS-008 | fact_single | hard | 0.00 | 旧题（已知答案块落 top6-8） |
-| DV-IO-002 | image_only | hard | 0.50 | 旧题 |
-| DV-IO-004 | image_only | hard | 0.00 | 旧题（已知例外：图被误判 table） |
-| DV-IO-006 | image_only | easy | 0.50 | 旧题 |
-| DV-CP-001 | comparison | hard | 0.33 | 旧题（精排截断，M5 探底已定位） |
-| DV-CP-002 | comparison | medium | 0.00 | 旧题（精排截断，M5 探底已定位） |
-| DV-CP-004 | comparison | hard | 0.50 | 旧题（内容匹配不足） |
-| DV-N-FS-012 | fact_single | easy | 0.80 | **新题**（护理分类，5 fact 中 4 命中） |
-| DV-N-FS-017 | fact_single | easy | 0.50 | **新题**（口头报告对象） |
-| DV-N-FS-019 | fact_single | easy | 0.00 | **新题**（青霉素案例=Ⅰ级，疑答案在 pptx 图片页） |
+**未满分 8 题（Correctness < 1）**：DV-IO-007 / DV-TN-005 / DV-TN-010（easy，检索 0）+ DV-TN-011（medium 0.5）+ summary hard 四题（DV-SUM-003/007/008/009，0.25–0.75）。retrieval 满分但 e2e 掉分 2 题（DV-FS-001 / DV-IO-005，0.5）= 主 fact 答、副 fact 漏，材料在上下文非检索缺口。
 
 **读数**：
 
-- **总体 0.7909，距用户「80%+」目标差 0.91pp**。未达标，但**拖累项全部是旧题**（image_only 0.6667 / comparison 0.4583 / hard 段 0.4815，四题 0：TN-005 / FS-008 / IO-004 / CP-002）——这三类是已知结构短板（多模态图块召回、comparison 跨型号精排截断、hard 段答案块落 top6-8），**不是新扩题或新语料引入的退化**。
-- **新增 20 题 0.9150** 远超旧题 0.6955：骨科 12 题 **全满分**，护理 8 题 0.7875。证明「多格式（PDF/PPTX/DOCX）+ 表格 + 多模态」通用 RAG 在新格式文档上的检索能力可用。
-- ⚠️ **骨科 12 题全满分的成因需点明（粒度效应）**：骨科 docx 被 MinerU 切成**单块 4265 字符**（§6.2），该文档所有 fact（材料/硬度/粗糙度/标准/预期用途/技术要求清单）都在这一个块里——**只要该块进 top5，12 题的 fact 全部命中**（块内内容饱和）。这是 docx 解析切分粒度粗的产物，**既是「命中率高」也是「粒度未细分」**：单块语义稀释风险被「块被稳定召回」抵消了。若未来 docx 切分细化，这 12 题会各自独立受检。
-- **护理 8 题 0.7875 的 3 个失分点**：FS-012（分类，5 fact 中 4 命中）、FS-017（口头报告对象，0.5）、**FS-019（青霉素案例=Ⅰ级，0.00）**。FS-019 的答案疑似落在 pptx 的**图片页**（幻灯片 5/10/13/14/21 无文本层，§6.2 已知），文本检索够不着——属多模态覆盖问题，非出题错误。
-- **新语料零回归**：table_numeric / image_only / comparison 三题型 aggregate @5 与 v532 **逐题完全一致**（0.8125/0.6667/0.4583），护理/骨科入库未稀释器械题检索精度（§6.2 曾担忧的「跨域噪声」未显现）。
-
-> **口径一致性**：本节与 v532 同为纯 @5 单窗口（`eval_top_n=5`），分母同为「可答题」口径，可直接比较。fact_single 从 0.6562 升至 0.8537 的**主因是新增 19 道简单事实题**（骨科/护理），非检索能力突变——旧 8 道 fact_single 题的表现与 v532 逐题一致（miss 的仍是 FS-002/005/006/008）。
-
-### 11.5 未满分题逐 fact 漏召归因（v5.33 探针实测，2026-10-05）
-
-> 探针 `backend/scripts/probe_hard_miss_rank.py`，日志 `backend/tests/reports/probe_hard_miss_rank.log`。复现 runner 生产检索形态（非 comparison：raw question + 全库；comparison：`localize_query` + per-doc + 交错），把每个失败 fact 的目标块当「鱼」，解剖其在三路候选 / RRF 全序 / fused top40 / 精排 top5 各段的排名。定位锚取自语料实测内容，与 key_facts 零交集（红线合规）。常量：`RRF_K=60` / `FUSED_TOP=40` / `RERANK_TOP=5`。
-
-**前置结论**：15 道未满分题的 21 个失败 fact，其支撑内容 **100% 存在于语料**（逐条 grep 实测确认，含 KE-2000 量程 0-279mmHg、LSP01-1BC 行程 120mm、博声 Android/iOS 等）——**失败不是语料缺失，而是检索未把目标块送进 top5**。
-
-**13 个目标块排名实测**（fused40 = 融合后 40 强内位次；final5 = 精排后 5 强内位次）：
-
-| 题 | 难度 | 目标块类型 | graph | vector | keyword | RRF 全序 | fused40 | final5 | 结论 |
-|---|---|---|---|---|---|---|---|---|---|
-| DV-TN-005 | hard | 段落 | 15 | MISS | 18 | 21 | **17** | MISS | 精排截断 |
-| DV-FS-008 | hard | 表格 | 5 | 9 | 37 | 7 | **8** | MISS | 精排截断 |
-| DV-IO-004 | hard | 图像 | 11 | 10 | MISS | 13 | **23** | MISS | 精排截断 |
-| DV-CP-001a | hard | 段落 | MISS | MISS | MISS | — | — | MISS | **候选池未进** |
-| DV-CP-001b | hard | 表格 | 5 | 3 | 8 | 3 | **7** | MISS | 精排截断 |
-| DV-CP-004a | hard | 标题 | MISS | 16 | 34 | 24 | **16** | MISS | 精排截断 |
-| DV-CP-004b | hard | 标题 | MISS | MISS | MISS | — | — | MISS | **候选池未进** |
-| DV-CP-002 | medium | 段落 | MISS | MISS | MISS | — | — | MISS | **候选池未进** |
-| DV-TN-007 | medium | 标题 | MISS | MISS | MISS | — | — | MISS | **候选池未进** |
-| DV-FS-006 | medium | 段落 | MISS | MISS | 24 | 32 | **22** | MISS | 精排截断 |
-| DV-FS-002 | easy | 标题 | 9 | MISS | 15 | 15 | **7** | MISS | 精排截断 |
-| DV-FS-005 | easy | 段落 | 19 | 16 | 17 | 13 | **10** | MISS | 精排截断 |
-| DV-IO-006 | easy | 图像 | 10 | 7 | MISS | 12 | **8** | MISS | 精排截断 |
-
-**二分归因**：
-
-- **精排截断（9/13，主因）**：目标块**已进候选池**（fused top40，位次 7–23），cross-encoder 精排后掉出 top5。跨题型普遍（段落 4 / 表格 2 / 图像 2 / 标题 1），非表格/图像专属。
-- **候选池未进（4/13）**：三路召回全 miss。四个目标块**全部是短块**（23–56 字：LSP 行程 111 字 / 博声运行环境 38 字 / 气压动态模拟 55 字 / pH 三点校准 56 字），稠密与稀疏索引均未命中。
-
-**分层**（按难度）：
-
-| 难度 | Recall@5 | 失败 fact | 归因拆分 |
-|---|---|---|---|
-| easy | 0.8720 | 8 | 漏召 4（精排截断为主）+ **裁判假阴性 4** |
-| medium | 0.8542 | 4 | 漏召 4（1 候选池未进 + 3 精排截断） |
-| hard | 0.4815 | 15 | 漏召 14（8 精排截断 + 3 候选池未进 + 3 同源）+ 假阴性 1 |
-
-**两类非检索因素（诚实标注，不计入检索缺陷）**：
-
-1. **裁判措辞字面化（假阴性）**：DV-N-FS-017 语料一句「向护士长、科主任、总值班、护理部口头报告事件情况」被题集拆成 4 个「包括X」fact，裁判逐个要求显式「包括X」表述 → 3 个 fact 全判否（内容其实全在上下文）；DV-N-FS-012「包括其他类」同理（上下文有「其他：医疗器械或设备…」）。**属评测口径 artifact**——按泄漏红线，不以改写 key_facts 抬分，仅标注：**easy/medium 的实测值被此口径低估**。
-2. **推理型 key_fact**：DV-N-FS-019（案例→Ⅰ级，语料只有Ⅰ级定义无案例映射）、DV-IO-002（Type 3 与 Type 1/2 排列顺序比较，需比较而非直接表述）——语料无直接表述，属出题取向而非检索缺陷。
-
-**修复方向（仅结论，未动手）**：主战场在 **M5 精排侧**（短块/图像/表格块的特征补偿，把 fused top40 里位次 7–23 的正确块推入 top5）；次战场是**候选池未进 4 例**（均短块，稀疏索引失明）。评测窗口 `eval_top_n=5` 对齐生产 `RERANK_TOP=5`，**不得为抬分放宽**（红线）。
-
+1. **总体 Correctness 0.8733（旧 30 题诚实口径 0.6286 → 对比含 comparison 题旧口径 +0.2447 主要来自剔除 comparison）**——comparison 检索短板并未闭环，只是新题集不再考核。诚实性由 Faithfulness 0.9950 保障（judge_failed=0），无编造。
+2. **summary 是最大拖累项**：新题型，hard 段 4 题 Correctness 0.25–0.75 全漏——目标块分散、需跨块聚合，与既有「精排截断短块/数字块」同源（§6.3 读数 2）。
+3. **fact_single / image_only / table_numeric 三题型检索+生成双稳**：retrieval 除 table_numeric（0.7917）均 ≥0.9，e2e Correctness ≥0.83；多模态图块（image_only）在 v2 题集下表现良好（0.9 / 0.85）。
+4. **⚠️ 跨题集不可横比**：v5.33 旧题集按题型/难度分层数字均已成历史（归档），上述数字只与本库后续版本纵向演进对比。

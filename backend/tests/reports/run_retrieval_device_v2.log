@@ -1,0 +1,868 @@
+/opt/anaconda3/envs/graphrag/lib/python3.11/site-packages/torch/cuda/__init__.py:68: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+测试集: testset_device_v2 (家用/医用器械说明书库（12 份，含注射泵、血压、血氧、心电、除颤、水质检测 + 骨科手术器械审评规范 + 护理不良事件上报）)
+  共 50 题：{'table_numeric': 12, 'fact_single': 18, 'image_only': 10, 'summary': 10}
+  难度分布：{'easy': 25, 'medium': 15, 'hard': 10}
+
+评测模式: retrieval
+Collection: col_b7b876b1 → workspace: col_b7b876b1
+数据目录: /Users/kemily/Documents/AI开发/AI_project/GraphRAG/backend/data/collections/col_b7b876b1
+
+初始化 RAG / 稀疏索引 / 实体 / 裁判 LLM...
+INFO: PostgreSQL table: LIGHTRAG_VDB_ENTITY_xinference_bge_m3_1024d
+INFO: PostgreSQL table: LIGHTRAG_VDB_RELATION_xinference_bge_m3_1024d
+INFO: PostgreSQL table: LIGHTRAG_VDB_CHUNKS_xinference_bge_m3_1024d
+INFO: Role LLM Configuration (initialized):
+INFO:  - extract: None/None, host=None, max_async=2, timeout=240
+INFO:  - keyword: None/None, host=None, max_async=4, timeout=240
+INFO:  - query: None/None, host=None, max_async=4, timeout=240
+INFO:  - vlm: None/None, host=None, max_async=4, timeout=240
+INFO: PostgreSQL, Retry config: attempts=10, backoff=3.0s, backoff_max=30.0s, pool_close_timeout=5.0s
+INFO: PostgreSQL, VECTOR extension enabled
+INFO: PostgreSQL, Connected to database at 127.0.0.1:5432/postgres without SSL
+INFO: chunk_id column already exists in LIGHTRAG_LLM_CACHE table
+INFO: cache_type column already exists in LIGHTRAG_LLM_CACHE table
+INFO: queryparam column already exists in LIGHTRAG_LLM_CACHE table
+INFO: mode column does not exist in LIGHTRAG_LLM_CACHE table
+INFO: chunks_list column already exists in LIGHTRAG_DOC_STATUS table
+INFO: llm_cache_list column already exists in LIGHTRAG_DOC_CHUNKS table
+INFO: track_id column already exists in LIGHTRAG_DOC_STATUS table
+INFO: Index on track_id column already exists for LIGHTRAG_DOC_STATUS table
+INFO: metadata column already exists in LIGHTRAG_DOC_STATUS table
+INFO: error_msg column already exists in LIGHTRAG_DOC_STATUS table
+INFO: HNSW vector index idx_lightrag_vdb_entity_xinference_bge_m3_1024d_hnsw_cosine already exists on table LIGHTRAG_VDB_ENTITY_xinference_bge_m3_1024d
+INFO: HNSW vector index idx_lightrag_vdb_relation_xinference_bge_m3_1024d_hnsw_cosine already exists on table LIGHTRAG_VDB_RELATION_xinference_bge_m3_1024d
+INFO: HNSW vector index idx_lightrag_vdb_chunks_xinference_bge_m3_1024d_hnsw_cosine already exists on table LIGHTRAG_VDB_CHUNKS_xinference_bge_m3_1024d
+INFO: [col_b7b876b1] PGTableGraphStorage initialized
+  稀疏索引 chunks: 871｜实体 3363
+  文档名映射: 12 份（comparison 题 per-doc 检索用）
+  初始化完成
+
+[1/50] DV-TN-001 - table_numeric - 这台注射泵的最大步速是多少？...
+WARNING: high_level_keywords is empty
+INFO: Embedding func: 8 new workers initialized (Timeouts: Func: 30s, Worker: 60s, Health Check: 75s)
+INFO: Query nodes: 最大步速, 注射泵 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 102 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 102 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 102 relations
+INFO: Selecting 37 from 38 entity-related chunks by vector similarity
+INFO: Find 1 additional chunks in 1 relations (deduplicated 36)
+INFO: Selecting 1 from 1 relation-related chunks by vector similarity
+INFO: Round-robin merged chunks: 58 -> 44 (deduplicated 14)
+INFO: Final context: 15 entities, 102 relations, 20 chunks
+INFO: Final chunks S+F/O: E3/1 R1/1 E2/2 E3/3 E4/4 E2/5 E2/6 E2/7 E2/8 C1/9 E1/9 E1/10 E1/11 E1/12 E1/13 C1/14 E1/14 C1/15 E2/15 C1/16
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (14.66s)  gr_avg=2.0
+[2/50] DV-FS-001 - fact_single - 这台注射泵可以用来做人体临床试验吗？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 注射泵, 人体 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 131 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 131 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 131 relations
+INFO: Selecting 37 from 58 entity-related chunks by vector similarity
+INFO: Find 21 additional chunks in 20 relations (deduplicated 35)
+INFO: Selecting 21 from 21 relation-related chunks by vector similarity
+INFO: Round-robin merged chunks: 78 -> 63 (deduplicated 15)
+INFO: Final context: 15 entities, 131 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 R2/1 E1/2 R2/2 E3/3 R1/3 E1/4 R2/4 C1/5 E1/5 R5/5 E1/6 R4/6 C1/7 E1/7 R1/7 E1/8 R2/8 E2/9 R1/9
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.60 (7.68s)  gr_avg=1.0
+[3/50] DV-FS-002 - fact_single - 这台注射泵的电源开关装在机器的哪个位置？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 注射泵, 电源 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 134 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 134 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 134 relations
+INFO: Selecting 37 from 51 entity-related chunks by vector similarity
+INFO: Find 13 additional chunks in 11 relations (deduplicated 35)
+INFO: Selecting 13 from 13 relation-related chunks by vector similarity
+INFO: Round-robin merged chunks: 70 -> 51 (deduplicated 19)
+INFO: Final context: 15 entities, 134 relations, 20 chunks
+INFO: Final chunks S+F/O: E2/1 R1/1 E5/2 R3/2 E3/3 R2/3 E1/4 R4/4 E1/5 R1/5 E1/6 R2/6 E3/7 R3/7 E2/8 R6/8 E1/9 R2/9 E1/10 R3/10
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (16.43s)  gr_avg=1.0
+[4/50] DV-IO-001 - image_only - 在流量校准界面里，当前显示的校正系数是多少？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 流量, 显示, 校准界面, 系数 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 54 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 54 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 54 relations
+INFO: Selecting 23 from 23 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 54 relations
+INFO: Round-robin merged chunks: 43 -> 34 (deduplicated 9)
+INFO: Final context: 15 entities, 54 relations, 20 chunks
+INFO: Final chunks S+F/O: E4/1 C1/2 E1/2 C1/3 E1/3 C1/4 E1/4 E1/5 E1/6 E1/7 E1/8 C1/9 E2/9 C1/10 E2/10 E2/11 E1/12 C1/13 E2/13 C1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (7.93s)  gr_avg=1.0
+[5/50] DV-FS-003 - fact_single - 用 RS485 把多台泵连到一台计算机上时，最多能控制多少台泵？泵的通讯地址范围是多少，出厂默认地址...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 计算机, 通讯地址, RS485, RS-485 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 26 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 26 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 26 relations
+INFO: Selecting 10 from 10 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 26 relations
+INFO: Round-robin merged chunks: 30 -> 24 (deduplicated 6)
+INFO: Final context: 15 entities, 26 relations, 20 chunks
+INFO: Final chunks S+F/O: E6/1 E1/2 E2/3 E1/4 C1/5 E1/5 C1/6 E2/6 C1/7 E1/7 E2/8 C1/9 E1/9 E1/10 C1/11 C1/12 C1/13 C1/14 C1/15 C1/16
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=1.00 precision=0.20 (30.06s)  gr_avg=1.0
+[6/50] DV-SUM-001 - summary - 如果要用程序列表里没有的注射器，自定义设置最多能保存几组？对注射器内径和行程的取值范围分别有什么要求...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 行程, 程序, 自定义, 注射器, 列表, 内径 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 66 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 66 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 66 relations
+INFO: Selecting 28 from 28 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 66 relations
+INFO: Round-robin merged chunks: 48 -> 33 (deduplicated 15)
+INFO: Final context: 15 entities, 66 relations, 20 chunks
+INFO: Final chunks S+F/O: E5/1 E4/2 E4/3 E1/4 C1/5 E4/5 E1/6 C1/7 E1/7 E3/8 C1/9 E2/9 E1/10 E3/11 C1/12 E2/12 E1/13 E1/14 E1/15 E1/16
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=1.00 precision=0.40 (37.36s)  gr_avg=2.33
+[7/50] DV-FS-004 - fact_single - 这台有创血压模拟仪的软件主菜单里，有一个只有选配了心电参数的型号才会出现的窗口，它叫什么？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 有创血压模拟仪, 心电参数, 主菜单, 软件 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 69 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 69 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 69 relations
+INFO: Selecting 16 from 16 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 69 relations
+INFO: Round-robin merged chunks: 36 -> 27 (deduplicated 9)
+INFO: Final context: 15 entities, 69 relations, 20 chunks
+INFO: Final chunks S+F/O: E4/1 E1/2 E1/3 E1/4 E1/5 C1/6 E1/6 C1/7 E1/7 C1/8 E1/8 C1/9 E1/9 C1/10 E1/10 E4/11 C1/12 E2/12 C1/13 E3/13
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (28.25s)  gr_avg=1.0
+[8/50] DV-TN-002 - table_numeric - 在系统参数设置界面里，厂家密码的默认数值是多少？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 系统参数设置, 厂家密码, 参数设置界面 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 62 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 62 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 62 relations
+INFO: Selecting 22 from 22 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 62 relations
+INFO: Round-robin merged chunks: 42 -> 37 (deduplicated 5)
+INFO: Final context: 15 entities, 62 relations, 20 chunks
+INFO: Final chunks S+F/O: C1/1 E2/1 E1/2 C1/3 E2/3 C1/4 E1/4 C1/5 E1/5 E1/6 C1/7 E1/7 E1/8 C1/9 E1/9 C1/10 E1/10 E1/11 C1/12 E1/12
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (9.57s)  gr_avg=1.0
+[9/50] DV-IO-002 - image_only - 在有创动态模拟（电信号输出）窗口的示例界面中，收缩压、舒张压和脉率三个数值分别显示为多少？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 电信号输出, 有创动态模拟, 显示, 舒张压, 收缩压, 脉率 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 56 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 56 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 56 relations
+INFO: Selecting 20 from 20 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 56 relations
+INFO: Round-robin merged chunks: 40 -> 28 (deduplicated 12)
+INFO: Final context: 15 entities, 56 relations, 20 chunks
+INFO: Final chunks S+F/O: E4/1 E3/2 E3/3 E2/4 E2/5 E1/6 C1/7 E1/7 E1/8 E1/9 E1/10 C1/11 E1/11 E1/12 C1/13 E1/13 C1/14 E1/14 C1/15 E3/15
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Timeout Error: Request timed out.
+  recall=1.00 precision=0.60 (37.25s)  gr_avg=1.0
+[10/50] DV-SUM-002 - summary - 这台模拟仪的电信号输出有『有创动态压力模拟』和『有创静压检测』两种功能，它们各自输出什么压力、范围是...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 电信号输出, 模拟仪, 有创动态压力模拟, 有创静压检测 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 65 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 65 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 65 relations
+INFO: Selecting 19 from 19 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 65 relations
+INFO: Round-robin merged chunks: 39 -> 25 (deduplicated 14)
+INFO: Final context: 15 entities, 65 relations, 20 chunks
+INFO: Final chunks S+F/O: E2/1 E1/2 E1/3 E3/4 E2/5 E1/6 E1/7 E3/8 E1/9 C1/10 E2/10 E1/11 E1/12 C1/13 E3/13 C1/14 E1/14 E1/15 E1/16 E1/17
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.80 (28.88s)  gr_avg=2.4
+[11/50] DV-FS-005 - fact_single - 多参数检测仪的血压袖带每次用完之后应该怎么清洁？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 袖带, 多参数检测仪, 清洁, 血压 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 118 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 118 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 118 relations
+INFO: Selecting 30 from 30 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 118 relations
+INFO: Round-robin merged chunks: 50 -> 41 (deduplicated 9)
+INFO: Final context: 15 entities, 118 relations, 20 chunks
+INFO: Final chunks S+F/O: E4/1 C1/2 E3/2 E2/3 C1/4 E1/4 C1/5 E3/5 E2/6 E1/7 C1/8 E1/8 C1/9 E5/9 E2/10 E1/11 C1/12 E1/12 C1/13 E2/13
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (27.49s)  gr_avg=1.0
+[12/50] DV-IO-003 - image_only - 说明书里讲测量血压时的正确坐姿，对桌子和椅子的高度差是怎么要求的？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 测量, 椅子, 桌子, 说明书, 血压 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 126 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 126 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 126 relations
+INFO: Selecting 37 from 40 entity-related chunks by vector similarity
+INFO: Find 3 additional chunks in 2 relations (deduplicated 33)
+INFO: Selecting 3 from 3 relation-related chunks by vector similarity
+INFO: Round-robin merged chunks: 60 -> 52 (deduplicated 8)
+INFO: Final context: 15 entities, 126 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 R3/1 E5/2 R3/2 E2/3 R1/3 C1/4 E2/4 E1/5 E1/6 C1/7 E2/7 E3/8 E2/9 C1/10 E3/10 C1/11 E1/11 C1/12 E2/12
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (27.83s)  gr_avg=1.0
+[13/50] DV-TN-003 - table_numeric - 按说明书里的血压分级，如果一个人的收缩压是165mmHg、舒张压是105mmHg，依据2018年中国...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 一级, mmHg, 2018年中国高血压防治指南, 舒张压, 收缩压, 说明书 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 49 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 49 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 49 relations
+INFO: Selecting 14 from 14 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 49 relations
+INFO: Round-robin merged chunks: 34 -> 22 (deduplicated 12)
+INFO: Final context: 15 entities, 49 relations, 20 chunks
+INFO: Final chunks S+F/O: E6/1 E4/2 E5/3 E2/4 E2/5 E2/6 E2/7 C1/8 E2/8 C1/9 E2/9 C1/10 E2/10 C1/11 E1/11 E2/12 C1/13 E2/13 E2/14 C1/18
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.40 (28.39s)  gr_avg=1.0
+[14/50] DV-SUM-003 - summary - 用这台多参数检测仪测血糖或尿酸时，如果屏幕出现HI或LO，说明书建议怎么处理？另外，如果测量结果偏高...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 血糖, 屏幕, 测量, HI, LO, 尿酸 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 114 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 114 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 114 relations
+INFO: Selecting 21 from 21 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 114 relations
+INFO: Round-robin merged chunks: 41 -> 26 (deduplicated 15)
+INFO: Final context: 15 entities, 114 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 E2/2 E3/3 E3/4 C1/5 E3/5 E3/6 E2/7 E2/8 E6/9 E1/10 C1/11 E1/11 E1/12 E1/13 C1/14 E1/14 E3/15 E4/16 E1/17
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.25 precision=0.00 (27.68s)  gr_avg=5.0
+[15/50] DV-FS-006 - fact_single - 这款数字差压计用单一通道测量时，显示的是什么压力值？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 显示, 测量, 压力值, 数字差压计 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 19 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 19 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 19 relations
+INFO: Selecting 8 from 8 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 19 relations
+INFO: Round-robin merged chunks: 28 -> 23 (deduplicated 5)
+INFO: Final context: 15 entities, 19 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 E9/2 C1/3 E2/3 E1/4 C1/5 E3/5 C1/6 E1/6 C1/7 E1/7 E1/8 C1/9 C1/10 C1/11 C1/13 C1/14 C1/15 C1/16 C1/17
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.40 (27.42s)  gr_avg=1.0
+[16/50] DV-TN-004 - table_numeric - TC-169A 型号用 inHg 作为测量单位时，它的量程范围和精度分别是多少？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 测量, 单位, inHg, TC-169A, 量程, 精度 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 68 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 68 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 68 relations
+INFO: Selecting 20 from 20 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 68 relations
+INFO: Round-robin merged chunks: 40 -> 26 (deduplicated 14)
+INFO: Final context: 15 entities, 68 relations, 20 chunks
+INFO: Final chunks S+F/O: E3/1 E5/2 E4/3 E2/4 E2/5 E3/6 E3/7 E3/8 E4/9 E2/10 E1/11 E1/12 C1/13 E1/13 C1/14 E1/14 E1/15 C1/16 E1/16 C1/17
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (28.85s)  gr_avg=1.5
+[17/50] DV-IO-004 - image_only - 看说明书里的产品外观示意图，液晶显示屏、正压输入通道和负压输入通道分别是几号标号？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 看说明书里的产品, 液晶显示屏, 产品外观 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 75 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 75 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 75 relations
+INFO: Selecting 26 from 26 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 75 relations
+INFO: Round-robin merged chunks: 46 -> 44 (deduplicated 2)
+INFO: Final context: 15 entities, 75 relations, 20 chunks
+INFO: Final chunks S+F/O: C1/1 E4/1 C1/2 E1/2 C1/3 E1/3 C1/4 E1/4 E1/5 C1/6 E1/6 C1/7 E2/7 C1/8 E1/8 C1/9 E1/9 C1/10 E1/10 C1/11
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=1.00 precision=0.40 (46.89s)  gr_avg=2.0
+[18/50] DV-TN-005 - table_numeric - LH-T600 智能便携式检测仪这台仪表本体有多重？外形尺寸是多少？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 外形尺寸, 仪表, LH-T600, 检测 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 56 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 56 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 56 relations
+INFO: Selecting 18 from 18 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 56 relations
+INFO: Round-robin merged chunks: 38 -> 26 (deduplicated 12)
+INFO: Final context: 15 entities, 56 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 E1/2 E3/3 E1/4 E4/5 E1/6 C1/7 E1/7 E4/8 C1/9 E1/9 E1/10 E1/11 C1/12 E1/12 C1/13 E1/13 C1/14 E1/14 C1/15
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.00 precision=0.00 (22.52s)
+[19/50] DV-TN-006 - table_numeric - LH-T613 蓝绿藻（BGA）传感器的检出限是多少？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 蓝绿藻, BGA, 检出限, 传感器, LH-T600 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 33 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 33 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 33 relations
+INFO: Selecting 14 from 14 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 33 relations
+INFO: Round-robin merged chunks: 34 -> 23 (deduplicated 11)
+INFO: Final context: 15 entities, 33 relations, 20 chunks
+INFO: Final chunks S+F/O: E2/1 E2/2 E3/3 E1/4 E2/5 C1/6 E1/6 C1/7 E1/7 E1/8 C1/9 E1/9 E1/10 C1/11 E2/11 E1/12 C1/13 E1/13 E2/14 C1/15
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (11.34s)  gr_avg=1.0
+[20/50] DV-IO-005 - image_only - 说明书「主界面」一节展示的叶绿素测量界面示意图上，叶绿素读数显示为多少？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 主界面, 显示, 测量, 叶绿素, 说明书 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 103 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 103 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 103 relations
+INFO: Selecting 33 from 33 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 103 relations
+INFO: Round-robin merged chunks: 53 -> 42 (deduplicated 11)
+INFO: Final context: 15 entities, 103 relations, 20 chunks
+INFO: Final chunks S+F/O: E2/1 E1/2 E3/3 C1/4 E2/4 C1/5 E1/5 C1/6 E1/6 E1/7 E1/8 C1/9 E1/9 E1/10 E1/11 C1/12 E1/12 E2/13 E2/14 E1/15
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=1.00 precision=0.20 (42.35s)  gr_avg=1.0
+[21/50] DV-FS-007 - fact_single - 仪表的电源自动关机（Auto Power）默认是多久无操作后自动关机？这个设置掉电后会不会保存？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 关机, 仪表, Auto Power, 操作后, 电源, 设置 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 36 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 36 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 36 relations
+INFO: Selecting 21 from 21 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 36 relations
+INFO: Round-robin merged chunks: 41 -> 33 (deduplicated 8)
+INFO: Final context: 15 entities, 36 relations, 20 chunks
+INFO: Final chunks S+F/O: E4/1 C1/2 E1/2 E1/3 C1/4 E2/4 C1/5 E1/5 E1/6 E1/7 C1/8 E1/8 E1/9 C1/10 E1/10 C1/11 E1/11 C1/12 E1/12 E2/13
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.40 (23.81s)  gr_avg=1.0
+[22/50] DV-FS-008 - fact_single - 更换溶解氧电极的荧光帽时，需要向仪表输入该电极帽的特征参数，这些参数一共有几组？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 仪表, 溶解氧, 荧光帽, 特征参数, 电极, 更换 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 99 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 99 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 99 relations
+INFO: Selecting 37 from 39 entity-related chunks by vector similarity
+INFO: Find 2 additional chunks in 2 relations (deduplicated 36)
+INFO: Selecting 2 from 2 relation-related chunks by vector similarity
+INFO: Round-robin merged chunks: 59 -> 43 (deduplicated 16)
+INFO: Final context: 15 entities, 99 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 R1/1 E7/2 R1/2 E1/3 E1/4 E1/5 E1/6 E1/7 E2/8 E1/9 C1/10 E1/10 E1/11 C1/12 E1/12 E1/13 E1/14 C1/15 E1/15
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.40 (29.24s)  gr_avg=1.0
+[23/50] DV-TN-007 - table_numeric - 用罗丹明 B 标液校准叶绿素时，需要查表换算，其中 20℃ 对应的系数是多少？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 叶绿素, 标液, 系数, 校准, 罗丹明B, 其它 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 42 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 42 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 42 relations
+INFO: Selecting 22 from 22 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 42 relations
+INFO: Round-robin merged chunks: 42 -> 30 (deduplicated 12)
+INFO: Final context: 15 entities, 42 relations, 20 chunks
+INFO: Final chunks S+F/O: E3/1 E3/2 E3/3 E3/4 E2/5 E2/6 E1/7 E3/8 E1/9 E2/10 C1/11 E1/11 C1/12 E2/12 C1/13 E1/13 C1/14 E2/14 C1/15 E1/15
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (23.26s)  gr_avg=3.0
+[24/50] DV-FS-009 - fact_single - 电导校准的时候，低量程探头和高量程探头分别建议选用什么浓度的电导率标准液？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 电导校准, 量程, 电导率, 探头 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 73 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 73 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 73 relations
+INFO: Selecting 37 from 47 entity-related chunks by vector similarity
+INFO: Find 9 additional chunks in 9 relations (deduplicated 37)
+INFO: Selecting 9 from 9 relation-related chunks by vector similarity
+INFO: Round-robin merged chunks: 66 -> 51 (deduplicated 15)
+INFO: Final context: 15 entities, 73 relations, 20 chunks
+INFO: Final chunks S+F/O: E6/1 R5/1 E2/2 R2/2 E3/3 R1/3 E1/4 R2/4 E2/5 R1/5 E1/6 R1/6 E1/7 R3/7 C1/8 E2/8 R1/8 E1/9 R1/9 E1/10
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (24.05s)  gr_avg=1.0
+[25/50] DV-SUM-004 - summary - 这款检测仪里，支持「零点校准」的传感器电极有哪几种？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 零点校准, 传感器, 电极, 检测 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 146 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 146 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 146 relations
+INFO: Selecting 37 from 55 entity-related chunks by vector similarity
+INFO: Find 18 additional chunks in 12 relations (deduplicated 35)
+INFO: Selecting 18 from 18 relation-related chunks by vector similarity
+INFO: Round-robin merged chunks: 75 -> 61 (deduplicated 14)
+INFO: Final context: 15 entities, 146 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 R7/1 E3/2 R28/2 E4/3 R1/3 E4/4 R2/4 C1/5 E1/5 R2/5 E3/6 R1/6 E1/7 R1/7 E3/8 R3/8 C1/9 E1/9 R6/9
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.40 (22.36s)  gr_avg=1.0
+[26/50] DV-FS-010 - fact_single - 这款 Cchippump-2 注射泵有没有在 FDA 注册？它能不能用于人类的临床实验？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: FDA, 注射泵, Cchippump-2, 注册, 简介, 特点 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 66 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 66 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 66 relations
+INFO: Selecting 20 from 20 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 66 relations
+INFO: Round-robin merged chunks: 40 -> 25 (deduplicated 15)
+INFO: Final context: 15 entities, 66 relations, 20 chunks
+INFO: Final chunks S+F/O: E5/1 E2/2 E2/3 E1/4 E3/5 E1/6 E1/7 E2/8 E1/9 E4/10 E1/11 C1/12 E1/12 E1/13 E1/14 E1/15 C1/16 E1/16 C1/17 E1/17
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.40 (16.89s)  gr_avg=1.0
+[27/50] DV-TN-008 - table_numeric - 5uL 规格注射器对应的流量范围是多少？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 流量, 注射器, uL, 规格, 25ul, 0.5ul (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 31 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 31 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 31 relations
+INFO: Selecting 7 from 7 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 31 relations
+INFO: Round-robin merged chunks: 27 -> 22 (deduplicated 5)
+INFO: Final context: 15 entities, 31 relations, 20 chunks
+INFO: Final chunks S+F/O: E3/1 E4/2 C1/3 E2/3 E3/4 E1/5 E2/6 C1/7 E1/7 C1/8 C1/9 C1/10 C1/11 C1/12 C1/13 C1/14 C1/15 C1/16 C1/17 C1/18
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (16.48s)  gr_avg=1.0
+[28/50] DV-IO-006 - image_only - 注射器选型界面（图5）里列出了哪些注射器品牌？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 注射器, 选型界面 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 48 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 48 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 48 relations
+INFO: Selecting 17 from 17 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 48 relations
+INFO: Round-robin merged chunks: 37 -> 26 (deduplicated 11)
+INFO: Final context: 15 entities, 48 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 E2/2 E3/3 E1/4 E1/5 C1/6 E2/6 E1/7 C1/8 E1/8 E2/9 C1/10 E1/10 E1/11 E1/12 E1/13 C1/14 E1/14 C1/15 E1/15
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=1.00 precision=0.20 (35.23s)  gr_avg=1.0
+[29/50] DV-SUM-005 - summary - 这份说明书对注射泵的工作模式前后描述不太一致，技术参数表里列的是哪几种工作模式？功能介绍和模式选择界...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 描述, 模式选择界面, 注射泵, 工作模式, 参数, 说明书 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 478 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 478 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 175 relations
+INFO: Selecting 37 from 134 entity-related chunks by vector similarity
+INFO: Find 80 additional chunks in 56 relations (deduplicated 0)
+INFO: Selecting 80 from 80 relation-related chunks by vector similarity
+INFO: Round-robin merged chunks: 137 -> 123 (deduplicated 14)
+INFO: Final context: 15 entities, 175 relations, 20 chunks
+INFO: Final chunks S+F/O: E5/1 R4/1 E1/2 R1/2 E1/3 R6/3 E1/4 R1/4 E2/5 R1/5 C1/6 E2/6 R2/6 E2/7 R5/7 E1/8 R3/8 C1/9 E1/9 R2/9
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.60 (11.14s)  gr_avg=3.0
+[30/50] DV-IO-007 - image_only - 除颤仪操作面板的照片上，除了监护、AED、起搏这三个模式，面板上还标了哪些按键？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 监护, AED, 除颤, 起搏, 按键 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 103 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 103 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 103 relations
+INFO: Selecting 23 from 23 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 103 relations
+INFO: Round-robin merged chunks: 43 -> 28 (deduplicated 15)
+INFO: Final context: 15 entities, 103 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 E1/2 E3/3 E4/4 E3/5 E3/6 E2/7 C1/8 E1/8 E3/9 E1/10 E1/11 E2/12 E3/13 E2/14 E1/15 C1/16 E1/16 E3/17 C1/18
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=0.00 precision=0.20 (42.17s)  gr_avg=1.0
+[31/50] DV-FS-011 - fact_single - 除颤的时候，如果病人身上装了植入性起搏器，电极板要避开什么部位？至少隔开多少距离？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 除颤, 病人, 植入性起搏器, 电极板 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 91 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 91 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 91 relations
+INFO: Selecting 25 from 25 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 91 relations
+INFO: Round-robin merged chunks: 45 -> 28 (deduplicated 17)
+INFO: Final context: 15 entities, 91 relations, 20 chunks
+INFO: Final chunks S+F/O: E5/1 E1/2 E4/3 E1/4 E3/5 E3/6 E3/7 E2/8 E2/9 E6/10 E1/11 E1/12 E1/13 C1/14 E2/14 E1/15 C1/16 E1/16 E3/17 E1/18
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (20.2s)  gr_avg=1.0
+[32/50] DV-TN-009 - table_numeric - 按说明书里的除颤能量选择表，心房颤动做同步电复律时，单相波和双相波分别该用多大能量？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 房颤, 除颤, 同步电复律, 双相波, 能量选择, 单相波 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 57 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 57 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 57 relations
+INFO: Selecting 15 from 15 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 57 relations
+INFO: Round-robin merged chunks: 35 -> 26 (deduplicated 9)
+INFO: Final context: 15 entities, 57 relations, 20 chunks
+INFO: Final chunks S+F/O: E6/1 E4/2 E3/3 E5/4 C1/5 E1/5 E3/6 E2/7 E1/8 C1/9 E2/9 C1/10 E2/10 C1/11 E1/11 C1/12 E1/12 C1/13 E1/13 C1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (27.69s)  gr_avg=1.0
+[33/50] DV-SUM-006 - summary - 电除颤为什么要跟心电同步？同步电复律的时候，放电脉冲要卡在心电周期的哪个时刻，为什么不能随便放？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 脉冲, 放电, 电除颤, 同步电复律 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 99 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 99 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 99 relations
+INFO: Selecting 26 from 26 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 99 relations
+INFO: Round-robin merged chunks: 46 -> 31 (deduplicated 15)
+INFO: Final context: 15 entities, 99 relations, 20 chunks
+INFO: Final chunks S+F/O: E3/1 C1/2 E3/2 C1/3 E1/3 E2/4 E2/5 E1/6 E3/7 E1/8 E2/9 E4/10 C1/11 E1/11 E1/12 E3/13 E1/14 E1/15 E1/16 C1/17
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=1.00 precision=0.40 (33.75s)  gr_avg=1.5
+[34/50] DV-FS-012 - fact_single - 这台脉搏血氧仪在测量时，红外发射管发出的是哪两种波长的光？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 测量, 红外发射管, 脉搏血氧仪 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 122 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 122 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 122 relations
+INFO: Selecting 37 from 37 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 122 relations
+INFO: Round-robin merged chunks: 57 -> 41 (deduplicated 16)
+INFO: Final context: 15 entities, 122 relations, 20 chunks
+INFO: Final chunks S+F/O: E5/1 E1/2 E3/3 E3/4 E1/5 E2/6 E3/7 E2/8 C1/9 E1/9 E1/10 E1/11 C1/12 E1/12 E1/13 E1/14 E1/15 E2/16 E1/17 E1/18
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (26.51s)  gr_avg=1.0
+[35/50] DV-TN-010 - table_numeric - 这款脉搏血氧仪在正常运行状态下，适用的大气压力范围是多少？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 运行, 大气压, 脉搏血氧仪, 状态, 正常 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 111 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 111 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 111 relations
+INFO: Selecting 31 from 31 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 111 relations
+INFO: Round-robin merged chunks: 51 -> 40 (deduplicated 11)
+INFO: Final context: 15 entities, 111 relations, 20 chunks
+INFO: Final chunks S+F/O: C1/1 E3/1 E1/2 E2/3 E1/4 C1/5 E3/5 C1/6 E1/6 E1/7 C1/8 E1/8 C1/9 E2/9 E1/10 E3/11 E1/12 E1/13 C1/14 E1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=0.00 precision=0.00 (41.17s)  gr_avg=1.0
+[36/50] DV-IO-008 - image_only - 在血氧仪设置界面的 Limit Setup（限值设置）那一屏上，血氧饱和度的报警上限和下限默认值分别...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 血氧饱和度, Limit Setup, 设置界面, 血氧仪, I, LimitSetup (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 66 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 66 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 66 relations
+INFO: Selecting 21 from 21 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 66 relations
+INFO: Round-robin merged chunks: 41 -> 32 (deduplicated 9)
+INFO: Final context: 15 entities, 66 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 E2/2 E1/3 E1/4 E1/5 E1/6 C1/7 E3/7 C1/8 E1/8 E1/9 C1/10 E1/10 E2/11 C1/12 E1/12 C1/13 E2/13 C1/14 E1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (22.91s)  gr_avg=2.0
+[37/50] DV-SUM-007 - summary - 关于电池和自动关机，说明书里在不同地方都有提到。请综合说明：两节AAA电池满电大约能用多久？检测不到...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 关机, 关于, 电池, 设备, 说明书, 检测 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 111 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 111 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 111 relations
+INFO: Selecting 37 from 54 entity-related chunks by vector similarity
+INFO: Find 17 additional chunks in 14 relations (deduplicated 37)
+INFO: Selecting 17 from 17 relation-related chunks by vector similarity
+INFO: Round-robin merged chunks: 74 -> 63 (deduplicated 11)
+INFO: Final context: 15 entities, 111 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 R1/1 E2/2 R2/2 E1/3 R11/3 C1/4 E1/4 R1/4 E1/5 R1/5 E1/6 R1/6 E2/7 R1/7 C1/8 E1/8 R2/8 E2/9 R2/9
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=0.67 precision=0.20 (60.05s)  gr_avg=1.67
+[38/50] DV-FS-013 - fact_single - 这款动态心电记录仪对计时准确性有什么要求？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 记录仪, 计时准确性 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 25 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 25 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 25 relations
+INFO: Selecting 19 from 19 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 25 relations
+INFO: Round-robin merged chunks: 39 -> 37 (deduplicated 2)
+INFO: Final context: 15 entities, 25 relations, 20 chunks
+INFO: Final chunks S+F/O: C1/1 E1/1 C1/2 E1/2 C1/3 E3/3 C1/4 E1/4 C1/5 E1/5 C1/6 E1/6 C1/7 E1/7 C1/8 E2/8 C1/9 E1/9 C1/10 E1/10
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (26.31s)  gr_avg=1.0
+[39/50] DV-IO-009 - image_only - 佩戴连接示意图里，人物把那个白色长条形设备贴在了身体的什么位置？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 连接示意图, 设备 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 87 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 87 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 87 relations
+INFO: Selecting 23 from 23 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 87 relations
+INFO: Round-robin merged chunks: 43 -> 34 (deduplicated 9)
+INFO: Final context: 15 entities, 87 relations, 20 chunks
+INFO: Final chunks S+F/O: C1/1 E1/1 C1/2 E1/2 C1/3 E2/3 E2/4 C1/5 E1/5 E3/6 E1/7 E7/8 E2/9 C1/10 E2/10 C1/11 E1/11 E1/12 C1/13 E2/13
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=1.00 precision=0.40 (31.74s)  gr_avg=1.0
+[40/50] DV-TN-011 - table_numeric - 说明书在电磁兼容章节给出了便携式及移动式射频通信设备与记录仪的推荐隔离距离表。若某射频通信设备的最大...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 电磁兼容, 最大额定输出功率, 隔离距离, 记录仪, 800MHz~2.5GHz, 设备 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 63 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 63 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 63 relations
+INFO: Selecting 30 from 30 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 63 relations
+INFO: Round-robin merged chunks: 50 -> 34 (deduplicated 16)
+INFO: Final context: 15 entities, 63 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 E2/2 C1/3 E2/3 E3/4 E3/5 E1/6 E4/7 C1/8 E3/8 E2/9 E1/10 E1/11 E1/12 C1/13 E1/13 E2/14 E1/15 C1/16 E1/16
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=0.50 precision=0.80 (42.11s)  gr_avg=1.0
+[41/50] DV-SUM-008 - summary - 关于这款动态心电记录仪的电池，说明书从电池规格、低电量提示、日常保养三个方面分别是怎样要求的？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 关于, 记录仪, 电池, 规格, 说明书, 提示 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 73 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 73 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 73 relations
+INFO: Selecting 37 from 50 entity-related chunks by vector similarity
+INFO: Find 13 additional chunks in 13 relations (deduplicated 37)
+INFO: Selecting 13 from 13 relation-related chunks by vector similarity
+INFO: Round-robin merged chunks: 70 -> 64 (deduplicated 6)
+INFO: Final context: 15 entities, 73 relations, 20 chunks
+INFO: Final chunks S+F/O: C1/1 E1/1 R1/1 C1/2 E1/2 R2/2 C1/3 E2/3 R2/3 C1/4 E3/4 R1/4 E1/5 R4/5 C1/6 E1/6 R2/6 C1/7 E3/7 R1/7
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.00 precision=0.00 (22.5s)
+[42/50] DV-FS-014 - fact_single - 如果用户用试用账号登录这个APP，检测数据和生成的本地报告会有什么限制？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 数据, 用户, APP, 登录, 本地报告, 试用 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 73 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 73 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 73 relations
+INFO: Selecting 16 from 16 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 73 relations
+INFO: Round-robin merged chunks: 36 -> 31 (deduplicated 5)
+INFO: Final context: 15 entities, 73 relations, 20 chunks
+INFO: Final chunks S+F/O: E3/1 C1/2 E2/2 C1/3 E2/3 C1/4 E1/4 E1/5 C1/6 E3/6 E2/7 E1/8 C1/9 E1/9 C1/10 E1/10 C1/11 E1/11 C1/12 E1/12
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (15.77s)  gr_avg=1.0
+[43/50] DV-FS-015 - fact_single - APP里的「我的消息」页面收到的消息分为哪几类？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: APP, 我的消息, App (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 79 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 79 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 79 relations
+INFO: Selecting 17 from 17 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 79 relations
+INFO: Round-robin merged chunks: 37 -> 28 (deduplicated 9)
+INFO: Final context: 15 entities, 79 relations, 20 chunks
+INFO: Final chunks S+F/O: E3/1 E1/2 E1/3 C1/4 E3/4 E2/5 C1/6 E1/6 C1/7 E1/7 E2/8 C1/9 E1/9 C1/10 E1/10 C1/11 E3/11 E2/12 C1/13 E1/13
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (114.39s)
+[44/50] DV-IO-010 - image_only - 网络报告里的心电图报告单上，心率(HR)、PR间期、QRS时限、QT、QTc 的测量结果分别是多少？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 心率, 测量, 心电图, 网络报告, PR间期, QRS时限 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 41 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 41 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 41 relations
+INFO: Selecting 11 from 11 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 41 relations
+INFO: Round-robin merged chunks: 31 -> 22 (deduplicated 9)
+INFO: Final context: 15 entities, 41 relations, 20 chunks
+INFO: Final chunks S+F/O: E5/1 E3/2 E4/3 E1/4 E1/5 E1/6 E1/7 C1/8 E2/8 C1/9 E1/9 E1/10 C1/11 E1/11 C1/12 C1/13 C1/14 C1/15 C1/16 C1/18
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (22.21s)  gr_avg=1.0
+[45/50] DV-TN-012 - table_numeric - 在「记录」页面按「分析灯」给报告分类排序时，除了绿灯（正常）和红灯（异常），还有哪几种分析灯状态，各...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 报告分类, 状态, 绿灯, 红灯, 正常, 异常 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 31 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 31 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 31 relations
+INFO: Selecting 16 from 16 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 31 relations
+INFO: Round-robin merged chunks: 36 -> 28 (deduplicated 8)
+INFO: Final context: 15 entities, 31 relations, 20 chunks
+INFO: Final chunks S+F/O: E4/1 E3/2 E1/3 E2/4 E1/5 E2/6 E1/7 C1/8 E2/8 C1/9 E1/9 C1/10 E2/10 C1/11 E2/11 C1/12 E2/12 E1/13 C1/14 E1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.40 (16.47s)  gr_avg=2.75
+[46/50] DV-SUM-009 - summary - 用户用血氧计完成一次检测后，要怎样才能拿到医生的诊断结果？请把从检测到最终看到医生诊断报告的主要步骤...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 用户, 医生诊断, 血氧计, 检测, 诊断结果 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 77 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 77 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 77 relations
+INFO: Selecting 31 from 31 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 77 relations
+INFO: Round-robin merged chunks: 51 -> 42 (deduplicated 9)
+INFO: Final context: 15 entities, 77 relations, 20 chunks
+INFO: Final chunks S+F/O: E4/1 E1/2 E4/3 E4/4 C1/5 E1/5 C1/6 E1/6 E1/7 C1/8 E1/8 E1/9 C1/10 E1/10 C1/11 E1/11 E1/12 C1/13 E1/13 C1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.75 precision=0.40 (29.61s)  gr_avg=2.0
+[47/50] DV-FS-016 - fact_single - 护理不良事件一共分为几个等级？每个等级分别叫什么名称？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 不良事件 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 72 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 72 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 72 relations
+INFO: Selecting 19 from 19 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 72 relations
+INFO: Round-robin merged chunks: 39 -> 21 (deduplicated 18)
+INFO: Final context: 15 entities, 72 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 E5/2 E4/3 E3/4 C1/5 E2/5 E3/6 E1/7 E1/8 E1/9 E1/10 E1/11 E1/12 E1/13 E1/14 E3/15 E1/16 E2/17 E1/18 E2/19
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=1.00 precision=0.60 (126.15s)  gr_avg=1.0
+[48/50] DV-SUM-010 - summary - 护理不良事件上报制度对上报时间有哪些规定？从事件发生到组织讨论分析，各环节分别要在多长时间内完成？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 时间, 护理不良事件上报制度 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 66 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 66 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 66 relations
+INFO: Selecting 14 from 14 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 66 relations
+INFO: Round-robin merged chunks: 34 -> 21 (deduplicated 13)
+INFO: Final context: 15 entities, 66 relations, 20 chunks
+INFO: Final chunks S+F/O: E4/1 E7/2 E3/3 E3/4 E3/5 E1/6 E1/7 E1/8 E1/9 E1/10 E5/11 C1/12 E1/12 E1/13 C1/14 E1/14 C1/15 C1/17 C1/18 C1/19
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.60 (16.59s)  gr_avg=1.2
+[49/50] DV-FS-017 - fact_single - 按这份技术审评规范，骨科手术器械的管理类别是怎么分的？产品类代号又是多少？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 产品 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 98 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 98 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 98 relations
+INFO: Selecting 29 from 29 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 98 relations
+INFO: Round-robin merged chunks: 49 -> 48 (deduplicated 1)
+INFO: Final context: 15 entities, 98 relations, 20 chunks
+INFO: Final chunks S+F/O: C1/1 E1/1 C1/2 E1/2 C1/3 E4/3 C1/4 E1/4 C1/5 E1/5 C1/6 E1/6 C1/7 E1/7 C1/8 E1/8 C1/9 E1/9 C1/10 E1/10
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (111.29s)  gr_avg=1.0
+[50/50] DV-FS-018 - fact_single - 电动骨锯这种带电的手术器械，需不需要按这份骨科手术器械技术审评规范来审评？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 骨锯 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 25 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 25 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 25 relations
+INFO: Selecting 1 from 1 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 25 relations
+INFO: Round-robin merged chunks: 21 -> 20 (deduplicated 1)
+INFO: Final context: 15 entities, 25 relations, 20 chunks
+INFO: Final chunks S+F/O: E15/1 C1/2 C1/3 C1/4 C1/5 C1/6 C1/7 C1/8 C1/9 C1/10 C1/11 C1/12 C1/13 C1/14 C1/15 C1/16 C1/17 C1/18 C1/19 C1/20
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (108.09s)  gr_avg=1.0
+INFO: [col_b7b876b1] PGTableGraphStorage finalized
+INFO: Closed PostgreSQL database connection pool
+INFO: Successfully finalized 12 storages
+
+============================================================
+# 评测报告：testset_device_v2
+
+- **领域**：家用/医用器械说明书库（12 份，含注射泵、血压、血氧、心电、除颤、水质检测 + 骨科手术器械审评规范 + 护理不良事件上报）
+- **题目数**：50
+- **时间**：2026-10-05 18:07:24
+- **配置**：{"mode": "retrieval", "collection": "col_b7b876b1", "workspace": "col_b7b876b1", "reranker": "standard", "ablation_routes": "graph,vector,keyword", "comparison_mode": "per_doc"}
+
+## 总体指标
+
+| 指标 | 得分 |
+|---|---|
+| Context Recall | 0.8833 |
+| Context Precision | 0.2960 |
+| Context Precision (加权) | 0.4723 |
+| nDCG | 0.9305 |
+
+## Gold Rank（事实最早出现的排名）
+
+- **平均 gold_rank**：1.39
+- **中位 gold_rank**：1.36
+- **min / max**：1.17 / 1.68
+
+| top-K | 事实覆盖率 |
+|---|---|
+| top1 | 0.7470 |
+| top3 | 0.8620 |
+| top5 | 0.9060 |
+
+## 按题型分布
+
+| 题型 | 题数 | Recall@5 | Prec@5 | nDCG@5 | GoldRank avg |
+|---|---|---|---|---|---|
+| fact_single | 18 | 1.0000 | 0.2889 | 0.9836 | 1.00 |
+| image_only | 10 | 0.9000 | 0.2800 | 0.9821 | 1.20 |
+| summary | 10 | 0.7667 | 0.3800 | 0.8127 | 2.23 |
+| table_numeric | 12 | 0.7917 | 0.2500 | 0.9059 | 1.48 |
+
+## 按难度分布
+
+| 难度 | 题数 | Recall@5 | Prec@5 | GoldRank avg |
+|---|---|---|---|---|
+| easy | 25 | 0.8800 | 0.2560 | 1.04 |
+| hard | 10 | 0.7667 | 0.3600 | 2.32 |
+| medium | 15 | 0.9667 | 0.3200 | 1.36 |
+
+总耗时：1669.0 秒
+报告已保存：tests/reports/run_retrieval_device_v2.json
+============================================================

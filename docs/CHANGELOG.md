@@ -23,6 +23,46 @@
 
 ---
 
+## [v5.35] 2026-10-05 —— comparison 功能弃用（前端入口隐藏，后端保留）
+
+**影响模块**：`frontend/src/components/Sidebar.tsx`（`NAV_ITEMS` 移除「参数对比」导航项）。后端与其余前端代码零改动。
+
+**决策**：弃用 comparison 能力。触发点：v5.34 题集重建已剔除 comparison 类别；且历史证据链已定论其检索短板未闭环——v5.30 泄漏治理后诚实口径 0.375→0.4583@5 仍低（见 v5.31/§11.2），v5.32 M5 探针（2026-10-04）把剩余 4 个漏召 fact 逐路归因为「精排 top5 截断 + 内容匹配不足」，属 M5 检索层长线课题，无 comparison 专属可落地修复。
+
+**「弃用不删除」执行口径**：`DeviceCompare.tsx` / App.tsx `compare` view 分支（389/441）/ `AppView['compare']` / `api.ts compareParams` / 后端 `app/m7_interact/compare.py` + `POST /compare` 全部保留不动，仅去掉 UI 唯一入口（Sidebar 导航项）——`activeView` 经 UI 不再可置为 `'compare'`，视图代码成为不可达死代码但不删，`AppView` 类型未动故 TS 编译零负担。
+
+**验证**：vite HMR 自动生效；chrome-devtools（[chrome-devtools-mcp](dashboard)）浏览器实测侧边栏仅剩「仪表盘 / 问答 / 文档管理 / 知识图谱」4 项，无「参数对比」；TS diagnostics 零错误；后端「在线」状态不受影响。评测题集 v2 无 comparison 题，无需重跑。
+
+---
+
+## [v5.34] 2026-10-05 —— 器械题集全删重建（12 文档全覆盖、每文档三档、难度 25/15/10）
+
+**影响模块**：器械库题集 `backend/tests/testsets/testset_device_v2.json`（**新建**，取代 v5.33 的 `testset_device_50.json`）；旧题集（`testset_device_30.json` + `testset_device_50.json`）`git mv` **归档到 `tests/testsets/archive/`**；两处探针脚本 `probe_compare_localize.py` / `probe_comparison_miss_paths.py` 的 TESTSET 路径改指向 archive（连带修复）；新增可复跑工具 `scripts/dump_device_chunks.py`（dump 各文档 chunk 供出题取材）+ `scripts/assemble_device_testset.py`（合并 agent 出题 → 校验 → 统一重编号 → 落盘）；文档 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md)（§6.3 新增，§6.2 标注被取代）。
+
+### 一、背景与用户指令
+
+v5.33 把 50 题做成了「旧 30 题冻结 + 新 20 题」，覆盖失衡被用户否决：新增 20 题里 **19 道 easy**（骨科 11 + 护理 8），全堆在 2 份新文档，10 份说明书只有 1 道新 hard。用户 2026-10-05 令：**「50 全部删除，重新出题，考虑器械库所有文档。按照难度 5:3:2 的比例，但是每个文档应该都有三个难度的题！」**
+
+**数学约束（先算后做）**：12 文档 × 每档≥1 ⇒ 各档≥12；5:3:2 ⇒ hard=0.2N≥12 ⇒ **N≥60**，N=50 时无解。经 AskUserQuestion 拍板三点：**N=50 近似 5:3:2（25/15/10）**；**骨科 docx（全文仅 1 chunk）豁免 hard**；**旧题集全部归档不改**。
+
+### 二、新题集 `testset_device_v2.json`（50 题）
+
+- **覆盖**：12 份文档**全覆盖**，每份至少 easy+medium 两档，内容充足的 10 份覆盖 hard；难度 **25 easy / 15 medium / 10 hard（5:3:2）**，逐文档达标。
+- **题型**：fact_single 18 / table_numeric 12 / image_only 10 / summary 10（`category` 后 3 类与难度正交）。**全部为单文档题**——decision 上剔除 comparison（跨文档、归属模糊会破坏「每文档三档」结构）与 unanswerable（无文档归属），这两类继续由归档旧题集覆盖。
+- **出题流程**：`dump_device_chunks.py` dump 12 文档全部 chunk（≤2 万字符/份）→ **12 个并行 agent 各出一文档**（同文 duplex，逐题依据 `_evidence_idx` 对照 chunk）→ `assemble_device_testset.py` 合并校验。**agent 自拟 id 跨文档冲突（多份都用 DV-FS-009 等），由 assemble 统一重编号**（按 category 前缀 DV-FS/DV-TN/DV-IO/DV-SUM 连续号，全库唯一）。
+- **校验口径（宽松命中，防误报）**：key_facts 是出题时的改写概括≠逐字，故「数字/英文 token 必须全命中（数字不会改写）+ 中文 2-gram 覆盖率 ≥0.5（容忍 paraphrase、拒绝编造）」+ `_evidence_idx` 越界检查 + difficulty/category/must_have_docs 合法性。**50 题全部通过，0 编造**（初版 18 处「未命中」逐一人工核对均为原文空格或改写，如「扩 展 窗 口」「TC-169A ±100Psi→inHg 换算 203.6」）。
+- **冒烟验证**：`runner --mode retrieval --limit 2` 跑通（Recall 1.0 / nDCG 0.82，报告 `run_1791192530.json`），链路可执行。
+
+### 三、全量实测（2026-10-05，检索 + e2e 双跑）
+
+**检索**（`--mode retrieval`，50 题 standard @5，报告 `run_retrieval_device_v2.json`）：总体 **Context Recall 0.8833** / nDCG 0.9305 / precision_w 0.4723 / gold_rank 1.39。按难度 easy **0.8800** / medium **0.9667** / hard **0.7667**；按题型 **fact_single 1.0000**（18 题全满）/ table_numeric 0.7917 / image_only 0.9000 / **summary 0.7667**（新题型）。
+
+**生成**（`--mode e2e`，50 题，报告 `run_e2e_device_v2.json`）：**Faithfulness 0.9950** / **Correctness 0.8733** / Answer Relevance 0.9314 / **Citation 0.8960**。按难度 medium **1.0**（15 题全对）/ easy 0.8400（25）/ hard 0.7667（10）。
+
+**未满分 8 题**：DV-IO-007 / DV-TN-005 / DV-TN-010（easy，检索 0）+ DV-TN-011（medium 0.5）+ summary hard 4 题（DV-SUM-003/007/008/009，0.25–0.75）。retrieval 满分但 e2e correctness 掉分 2 题（DV-FS-001 / DV-IO-005，0.5）均为主 fact 回答、副 fact 遗漏，材料在上下文，非检索缺口。**DV-TN-005 跨题集复现 0**（v5.33 旧题同文档同表即 0，表格数值块被精排压出 top5 的稳定画像）。**summary 新题型 hard 段 4 题全漏 = 新最大拖累项**（目标块分散、需跨块聚合，与精排截断短块/数字块同源）。详表见 `retrieval_comparison.md` v5.34 节。
+
+> **口径注记**：v5.34 题集全删重建，与 v5.33 **不可横比**（题集不同非增量）；e2e 对比 v5.31 诚实口径 30 题（Correctness 0.6286）的 +0.2447 主要来自**剔除 comparison**（诚实口径下 comparison 曾崩 0.0875），comparison 检索短板并未闭环、只是新题集不再考核。
+
 ## [v5.29] 2026-10-03 —— 器械 30 题评测集跑通 + M9 裁判 `hit` 字段修复
 
 **影响模块**：M9 `judge.py`（解析并归一化 `hit`）、`metrics/context_recall.py`（采信 `hit`，`_PROMPT_VERSION` bump 至 `p1_llm_hit`）、`runner.py`（新式 collection 兼容 + comparison per-doc 检索）、`testset.py`（`VALID_CATEGORIES` 补 `image_only`）；新增 `backend/tests/testsets/testset_device_30.json`；方案文档 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) v0.5→v0.6（新增 §11 实测结果）、[`M9_evaluation.md`](modules/M9_evaluation.md)（状态行 + 变更历史）。
@@ -147,6 +187,8 @@
 
 ## [v5.33] 2026-10-05 —— 器械题集扩到 50 题（难度收敛 5:3:2）+ 两文档入库
 
+> ⚠️ **本条目题集已被 [v5.34] 取代**：v5.33 的 `testset_device_50.json` 与旧 `testset_device_30.json` 已归档至 `tests/testsets/archive/`，新题集 `testset_device_v2.json`（12 文档全覆盖重建）为准。
+
 **影响模块**：器械库 `col_b7b876b1`（入库 2 份新文档）；新增 `backend/tests/testsets/testset_device_50.json`；文档 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md)（§6.2 执行结果 + §7 验证表 + §11.4 实测）、[`retrieval_comparison.md`](../backend/tests/reports/retrieval_comparison.md)（三库对比节 v5.33 更新）。
 
 ### 一、背景（用户拍板：改题而非改标签）
@@ -177,11 +219,16 @@ v5.32 后器械 30 题诚实口径 Recall **0.6763**，用户判断偏低。诊�
 
 **探针**：`backend/scripts/probe_hard_miss_rank.py`（只读，留档可复跑），日志 `backend/tests/reports/probe_hard_miss_rank.log`。复现 runner 生产检索形态，把每个失败 fact 的目标块当「鱼」，解剖其在三路候选 / RRF 全序 / fused top40 / 精排 top5 各段排名（定位锚取自语料实测内容，与 key_facts 零交集，红线合规）。
 
-- **前置结论**：15 道未满分题的 **21 个失败 fact，支撑内容 100% 存在于语料**（逐条 grep 实测，含 KE-2000 量程 0-279mmHg、LSP01-1BC 行程 120mm 等）——**失败不是语料缺失，而是检索未把目标块送进 top5**。
-- **二分归因（13 目标块实测）**：**精排截断 9/13（主因）**——目标块已进 fused top40（位次 7–23），cross-encoder 精排后掉出 top5，跨题型普遍（段落 4 / 表格 2 / 图像 2 / 标题 1）；**候选池未进 4/13**——三路召回全 miss，四块**全为短块**（23–56 字：LSP 行程 / 博声运行环境 / 气压动态模拟 / pH 三点校准）。
-- **分层**：easy 0.8720（8 失败 fact = 漏召 4 + **裁判假阴性 4**）/ medium 0.8542（4 失败 fact = 全漏召）/ hard 0.4815（15 失败 fact = 漏召 14 + 假阴性 1）。
-- **非检索因素（诚实标注，不计入检索缺陷）**：① **裁判措辞字面化假阴性**——DV-N-FS-017 语料一句「向护士长、科主任、总值班、护理部口头报告事件情况」被题集拆成 4 个「包括X」fact，裁判逐个要求显式「包括X」→ 3 个 fact 全判否（内容其实全在上下文）；DV-N-FS-012 同理。**属评测口径 artifact**，按泄漏红线不以改写 key_facts 抬分，仅标注 easy/medium 实测值被低估。② **推理型 key_fact**（DV-N-FS-019 案例→Ⅰ级、DV-IO-002 Type 排列顺序比较）语料无直接表述，属出题取向。
+- **前置结论**：15 道未满分题共 **25 个失败 fact**，按失败性质三分：**检索漏召 20 个**（目标块内容确在语料，逐条 grep 实测确认，含 KE-2000 量程 0-279mmHg、LSP01-1BC 行程 120mm 等，只是没进 top5）+ **裁判字面假阴性 3 个**（内容已在检索上下文内，裁判因措辞不逐字匹配判否）+ **推理型 2 个**（语料有原始数据但无该断言）。**失败不是语料缺失，而是检索未把目标块送进 top5（20/25）为主，另有裁判口径 artifact（3）与出题取向（2）。**
+- **二分归因（13 目标块实测）**：**精排截断 9/13（主因）**——目标块已进 fused top40（位次 7–23），cross-encoder 精排后掉出 top5，跨题型普遍（段落 3 / 表格 2 / 图像 2 / 标题 2）；**候选池未进 4/13**——三路召回全 miss，四块**全为短块**（23–56 字：LSP 行程 / 博声运行环境 / 气压动态模拟 / pH 三点校准）。
+- **分层**：easy 0.8720（7 失败 fact = 漏召 3 + **裁判假阴性 3** + 推理型 1）/ medium 0.8542（4 失败 fact = 全漏召）/ hard 0.4815（14 失败 fact = 漏召 13 + 推理型 1）。
+- **非检索因素（诚实标注，不计入检索缺陷）**：① **裁判措辞字面化假阴性**——DV-N-FS-017 语料一句「向护士长、科主任、总值班、护理部口头报告事件情况」被题集拆成 4 个「包括X」fact，裁判逐个要求显式「包括X」→ **2 个 fact 判否（科主任 / 总值班）、同句另 2 个（护士长 / 护理部）判真，同句枚举内判罚不一致**（内容其实全在上下文）；DV-N-FS-012 同理。**属评测口径 artifact**，按泄漏红线不以改写 key_facts 抬分，仅标注 easy/medium 实测值被低估。② **推理型 key_fact**（DV-N-FS-019 案例→Ⅰ级、DV-IO-002 Type 排列顺序比较）语料无直接表述，属出题取向。
 - **修复方向（仅结论，未动手）**：主战场在 **M5 精排侧**（短块/图像/表格块特征补偿，把 fused top40 里位次 7–23 的正确块推入 top5）；次战场是候选池未进 4 例（均短块，稀疏索引失明）。**评测窗口 `eval_top_n=5` 对齐生产 `RERANK_TOP=5`，不得为抬分放宽**（红线）。⚠️ 与 v5.32 探底交叉：客服库已系统性试过调权重并封闭（v5.11/12/13/20 逐字节/逐位无效），精排侧要动名次只能换赛道（LLM 终审进生产 / 换 reranker），属方向决策。详见 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §11.5。
+- **探底：精排文本工程（增补 / 去噪）双向无效（2026-10-05）**——假设「表格块有 NL 摘要（v5.13，单块分 +165%），对称地给图像/段落块做文本工程即可推入 top5」。改 `table_summary.py` 单文件，复用 `probe_hard_miss_rank.py` 实测 13 目标块，跑两轮：
+  - **A 增补**（drawing caption 管道结构→叙述句、paragraph 规格列表→补类型前缀）：final5 命中 **0/13**，fused40 **5/13 变差**（TN-005 17→20、CP-001b 7→9、FS-005 10→11、IO-006 8→11、FS-008 8→9）、1 变好（IO-004 23→19）。
+  - **B 去噪**（去 markdown 分隔行 `|---|---|` / drawing 空列「有/无」与管道符 / 转义符 `\~` / 连续空白）：final5 仍 **0/13**，fused40 **4/13 变差**（IO-004 23→32、TN-005 17→19、CP-001b 7→8、FS-002 7→8）、1 变好（IO-006 8→7）。
+  - **两轮方向相反却同为净负面 ⇒ cross-encoder 对块文本表层格式工程免疫**：位次漂移是文本扰动的随机噪声（IO-004 最敏感，A 23→19 / B 23→32 正负翻转），非系统性改进——失败是语义层（短块 / 数字块 / 图像描述块与 query 语义不匹配），非格式层。
+  - **结论：精排侧「文本工程」方向封闭**（增补 / 去噪 / 权重调参同归无效，与客服库 v5.11/12/13/20 一致）；要动名次只能换赛道（LLM 终审进生产 / 换 reranker），属方向决策。两轮均 `git checkout` 回滚，日志 `backend/tests/reports/probe_rerank_text_context.log` / `probe_rerank_text_denoise.log` 归档。
 
 ### 六、收尾
 

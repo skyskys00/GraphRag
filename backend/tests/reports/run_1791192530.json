@@ -1,0 +1,298 @@
+{
+  "testset_id": "testset_device_v2",
+  "domain": "家用/医用器械说明书库（12 份，含注射泵、血压、血氧、心电、除颤、水质检测 + 骨科手术器械审评规范 + 护理不良事件上报）",
+  "version": "2026-10-05",
+  "timestamp": "2026-10-05 17:28:50",
+  "config": {
+    "mode": "retrieval",
+    "collection": "col_b7b876b1",
+    "workspace": "col_b7b876b1",
+    "reranker": "standard",
+    "ablation_routes": "graph,vector,keyword",
+    "comparison_mode": "per_doc"
+  },
+  "summary": {
+    "total_questions": 2,
+    "overall": {
+      "context_recall": 1.0,
+      "context_precision": 0.4,
+      "context_precision_weighted": 0.511,
+      "gold_rank_avg": 1.5,
+      "gold_rank_median": 1.5,
+      "gold_rank_min": 1.5,
+      "gold_rank_max": 1.5,
+      "gold_rank_top1_recall": 0.5,
+      "gold_rank_top3_recall": 1.0,
+      "gold_rank_top5_recall": 1.0,
+      "ndcg": 0.8201,
+      "faithfulness": 0.0,
+      "answer_relevance": 0.0,
+      "correctness": 0.0,
+      "citation_accuracy": 0.0,
+      "judge_failed_judgments": 0
+    },
+    "by_category": {
+      "fact_single": {
+        "count": 1,
+        "context_recall": 1.0,
+        "context_precision": 0.6,
+        "gold_rank_avg": 1.0,
+        "gold_rank_median": 1.0,
+        "gold_rank_top5_recall": 1.0,
+        "ndcg": 1.0,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      },
+      "table_numeric": {
+        "count": 1,
+        "context_recall": 1.0,
+        "context_precision": 0.2,
+        "gold_rank_avg": 2.0,
+        "gold_rank_median": 2.0,
+        "gold_rank_top5_recall": 1.0,
+        "ndcg": 0.6403,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "count": 2,
+        "context_recall": 1.0,
+        "context_precision": 0.4,
+        "gold_rank_avg": 1.5,
+        "gold_rank_median": 1.5,
+        "gold_rank_top5_recall": 1.0,
+        "ndcg": 0.8201,
+        "faithfulness": 0.0,
+        "answer_relevance": 0.0,
+        "correctness": 0.0,
+        "citation_accuracy": 0.0
+      }
+    },
+    "judge_failed_questions": 0,
+    "total_time_s": 26.7
+  },
+  "questions": [
+    {
+      "id": "DV-TN-001",
+      "category": "table_numeric",
+      "difficulty": "easy",
+      "question": "这台注射泵的最大步速是多少？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "f33baf8f00190aa4",
+          "8a22bfff101b31f1",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4"
+        ],
+        "time_s": 14.33
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 1,
+          "found_facts": 1,
+          "not_found_facts": 0,
+          "min_rank": 2,
+          "median_rank": 2.0,
+          "avg_rank": 2.0,
+          "max_rank": 2,
+          "top_k_recall": {
+            "1": 0.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "最大步速 = 867 steps/sec",
+              "gold_rank": 2,
+              "chunk_id": "chunk-ec7e904e0b9ae07455e9980498544b1a",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 1,
+          "hit_facts": 1,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "最大步速 = 867 steps/sec",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]中明确列出：型号 LSP01-1BC 的参数表中有“| 最大步速 | 867 steps/sec |”，与事实陈述“最大步速 = 867 steps/sec”完全一致。"
+            }
+          ],
+          "reason": "1/1 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.2,
+        "context_precision_weighted": 0.219,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 1,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本中的最大步速为1243step/sec，与标准答案关键数值867不一致，因此对回答该问题没有帮助。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本中的表格明确列出了该型号的最大步速为 867 steps/sec，与标准答案要点及关键数值清单完全一致，直接回答了问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "检索文本仅列出线速度范围（4.68um/min-270.00mm/min）等参数，未包含最大步速867 steps/sec或任何可直接换算为步速的信息。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该检索文本列出了注射泵类型、注射器选择、最大行程等信息，但完全没有提及最大步速，未包含回答所需的数值867 steps/sec，因此对回答问题没有帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.1,
+              "reason": "该文本列出了 Cchippump-2 的最小步速为 0、控制精度和重复精度，但未提及最大步速，也没有出现关键数值 867，因此无助于回答问题。"
+            }
+          ],
+          "reason": "1/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 0.6403
+      },
+      "time_s": 16.76
+    },
+    {
+      "id": "DV-FS-001",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "这台注射泵可以用来做人体临床试验吗？",
+      "retrieval": {
+        "num_results": 5,
+        "top_docs": [
+          "f33baf8f00190aa4",
+          "8a22bfff101b31f1",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4"
+        ],
+        "time_s": 7.79
+      },
+      "metrics": {
+        "gold_rank": {
+          "total_facts": 2,
+          "found_facts": 2,
+          "not_found_facts": 0,
+          "min_rank": 1,
+          "median_rank": 1.0,
+          "avg_rank": 1.0,
+          "max_rank": 1,
+          "top_k_recall": {
+            "1": 1.0,
+            "3": 1.0,
+            "5": 1.0,
+            "8": 1.0
+          },
+          "per_fact": [
+            {
+              "fact": "不能用于人类的临床实验",
+              "gold_rank": 1,
+              "chunk_id": "chunk-a2c61e330bb690f1a10410885ba4d44f",
+              "match_mode": "lexical"
+            },
+            {
+              "fact": "只能用于科学研究",
+              "gold_rank": 1,
+              "chunk_id": "chunk-a2c61e330bb690f1a10410885ba4d44f",
+              "match_mode": "lexical"
+            }
+          ],
+          "mode": "lexical"
+        },
+        "context_recall": 1.0,
+        "context_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "不能用于人类的临床实验",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确记载“此泵没有在FDA注册，不能用于人类的临床实验”，上下文[2]也记载“此泵不能用于人类的临床实验，只能用于科学研究”，均直接支持该事实陈述。"
+            },
+            {
+              "fact": "只能用于科学研究",
+              "hit": true,
+              "score": 1.0,
+              "reason": "检索上下文[2]中明确表述：\"此泵不能用于人类的临床实验，只能用于科学研究\"。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "window": "top5"
+        },
+        "context_precision": 0.6,
+        "context_precision_weighted": 0.8029,
+        "context_precision_detail": {
+          "total_chunks": 5,
+          "relevant_chunks": 3,
+          "failed_chunks": 0,
+          "per_chunk": [
+            {
+              "rank": 1,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本第(9)条明确写明‘此泵没有在FDA注册，不能用于人类的临床实验’，直接包含标准答案要点中的‘不可以’和‘不能用于人类的临床实验’，对回答问题有直接帮助。"
+            },
+            {
+              "rank": 2,
+              "relevant": true,
+              "score": 1.0,
+              "reason": "检索文本明确表述“此泵不能用于人类的临床实验，只能用于科学研究”，与标准答案要点“不可以”“只能用于科学研究”完全一致，直接回答了问题。"
+            },
+            {
+              "rank": 3,
+              "relevant": true,
+              "score": 0.6,
+              "reason": "文本介绍了注射泵的应用领域，涵盖动物药物注射等，但没有直接说明是否可以用于人体临床试验，仅提供了部分背景信息。"
+            },
+            {
+              "rank": 4,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "这段文本仅为产品说明书中的公司联系方式及版权声明，未提及注射泵能否用于人体临床试验或任何相关限制说明，对回答问题没有帮助。"
+            },
+            {
+              "rank": 5,
+              "relevant": false,
+              "score": 0.0,
+              "reason": "该文本仅罗列注射泵的产品特点（屏幕、通讯、记忆功能等），完全未提及是否可用于人体临床试验或相关限制，对回答问题没有帮助。"
+            }
+          ],
+          "reason": "3/5 个 chunk 与问题相关",
+          "window": "top5"
+        },
+        "ndcg": 1.0
+      },
+      "time_s": 9.96
+    }
+  ]
+}
