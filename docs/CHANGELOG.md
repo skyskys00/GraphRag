@@ -145,6 +145,39 @@
 
 ---
 
+## [v5.33] 2026-10-05 —— 器械题集扩到 50 题（难度收敛 5:3:2）+ 两文档入库
+
+**影响模块**：器械库 `col_b7b876b1`（入库 2 份新文档）；新增 `backend/tests/testsets/testset_device_50.json`；文档 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md)（§6.2 执行结果 + §7 验证表 + §11.4 实测）、[`retrieval_comparison.md`](../backend/tests/reports/retrieval_comparison.md)（三库对比节 v5.33 更新）。
+
+### 一、背景（用户拍板：改题而非改标签）
+
+v5.32 后器械 30 题诚实口径 Recall **0.6763**，用户判断偏低。诊断结论：**难度标签不参与 recall 计算**，涂改 difficulty 只会让分组虚高、aggregate 纹丝不动；唯一真实抬升路径是**改题目内容**——增加真实简单题，让难度分布贴近生产实际。用户拍板 5:3:2（easy:medium:hard）并明确「通用 RAG 不追极高精度，80%+ 即可观」。据此**回滚前序误改的 difficulty 标签实验**（`run_retrieval_device30_v533_rebalance.*` 已删，见「收尾」），改为**真扩题**。
+
+### 二、入库（2 份新文档，多格式）
+
+- `骨科手术器械类产品技术审评规范.docx` → doc_id `268dffae2382a83a`，**1 chunk / 4265 字符**（MinerU 对 docx 未细分段落，整篇一块；其他 PDF 约 70 块/份）。内容完整（材料牌号/硬度/粗糙度/标准号/预期用途/技术要求清单齐全），**未修**——骨科 12 题全满分（块进 top5 即所有 fact 命中），属「粒度效应」非缺陷。
+- `护理不良事件上报系统培训.pptx` → doc_id `ac6d599e803fb549`，**30 chunks**（paragraph 21 + heading 9）。
+- 库态：**12 份 `ready` / 888 jsonl chunk 行 / 149 drawing 块**（新文档无图，drawing 数不变）。
+
+> **说明（2026-10-05 用户澄清）**：护理 pptx 与器械说明书子域不同，但**同属医疗大领域**；用户**有意**纳入以验证通用 RAG 对**多格式（pptx）**的处理能力，故**不视为违背 `M9_testset.md` §0.1 铁律 1**（该铁律反对跨大领域，医疗内部子域扩展属有意为之）。保留诚实注记：50 题含 8 道护理子域题，aggregate 混合两子域，**读数按子域分层**（§11.4 已单列骨科/护理分组）。
+
+### 三、题集（30 → 50 题，难度 25/16/9 ≈ 5:3:2）
+
+新增 20 题：骨科 12（DV-N-FS-001~011 + DV-N-SUM-001）+ 护理 8（DV-N-FS-012~019）。题型：fact_single 27 / table_numeric 8 / image_only 6 / comparison 4 / unanswerable 4 / summary 1。难度从「6 易/16 中/8 难（hard 27%）」调为「**25 易/16 中/9 难（hard 18%）**」。出题规范参照 [`M9_testset.md`](modules/M9_testset.md)，方案先落 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §6.2 再执行。
+
+### 四、实测（`--mode retrieval`，50 题，standard @5，分母 46，耗时 2645.8s，`judge_failed=0`）
+
+- **总体 Recall 0.7909**（30 题基线 0.6763 → **+0.1146**）、nDCG 0.7737、GoldRank 1.47、top5 召回 0.8217。
+- **按难度**：easy **0.8720**（25 题）/ medium **0.8542**（16 题）/ hard **0.4815**（9 题）。medium 与 v5.32 持平（0.8542），hard 小幅上移（0.4167→0.4815，含 v5.32 CP-001 恢复）。
+- **新增 20 题平均 0.9150**：骨科 12 题**全满分**、护理 8 题均 0.7875（未满分：FS-012 0.8 / FS-017 0.5 / FS-019 0.0——FS-019 答案疑在 pptx 图片页，与既有 image_only 短板同源）。
+- **拖累项全是旧题**：image_only 0.6667 / comparison 0.4583 / hard 段 0.4815（四题 0：TN-005 / FS-008 / IO-004 / CP-002）。**新语料零回归**：table_numeric / image_only / comparison 三题型 @5 与 v5.32 逐题一致。
+- **读数**：难度配比是器械 aggregate 的主要杠杆——hard 占比 27%→18% 带来 +0.1146，**不是链路变强，而是考核分布变真实**。距用户 80% 目标差 0.91pp。详见 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §11.4。
+
+### 五、收尾
+
+- 残留清理：删除前序误改标签实验产物 `run_retrieval_device30_v533_rebalance.json/.log`（difficulty 涂改，已回滚，不占版本）。
+- 报告归档：`run_retrieval_device50.json` + `.log`（本次产物）；`testset_device_50.json` 入库 `backend/tests/testsets/`。
+
 ## [v5.32] 2026-10-04 —— comparison 对比检索 query 去噪落地（`localize_query`，生产可复现）
 
 **影响模块**：新增 `app/m5_retrieve/query_localize.py`（共享去噪模块）；`app/m7_interact/compare.py`（对比检索前逐 doc localize）、`app/m9_eval/runner.py`（comparison 路径镜像同一函数）；脚本 `backend/scripts/probe_compare_localize.py`（探针留档）；文档 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) v0.9→v0.10（§5.4 探针阶段 → 已落地）。

@@ -1,0 +1,1205 @@
+{
+  "testset_id": "testset_device_50",
+  "collection": "col_b7b876b1",
+  "domain": "家用/医用器械说明书库（12 份，含注射泵、血压、血氧、心电、除颤、水质检测 + 骨科手术器械审评规范 + 护理不良事件上报）",
+  "version": "2026-10-05",
+  "created": "2026-10-05",
+  "description": "器械垂直场景 50 题评测集（v5.33 扩充）。原 30 题冻结；新增 20 题覆盖两份新入库文档（骨科手术器械类产品技术审评规范.docx / 护理不良事件上报系统培训.pptx），全为 easy 单事实题 + 1 道 hard summary。难度分布 25 易 / 16 中 / 9 难（≈5:3:2；精确 25/15/10 需改现有题标签，已禁止）。题型：table_numeric 8 / fact_single 27 / image_only 6 / comparison 4 / unanswerable 4 / summary 1。",
+  "corpus_docs": [
+    "融柏恒流泵_LSP-1C系列注射泵_说明书.pdf",
+    "铭昇电子_H2-5000IBP有创血压模拟仪_操作手册.pdf",
+    "多参数检测仪KE-2000 说明书.pdf",
+    "数字差压计使用说明书.pdf",
+    "智能便携式检测仪.pdf",
+    "瑞创RSP系列注射泵.pdf",
+    "电除颤.pdf",
+    "脉搏血氧仪.pdf",
+    "英菲泰克动态心电记录仪.pdf",
+    "血氧仪使用手册.pdf",
+    "护理不良事件上报系统培训.pptx",
+    "骨科手术器械类产品技术审评规范.docx"
+  ],
+  "questions": [
+    {
+      "id": "DV-TN-001",
+      "category": "table_numeric",
+      "question": "瑞创RSP系列注射泵（Cchippump-2）说明书附「标准注射器流量参数表」中，60mL 规格注射器对应的内径和流量范围分别是多少？",
+      "ground_truth": "60mL 注射器内径为 29.15mm，流量范围为 3.133-227.837（uL/min-mL/min）。",
+      "key_facts": [
+        "60mL 注射器内径 = 29.15mm",
+        "60mL 流量范围 = 3.133-227.837 uL/min-mL/min"
+      ],
+      "must_have_docs": [
+        "瑞创RSP系列注射泵.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "瑞创RSP系列注射泵.pdf"
+      ],
+      "tags": [
+        "注射泵",
+        "流量参数表",
+        "内径",
+        "Cchippump-2"
+      ]
+    },
+    {
+      "id": "DV-TN-002",
+      "category": "table_numeric",
+      "question": "Cchippump-2 双通道分体式注射泵的控制精度和重复精度指标分别是多少？",
+      "ground_truth": "控制精度：当 >30% 满行程时，控制误差 ≤±0.5%；重复精度 ≤±0.3%。",
+      "key_facts": [
+        "控制精度：>30% 满行程时 ≤±0.5%",
+        "重复精度 ≤±0.3%"
+      ],
+      "must_have_docs": [
+        "瑞创RSP系列注射泵.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "瑞创RSP系列注射泵.pdf"
+      ],
+      "tags": [
+        "注射泵",
+        "技术参数",
+        "精度"
+      ]
+    },
+    {
+      "id": "DV-TN-003",
+      "category": "table_numeric",
+      "question": "数字差压计（TC-168A/TC-169A）的准确度和可重复性指标分别是多少？",
+      "ground_truth": "准确度 ±0.3% FSO（25℃）；可重复性 ±0.2%（MAX ±0.5% FSO）。",
+      "key_facts": [
+        "准确度 = ±0.3% FSO（25℃）",
+        "可重复性 = ±0.2%，最大 ±0.5% FSO"
+      ],
+      "must_have_docs": [
+        "数字差压计使用说明书.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "数字差压计使用说明书.pdf"
+      ],
+      "tags": [
+        "数字差压计",
+        "准确度",
+        "可重复性"
+      ]
+    },
+    {
+      "id": "DV-TN-004",
+      "category": "table_numeric",
+      "question": "数字差压计在 kPa 单位下，TC-168A 与 TC-169A 两个型号的量程与显示精度分别是多少？",
+      "ground_truth": "kPa 单位：TC-168A 量程 ±20.68，精度 0.001；TC-169A 量程 ±689.4，精度 0.1。",
+      "key_facts": [
+        "TC-168A：kPa 量程 ±20.68，精度 0.001",
+        "TC-169A：kPa 量程 ±689.4，精度 0.1"
+      ],
+      "must_have_docs": [
+        "数字差压计使用说明书.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "hard",
+      "source_docs": [
+        "数字差压计使用说明书.pdf"
+      ],
+      "tags": [
+        "数字差压计",
+        "量程",
+        "kPa",
+        "分辨率"
+      ]
+    },
+    {
+      "id": "DV-TN-005",
+      "category": "table_numeric",
+      "question": "铭昇 H2-5000IBP 有创血压模拟仪的气压动态模拟范围是多少？气压静态压力输出的量程与精度等级是多少？",
+      "ground_truth": "气压动态模拟：收缩压 30–255mmHg，舒张压 10–240mmHg。气压静态压力输出：量程 (0～40)kPa，精度等级 ±0.15%F.S，绝对误差 <0.75mmHg(0-300mmHg)。",
+      "key_facts": [
+        "气压动态模拟收缩压 30-255mmHg、舒张压 10-240mmHg",
+        "气压静态压力输出量程 (0～40)kPa",
+        "静态压力输出精度等级 ±0.15%F.S"
+      ],
+      "must_have_docs": [
+        "铭昇电子_H2-5000IBP有创血压模拟仪_操作手册.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "hard",
+      "source_docs": [
+        "铭昇电子_H2-5000IBP有创血压模拟仪_操作手册.pdf"
+      ],
+      "tags": [
+        "血压模拟仪",
+        "气压输出",
+        "量程",
+        "精度"
+      ]
+    },
+    {
+      "id": "DV-TN-006",
+      "category": "table_numeric",
+      "question": "多参数检测仪 KE-2000 的血糖和尿酸测量量程与显示分辨率分别是多少？",
+      "ground_truth": "血糖：1.5-31.3 mmol/L（27–563 mg/dL），分辨率 0.1 mmol/L；尿酸：178-1190 umol/L（3–20 mg/dL），分辨率 1 umol/L。",
+      "key_facts": [
+        "血糖量程 1.5-31.3 mmol/L（27-563 mg/dL），分辨率 0.1 mmol/L",
+        "尿酸量程 178-1190 umol/L（3-20 mg/dL），分辨率 1 umol/L"
+      ],
+      "must_have_docs": [
+        "多参数检测仪KE-2000 说明书.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "多参数检测仪KE-2000 说明书.pdf"
+      ],
+      "tags": [
+        "多参数检测仪",
+        "血糖",
+        "尿酸",
+        "量程"
+      ]
+    },
+    {
+      "id": "DV-TN-007",
+      "category": "table_numeric",
+      "question": "智能便携式检测仪 LH-T600 的浊度探头（LH-T610）和 pH 探头（LH-T632）的量程与精度分别是多少？",
+      "ground_truth": "LH-T610 浊度：0.1–1000 NTU，精度 ±5% 或 ±0.3NTU，分辨率 0.1NTU；LH-T632 pH：0–14，精度 ±0.1，支持三点校准。",
+      "key_facts": [
+        "LH-T610 浊度量程 0.1-1000 NTU，精度 ±5% 或 ±0.3NTU",
+        "LH-T632 pH 量程 0-14，精度 ±0.1，三点校准"
+      ],
+      "must_have_docs": [
+        "智能便携式检测仪.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "智能便携式检测仪.pdf"
+      ],
+      "tags": [
+        "水质检测",
+        "浊度",
+        "pH",
+        "探头规格"
+      ]
+    },
+    {
+      "id": "DV-TN-008",
+      "category": "table_numeric",
+      "question": "电除颤说明书中，成人、儿童、婴儿使用的电极板直径分别是多少？",
+      "ground_truth": "成人电极板直径 10～13cm，儿童 8cm，婴儿 4～5cm。",
+      "key_facts": [
+        "成人电极板直径 10-13cm",
+        "儿童电极板直径 8cm",
+        "婴儿电极板直径 4-5cm"
+      ],
+      "must_have_docs": [
+        "电除颤.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "电除颤.pdf"
+      ],
+      "tags": [
+        "除颤仪",
+        "电极板",
+        "尺寸"
+      ]
+    },
+    {
+      "id": "DV-FS-001",
+      "category": "fact_single",
+      "question": "脉搏血氧仪 PO-50B 的 SpO2 测量范围是多少？不同区间的测量精度如何规定？",
+      "ground_truth": "SpO2 测量范围 35%～99%；精度：90%-99% 为 ±2%，70%-89% 为 ±3%，≤70% 精度无定义。",
+      "key_facts": [
+        "SpO2 测量范围 35%～99%",
+        "90%-99% 精度 ±2%",
+        "70%-89% 精度 ±3%",
+        "≤70% 精度无定义"
+      ],
+      "must_have_docs": [
+        "脉搏血氧仪.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "脉搏血氧仪.pdf"
+      ],
+      "tags": [
+        "血氧仪",
+        "SpO2",
+        "精度"
+      ]
+    },
+    {
+      "id": "DV-FS-002",
+      "category": "fact_single",
+      "question": "英菲泰克 IDEM1000-0N 动态心电记录仪的计时准确性要求和连续监测时间指标分别是多少？",
+      "ground_truth": "计时准确性：24h 内总误差应不超 30s；监测时间：内部电源完全充满电的情况下，持续时间不小于 24 小时。",
+      "key_facts": [
+        "计时准确性 24h 内总误差不超过 30s",
+        "满电连续监测时间不小于 24 小时"
+      ],
+      "must_have_docs": [
+        "英菲泰克动态心电记录仪.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "英菲泰克动态心电记录仪.pdf"
+      ],
+      "tags": [
+        "动态心电",
+        "性能指标",
+        "计时准确性"
+      ]
+    },
+    {
+      "id": "DV-FS-003",
+      "category": "fact_single",
+      "question": "融柏恒流泵 LSP-1C 系列注射泵的线速度范围和流量范围分别是多少？",
+      "ground_truth": "线速度范围 Min 5um/min 至 Max 13cm/min；流量范围 0.831 nl/min 至 150.5 ml/min（以 60ml 注射器计）。",
+      "key_facts": [
+        "线速度范围 5um/min - 13cm/min",
+        "流量范围 0.831 nl/min - 150.5 ml/min（60ml 注射器）"
+      ],
+      "must_have_docs": [
+        "融柏恒流泵_LSP-1C系列注射泵_说明书.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "融柏恒流泵_LSP-1C系列注射泵_说明书.pdf"
+      ],
+      "tags": [
+        "注射泵",
+        "线速度",
+        "流量"
+      ]
+    },
+    {
+      "id": "DV-FS-004",
+      "category": "fact_single",
+      "question": "多参数检测仪 KE-2000 配套试纸在开罐后的使用期限是多久？试纸应存放在什么温度范围内？",
+      "ground_truth": "开启试纸罐后应于 90 天内使用完；试纸需存放于 10℃ 到 40℃ 温度下，避免受潮或高温暴晒。",
+      "key_facts": [
+        "试纸开罐后须于 90 天内使用完",
+        "试纸存放温度 10℃ 到 40℃"
+      ],
+      "must_have_docs": [
+        "多参数检测仪KE-2000 说明书.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "多参数检测仪KE-2000 说明书.pdf"
+      ],
+      "tags": [
+        "多参数检测仪",
+        "试纸",
+        "保存条件"
+      ]
+    },
+    {
+      "id": "DV-FS-005",
+      "category": "fact_single",
+      "question": "铭昇 H2-5000IBP 有创血压模拟仪采用什么电池配置？满电状态下可连续工作多长时间？",
+      "ground_truth": "内置 4 节 18650 锂电池，满电连续工作大于 8 小时。",
+      "key_facts": [
+        "内置 4 节 18650 锂电池",
+        "满电连续工作 >8 小时"
+      ],
+      "must_have_docs": [
+        "铭昇电子_H2-5000IBP有创血压模拟仪_操作手册.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "铭昇电子_H2-5000IBP有创血压模拟仪_操作手册.pdf"
+      ],
+      "tags": [
+        "血压模拟仪",
+        "电池",
+        "续航"
+      ]
+    },
+    {
+      "id": "DV-FS-006",
+      "category": "fact_single",
+      "question": "电除颤说明书中，室扑和室颤的频率范围分别是多少？心跳骤停病人中约多少比例由室颤引起？除颤每延迟 1 分钟成功率下降多少？",
+      "ground_truth": "室扑频率 200～250 次/分；室颤速率 250～500 次/分。心跳骤停病人中约 80% 为室颤引起；每延迟 1 分钟，除颤成功率下降 7%-10%。",
+      "key_facts": [
+        "室扑频率 200-250 次/分",
+        "室颤速率 250-500 次/分",
+        "约 80% 心跳骤停由室颤引起",
+        "每延迟 1 分钟成功率下降 7%-10%"
+      ],
+      "must_have_docs": [
+        "电除颤.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "电除颤.pdf"
+      ],
+      "tags": [
+        "除颤仪",
+        "室颤",
+        "室扑",
+        "抢救时效"
+      ]
+    },
+    {
+      "id": "DV-FS-007",
+      "category": "fact_single",
+      "question": "博声医疗血氧仪 APP 的检测报告可按「分析灯」分类，各颜色分析灯分别代表什么含义？",
+      "ground_truth": "绿灯=检测初步显示正常；红灯=检测初步显示异常；受干扰色=检测受干扰、信号质量差需重新检测；未上传色=检测数据未上传、等待设备联网，报告以网络报告为准。",
+      "key_facts": [
+        "绿灯：检测初步显示正常",
+        "红灯：检测初步显示异常",
+        "受干扰色：信号质量差，请重新检测",
+        "未上传色：数据未上传，等待联网，以网络报告为准"
+      ],
+      "must_have_docs": [
+        "血氧仪使用手册.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "血氧仪使用手册.pdf"
+      ],
+      "tags": [
+        "血氧仪APP",
+        "分析灯",
+        "报告分类"
+      ]
+    },
+    {
+      "id": "DV-FS-008",
+      "category": "fact_single",
+      "question": "智能便携式检测仪 LH-T600 溶解氧探头的荧光帽（Sensor Cap）维护周期要求是什么？",
+      "ground_truth": "清洗传感器外表面每次使用；检查荧光帽每 30 天；更换荧光帽每一年；校准传感器建议每 3 个月或每次使用前（高精度要求）；湿润保存荧光膜每 30 天检查海绵状态并及时补水。",
+      "key_facts": [
+        "检查荧光帽每 30 天",
+        "更换荧光帽每一年",
+        "校准传感器每 3 个月或每次使用前",
+        "湿润保存荧光膜每 30 天检查海绵并补水"
+      ],
+      "must_have_docs": [
+        "智能便携式检测仪.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "hard",
+      "source_docs": [
+        "智能便携式检测仪.pdf"
+      ],
+      "tags": [
+        "水质检测",
+        "溶氧探头",
+        "荧光帽",
+        "维护周期"
+      ]
+    },
+    {
+      "id": "DV-IO-001",
+      "category": "image_only",
+      "question": "脉搏血氧仪 PO-50B 的限值设置（Limit Setup）界面中，SpO2 报警上下限和脉率（PR）报警上下限的默认值分别是多少？",
+      "ground_truth": "限值设置界面显示：Sp02 Hi 100、Sp02 Lo 94、PR Hi 130、PR Lo 50。",
+      "key_facts": [
+        "Sp02 Hi 100，Sp02 Lo 94",
+        "PR Hi 130，PR Lo 50"
+      ],
+      "must_have_docs": [
+        "脉搏血氧仪.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "hard",
+      "source_docs": [
+        "脉搏血氧仪.pdf"
+      ],
+      "tags": [
+        "血氧仪",
+        "报警限值",
+        "界面",
+        "图上信息"
+      ]
+    },
+    {
+      "id": "DV-IO-002",
+      "category": "image_only",
+      "question": "脉搏血氧仪 PO-50B 提供 6 种界面显示类型（Type 1 至 Type 6），其中 Type 3 的显示项排列顺序是什么？",
+      "ground_truth": "Type 3 的显示顺序为：%SpO2、PR bpm、98、75、PI%、5.5（即血氧值在前、脉率值居中、灌注指数在后）。",
+      "key_facts": [
+        "Type 3 排列顺序为 %SpO2、PR bpm、98、75、PI%、5.5",
+        "与 Type 1/Type 2 的排列顺序不同"
+      ],
+      "must_have_docs": [
+        "脉搏血氧仪.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "hard",
+      "source_docs": [
+        "脉搏血氧仪.pdf"
+      ],
+      "tags": [
+        "血氧仪",
+        "界面类型",
+        "显示布局",
+        "图上信息"
+      ]
+    },
+    {
+      "id": "DV-IO-003",
+      "category": "image_only",
+      "question": "铭昇 H2-5000IBP 有创压气体压力动态模拟界面中，收缩压 150mmHg 与舒张压 100mmHg 分别折算显示为多少 kPa？",
+      "ground_truth": "界面中收缩压 150mmHg 显示为 20.00kPa，舒张压 100mmHg 显示为 13.33kPa。",
+      "key_facts": [
+        "150mmHg 折算显示 20.00kPa",
+        "100mmHg 折算显示 13.33kPa"
+      ],
+      "must_have_docs": [
+        "铭昇电子_H2-5000IBP有创血压模拟仪_操作手册.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "铭昇电子_H2-5000IBP有创血压模拟仪_操作手册.pdf"
+      ],
+      "tags": [
+        "血压模拟仪",
+        "界面",
+        "单位换算",
+        "图上信息"
+      ]
+    },
+    {
+      "id": "DV-IO-004",
+      "category": "image_only",
+      "question": "博声医疗血氧仪 APP 的「设置」页面包含哪些功能项？",
+      "ground_truth": "设置页面包含：绑定医生、医生解绑、多语言、记录设置、密码设置、网页浏览设置、帮助反馈、关于我们、帮助文档、退出登录。",
+      "key_facts": [
+        "包含密码设置、记录设置、网页浏览设置",
+        "包含帮助反馈、关于我们、帮助文档",
+        "包含绑定医生/医生解绑、多语言、退出登录"
+      ],
+      "must_have_docs": [
+        "血氧仪使用手册.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "hard",
+      "source_docs": [
+        "血氧仪使用手册.pdf"
+      ],
+      "tags": [
+        "血氧仪APP",
+        "设置页面",
+        "功能项",
+        "图上信息"
+      ]
+    },
+    {
+      "id": "DV-IO-005",
+      "category": "image_only",
+      "question": "数字差压计面板上的按键标注中，第 2 号键和第 6 号键分别是什么功能键？",
+      "ground_truth": "面板标注为：1 电源键、2 °C/°F 键、3 HOLD 键、4 UNITS 键、5 DIF 键、6 MAX 键。故 2 号键为 °C/°F 键（温度单位切换），6 号键为 MAX 键。",
+      "key_facts": [
+        "2 号键 = °C/°F 键",
+        "6 号键 = MAX 键"
+      ],
+      "must_have_docs": [
+        "数字差压计使用说明书.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "数字差压计使用说明书.pdf"
+      ],
+      "tags": [
+        "数字差压计",
+        "按键",
+        "面板标注",
+        "图上信息"
+      ]
+    },
+    {
+      "id": "DV-IO-006",
+      "category": "image_only",
+      "question": "融柏恒流泵 LSP-1C 系列注射泵运行中若发生堵车，界面弹出的报警提示文字是什么？",
+      "ground_truth": "界面弹出的提示文字为「设备堵车，请移动推块！」（另有报警文本「工作被中断！」，配「继续/停止」按钮）。",
+      "key_facts": [
+        "堵车提示文字为「设备堵车，请移动推块！」",
+        "配套报警文本为「工作被中断！」"
+      ],
+      "must_have_docs": [
+        "融柏恒流泵_LSP-1C系列注射泵_说明书.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "easy",
+      "source_docs": [
+        "融柏恒流泵_LSP-1C系列注射泵_说明书.pdf"
+      ],
+      "tags": [
+        "注射泵",
+        "报警提示",
+        "界面",
+        "图上信息"
+      ]
+    },
+    {
+      "id": "DV-CP-001",
+      "category": "comparison",
+      "question": "融柏 LSP-1C 系列（型号 LSP01-1BC）与中芯启恒 Cchippump-2 两台注射泵，在运行/工作模式与行程上限上有何不同？",
+      "ground_truth": "融柏 LSP01-1BC：运行模式 5 种（灌注、抽取、先灌注后抽取、先抽取后灌注、连续），自定义行程须大于 0 且小于 120mm。中芯启恒 Cchippump-2：双通道分体式（通道数量 2，每个通道独立工作、独立控制、互不干涉），最大行程 140mm，工作模式 4 种——规格参数表列为「单推、单拉、单推循环（选配）、推拉循环」，正文模式选择界面列为「单推、单拉、推拉循环、不工作」。",
+      "key_facts": [
+        "LSP01-1BC 运行模式 5 种（灌注、抽取、先灌注后抽取、先抽取后灌注、连续）",
+        "LSP01-1BC 行程须大于 0 且小于 120mm",
+        "Cchippump-2 双通道（通道数量 2，独立控制），最大行程 140mm"
+      ],
+      "must_have_docs": [
+        "融柏恒流泵_LSP-1C系列注射泵_说明书.pdf",
+        "瑞创RSP系列注射泵.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "hard",
+      "source_docs": [
+        "融柏恒流泵_LSP-1C系列注射泵_说明书.pdf",
+        "瑞创RSP系列注射泵.pdf"
+      ],
+      "tags": [
+        "注射泵",
+        "对比",
+        "通道数",
+        "行程"
+      ]
+    },
+    {
+      "id": "DV-CP-002",
+      "category": "comparison",
+      "question": "铭昇 H2-5000IBP 与多参数检测仪 KE-2000 都涉及血压，两者的血压相关量程/范围有何不同？",
+      "ground_truth": "H2-5000IBP 是血压模拟仪，气压动态模拟收缩压 30–255mmHg、舒张压 10–240mmHg；KE-2000 是血压测量仪，血压量程 0-279mmHg，显示分辨率 1mmHg(0.1kPa)。",
+      "key_facts": [
+        "H2-5000IBP 为模拟仪，动态模拟收缩压 30-255mmHg、舒张压 10-240mmHg",
+        "KE-2000 为测量仪，血压量程 0-279mmHg，分辨率 1mmHg"
+      ],
+      "must_have_docs": [
+        "铭昇电子_H2-5000IBP有创血压模拟仪_操作手册.pdf",
+        "多参数检测仪KE-2000 说明书.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "铭昇电子_H2-5000IBP有创血压模拟仪_操作手册.pdf",
+        "多参数检测仪KE-2000 说明书.pdf"
+      ],
+      "tags": [
+        "血压",
+        "对比",
+        "模拟仪",
+        "测量仪"
+      ]
+    },
+    {
+      "id": "DV-CP-003",
+      "category": "comparison",
+      "question": "脉搏血氧仪 PO-50B 与多参数检测仪 KE-2000 的血氧（SpO2）测量范围与精度分级有何差异？",
+      "ground_truth": "PO-50B：SpO2 范围 35%～99%，90%-99% ±2%、70%-89% ±3%、≤70% 无定义；KE-2000：血氧 35%～100%，90-100% ±2%、70-90% ±3%。两者分级思路一致，但 PO-50B 上限为 99% 且明确 ≤70% 无定义，KE-2000 上限为 100% 且区间边界为 90/70。",
+      "key_facts": [
+        "PO-50B 范围 35%～99%，90-99 ±2%、70-89 ±3%、≤70 无定义",
+        "KE-2000 范围 35%～100%，90-100 ±2%、70-90 ±3%"
+      ],
+      "must_have_docs": [
+        "脉搏血氧仪.pdf",
+        "多参数检测仪KE-2000 说明书.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [
+        "脉搏血氧仪.pdf",
+        "多参数检测仪KE-2000 说明书.pdf"
+      ],
+      "tags": [
+        "血氧",
+        "对比",
+        "精度分级"
+      ]
+    },
+    {
+      "id": "DV-CP-004",
+      "category": "comparison",
+      "question": "英菲泰克 IDEM1000-0N 与博声医疗血氧仪 APP 都涉及心电监测，二者在产品形态、适用人群与使用方式上有何不同？",
+      "ground_truth": "IDEM1000-0N 是硬件动态心电记录仪：CF 型、内部电源设备、IPXO、连续运行、携带式，经蓝牙与手机连接，供人体 24 小时动态心电监测，适用人群为成人，禁忌新生儿/儿童、胸廓严重畸形、安装心脏起搏器者。博声血氧仪 APP（「测医测」）是软件：可在 Android/iOS 运行，配合检测设备使用，提供血氧/心电等检测、本地与网络报告、分析灯分类及医生会诊等在线服务。",
+      "key_facts": [
+        "IDEM1000-0N 为硬件记录仪，适用成人，24 小时动态心电监测，蓝牙连接",
+        "博声为 Android/iOS 软件 APP，提供检测、报告与在线医生会诊服务"
+      ],
+      "must_have_docs": [
+        "英菲泰克动态心电记录仪.pdf",
+        "血氧仪使用手册.pdf"
+      ],
+      "must_not_have_docs": [],
+      "difficulty": "hard",
+      "source_docs": [
+        "英菲泰克动态心电记录仪.pdf",
+        "血氧仪使用手册.pdf"
+      ],
+      "tags": [
+        "心电",
+        "对比",
+        "硬件与软件",
+        "适用人群"
+      ]
+    },
+    {
+      "id": "DV-UA-001",
+      "category": "unanswerable",
+      "question": "这批器械说明书中，哪一款设备支持 Wi-Fi 无线联网？",
+      "ground_truth": "现有 10 份说明书中均未提及 Wi-Fi 联网。已知的通信方式为蓝牙（英菲泰克记录仪）、NB-IoT（KE-2000）、RS232/RS485（注射泵）、USB/串口（LH-T600）及手机网络，没有任何设备标注 Wi-Fi 功能。",
+      "key_facts": [
+        "10 份文档均未提及 Wi-Fi",
+        "已知联网方式为蓝牙、NB-IoT、RS232/RS485、USB，无 Wi-Fi"
+      ],
+      "must_have_docs": [],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [],
+      "tags": [
+        "无答案",
+        "Wi-Fi",
+        "联网方式",
+        "不可答"
+      ]
+    },
+    {
+      "id": "DV-UA-002",
+      "category": "unanswerable",
+      "question": "这批器械说明书中，是否有设备给出了电池的循环充放电次数（cycle life）？具体是多少次？",
+      "ground_truth": "现有材料中均未给出电池循环充放电次数。说明书只提供了电池类型/容量、电压阈值与续航时长（如 H2-5000IBP 满电 >8 小时、英菲泰克不小于 24 小时），没有循环寿命数据。",
+      "key_facts": [
+        "10 份文档均无电池循环充放电次数",
+        "仅给出电池类型/容量与续航时长"
+      ],
+      "must_have_docs": [],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [],
+      "tags": [
+        "无答案",
+        "电池",
+        "循环寿命",
+        "不可答"
+      ]
+    },
+    {
+      "id": "DV-UA-003",
+      "category": "unanswerable",
+      "question": "电除颤说明书中，双相波除颤的脉冲宽度（ms）是多少？",
+      "ground_truth": "电除颤说明书中未给出双相波的脉冲宽度数值。文档只说明了双向波除极方向、能量选择（双相波 120–200J 等）与单/双相波分类，未涉及脉冲宽度参数。",
+      "key_facts": [
+        "文档未提及脉冲宽度/脉宽参数",
+        "仅说明除极方向与能量选择"
+      ],
+      "must_have_docs": [],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [],
+      "tags": [
+        "无答案",
+        "除颤",
+        "脉冲宽度",
+        "不可答"
+      ]
+    },
+    {
+      "id": "DV-UA-004",
+      "category": "unanswerable",
+      "question": "这批设备中，哪一款支持通过手机 App 进行远程固件升级（OTA）？",
+      "ground_truth": "现有材料中均未提及远程固件升级（OTA）功能。英菲泰克记录仪与博声 APP 之间通过蓝牙传输心电数据，但说明书没有描述任何设备的固件升级机制。",
+      "key_facts": [
+        "10 份文档均无 OTA/固件升级相关内容",
+        "仅描述蓝牙数据传输，无升级机制"
+      ],
+      "must_have_docs": [],
+      "must_not_have_docs": [],
+      "difficulty": "medium",
+      "source_docs": [],
+      "tags": [
+        "无答案",
+        "OTA",
+        "固件升级",
+        "不可答"
+      ]
+    },
+    {
+      "id": "DV-N-FS-001",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "source_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_have_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_not_have_docs": [],
+      "question": "根据《骨科手术器械类产品技术审评规范》，骨科手术器械的管理类别如何划分？产品类代号是多少？",
+      "ground_truth": "骨科手术器械管理类别分为I类和II类，产品类代号为6810。",
+      "key_facts": [
+        "骨科手术器械管理类别分为I类和II类",
+        "骨科手术器械产品类代号为6810"
+      ],
+      "tags": [
+        "骨科器械",
+        "管理类别",
+        "产品类代号"
+      ]
+    },
+    {
+      "id": "DV-N-FS-002",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "source_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_have_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_not_have_docs": [],
+      "question": "《骨科手术器械类产品技术审评规范》适用于哪类手术器械？带电手术器械（如电动骨锯）是否在该规范涉及范围内？",
+      "ground_truth": "该规范适用于无源类常规手术器械；带电手术器械（如电动骨锯）不在此规范涉及范围内。",
+      "key_facts": [
+        "规范适用于无源类常规手术器械",
+        "带电手术器械（如电动骨锯）不在本规范涉及范围内"
+      ],
+      "tags": [
+        "骨科器械",
+        "适用范围",
+        "有源器械"
+      ]
+    },
+    {
+      "id": "DV-N-FS-003",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "source_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_have_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_not_have_docs": [],
+      "question": "骨科手术器械类产品的主要工作原理是什么？",
+      "ground_truth": "骨科手术器械类产品主要应用机械力学原理。",
+      "key_facts": [
+        "骨科手术器械类产品主要应用机械力学原理"
+      ],
+      "tags": [
+        "骨科器械",
+        "工作原理"
+      ]
+    },
+    {
+      "id": "DV-N-FS-004",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "source_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_have_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_not_have_docs": [],
+      "question": "骨科手术器械中，咬骨钳（剪）的头部可选用的不锈钢材料有哪些？",
+      "ground_truth": "咬骨钳（剪）的头部可选符合GB/T 1220规定的32Cr13Mo、30Cr13、40Cr13等材料。",
+      "key_facts": [
+        "咬骨钳（剪）头部可选材料包括32Cr13Mo",
+        "咬骨钳（剪）头部可选材料包括30Cr13",
+        "咬骨钳（剪）头部可选材料包括40Cr13"
+      ],
+      "tags": [
+        "骨科器械",
+        "咬骨钳",
+        "材料"
+      ]
+    },
+    {
+      "id": "DV-N-FS-005",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "source_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_have_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_not_have_docs": [],
+      "question": "骨科手术器械中，骨锯的锯片可采用哪些材料制造？",
+      "ground_truth": "骨锯的锯片可采用GB/T 1220中规定材料及65Mn、60SiMn等材料制造。",
+      "key_facts": [
+        "骨锯锯片可采用65Mn材料",
+        "骨锯锯片可采用60SiMn材料"
+      ],
+      "tags": [
+        "骨科器械",
+        "骨锯",
+        "材料"
+      ]
+    },
+    {
+      "id": "DV-N-FS-006",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "source_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_have_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_not_have_docs": [],
+      "question": "骨科手术器械中，骨凿可采用哪些材料制造？",
+      "ground_truth": "骨凿可采用GB/T 1220中规定的40Cr13和90Cr18MoV等材料制造。",
+      "key_facts": [
+        "骨凿可采用40Cr13材料",
+        "骨凿可采用90Cr18MoV材料"
+      ],
+      "tags": [
+        "骨科器械",
+        "骨凿",
+        "材料"
+      ]
+    },
+    {
+      "id": "DV-N-FS-007",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "source_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_have_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_not_have_docs": [],
+      "question": "咬骨钳（剪）热处理后，头部采用30Cr13材料时硬度要求是多少？",
+      "ground_truth": "咬骨钳（剪）头部采用30Cr13材料时硬度为47 HRC～53 HRC。",
+      "key_facts": [
+        "30Cr13材料咬骨钳（剪）头部硬度为47 HRC～53 HRC"
+      ],
+      "tags": [
+        "骨科器械",
+        "咬骨钳",
+        "硬度",
+        "30Cr13"
+      ]
+    },
+    {
+      "id": "DV-N-FS-008",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "source_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_have_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_not_have_docs": [],
+      "question": "咬骨钳（剪）热处理后，头部采用32Cr13Mo材料时硬度要求是多少？",
+      "ground_truth": "咬骨钳（剪）头部采用32Cr13Mo材料时硬度为48 HRC～56 HRC。",
+      "key_facts": [
+        "32Cr13Mo材料咬骨钳（剪）头部硬度为48 HRC～56 HRC"
+      ],
+      "tags": [
+        "骨科器械",
+        "咬骨钳",
+        "硬度",
+        "32Cr13Mo"
+      ]
+    },
+    {
+      "id": "DV-N-FS-009",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "source_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_have_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_not_have_docs": [],
+      "question": "咬骨钳（剪）热处理后，左、右两片头部硬度之差应不大于多少？",
+      "ground_truth": "咬骨钳（剪）左、右两片头部硬度之差应不大于4HRC。",
+      "key_facts": [
+        "咬骨钳（剪）左右两片头部硬度之差应不大于4HRC"
+      ],
+      "tags": [
+        "骨科器械",
+        "咬骨钳",
+        "硬度差"
+      ]
+    },
+    {
+      "id": "DV-N-FS-010",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "source_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_have_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_not_have_docs": [],
+      "question": "骨凿热处理后，头部20毫米内采用90Cr18MoV材料时硬度要求是多少？",
+      "ground_truth": "骨凿头部20毫米内采用90Cr18MoV材料时硬度为53HRC～58 HRC。",
+      "key_facts": [
+        "骨凿头部20毫米内90Cr18MoV材料硬度为53HRC～58 HRC"
+      ],
+      "tags": [
+        "骨科器械",
+        "骨凿",
+        "硬度",
+        "90Cr18MoV"
+      ]
+    },
+    {
+      "id": "DV-N-FS-011",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "source_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_have_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_not_have_docs": [],
+      "question": "咬骨钳（剪）的表面粗糙度要求中，头部凹槽、光亮外表面、无光亮外表面分别是多少？",
+      "ground_truth": "咬骨钳（剪）头部凹槽Ra≤0.8μm，光亮外表面Ra≤0.4μm，无光亮外表面Ra≤0.8μm。",
+      "key_facts": [
+        "咬骨钳（剪）头部凹槽表面粗糙度Ra≤0.8μm",
+        "光亮外表面Ra≤0.4μm",
+        "无光亮外表面Ra≤0.8μm"
+      ],
+      "tags": [
+        "骨科器械",
+        "咬骨钳",
+        "表面粗糙度"
+      ]
+    },
+    {
+      "id": "DV-N-FS-012",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "source_docs": [
+        "护理不良事件上报系统培训.pptx"
+      ],
+      "must_have_docs": [
+        "护理不良事件上报系统培训.pptx"
+      ],
+      "must_not_have_docs": [],
+      "question": "护理不良事件按内容可分为哪几大类？",
+      "ground_truth": "护理不良事件分为用药错误、输液问题、预防不足、医嘱错误、其他五大类。",
+      "key_facts": [
+        "护理不良事件分类包括用药错误",
+        "包括输液问题",
+        "包括预防不足",
+        "包括医嘱错误",
+        "包括其他类"
+      ],
+      "tags": [
+        "护理不良事件",
+        "分类"
+      ]
+    },
+    {
+      "id": "DV-N-FS-013",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "source_docs": [
+        "护理不良事件上报系统培训.pptx"
+      ],
+      "must_have_docs": [
+        "护理不良事件上报系统培训.pptx"
+      ],
+      "must_not_have_docs": [],
+      "question": "护理不良事件中，「输液问题」这一类包括哪些具体情形？",
+      "ground_truth": "输液问题包括化疗药外渗、输液反应、输血反应。",
+      "key_facts": [
+        "输液问题包括化疗药外渗",
+        "包括输液反应",
+        "包括输血反应"
+      ],
+      "tags": [
+        "护理不良事件",
+        "分类",
+        "输液问题"
+      ]
+    },
+    {
+      "id": "DV-N-FS-014",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "source_docs": [
+        "护理不良事件上报系统培训.pptx"
+      ],
+      "must_have_docs": [
+        "护理不良事件上报系统培训.pptx"
+      ],
+      "must_not_have_docs": [],
+      "question": "护理不良事件等级划分中，Ⅰ级事件（警告事件）的判定标准是什么？",
+      "ground_truth": "Ⅰ级事件指发生错误、造成患者死亡（包括损害程度I级）。",
+      "key_facts": [
+        "Ⅰ级事件为发生错误造成患者死亡（包括损害程度I级）"
+      ],
+      "tags": [
+        "护理不良事件",
+        "等级划分",
+        "Ⅰ级事件"
+      ]
+    },
+    {
+      "id": "DV-N-FS-015",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "source_docs": [
+        "护理不良事件上报系统培训.pptx"
+      ],
+      "must_have_docs": [
+        "护理不良事件上报系统培训.pptx"
+      ],
+      "must_not_have_docs": [],
+      "question": "护理不良事件等级划分中，Ⅳ级事件（隐患事件）的判定标准是什么？",
+      "ground_truth": "Ⅳ级事件指错误未发生（错误隐患），包括损害程度A级。",
+      "key_facts": [
+        "Ⅳ级事件为错误未发生（错误隐患），包括损害程度A级"
+      ],
+      "tags": [
+        "护理不良事件",
+        "等级划分",
+        "Ⅳ级事件"
+      ]
+    },
+    {
+      "id": "DV-N-FS-016",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "source_docs": [
+        "护理不良事件上报系统培训.pptx"
+      ],
+      "must_have_docs": [
+        "护理不良事件上报系统培训.pptx"
+      ],
+      "must_not_have_docs": [],
+      "question": "护理不良事件的报告形式有哪几种？",
+      "ground_truth": "护理不良事件的报告形式有口头报告、书面报告、网络报告三种。",
+      "key_facts": [
+        "报告形式包括口头报告",
+        "包括书面报告",
+        "包括网络报告"
+      ],
+      "tags": [
+        "护理不良事件",
+        "报告制度",
+        "报告形式"
+      ]
+    },
+    {
+      "id": "DV-N-FS-017",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "source_docs": [
+        "护理不良事件上报系统培训.pptx"
+      ],
+      "must_have_docs": [
+        "护理不良事件上报系统培训.pptx"
+      ],
+      "must_not_have_docs": [],
+      "question": "发生护理不良事件时，口头报告的接收对象包括哪些？",
+      "ground_truth": "口头报告应知情人立即向护士长、科主任、总值班、护理部报告。",
+      "key_facts": [
+        "口头报告对象包括护士长",
+        "包括科主任",
+        "包括总值班",
+        "包括护理部"
+      ],
+      "tags": [
+        "护理不良事件",
+        "报告制度",
+        "口头报告"
+      ]
+    },
+    {
+      "id": "DV-N-FS-018",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "source_docs": [
+        "护理不良事件上报系统培训.pptx"
+      ],
+      "must_have_docs": [
+        "护理不良事件上报系统培训.pptx"
+      ],
+      "must_not_have_docs": [],
+      "question": "护理部多久在质量管理委员会会议上反馈讨论护理不良事件？",
+      "ground_truth": "护理部每季度在质量管理委员会会议上反馈讨论护理不良事件。",
+      "key_facts": [
+        "护理部每季度在质量管理委员会会议上反馈讨论护理不良事件"
+      ],
+      "tags": [
+        "护理不良事件",
+        "报告制度",
+        "护理部"
+      ]
+    },
+    {
+      "id": "DV-N-FS-019",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "source_docs": [
+        "护理不良事件上报系统培训.pptx"
+      ],
+      "must_have_docs": [
+        "护理不良事件上报系统培训.pptx"
+      ],
+      "must_not_have_docs": [],
+      "question": "培训案例中，把青霉素误用在有青霉素过敏史的患者身上、导致过敏性休克抢救无效死亡，应属于几级护理不良事件？",
+      "ground_truth": "该案例导致患者死亡，应属于Ⅰ级事件。",
+      "key_facts": [
+        "青霉素过敏史患者误用致死亡属于Ⅰ级事件"
+      ],
+      "tags": [
+        "护理不良事件",
+        "案例分析",
+        "Ⅰ级事件"
+      ]
+    },
+    {
+      "id": "DV-N-SUM-001",
+      "category": "summary",
+      "difficulty": "hard",
+      "source_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_have_docs": [
+        "骨科手术器械类产品技术审评规范.docx"
+      ],
+      "must_not_have_docs": [],
+      "question": "《骨科手术器械类产品技术审评规范》中，骨科器械产品标准的主要技术要求一般包括哪几项？",
+      "ground_truth": "主要技术要求一般包括：材料、硬度、耐腐蚀性（如采用不锈钢为主体材料）、外观、规格尺寸、使用性能、表面粗糙度、组件要求（如有）等。",
+      "key_facts": [
+        "主要技术要求包括材料要求",
+        "包括硬度要求",
+        "包括耐腐蚀性要求",
+        "包括外观要求",
+        "包括规格尺寸要求",
+        "包括使用性能要求",
+        "包括表面粗糙度要求",
+        "包括组件要求"
+      ],
+      "tags": [
+        "骨科器械",
+        "主要技术要求",
+        "综述"
+      ]
+    }
+  ]
+}

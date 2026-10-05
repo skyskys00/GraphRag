@@ -456,3 +456,48 @@
 **对 v5.29「遗留」归因的直接证伪**：旧归因指向 `chunk-bb7dc287`（LSP-1C「一块塞内径/行程/时钟被长度归一化稀释」）。该 fact（CP-001.f2）语料内可定位目标块实为 **111 字单主题 paragraph**；v5.29 探针自记该块 keyword 第 39 名擦边进池——**稀疏打分可达，差在 RRF 跨路聚合而非切分**。若切分是主因，4 块应全像 f2/博声那样进不了候选；而 2/4 已进 RRF 全序前 11，切分假设不成立。
 
 **后续方向（历史已封闭，勿重复探底）**：f3/CP-002 精排截断 = 客服库 CS-TN-003 同款画像，该方向客服/admin 库已系统探底并封闭——v5.11/12 numeric boost 逐字节无效、v5.13 NL 摘要分数变序不变、v5.20 结构化补召回指标逐位不变，贯穿病根是 bge-reranker 对数字/专名块失明（rerank 主导排名结构）；唯一被验证有效（救池内块）的 v5.21 LLM listwise 终审已决策不接生产（流式不兼容 + 评测同源偏置 + token 成本）。故 f3/CP-002 要动名次需 reranker 侧换赛道（LLM 终审进生产 / 换 reranker 模型），f2/博声属纯匹配问题另案——均属方向决策，非探底能自行开启。本次探底零代码改动，无需回滚；探针留档 `backend/scripts/probe_comparison_miss_paths.py`。
+
+---
+
+# 三库检索效果横向对比（2026-10-04）：器械「差」非系统退化，是考核难度结构差异
+
+**动机（用户疑问）**：「为什么行政库 / 客服库效果好像远好于器械库？」直接横向对比绝对值会产生误导——三套题库的难度配比、题型构成、语料规模都不是一个量级。下表拉齐真实数据（器械 = v532 `run_retrieval_device30_v532_localize.json`（诚实 @5 口径）；行政 = `run_retrieval_finalcheck_admin30_20260927.json`；客服 = `run_retrieval_finalcheck_cservice35_20260927.json`；均 standard reranker、@5 口径。按难度 Recall 由各报告 `questions[].difficulty` + `metrics.context_recall(_top5)` 现算并排除 unanswerable）。
+
+| 维度 | 器械（col_b7b876b1） | 行政（eval_admin_ws） | 客服（eval_cservice_ws） |
+|---|---|---|---|
+| 题数 / hard 占比 | 30，**8 hard（27%）** | 30，**1 hard（3%）** | 35，**5 hard（14%）** |
+| 题型构成 | table_numeric 8 + image_only 6 + fact_single 8 + comparison 4 + unanswerable 4 | fact_single 11 + fact_cross_doc 4 + proper_noun 4 + comparison 4 + table_numeric 5 + unanswerable 2 | fact_single 10 + fact_cross_doc 7 + proper_noun 6 + comparison 4 + table_numeric 4 + summary 2 + unanswerable 2 |
+| 语料 | **10 份 / 844 chunk** | 6 份 / 203 chunk | 5 份 / 99 chunk |
+| 块形态 | **table 25.2% + drawing 17.5%**（约 43% 非纯文本） | heading 39.4% + paragraph 35.5% + table 24.6% | heading 33.3% + paragraph 41.4% + table 25.3% |
+| Recall / nDCG（standard） | 0.6763 / 0.7508（v532） | 0.9321 / 0.8450 | 0.8753 / 0.8960 |
+| hard Recall | **0.4167** | 0.80（仅 1 题，无统计意义） | **0.71** |
+| medium Recall | **0.8542** | 0.9212 | 0.8222 |
+| easy Recall | 0.6667 | 0.9479 | 1.0 |
+
+**结论：落差是结构性三重差异，不是「器械库检索更差」（同难度段链路没崩）：**
+
+1. **难度结构完全不同**：器械 hard 占 27%，行政仅 3%（1 题）、客服 14%；hard 硬题 = table_numeric + image_only 密集，恰好全是 cross-encoder 失明高发题型。
+2. **题型构成**：器械首次引入 image_only（6 题，答案在 drawing 截图块）+ 8 题 table_numeric（数值表格）；行政/客服以 fact_single/proper_noun 文本问答为主——文本题型对 reranker 友好。
+3. **语料规模放大竞争**：844 chunk 候选池比 99/203 大 4~8 倍，相似块相互挤兑，rerank 把目标块压出 top5 概率成倍上升（探针精排截断画像）。
+
+**对照读数**：medium 段器械 0.8542 ≈ 客服 0.8222 ≈ 行政 0.9212（同量级）；差距集中在 hard 段（0.42 vs 0.71）与题型构成。=> 器械 0.6763 是「把 cross-encoder 数字失明在真实难题上暴露度放大」的结果，不是系统退化。日后纵向对比应**按题型/难度分层读**，勿拿三库 aggregate 绝对值直接排优劣。
+
+**📌 v5.33 更新（2026-10-05，器械扩到 50 题、难度收敛 5:3:2）**：语料 10→**12 份**（+骨科审评规范.docx / 护理不良事件.pptx），题集 30→**50 题**，难度从「6 易/16 中/8 难（hard 27%）」调为「**25 易/16 中/9 难（hard 18%）**」。实测（`run_retrieval_device50.json`，standard，@5，分母 46）：
+
+| 维度 | 器械 50 题（v5.33） | 器械 30 题（v532） | 变化 |
+|---|---|---|---|
+| 题数 / hard 占比 | 50，**9 hard（18%）** | 30，8 hard（27%） | hard 占比 −9pp |
+| 语料 | **12 份 / 888 chunk** | 10 份 / 844 chunk | +2 份 |
+| Recall / nDCG | **0.7909 / 0.7737** | 0.6763 / 0.7508 | **+0.1146 / +0.0229** |
+| easy Recall | **0.8720**（25 题） | 0.6667（6 题） | +0.2053 |
+| medium Recall | **0.8542**（16 题） | 0.8542 | 持平 |
+| hard Recall | **0.4815**（9 题） | 0.4167 | +0.0648 |
+
+**读数**：
+
+1. **难度配比是器械 aggregate 的主要杠杆**——把 hard 占比从 27% 压到 18%（贴近真实使用），aggregate Recall 从 0.6763 升到 0.7909（**+0.1146**）。这正面验证上文「器械『差』主要是考核难度结构差异」的结论：**不是链路变强了，而是考核分布变真实了**。
+2. **hard 段本身也小幅上移（0.4167→0.4815）**，主因是 v5.32 `localize_query` 让 comparison CP-001 恢复（CP 属 hard）——即检索侧真实改进，与难度重配解耦。
+3. **新增 20 题（骨科 12 全满分 / 护理 8 均 0.7875，合计 0.9150）**证明「多格式（PDF/PPTX/DOCX）+ 表格 + 多模态」通用 RAG 在新格式文档上可用；护理 FS-019 的 0（答案疑在 pptx 图片页）与既有 image_only 短板同源。
+4. **新语料零回归**：table_numeric / image_only / comparison 三题型 @5 与 v532 逐题一致，跨域入库未稀释器械题精度。
+
+**附录：LLM 终审进生产的现状核对（2026-10-04）**：`rerank_with_llm` 定义与调用点仅在 M9 评测（`llm_rerank.py` + `runner.py --reranker llm`）；生产检索 `retriever.py` 用 bge-reranker，M7/api 无引用——「v5.21 采用过 LLM 终审」只发生在评测量测，生产问答/compare 从未接入。
