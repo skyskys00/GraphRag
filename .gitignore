@@ -43,5 +43,6 @@ frontend/dist/
 # 单份测试输入副本（非标准语料，仅本地追溯用）
 backend/inputs/raw/季度销售业绩复盘_行动方案补充说明.pdf
 
-# 
+# 本地治理规范（不入库，仅供本机 Claude Code 读取）
+CLAUDE.md 
 

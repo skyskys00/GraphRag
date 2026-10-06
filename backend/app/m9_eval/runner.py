@@ -124,7 +124,7 @@ def _comparison_targets(
     交错合并后统一窗口。
 
     v5.30 起退役题集 per_doc_queries（每文档定制子查询是评测独有输入，线上 compare.py
-    不消费 ⇒ 泄漏红线，见 CLAUDE.md「评测信息泄漏红线」）。每 doc 直接用完整 question
+    不消费 ⇒ 违反评测防泄漏红线）。每 doc 直接用完整 question
     检索 —— 与生产形态一致，数字反映真实对比检索质量。
 
     **v5.32 起（生产先落地能力，评测镜像同一函数）**：喂给每个 doc 的子查询 = 生产
