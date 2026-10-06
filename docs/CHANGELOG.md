@@ -48,6 +48,7 @@ reports/
 - ⚠️ **本条目之前各历史条目里的报告路径（`tests/reports/run_xxx.json` 等）已因本次重组失效**——历史条目保留原文不改（时序权威）；回溯时按文件名到对应子目录查找（旧 retrieval 报告多在 `retrieval/history/`）。
 - **引用已更新**：`M9_evaluation.md` / `M9_testset.md` / `DEVICE_SCENARIO.md` / `RETRIEVAL_OPTIMIZATION.md` / `archive/{retrieval_probing,device_scenario_eval}_archive.md` / `retrieval_comparison.md`（主报告，含裸名引用）+ 脚本 `rejudge_correctness.py` / `probe_struct_table.py` / `probe_m2_inject_rank.py` / `probe_expand_ablation.py` / `build_human_checklist.py`。
 - **未改**：`m9_eval/runner.py` 默认输出路径（`tests/reports/run_{ts}.json`，运行时用 `--report` 指定落点）；`final_results/` 目录（v5.37 已建的当前权威归档，不在本次重组范围）。
+- **补丁（同日）**：首次公开发布准备 —— 根 `README.md` 全面完善（新增 4 张界面截图 `docs/screenshots/`、多模态/评测体系章节、技术栈补视觉模型）；**正式第一版 tag `v5.38`**（本条目版本号即发布号）。
 
 ---
 
