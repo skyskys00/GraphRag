@@ -285,7 +285,7 @@ cd backend && python -m app.m9_eval.runner --testset tests/testsets/testset_devi
 
 > 库 `col_b7b876b1`（12 份文档 / 888 chunk / 149 带图 drawing 块）。
 > 跑法：`python -m app.m9_eval.runner --testset tests/testsets/testset_device_v2.json --collection col_b7b876b1 --mode <retrieval|e2e>`（standard reranker，@5 生产口径）。
-> 报告：`backend/tests/reports/run_retrieval_device_v2.json` / `run_e2e_device_v2.json`；**详表与逐题归因见 [retrieval_comparison.md](../../backend/tests/reports/retrieval_comparison.md) v5.34 节**。
+> 报告：`backend/tests/reports/retrieval/current/run_retrieval_device_v2.json` / `run_e2e_device_v2.json`；**详表与逐题归因见 [retrieval_comparison.md](../../backend/tests/reports/retrieval_comparison.md) v5.34 节**。
 > ⚠️ **旧题集（30/50 题）全部实测已归档**：[device_scenario_eval_archive.md](../archive/device_scenario_eval_archive.md)。题集全删重建非增量，**数值与 v2 不可横比**。
 
 ### 11.1 检索指标（`--mode retrieval`，50 题 v2，@5 生产口径，`run_retrieval_device_v2.json`）

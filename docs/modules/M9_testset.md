@@ -1,8 +1,8 @@
 # M9 测试语料与测试集设计规范
 
-> **版本：** v0.8
-> **状态：** 客服业务库 50 题完整版已落地（2026-09-24）+ 5 题 GT 修正（2026-09-25）+ 裁判校准（v1.5，2026-09-25）；**办公行政库 30 题完整版已落地（2026-09-25：6 文档 203 chunks 建库 + 30 题测试集 v0.2 + 全量检索基线 + 全量 e2e + 裁判一致性抽检 10/10 达标）**
-> **更新：** 2026-09-25
+> **版本：** v0.9
+> **状态：** 客服业务库 50 题完整版已落地（2026-09-24）+ 5 题 GT 修正（2026-09-25）+ 裁判校准（v1.5，2026-09-25）；**办公行政库 30 题完整版已落地（2026-09-25：6 文档 203 chunks 建库 + 30 题测试集 v0.2 + 全量检索基线 + 全量 e2e + 裁判一致性抽检 10/10 达标）**；**客服库评测口径回填（2026-10-06：§8 旧口径 recall 判为虚高，当前口径重跑已归档，见 CHANGELOG v5.36）**
+> **更新：** 2026-10-06
 > **定位：** M9 评测层的测试语料（知识库文档）与测试题集的设计标准、清单与构造流程
 > **契约：** 评测语料 → 测试集 JSON → 供 [M9_evaluation.md](M9_evaluation.md) runner 使用
 > **上游：** [M9_evaluation.md](M9_evaluation.md) §3 ｜ **下游：** 实际评测语料文件 + 测试集 JSON
@@ -415,7 +415,9 @@ backend/
 
 ## 8. Phase 2 生成质量评测结果（2026-09-25，M9 v1.4 → v1.5 裁判校准）
 
-50 题客服库全量 e2e 评测（报告 `tests/reports/run_e2e_cservice_50.json`，**6 处 GT 修正 merge 后终值 + 裁判校准后 correctness 重判**，judge_failed=0）：
+> ⚠️ **口径注记（2026-10-06）**：下表为 v5.15 **旧口径**数值（早于评测口径修复），**其 Context Recall 0.9601 为虚高值**，与当前口径不可横比。当前口径重跑（`tests/final_results/run_e2e_cservice_50_20261006.json`）：Context Recall **0.8** / Faithfulness **0.9975** / Correctness **0.8149** / Answer Relevance 0.952 / Citation Accuracy 0.8594（nDCG 0.9377、gold_rank 1.49 均较旧值改善，证明非链路退化）。口径变更详见 [CHANGELOG](../CHANGELOG.md) v5.36 与 [retrieval_comparison.md](../../backend/tests/reports/retrieval_comparison.md)「口径变更说明」。
+
+50 题客服库全量 e2e 评测（报告 `tests/reports/e2e/history/run_e2e_cservice_50.json`，**6 处 GT 修正 merge 后终值 + 裁判校准后 correctness 重判**，judge_failed=0）：
 
 | 指标 | 数值 | 含义 |
 |---|---|---|
@@ -430,7 +432,7 @@ backend/
 
 **裁判一致性人工抽检（10 题，验收线 ≥80%）**：
 - **校准前（v5.14/v1.4 阶段）**：方向性判定一致率高，分数一致性约 **7/10，未硬达标 80%**。已知偏差模式——裁判系统性低估「表述不同但实质覆盖」的答案（CS-FS-007 判 0.17 人工 0.9+；CS-FC-004 判 0.25 人工倾向 0.5）。
-- **校准后（v1.5 rejudge 版本，重做 10 题）**：一致性 **10/10 = 100% 达标**，平均 |人工−裁判| 0.043、最大 0.15（报告 `tests/reports/human_checklist_run_e2e_cservice_50_v2.md`）。低估修复确认（CS-FS-007 0.17→0.60 vs 人工 0.75；CS-FC-004 0.25→0.50 vs 人工 0.50），虚构错答严判保留（CS-CP-004 仍 0.00，人工亦 0.00）。残留：单题 LLM 采样波动 ±0.1~0.25 + 抽检人工判定由 Claude（与裁判同源）执行有自我一致性偏差风险，建议用户抽看 2-3 题复核（CS-FS-007 / CS-CP-006 / CS-TN-003）。缓解：评测用于版本间**相对比较**而非绝对分，且按 [M9_evaluation.md](M9_evaluation.md) §5 每个版本核心数据人工抽检 20%。
+- **校准后（v1.5 rejudge 版本，重做 10 题）**：一致性 **10/10 = 100% 达标**，平均 |人工−裁判| 0.043、最大 0.15（报告 `tests/reports/checklists/human_checklist_run_e2e_cservice_50_v2.md`）。低估修复确认（CS-FS-007 0.17→0.60 vs 人工 0.75；CS-FC-004 0.25→0.50 vs 人工 0.50），虚构错答严判保留（CS-CP-004 仍 0.00，人工亦 0.00）。残留：单题 LLM 采样波动 ±0.1~0.25 + 抽检人工判定由 Claude（与裁判同源）执行有自我一致性偏差风险，建议用户抽看 2-3 题复核（CS-FS-007 / CS-CP-006 / CS-TN-003）。缓解：评测用于版本间**相对比较**而非绝对分，且按 [M9_evaluation.md](M9_evaluation.md) §5 每个版本核心数据人工抽检 20%。
 
 **GT 修正效果**：6 处修正（§10 v0.3）为测试集纠错，correctness 0.799→**0.832**；CS-FC-005 三含义修正 0.25→0.643，CS-FC-007 去推断句后 citation_accuracy 0.357→0.833。
 
@@ -449,8 +451,9 @@ backend/
 
 ## 10. 版本
 
+- **v0.9**（2026-10-06）：**客服库评测口径回填**。v5.13/v5.15 旧 recall 判定为修复前口径的虚高值（§8 加口径注记）；当前代码重跑 35 题 retrieval（Recall 0.7515 / nDCG 0.9443）与 50 题 e2e（Recall 0.8 / Correctness 0.8149），报告归档 `tests/final_results/`。口径变更详见 [CHANGELOG](../CHANGELOG.md) v5.36 与 [retrieval_comparison.md](../../backend/tests/reports/retrieval_comparison.md)「口径变更说明」。
 - **v0.8**（2026-09-25）：**办公行政库 30 题完整版落地**。`testset_admin_30.json`（v0.2，30 题）新增 15 题（q016–q030）覆盖 A4/A5/A6；**q015 转换**（unanswerable→fact_single，年假梯度作答，拒答 coverage 由新增 q029/q030 承担，diff_source 注明）；A4/A5/A6 三篇文档（5 页 PDF / MD / DOCX）补齐，六篇 203 chunks 建库 `eval_admin_ws`。全量检索基线 + 全量 e2e + 裁判一致性抽检（10/10）见 [CHANGELOG](../CHANGELOG.md) v5.19 与 [M9_evaluation.md §8.1c/8.1d](M9_evaluation.md#81c-行政库30题全量检索基线2026-09-25m9-v19)。
-- **v0.7**（2026-09-25）：**行政库 e2e 生成四指标首次出值**。15 题全量 e2e（`tests/reports/run_e2e_admin_15.json`，judge_failed=0，9.3 分钟）：faithfulness 0.9277 / answer_relevance 0.9000 / correctness 0.9373 / citation_accuracy 0.8928。拒答验证通过（adm_q015 正确拒答）、干扰题行为正确（adm_q010 如实答「FAS 无业务定义」）、检索缺口传导到生成（adm_q004 跨表依赖 correctness 0.5）。详见 [M9_evaluation.md §8.1b](M9_evaluation.md#81b-行政库e2e生成质量评测2026-09-25m9-v17--v18) 与 [CHANGELOG](../CHANGELOG.md) v5.18。
+- **v0.7**（2026-09-25）：**行政库 e2e 生成四指标首次出值**。15 题全量 e2e（`tests/reports/e2e/history/run_e2e_admin_15.json`，judge_failed=0，9.3 分钟）：faithfulness 0.9277 / answer_relevance 0.9000 / correctness 0.9373 / citation_accuracy 0.8928。拒答验证通过（adm_q015 正确拒答）、干扰题行为正确（adm_q010 如实答「FAS 无业务定义」）、检索缺口传导到生成（adm_q004 跨表依赖 correctness 0.5）。详见 [M9_evaluation.md §8.1b](M9_evaluation.md#81b-行政库e2e生成质量评测2026-09-25m9-v17--v18) 与 [CHANGELOG](../CHANGELOG.md) v5.18。
 - **v0.6**（2026-09-25）：**行政库表格链路复用表格 NL 摘要**。排查修正 v5.16 结论（q013 非「建库未套用摘要」，真因是稀疏索引缺 block_type 元数据：M7 `build_workspace_deps` 重建 sparse 漏传 `chunks_dir`）。M7 修复 + admin sparse 重建后检索复测出值（Rec@5 0.9405→0.9583 / Prec@5 加权 0.5878→0.6122 / nDCG@5 0.8518→0.8649，`adm_q012` nDCG 0.83→0.99）；q013/q014 排序不变确认表格碎片化为 M2 行级切分独立问题。详见 [CHANGELOG](../CHANGELOG.md) v5.17 与 [M9_evaluation.md §8.1a](M9_evaluation.md#81a-表格-nl-摘要激活后复测2026-09-25m9-v16--v17)。
 - **v0.5**（2026-09-25）：**办公行政库 15 题最小集落地（eval_admin）**。`testset_admin_15.json` 审查通过（14 题 GT 对照语料通过，难度 7/7/1），修正 adm_q010（FAS）GT——该缩写仅以固定资产办法编号 FIN-FAS-2024-002 片段出现、无业务定义，「船边交货/财务会计准则」系写题臆造。语料建库 3 篇 117 chunks，首轮检索基线评测出值（见 [M9_evaluation.md §8.1](M9_evaluation.md) 与 [CHANGELOG](../CHANGELOG.md) v5.16）。
 - **v0.4**（2026-09-25）：**裁判校准**。correctness 裁判 prompt 校准（分母改标准答案事实点 + 语义对齐含译名 + 额外不扣分 + 比例分），judge 透传 total_facts/correct_facts/incorrect，新增重判脚本 `scripts/rejudge_correctness.py`。全量重判后 correctness 0.8321→**0.8353**（详见 §8 与 [CHANGELOG](../CHANGELOG.md) v5.15）。

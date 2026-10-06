@@ -23,7 +23,7 @@
 
 - **改什么**：`blocks_builder._CHAPTER_RE` 对 `第X章/第3节/第一篇/卷` 式标题在 PDF 链路强制 level=1。MinerU 模型推断 text_level 常把章误判为与「X.Y」节同级（=2），导致 chunker 弹栈丢章、title_path 退化为「文档名/节」、sibling 展开为整文档目录。docx（读 Word 大纲）章值本为 1，恒等不变。
 - **效果**：title_path 分层恢复（章→节）；检索指标与 baseline 完全一致（0.8567）——**纯解析修复，语义零回归**。
-- 报告：`tests/reports/run_retr_admin_30_v520.json`。
+- 报告：`tests/reports/retrieval/history/run_retr_admin_30_v520.json`。
 
 ### 已确定无效（探底三连收尾，不落地）
 
@@ -34,7 +34,7 @@
 | 注入 + NL_SUM（表格 NL 摘要进 sparse 向量） | 0.8499 | 0.9613 | **+0.0026 杯水车薪**：摘要进不进召回池不是瓶颈 |
 
 - **注入对 title_path 结构敏感**：旧（错误）title_path 下 #×0.0006、正确 title_path 下 -0.94pt——全量 sibling 前缀在正确层级下过曝回吐。
-- 探针脚本留档：`scripts/probe_m2_inject_all.py`（全量）、`scripts/probe_m2_inject_rank.py`（排序级判定）；报告 `tests/reports/probe_m2_inject_*`。
+- 探针脚本留档：`scripts/probe_m2_inject_all.py`（全量）、`scripts/probe_m2_inject_rank.py`（排序级判定）；报告 `tests/reports/probe/probe_m2_inject_*`。
 
 ### 可能有效的线索（数据指向，暂不落地）
 
@@ -67,7 +67,7 @@
 
 ### 「结构化表索引」探针验证（2026-09-26，方向 1 预审）
 
-> 脚本 `scripts/probe_struct_table.py`（纯本地解析 eval_admin 表块，无 LLM/Xinference）；报告 `tests/reports/probe_struct_table.json`。
+> 脚本 `scripts/probe_struct_table.py`（纯本地解析 eval_admin 表块，无 LLM/Xinference）；报告 `tests/reports/probe/probe_struct_table.json`。
 > 验证问题：把表块解析为「列名 + 行 cell」后，用 query 实体做**值匹配**（专名精确/数值区间），能否绕过 sparse 激活盲区，给缺口表块候选资格。
 
 **结论：方向成立，三类典型缺口可救；q008 类跨文档错位须配文档关联扩展。**
@@ -108,7 +108,7 @@
 
 > 出处：retrieval_comparison.md「## LLM listwise 终审探底 A/B（v5.21…）」整节。
 > **决策背景**：B 方案（结构化补召回）证明「进池靠召回层手段、出位卡 reranker 失明」。终审权移交方向：把 `fusion.fused_top40` 前 20 交给 LLM listwise 重排定 top-N —— **谁握终审权比顺序更关键**，cross-encoder 降级为召回/初筛。
-> 探针 `scripts/probe_rankgpt_listwise.py`（报告 `probe_rankgpt_listwise.json`）→ 全量 A/B `tests/reports/run_retr_admin_30_llm_final.json`（30 题，同库同裁判）。
+> 探针 `scripts/probe_rankgpt_listwise.py`（报告 `probe_rankgpt_listwise.json`）→ 全量 A/B `tests/reports/retrieval/history/run_retr_admin_30_llm_final.json`（30 题，同库同裁判）。
 > **归档备注**：本节基于旧 admin 30 题集。落地状态与主线一致：仅 M9 评测 `--reranker llm` 可选，生产检索 `retriever.py` 用 bge-reranker、从未接 LLM 终审（2026-10-04 附录核对）。
 
 ### A/B 总体
@@ -230,7 +230,7 @@
 
 **背景**：回答「每条召回路由（graph / vector / keyword）各带多少增益」——`--ablation-routes` 开关按 active set 裁剪三路召回输入（不改检索/融合/判据逻辑），admin 30 题跑 vector / vector+graph / 三条全量三组对照；verify 组（0 ERROR）复跑逐项一致，初跑 judge ERROR 为已重试成功的瞬时日志，未污染。
 
-**总体指标**（报告 `tests/reports/run_ablation_admin_{vector,vector_graph,graph_vector_keyword}_20260929.json`）：
+**总体指标**（报告 `tests/reports/ablation/run_ablation_admin_{vector,vector_graph,graph_vector_keyword}_20260929.json`）：
 
 | 指标 | vector | vector+graph | full（三路） | 2026-09-27 基线 |
 |---|---|---|---|---|
@@ -255,7 +255,7 @@
 
 **动机**：admin 30 题的「三路 ≈ 中性」结论是否只在行政库成立？在另一领域（客服业务库，`eval_cservice_ws`）跑同口径对照（vector / 三路全量两组）。
 
-**总体指标**（报告 `tests/reports/run_ablation_cservice35_{vector,graph_vector_keyword}_20260929.json`）：
+**总体指标**（报告 `tests/reports/ablation/run_ablation_cservice35_{vector,graph_vector_keyword}_20260929.json`）：
 
 | 指标 | vector | full（三路） | Δ |
 |---|---|---|---|
@@ -416,4 +416,4 @@
 
 **方向封闭**：精排侧「文本工程」（增补 / 去噪 / 权重调参）三路同归无效，与客服库 v5.11/12 numeric boost、v5.13 NL 摘要（分数变序不变）、v5.20 结构化补召回（指标逐位不变）一致。要动名次只剩换赛道（LLM 终审进生产 / 换 reranker），属方向决策。
 
-**收尾**：两轮均 `git checkout` 整文件回滚（工作区无残留）；日志归档 `backend/tests/reports/probe_rerank_text_context.log`（A）/ `probe_rerank_text_denoise.log`（B）；探针复用未新增脚本；零生产代码改动、零索引重建。
+**收尾**：两轮均 `git checkout` 整文件回滚（工作区无残留）；日志归档 `backend/tests/reports/probe/probe_rerank_text_context.log`（A）/ `probe_rerank_text_denoise.log`（B）；探针复用未新增脚本；零生产代码改动、零索引重建。

@@ -1,0 +1,887 @@
+/opt/anaconda3/envs/graphrag/lib/python3.11/site-packages/torch/cuda/__init__.py:68: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+测试集: testset_cservice_50 (客服业务库（客户服务中心）)
+  共 50 题：{'fact_single': 14, 'fact_cross_doc': 9, 'proper_noun': 8, 'comparison': 6, 'table_numeric': 6, 'summary': 3, 'unanswerable': 4}
+  难度分布：{'easy': 15, 'medium': 29, 'hard': 6}
+
+评测模式: e2e
+Collection: eval_cservice → workspace: eval_cservice_ws
+数据目录: /Users/kemily/Documents/AI开发/AI_project/GraphRAG/backend/data/eval_cservice_ws
+
+初始化 RAG / 稀疏索引 / 实体 / 裁判 LLM...
+INFO: PostgreSQL table: LIGHTRAG_VDB_ENTITY_xinference_bge_m3_1024d
+INFO: PostgreSQL table: LIGHTRAG_VDB_RELATION_xinference_bge_m3_1024d
+INFO: PostgreSQL table: LIGHTRAG_VDB_CHUNKS_xinference_bge_m3_1024d
+INFO: Role LLM Configuration (initialized):
+INFO:  - extract: None/None, host=None, max_async=2, timeout=240
+INFO:  - keyword: None/None, host=None, max_async=4, timeout=240
+INFO:  - query: None/None, host=None, max_async=4, timeout=240
+INFO:  - vlm: None/None, host=None, max_async=4, timeout=240
+INFO: PostgreSQL, Retry config: attempts=10, backoff=3.0s, backoff_max=30.0s, pool_close_timeout=5.0s
+INFO: PostgreSQL, VECTOR extension enabled
+INFO: PostgreSQL, Connected to database at 127.0.0.1:5432/postgres without SSL
+INFO: chunk_id column already exists in LIGHTRAG_LLM_CACHE table
+INFO: cache_type column already exists in LIGHTRAG_LLM_CACHE table
+INFO: queryparam column already exists in LIGHTRAG_LLM_CACHE table
+INFO: mode column does not exist in LIGHTRAG_LLM_CACHE table
+INFO: chunks_list column already exists in LIGHTRAG_DOC_STATUS table
+INFO: llm_cache_list column already exists in LIGHTRAG_DOC_CHUNKS table
+INFO: track_id column already exists in LIGHTRAG_DOC_STATUS table
+INFO: Index on track_id column already exists for LIGHTRAG_DOC_STATUS table
+INFO: metadata column already exists in LIGHTRAG_DOC_STATUS table
+INFO: error_msg column already exists in LIGHTRAG_DOC_STATUS table
+INFO: HNSW vector index idx_lightrag_vdb_entity_xinference_bge_m3_1024d_hnsw_cosine already exists on table LIGHTRAG_VDB_ENTITY_xinference_bge_m3_1024d
+INFO: HNSW vector index idx_lightrag_vdb_relation_xinference_bge_m3_1024d_hnsw_cosine already exists on table LIGHTRAG_VDB_RELATION_xinference_bge_m3_1024d
+INFO: HNSW vector index idx_lightrag_vdb_chunks_xinference_bge_m3_1024d_hnsw_cosine already exists on table LIGHTRAG_VDB_CHUNKS_xinference_bge_m3_1024d
+INFO: [eval_cservice_ws] PGTableGraphStorage initialized
+  稀疏索引 chunks: 99｜实体 595
+  文档名映射: 0 份（comparison 题 per-doc 检索用）
+  初始化完成
+
+[1/50] CS-FS-001 - fact_single - 三级投诉的首次响应时效是多长时间？...
+WARNING: high_level_keywords is empty
+INFO: Embedding func: 8 new workers initialized (Timeouts: Func: 30s, Worker: 60s, Health Check: 75s)
+INFO: Query nodes: 三级, 响应时效, 投诉, 首次响应 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 56 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 56 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 56 relations
+INFO: Selecting 9 from 9 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 56 relations
+INFO: Round-robin merged chunks: 29 -> 21 (deduplicated 8)
+INFO: Final context: 15 entities, 56 relations, 20 chunks
+INFO: Final chunks S+F/O: E5/1 E5/2 E3/3 E4/4 C1/5 E5/5 E1/6 C1/7 E2/7 E1/8 C1/9 E1/9 C1/10 C1/12 C1/14 C1/15 C1/16 C1/17 C1/18 C1/19
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.40 (15.5s)  gr_avg=1.67
+[2/50] CS-FS-002 - fact_single - 一级投诉的全流程处理时效中，问题解决需要在多长时间内完成？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 一级, 问题解决, 投诉 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 40 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 40 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 40 relations
+INFO: Selecting 9 from 9 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 40 relations
+INFO: Round-robin merged chunks: 29 -> 23 (deduplicated 6)
+INFO: Final context: 15 entities, 40 relations, 20 chunks
+INFO: Final chunks S+F/O: E3/1 E1/2 C1/3 E1/3 C1/4 E4/4 E2/5 E5/6 C1/7 E4/7 C1/8 E1/8 E1/9 C1/10 C1/11 C1/12 C1/13 C1/14 C1/15 C1/17
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.80 (15.93s)  gr_avg=2.0
+[3/50] CS-FS-003 - fact_single - 智能客服系统的 FCR 指标是什么含义？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 智能客服系统, FCR (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 72 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 72 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 72 relations
+INFO: Selecting 24 from 24 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 72 relations
+INFO: Round-robin merged chunks: 44 -> 29 (deduplicated 15)
+INFO: Final context: 15 entities, 72 relations, 20 chunks
+INFO: Final chunks S+F/O: E2/1 E2/2 C1/3 E1/3 E1/4 C1/5 E3/5 C1/6 E1/6 C1/7 E5/7 E1/8 C1/9 E2/9 E1/10 E1/11 E2/12 E1/13 E1/14 E1/15
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.60 (17.77s)  gr_avg=1.0
+[4/50] CS-FS-004 - fact_single - 客户情绪激动时，客服应遵循什么处理法则？请简述其步骤。...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 客服, 客户 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 53 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 53 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 53 relations
+INFO: Selecting 26 from 26 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 53 relations
+INFO: Round-robin merged chunks: 46 -> 38 (deduplicated 8)
+INFO: Final context: 15 entities, 53 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 C1/2 E1/2 E1/3 C1/4 E1/4 E1/5 E2/6 C1/7 E2/7 E1/8 E1/9 C1/10 E1/10 C1/11 E1/11 C1/12 E1/12 C1/13 E1/13
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=1.00 precision=0.40 (51.78s)  gr_avg=1.0
+[5/50] CS-FS-005 - fact_single - 连续输错密码几次会导致账户锁定？锁定多长时间？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 密码, 账户锁定 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 17 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 17 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 17 relations
+INFO: Selecting 1 from 1 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 17 relations
+INFO: Round-robin merged chunks: 21 -> 20 (deduplicated 1)
+INFO: Final context: 15 entities, 17 relations, 20 chunks
+INFO: Final chunks S+F/O: E15/1 C1/2 C1/3 C1/4 C1/5 C1/6 C1/7 C1/8 C1/9 C1/10 C1/11 C1/12 C1/13 C1/14 C1/15 C1/16 C1/17 C1/18 C1/19 C1/20
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (14.7s)  gr_avg=1.0
+[6/50] CS-FS-006 - fact_single - 投诉处理的升级触发条件有哪几种？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 投诉 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 39 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 39 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 39 relations
+INFO: Selecting 16 from 16 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 39 relations
+INFO: Round-robin merged chunks: 36 -> 25 (deduplicated 11)
+INFO: Final context: 15 entities, 39 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 E2/2 C1/3 E1/3 C1/4 E2/4 E2/5 E3/6 C1/7 E1/7 E1/8 E1/9 E2/10 E1/11 C1/12 E1/12 C1/13 E1/13 C1/14 E4/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.40 (19.09s)  gr_avg=1.0
+[7/50] CS-FS-007 - fact_single - 智能客服系统 v2.1 版本相比 v1.0 新增了哪些核心功能模块？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 智能客服系统, 新增了哪些核心功能模块, V2.1, V2.3, V2.0, V1.2 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 102 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 102 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 102 relations
+INFO: Selecting 30 from 30 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 102 relations
+INFO: Round-robin merged chunks: 50 -> 33 (deduplicated 17)
+INFO: Final context: 15 entities, 102 relations, 20 chunks
+INFO: Final chunks S+F/O: E3/1 E3/2 E1/3 E1/4 E3/5 E4/6 E1/7 C1/8 E1/8 E1/9 E2/10 E3/11 E1/12 E2/13 C1/14 E1/14 E1/15 E2/16 E1/17 C1/18
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+ERROR: OpenAI API Connection Error: Connection error.
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=0.50 precision=0.60 (80.13s)  gr_avg=2.0
+[8/50] CS-FS-008 - fact_single - 客服话术规范中明确禁止使用哪些类型的用语？请列举至少三类。...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 客服 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 67 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 67 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 67 relations
+INFO: Selecting 29 from 29 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 67 relations
+INFO: Round-robin merged chunks: 49 -> 41 (deduplicated 8)
+INFO: Final context: 15 entities, 67 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 E1/2 C1/3 E1/3 C1/4 E1/4 C1/5 E2/5 C1/6 E1/6 C1/7 E1/7 C1/8 E1/8 E4/9 E1/10 E2/11 C1/12 E1/12 E2/13
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (18.72s)  gr_avg=1.0
+[9/50] CS-FS-009 - fact_single - SOP 当前版本号是多少？上一个主要版本做了什么修订？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: CS-SOP-2026-014, 客户服务投诉处理SOP, APP, ROI (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 61 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 61 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 61 relations
+INFO: Selecting 21 from 21 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 61 relations
+INFO: Round-robin merged chunks: 41 -> 32 (deduplicated 9)
+INFO: Final context: 15 entities, 61 relations, 20 chunks
+INFO: Final chunks S+F/O: E5/1 C1/2 E1/2 E3/3 C1/4 E3/4 C1/5 E3/5 E2/6 E2/7 C1/8 E1/8 C1/9 E1/9 C1/10 E1/10 C1/11 E1/11 C1/12 E1/12
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+ERROR: OpenAI API Timeout Error: Request timed out.
+  recall=1.00 precision=0.40 (48.88s)  gr_avg=2.5
+[10/50] CS-FS-010 - fact_single - GraphRAG 架构解决了单纯大模型 RAG 系统的什么问题？它的核心思路是什么？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 系统, 大模型, GraphRAG, 纯向量RAG, AHT (Average Handle Time), ART (Average Response Time) (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 52 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 52 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 52 relations
+INFO: Selecting 14 from 14 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 52 relations
+INFO: Round-robin merged chunks: 34 -> 27 (deduplicated 7)
+INFO: Final context: 15 entities, 52 relations, 20 chunks
+INFO: Final chunks S+F/O: E4/1 E1/2 C1/3 E1/3 C1/4 E1/4 E1/5 E1/6 C1/7 E1/7 C1/8 E2/8 C1/9 E1/9 E3/10 E3/11 C1/12 E1/12 C1/13 E2/13
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.75 precision=0.40 (17.64s)  gr_avg=1.0
+[11/50] CS-FC-001 - fact_cross_doc - 客服话术规范中提到的「三级投诉范围」具体指什么样的投诉？对应的处理时效是怎样的？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 三级, 投诉, 客服 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 37 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 37 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 37 relations
+INFO: Selecting 11 from 11 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 37 relations
+INFO: Round-robin merged chunks: 31 -> 22 (deduplicated 9)
+INFO: Final context: 15 entities, 37 relations, 20 chunks
+INFO: Final chunks S+F/O: E4/1 E2/2 E6/3 C1/4 E2/4 C1/5 E1/5 E1/6 C1/7 E2/7 C1/8 E4/8 E1/9 C1/10 E1/10 E1/11 C1/12 C1/13 C1/14 C1/17
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=0.75 precision=0.80 (58.58s)  gr_avg=1.0
+[12/50] CS-FC-002 - fact_cross_doc - 智能问答引擎在公司内部哪些文档或系统中被提及？它分别承担什么角色？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 智能问答引擎, 在公司内部哪些文档或系统 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 92 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 92 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 92 relations
+INFO: Selecting 33 from 33 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 92 relations
+INFO: Round-robin merged chunks: 53 -> 38 (deduplicated 15)
+INFO: Final context: 15 entities, 92 relations, 20 chunks
+INFO: Final chunks S+F/O: E5/1 E1/2 E2/3 E2/4 E2/5 E2/6 E2/7 E2/8 E1/9 C1/10 E2/10 E1/11 C1/12 E2/12 E3/13 E2/14 E2/15 E1/16 E2/17 C1/18
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=0.25 precision=0.80 (93.45s)  gr_avg=1.67
+[13/50] CS-FC-003 - fact_cross_doc - 王小燕在客服中心的角色是什么？她负责哪些具体工作？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 王小燕在客服中心 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 81 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 81 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 81 relations
+INFO: Selecting 28 from 28 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 81 relations
+INFO: Round-robin merged chunks: 48 -> 32 (deduplicated 16)
+INFO: Final context: 15 entities, 81 relations, 20 chunks
+INFO: Final chunks S+F/O: E3/1 E2/2 E3/3 E1/4 E3/5 E3/6 E3/7 E2/8 E3/9 E1/10 E2/11 E2/12 E3/13 E2/14 C1/15 E1/15 C1/16 E2/16 E2/17 E1/18
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.50 precision=0.80 (20.13s)  gr_avg=3.25
+[14/50] CS-FC-004 - fact_cross_doc - 投诉处理中「升级流程」有几种不同含义？请分别说明。...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 投诉 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 39 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 39 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 39 relations
+INFO: Selecting 16 from 16 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 39 relations
+INFO: Round-robin merged chunks: 36 -> 26 (deduplicated 10)
+INFO: Final context: 15 entities, 39 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 E2/2 C1/3 E1/3 E2/4 C1/5 E3/5 C1/6 E1/6 E1/7 E2/8 C1/9 E1/9 C1/10 E1/10 E1/11 E1/12 E2/13 C1/14 E4/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.50 precision=0.20 (26.44s)  gr_avg=2.0
+[15/50] CS-FC-005 - fact_cross_doc - 「响应时间」在客服业务中有哪几种不同的定义？分别对应什么指标？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 客服 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 67 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 67 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 67 relations
+INFO: Selecting 29 from 29 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 67 relations
+INFO: Round-robin merged chunks: 49 -> 45 (deduplicated 4)
+INFO: Final context: 15 entities, 67 relations, 20 chunks
+INFO: Final chunks S+F/O: C1/1 E1/1 E2/2 C1/3 E1/3 C1/4 E1/4 C1/5 E1/5 C1/6 E1/6 C1/7 E1/7 C1/8 E2/8 C1/9 E1/9 E1/10 C1/11 E1/11
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.67 precision=0.80 (19.51s)  gr_avg=3.5
+[16/50] CS-FC-006 - fact_cross_doc - 智能客服的「解决率」目标与实际表现分别是多少？差距主要体现在哪里？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 客服, 解决率 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 70 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 70 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 70 relations
+INFO: Selecting 16 from 16 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 70 relations
+INFO: Round-robin merged chunks: 36 -> 27 (deduplicated 9)
+INFO: Final context: 15 entities, 70 relations, 20 chunks
+INFO: Final chunks S+F/O: E3/1 C1/2 E4/2 E2/3 E1/4 E1/5 E1/6 E4/7 C1/8 E3/8 C1/9 E1/9 C1/10 E2/10 C1/11 E1/11 C1/12 E1/12 C1/13 E1/13
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=0.75 precision=0.60 (43.94s)  gr_avg=1.33
+[17/50] CS-FC-007 - fact_cross_doc - 行业报告中提到的「首问解决率从 40% 提升至 70% 以上」与公司 PRD 中的 FCR 目标有什...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 首问解决率, FCR, 7月, PRD文档终稿, ART, 投诉 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 58 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 58 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 58 relations
+INFO: Selecting 19 from 19 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 58 relations
+INFO: Round-robin merged chunks: 39 -> 28 (deduplicated 11)
+INFO: Final context: 15 entities, 58 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 E2/2 E1/3 E1/4 E2/5 C1/6 E1/6 E2/7 C1/8 E2/8 C1/9 E2/9 E1/10 E1/11 E3/12 C1/13 E1/13 C1/14 E1/14 E1/15
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=1.00 precision=1.00 (66.55s)  gr_avg=1.75
+[18/50] CS-PN-001 - proper_noun - 什么是 ART？请说明其全称和含义。...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: ART, API, APP (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 46 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 46 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 46 relations
+INFO: Selecting 18 from 18 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 46 relations
+INFO: Round-robin merged chunks: 38 -> 28 (deduplicated 10)
+INFO: Final context: 15 entities, 46 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 C1/2 E3/2 E2/3 E1/4 E1/5 E1/6 E1/7 E2/8 C1/9 E1/9 E3/10 C1/11 E1/11 C1/12 E1/12 E1/13 C1/14 E2/14 C1/15
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=0.75 precision=0.80 (36.15s)  gr_avg=1.0
+[19/50] CS-PN-002 - proper_noun - 什么是 FCR？请说明其全称和业务含义。...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: FCR (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 33 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 33 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 33 relations
+INFO: Selecting 18 from 18 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 33 relations
+INFO: Round-robin merged chunks: 38 -> 28 (deduplicated 10)
+INFO: Final context: 15 entities, 33 relations, 20 chunks
+INFO: Final chunks S+F/O: E2/1 E1/2 E2/3 E1/4 C1/5 E1/5 E1/6 E2/7 C1/8 E1/8 C1/9 E1/9 E1/10 C1/11 E2/11 E1/12 C1/13 E1/13 C1/14 E1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=0.75 precision=0.80 (36.58s)  gr_avg=2.0
+[20/50] CS-PN-003 - proper_noun - 什么是 CSAT？它衡量的是什么？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: CSAT (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 52 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 52 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 52 relations
+INFO: Selecting 11 from 11 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 52 relations
+INFO: Round-robin merged chunks: 31 -> 23 (deduplicated 8)
+INFO: Final context: 15 entities, 52 relations, 20 chunks
+INFO: Final chunks S+F/O: E1/1 E4/2 E4/3 E1/4 C1/5 E6/5 E3/6 C1/7 E1/7 C1/8 E1/8 C1/9 E1/9 E1/10 C1/11 E1/11 C1/12 C1/13 C1/15 C1/16
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.75 precision=0.40 (15.95s)  gr_avg=1.33
+[21/50] CS-PN-004 - proper_noun - 什么是 AHT？请说明其含义。...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 平均处理时长(AHT), AHT (Average Handle Time), ART, API, APP (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 63 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 63 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 63 relations
+INFO: Selecting 12 from 12 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 63 relations
+INFO: Round-robin merged chunks: 32 -> 22 (deduplicated 10)
+INFO: Final context: 15 entities, 63 relations, 20 chunks
+INFO: Final chunks S+F/O: E2/1 E1/2 E2/3 E2/4 E3/5 E1/6 C1/7 E1/7 E2/8 E3/9 E5/10 C1/11 E1/11 C1/12 E1/12 C1/13 C1/14 C1/15 C1/16 C1/17
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.75 precision=0.20 (19.18s)  gr_avg=1.0
+[22/50] CS-PN-005 - proper_noun - 什么是 LSC 法则？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: LSC法则, LSC情绪处理法则, LLM, 厂商C, 法律, 总则 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 28 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 28 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 28 relations
+INFO: Selecting 12 from 12 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 28 relations
+INFO: Round-robin merged chunks: 32 -> 28 (deduplicated 4)
+INFO: Final context: 15 entities, 28 relations, 20 chunks
+INFO: Final chunks S+F/O: E5/1 E2/2 C1/3 E1/3 C1/4 E1/4 C1/5 E1/5 C1/6 E1/6 C1/7 E2/7 E1/8 C1/9 E1/9 C1/10 E1/10 E1/11 C1/12 E1/12
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (18.81s)  gr_avg=1.0
+[23/50] CS-PN-006 - proper_noun - 什么是 GraphRAG？它与传统 RAG 有什么区别？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: GraphRAG, RAG系统, 纯向量RAG, AHT (Average Handle Time), ART (Average Response Time) (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 52 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 52 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 52 relations
+INFO: Selecting 14 from 14 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 52 relations
+INFO: Round-robin merged chunks: 34 -> 24 (deduplicated 10)
+INFO: Final context: 15 entities, 52 relations, 20 chunks
+INFO: Final chunks S+F/O: E3/1 E1/2 E1/3 C1/4 E2/4 E3/5 C1/6 E2/6 E1/7 C1/8 E1/8 E1/9 C1/10 E1/10 E3/11 C1/12 E1/12 C1/13 E1/13 E2/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.40 (22.94s)  gr_avg=1.0
+[24/50] CS-CP-001 - comparison - 一级、二级、三级投诉在首次响应时效上有什么区别？为什么一级是例外？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 一级, 二级, 三级, 响应时效, 投诉, 首次响应 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 58 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 58 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 58 relations
+INFO: Selecting 9 from 9 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 58 relations
+INFO: Round-robin merged chunks: 29 -> 21 (deduplicated 8)
+INFO: Final context: 15 entities, 58 relations, 20 chunks
+INFO: Final chunks S+F/O: E5/1 E5/2 E3/3 E2/4 E5/5 C1/6 E1/6 E1/7 C1/8 E4/8 E1/9 C1/10 C1/11 C1/13 C1/14 C1/15 C1/16 C1/17 C1/18 C1/19
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=0.75 precision=0.80 (37.32s)  gr_avg=1.75
+[25/50] CS-CP-002 - comparison - 智能客服和人工客服在服务能力上有什么区别和互补关系？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 客服, 服务 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 80 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 80 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 80 relations
+INFO: Selecting 30 from 30 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 80 relations
+INFO: Round-robin merged chunks: 50 -> 38 (deduplicated 12)
+INFO: Final context: 15 entities, 80 relations, 20 chunks
+INFO: Final chunks S+F/O: E2/1 E4/2 C1/3 E1/3 E1/4 C1/5 E2/5 E1/6 E4/7 E1/8 C1/9 E1/9 C1/10 E1/10 E1/11 E1/12 E1/13 E1/14 C1/15 E1/15
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=0.75 precision=0.60 (43.58s)  gr_avg=1.0
+[26/50] CS-CP-003 - comparison - 华东大区和西南大区在 Q3 客服运营表现上有哪些主要差异？可能的原因是什么？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 华东大区和西南大区, Q3, 客服, Q4, Q2, 投诉 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 52 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 52 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 52 relations
+INFO: Selecting 11 from 11 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 52 relations
+INFO: Round-robin merged chunks: 31 -> 26 (deduplicated 5)
+INFO: Final context: 15 entities, 52 relations, 20 chunks
+INFO: Final chunks S+F/O: E3/1 E7/2 E2/3 E4/4 C1/5 E1/5 C1/6 E4/6 C1/7 E1/7 C1/8 E1/8 C1/9 E1/9 C1/10 E1/10 C1/11 E4/11 C1/12 C1/13
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+ERROR: OpenAI API Connection Error: Connection error.
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=1.00 precision=0.60 (98.51s)  gr_avg=1.0
+[27/50] CS-CP-004 - comparison - 智能客服系统 v1.0 和 v2.1 在核心指标目标上有什么变化？这些变化说明了什么？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 智能客服系统, V1.0, V2.0, V1.2, V2.1 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 102 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 102 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 102 relations
+INFO: Selecting 30 from 30 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 102 relations
+INFO: Round-robin merged chunks: 50 -> 33 (deduplicated 17)
+INFO: Final context: 15 entities, 102 relations, 20 chunks
+INFO: Final chunks S+F/O: E3/1 E2/2 E3/3 E2/4 E1/5 E1/6 E3/7 E3/8 E1/9 C1/10 E1/10 E1/11 E1/12 E1/13 C1/14 E1/14 C1/15 E1/15 E1/16 E2/17
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.25 precision=0.60 (34.72s)  gr_avg=2.0
+[28/50] CS-TN-001 - table_numeric - 2026 年 Q3 客服中心总工单量是多少？其中 9 月份的工单量比 7 月份增长了多少？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 客服中心, Q3, 工单, 2026年9月1日, CS-SOP-2026-014, 2026中国客服智能化行业趋势报告 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 45 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 45 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 45 relations
+INFO: Selecting 11 from 11 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 45 relations
+INFO: Round-robin merged chunks: 31 -> 26 (deduplicated 5)
+INFO: Final context: 15 entities, 45 relations, 20 chunks
+INFO: Final chunks S+F/O: C1/1 E2/1 E1/2 C1/3 E2/3 C1/4 E2/4 E5/5 E1/6 E1/7 C1/8 E1/8 C1/9 E2/9 C1/10 E2/10 C1/11 E2/11 C1/13 C1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.75 precision=0.40 (24.27s)  gr_avg=2.5
+[29/50] CS-TN-002 - table_numeric - Q3 各大区中，哪个大区的人均工单量最高？具体数值是多少？解决率最低的是哪个大区？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 哪个大区, Q3, 人均工单, 解决率, 工单量, Q4 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 68 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 68 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 68 relations
+INFO: Selecting 10 from 10 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 68 relations
+INFO: Round-robin merged chunks: 30 -> 22 (deduplicated 8)
+INFO: Final context: 15 entities, 68 relations, 20 chunks
+INFO: Final chunks S+F/O: E3/1 E7/2 E3/3 E3/4 E5/5 E3/6 E2/7 C1/8 E2/8 C1/9 E1/9 C1/10 E2/10 C1/12 C1/13 C1/14 C1/15 C1/16 C1/17 C1/18
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.60 (22.21s)  gr_avg=1.67
+[30/50] CS-TN-003 - table_numeric - 2026 年中国客服智能化市场规模预计达到多少？相比 2023 年增长了多少倍？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 市场规模, 中国客服智能化市场, 2026年9月1日, CS-SOP-2026-014, 2026中国客服智能化行业趋势报告, 2026E (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 26 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 26 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 26 relations
+INFO: Selecting 8 from 8 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 26 relations
+INFO: Round-robin merged chunks: 28 -> 21 (deduplicated 7)
+INFO: Final context: 15 entities, 26 relations, 20 chunks
+INFO: Final chunks S+F/O: E5/1 E2/2 E5/3 E2/4 E2/5 C1/6 E2/6 C1/7 E1/7 E2/8 C1/9 C1/10 C1/12 C1/13 C1/14 C1/15 C1/16 C1/17 C1/18 C1/19
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Timeout Error: Request timed out.
+  recall=0.33 precision=0.20 (25.2s)  gr_avg=1.0
+[31/50] CS-TN-004 - table_numeric - 客服质检评分标准中，信息准确性和服务态度的分值分别是多少？如果客服被投诉态度问题且有一次信息错误，总...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 投诉, 客服, 态度, 分值, 信息准确性, 信息错误 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 53 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 53 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 53 relations
+INFO: Selecting 15 from 15 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 53 relations
+INFO: Round-robin merged chunks: 35 -> 26 (deduplicated 9)
+INFO: Final context: 15 entities, 53 relations, 20 chunks
+INFO: Final chunks S+F/O: E3/1 E4/2 C1/3 E1/3 E1/4 C1/5 E1/5 C1/6 E2/6 E1/7 C1/8 E3/8 E2/9 C1/10 E1/10 E1/11 E1/12 C1/13 E1/13 C1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.50 precision=0.20 (21.61s)  gr_avg=1.0
+[32/50] CS-SM-001 - summary - 请简要总结 2026 年 Q3 客服运营的整体表现及主要问题。...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: Q3, 客服, 2026年9月1日, CS-SOP-2026-014, 2026E, 2026年8月15日 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 42 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 42 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 42 relations
+INFO: Selecting 12 from 12 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 42 relations
+INFO: Round-robin merged chunks: 32 -> 30 (deduplicated 2)
+INFO: Final context: 15 entities, 42 relations, 20 chunks
+INFO: Final chunks S+F/O: E3/1 C1/2 E1/2 C1/3 E4/3 C1/4 E1/4 C1/5 E3/5 C1/6 E1/6 C1/7 E1/7 C1/8 E4/8 C1/9 E1/9 C1/10 E1/10 C1/11
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=0.20 precision=0.60 (43.0s)  gr_avg=2.0
+[33/50] CS-SM-002 - summary - 请概述客服智能化行业的主要技术趋势和未来展望。...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 客服智能化, 未来展望 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 45 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 45 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 45 relations
+INFO: Selecting 13 from 13 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 45 relations
+INFO: Round-robin merged chunks: 33 -> 23 (deduplicated 10)
+INFO: Final context: 15 entities, 45 relations, 20 chunks
+INFO: Final chunks S+F/O: E9/1 E3/2 E2/3 E1/4 C1/5 E1/5 E1/6 C1/7 E1/7 E1/8 C1/9 E1/9 C1/10 E1/10 C1/11 E1/11 C1/12 E1/12 E1/13 C1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.60 precision=0.60 (21.86s)  gr_avg=2.75
+[34/50] CS-UA-001 - unanswerable - 公司智能客服系统使用的具体大模型版本是什么？是基于哪个基座模型微调的？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 公司智能客服系统, 大模型 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 75 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 75 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 75 relations
+INFO: Selecting 19 from 19 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 75 relations
+INFO: Round-robin merged chunks: 39 -> 25 (deduplicated 14)
+INFO: Final context: 15 entities, 75 relations, 20 chunks
+INFO: Final chunks S+F/O: E2/1 E1/2 E4/3 E1/4 C1/5 E2/5 C1/6 E2/6 E3/7 E1/8 C1/9 E1/9 C1/10 E2/10 E3/11 C1/12 E2/12 E1/13 E1/14 E2/15
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=N/A precision=0.00 (41.86s)
+[35/50] CS-UA-002 - unanswerable - 客服中心 2026 年 Q4 的具体预算是多少？人均薪酬成本是多少？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 客服中心, Q4, 客服总监, 客服系统, 2026年9月1日, CS-SOP-2026-014 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 61 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 61 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 61 relations
+INFO: Selecting 20 from 20 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 61 relations
+INFO: Round-robin merged chunks: 40 -> 34 (deduplicated 6)
+INFO: Final context: 15 entities, 61 relations, 20 chunks
+INFO: Final chunks S+F/O: C1/1 E1/1 E2/2 C1/3 E1/3 E1/4 C1/5 E4/5 C1/6 E1/6 C1/7 E3/7 E1/8 E2/9 E6/10 C1/11 E2/11 C1/12 E2/12 C1/13
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=N/A precision=0.00 (21.77s)
+[36/50] CS-FS-011 - fact_single - 各等级投诉的「方案提出」时效分别是多少？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 投诉, 方案提出 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 42 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 42 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 42 relations
+INFO: Selecting 11 from 11 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 42 relations
+INFO: Round-robin merged chunks: 31 -> 23 (deduplicated 8)
+INFO: Final context: 15 entities, 42 relations, 20 chunks
+INFO: Final chunks S+F/O: E2/1 C1/2 E4/2 E2/3 C1/4 E3/4 C1/5 E4/5 C1/6 E3/6 E1/7 E1/8 E1/9 C1/10 E1/10 C1/11 E1/11 C1/12 C1/14 C1/15
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=1.00 precision=0.20 (36.34s)  gr_avg=1.0
+[37/50] CS-FS-012 - fact_single - 智能问答引擎的意图识别采用什么技术方案？支持多少种意图分类？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 智能问答引擎, 意图识别采用什么技术方案 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 44 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 44 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 44 relations
+INFO: Selecting 17 from 17 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 44 relations
+INFO: Round-robin merged chunks: 37 -> 26 (deduplicated 11)
+INFO: Final context: 15 entities, 44 relations, 20 chunks
+INFO: Final chunks S+F/O: E3/1 E2/2 E2/3 E3/4 E3/5 E4/6 C1/7 E1/7 E1/8 E2/9 C1/10 E2/10 C1/11 E1/11 E1/12 E2/13 C1/14 E1/14 C1/15 E1/15
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.60 (19.86s)  gr_avg=1.0
+[38/50] CS-FS-013 - fact_single - 客服质检月度评分中，评为「服务之星」的条件是什么？连续多久低于多少分会启动绩效改进计划（PIP）？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 客服, 服务之星, 月度评分 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 53 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 53 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 53 relations
+INFO: Selecting 12 from 12 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 53 relations
+INFO: Round-robin merged chunks: 32 -> 25 (deduplicated 7)
+INFO: Final context: 15 entities, 53 relations, 20 chunks
+INFO: Final chunks S+F/O: E5/1 E2/2 C1/3 E1/3 E1/4 E1/5 C1/6 E1/6 C1/7 E1/7 C1/8 E1/8 E2/9 C1/10 E1/10 C1/11 E1/11 C1/12 E1/12 C1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (17.59s)  gr_avg=1.0
+[39/50] CS-FS-014 - fact_single - 智能客服系统项目的里程碑中，试点上线和全量上线分别计划在什么时间？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 智能客服系统项目, 全量上线, 试点上线 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 92 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 92 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 92 relations
+INFO: Selecting 25 from 25 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 92 relations
+INFO: Round-robin merged chunks: 45 -> 31 (deduplicated 14)
+INFO: Final context: 15 entities, 92 relations, 20 chunks
+INFO: Final chunks S+F/O: E5/1 E2/2 E1/3 E3/4 E4/5 E2/6 C1/7 E1/7 E1/8 E2/9 E1/10 E1/11 E1/12 E1/13 C1/14 E1/14 C1/15 E1/15 C1/16 E1/16
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (23.26s)  gr_avg=1.0
+[40/50] CS-FC-008 - fact_cross_doc - 话术 FAQ 中「投诉多久能有结果」的标准回答（一般问题 5 个工作日处理完毕），与投诉处理 SOP...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 投诉, 客服话术规范与常见问题FAQ, 基础话术规范, 服务话术标准, 自动回复话术, 话术复训 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 50 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 50 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 50 relations
+INFO: Selecting 17 from 17 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 50 relations
+INFO: Round-robin merged chunks: 37 -> 28 (deduplicated 9)
+INFO: Final context: 15 entities, 50 relations, 20 chunks
+INFO: Final chunks S+F/O: C1/1 E3/1 E3/2 E3/3 E2/4 C1/5 E1/5 C1/6 E2/6 C1/7 E2/7 C1/8 E1/8 E1/9 C1/10 E1/10 E1/11 E1/12 C1/13 E1/13
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=0.67 precision=0.40 (42.2s)  gr_avg=2.0
+[41/50] CS-FC-009 - fact_cross_doc - D3 报表指出西南大区响应偏慢与其未接入智能客服有关，结合 D2 的规划，西南大区预计何时完成接入？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 西南大区, 智能问答引擎, 客服, Q3, 投诉, 系统 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 104 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 104 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 104 relations
+INFO: Selecting 34 from 34 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 104 relations
+INFO: Round-robin merged chunks: 54 -> 41 (deduplicated 13)
+INFO: Final context: 15 entities, 104 relations, 20 chunks
+INFO: Final chunks S+F/O: E5/1 E7/2 E3/3 E1/4 E1/5 E1/6 E1/7 E1/8 C1/9 E2/9 E1/10 C1/11 E1/11 C1/12 E4/12 C1/13 E1/13 E1/14 C1/15 E2/15
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.60 (18.73s)  gr_avg=1.67
+[42/50] CS-PN-007 - proper_noun - 什么是 Deflection Rate（智能客服拦截率）？公司 Q3 实际值是多少，是否达成目标？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: Q3, 客服, 拦截率, Deflection Rate, 公司产品售后服务, 本公司 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 28 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 28 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 28 relations
+INFO: Selecting 11 from 11 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 28 relations
+INFO: Round-robin merged chunks: 31 -> 23 (deduplicated 8)
+INFO: Final context: 15 entities, 28 relations, 20 chunks
+INFO: Final chunks S+F/O: E5/1 E3/2 C1/3 E2/3 E1/4 E1/5 C1/6 E2/6 C1/7 E2/7 E1/8 E1/9 E1/10 C1/11 E1/11 C1/12 C1/13 C1/15 C1/16 C1/17
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.80 (18.72s)  gr_avg=1.67
+[43/50] CS-PN-008 - proper_noun - 什么是「槽位填充」（Slot Filling）？它在智能客服系统的哪个模块中使用？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 它在智能客服系统, 的哪个模块, 槽位填充 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 91 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 91 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 91 relations
+INFO: Selecting 27 from 27 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 91 relations
+INFO: Round-robin merged chunks: 47 -> 32 (deduplicated 15)
+INFO: Final context: 15 entities, 91 relations, 20 chunks
+INFO: Final chunks S+F/O: E2/1 E2/2 E3/3 C1/4 E1/4 E3/5 E2/6 E1/7 C1/8 E2/8 E2/9 E1/10 E2/11 E3/12 E2/13 E2/14 C1/15 E2/15 E1/16 C1/17
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+ERROR: OpenAI API Connection Error: Connection error.
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=1.00 precision=0.20 (76.48s)  gr_avg=1.0
+[44/50] CS-CP-005 - comparison - 行业报告中，金融、电商、通信三大行业的客服智能化渗透率分别是多少？我司所处的消费电子行业渗透率处于什...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 消费电子行业, 客服智能化, 渗透率, 我司, 金融, 投诉 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 38 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 38 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 38 relations
+INFO: Selecting 13 from 13 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 38 relations
+INFO: Round-robin merged chunks: 33 -> 25 (deduplicated 8)
+INFO: Final context: 15 entities, 38 relations, 20 chunks
+INFO: Final chunks S+F/O: E5/1 E7/2 C1/3 E2/3 E2/4 C1/5 E1/5 E1/6 C1/7 E1/7 C1/8 E1/8 C1/9 E1/9 C1/10 E1/10 E1/11 E1/12 C1/13 E1/13
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (15.93s)  gr_avg=1.0
+[45/50] CS-CP-006 - comparison - 对比 2025 年和 2026E 中国客服智能化市场规模增速，哪个更快？主要驱动因素是什么？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 市场规模, 2026E, 中国客服智能化市场, 各大区运营数据对比, 投诉, 系统 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 27 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 27 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 27 relations
+INFO: Selecting 8 from 8 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 27 relations
+INFO: Round-robin merged chunks: 28 -> 21 (deduplicated 7)
+INFO: Final context: 15 entities, 27 relations, 20 chunks
+INFO: Final chunks S+F/O: E5/1 E2/2 E5/3 E2/4 E2/5 C1/6 E1/6 C1/7 E2/7 C1/8 E2/8 C1/11 C1/12 C1/13 C1/14 C1/15 C1/16 C1/17 C1/18 C1/19
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=0.67 precision=0.40 (24.37s)  gr_avg=1.0
+[46/50] CS-TN-005 - table_numeric - Q3 分月工单量中，8 月工单量是多少件？环比 7 月增长了多少？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: Q3, 工单, Q4, Q2, 投诉, 环比变化 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 53 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 53 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 53 relations
+INFO: Selecting 12 from 12 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 53 relations
+INFO: Round-robin merged chunks: 32 -> 23 (deduplicated 9)
+INFO: Final context: 15 entities, 53 relations, 20 chunks
+INFO: Final chunks S+F/O: E4/1 E3/2 E4/3 E3/4 E5/5 E2/6 C1/7 E1/7 C1/8 E1/8 E1/9 E1/10 C1/11 E1/11 E1/12 C1/13 C1/14 C1/15 C1/16 C1/17
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (15.79s)  gr_avg=1.0
+[47/50] CS-TN-006 - table_numeric - 行业报告市场规模表中，2028 年预计市场规模是多少亿元？相比 2025 年增长了多少倍？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 市场规模, 2028E, 2027–2028年, 2024年, 2023年, 2026E (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 28 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 28 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 28 relations
+INFO: Selecting 6 from 6 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 28 relations
+INFO: Round-robin merged chunks: 26 -> 20 (deduplicated 6)
+INFO: Final context: 15 entities, 28 relations, 20 chunks
+INFO: Final chunks S+F/O: E7/1 E7/2 E1/3 C1/4 E1/4 E1/5 C1/6 E1/6 C1/7 C1/8 C1/9 C1/10 C1/12 C1/13 C1/14 C1/15 C1/16 C1/17 C1/18 C1/20
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=0.67 precision=0.40 (46.83s)  gr_avg=1.5
+[48/50] CS-SM-003 - summary - 请简要概括智能客服行业当前面临的主要挑战。...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 客服 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 67 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 67 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 67 relations
+INFO: Selecting 29 from 29 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 67 relations
+INFO: Round-robin merged chunks: 49 -> 40 (deduplicated 9)
+INFO: Final context: 15 entities, 67 relations, 20 chunks
+INFO: Final chunks S+F/O: C1/1 E4/1 C1/2 E1/2 E1/3 C1/4 E1/4 E2/5 E1/6 C1/7 E2/7 C1/8 E2/8 C1/9 E1/9 E1/10 E1/11 E5/12 E1/13 E1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=1.00 precision=0.20 (18.09s)  gr_avg=1.0
+[49/50] CS-UA-003 - unanswerable - 2026 年 Q1 的客服工单总量是多少？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: Q1, 客服, 工单总量, 2026年9月1日, CS-SOP-2026-014, 2026E (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 70 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 70 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 70 relations
+INFO: Selecting 13 from 13 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 70 relations
+INFO: Round-robin merged chunks: 33 -> 25 (deduplicated 8)
+INFO: Final context: 15 entities, 70 relations, 20 chunks
+INFO: Final chunks S+F/O: E3/1 C1/2 E3/2 E1/3 E3/4 C1/5 E3/5 E2/6 C1/7 E3/7 C1/8 E2/8 E1/9 C1/10 E1/10 E1/11 E4/12 C1/13 E1/13 C1/14
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+ERROR: OpenAI API Connection Error: Connection error.
+ERROR: OpenAI API Connection Error: Connection error.
+  recall=N/A precision=0.40 (57.84s)
+[50/50] CS-UA-004 - unanswerable - 客服中心计划在 2027 年上半年新增多少名客服人员？...
+WARNING: high_level_keywords is empty
+INFO: Query nodes: 客服中心, 客服人员, 2027E, 2027年, 2027–2028年, 2024年 (top_k:15, cosine:0.2)
+INFO: Local query: 15 entites, 48 relations
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Raw search results: 15 entities, 48 relations, 20 vector chunks
+INFO: After truncation: 15 entities, 48 relations
+INFO: Selecting 16 from 16 entity-related chunks by vector similarity
+INFO: Find no additional relations-related chunks from 48 relations
+INFO: Round-robin merged chunks: 36 -> 30 (deduplicated 6)
+INFO: Final context: 15 entities, 48 relations, 20 chunks
+INFO: Final chunks S+F/O: E4/1 E1/2 C1/3 E1/3 C1/4 E2/4 E1/5 C1/6 E2/6 E1/7 C1/8 E1/8 C1/9 E1/9 C1/10 E1/10 C1/11 E2/11 E1/12 C1/13
+INFO: Naive query: 20 chunks (chunk_top_k:20 cosine:0.2)
+INFO: Final context: 20 chunks
+  recall=N/A precision=0.00 (19.17s)
+
+============================================================
+# 评测报告：testset_cservice_50
+
+- **领域**：客服业务库（客户服务中心）
+- **题目数**：50
+- **时间**：2026-10-06 14:56:26
+- **配置**：{"mode": "e2e", "collection": "eval_cservice", "workspace": "eval_cservice_ws", "reranker": "standard", "ablation_routes": "graph,vector,keyword", "comparison_mode": "per_doc"}
+
+## 总体指标
+
+| 指标 | 得分 |
+|---|---|
+| Context Recall | 0.8000 |
+| Context Precision | 0.4480 |
+| Context Precision (加权) | 0.5860 |
+| nDCG | 0.9377 |
+
+## 生成质量
+
+| 指标 | 得分 |
+|---|---|
+| Faithfulness（忠实度） | 0.9975 |
+| Answer Relevance（答案相关性） | 0.9520 |
+| Correctness（正确性） | 0.8149 |
+| Citation Accuracy（引用准确率） | 0.8594 |
+
+## Gold Rank（事实最早出现的排名）
+
+- **平均 gold_rank**：1.49
+- **中位 gold_rank**：1.38
+- **min / max**：1.11 / 2.0
+
+| top-K | 事实覆盖率 |
+|---|---|
+| top1 | 0.6149 |
+| top3 | 0.7996 |
+| top5 | 0.8438 |
+
+## 按题型分布
+
+| 题型 | 题数 | Recall@5 | Prec@5 | nDCG@5 | GoldRank avg |
+|---|---|---|---|---|---|
+| comparison | 6 | 0.7361 | 0.5333 | 0.9567 | 1.29 |
+| fact_cross_doc | 9 | 0.6759 | 0.6667 | 0.8827 | 2.02 |
+| fact_single | 14 | 0.9464 | 0.4000 | 0.9714 | 1.30 |
+| proper_noun | 8 | 0.8750 | 0.4750 | 0.9887 | 1.25 |
+| summary | 3 | 0.6000 | 0.4667 | 0.8689 | 1.92 |
+| table_numeric | 6 | 0.7083 | 0.3333 | 0.9532 | 1.45 |
+| unanswerable | 4 | 0.0000 | 0.1000 | 0.8417 | — |
+
+## 按难度分布
+
+| 难度 | 题数 | Recall@5 | Prec@5 | GoldRank avg |
+|---|---|---|---|---|
+| easy | 15 | 0.8833 | 0.5067 | 1.35 |
+| hard | 6 | 0.4945 | 0.6667 | 1.86 |
+| medium | 29 | 0.8233 | 0.3724 | 1.48 |
+
+总耗时：1665.5 秒
+报告已保存：tests/reports/run_e2e_cservice50_20261006.json
+============================================================
+INFO: [eval_cservice_ws] PGTableGraphStorage finalized
+INFO: Closed PostgreSQL database connection pool
+INFO: Successfully finalized 12 storages

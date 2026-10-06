@@ -23,6 +23,94 @@
 
 ---
 
+## [v5.38] 2026-10-06 —— `backend/tests/reports/` 目录分类重组
+
+**影响模块**：`backend/tests/reports/` 目录结构（96 文件由扁平重组为分类子目录）；6 个活文档 + 5 个脚本的引用路径同步更新。**代码/功能零改动，评测数字不变**。
+
+原 96 个报告/日志/探针文件平铺一层，现按类型分入子目录（主报告留顶层）：
+
+```
+reports/
+├── retrieval_comparison.md        # 主报告（顶层）
+├── probe/          # 探底探针（probe_*、P0P1 对照）
+├── ablation/       # 消融实验（run_ablation_*）
+├── e2e/
+│   ├── current/    # 当前 @5 口径（run_e2e_cservice50_20261006 / run_e2e_device_v2）
+│   └── history/    # 其余（旧口径 / 旧题集）
+├── retrieval/
+│   ├── current/    # 当前 @5 口径（v5.31+：device30_v531/v532、device50、device_v2、cservice35_20261006）
+│   └── history/    # 旧口径 / 逐版本探底（v5.7~v5.13、9-27 系列、run_retr_admin_*、qa_v510）
+├── smoke/          # 冒烟（smoke_*、run_smoke_*、device30_smoke、run_1791192530）
+├── checklists/     # 人工抽检（human_checklist_*）
+└── runlogs/        # 运行日志（log_*.txt；不叫 logs/ 以免撞 .gitignore 的 LightRAG 运行时 logs/ 规则）
+```
+
+- ⚠️ **本条目之前各历史条目里的报告路径（`tests/reports/run_xxx.json` 等）已因本次重组失效**——历史条目保留原文不改（时序权威）；回溯时按文件名到对应子目录查找（旧 retrieval 报告多在 `retrieval/history/`）。
+- **引用已更新**：`M9_evaluation.md` / `M9_testset.md` / `DEVICE_SCENARIO.md` / `RETRIEVAL_OPTIMIZATION.md` / `archive/{retrieval_probing,device_scenario_eval}_archive.md` / `retrieval_comparison.md`（主报告，含裸名引用）+ 脚本 `rejudge_correctness.py` / `probe_struct_table.py` / `probe_m2_inject_rank.py` / `probe_expand_ablation.py` / `build_human_checklist.py`。
+- **未改**：`m9_eval/runner.py` 默认输出路径（`tests/reports/run_{ts}.json`，运行时用 `--report` 指定落点）；`final_results/` 目录（v5.37 已建的当前权威归档，不在本次重组范围）。
+
+---
+
+## [v5.37] 2026-10-06 —— 三库评测结果横向汇总表 + 客服/行政 retrieval 重跑补齐
+
+**影响模块**：新增 [`backend/tests/final_results/eval_results_summary.md`](../backend/tests/final_results/eval_results_summary.md)（三库 × 检索/e2e 汇总表）；新增两份 retrieval 报告归档；[`M9_evaluation.md`](modules/M9_evaluation.md) §8.1c（旧口径注记）。**代码零改动**。
+
+### 一、横向汇总表（新建）
+
+`eval_results_summary.md`：把三个库（客服 cservice / 办公行政 admin / 器械 device）的**检索**与 **e2e** 结果统一成表，数据**直读各报告 JSON 的 `summary.overall`**（非手工转录）。§0 跨库总览 + §1~§3 分库明细（overall / by_category / by_difficulty）+ 附旧口径历史对照。表内所有数字已用脚本逐项核对报告 JSON。
+
+### 二、补齐两处 retrieval 缺口（本次重跑）
+
+此前 final_results 内**客服库检索只有 35 题、行政库检索无当前口径报告**，本次补齐：
+
+| 评测 | 新报告 | 耗时 | Recall | nDCG@5 | gold_rank 均值 |
+|---|---|---|---|---|---|
+| 客服 50 题 retrieval | `run_retrieval_cservice_50_20261006.json` | 522.6s | **0.8** | **0.9377** | 1.49 |
+| 行政 30 题 retrieval | `run_retrieval_admin_30_20261006.json` | 289.8s | **0.8363** | **0.8935** | 1.39 |
+
+- **客服 50 题 retrieval 与既有 e2e 同题集**（`testset_cservice_50.json`），检索侧指标与 `run_e2e_cservice_50_20261006.json` **逐位相同**。
+- **行政 30 题 retrieval** 取代旧口径基线（§8.1c，2026-09-25：Recall@5 0.9524 为修复前虚高值），检索侧指标与 `run_e2e_admin_30_20261004.json` **逐位相同**。
+- **确定性交叉验证**：两次重跑（retrieval 模式）与对应 e2e 报告的检索侧指标**逐位一致**——同检索链路 + judge 缓存 → 确定性复现，可作评测链路自洽性证据；e2e 独有的增量仅为生成侧四项。
+
+### 三、处置
+
+1. 旧口径 admin 30 题检索基线（§8.1c）加当前口径注记，指向本条目与新报告。
+2. 汇总表口径统一为**当前口径（v5.31 之后 @5 生产口径）**；客服库另有 35 题检索优化集（Recall 0.7515，见 §1.2）与 50 题为**不同题集**，表内已显式区分。
+3. 归档命名沿用 `run_{mode}_{库}_{题数}_{YYYYMMDD}.json`。
+
+---
+
+## [v5.36] 2026-10-06 —— 客服库评测口径回填（旧 recall 判定为虚高，重跑归档 + 口径变更说明）
+
+**影响模块**：文档 [`retrieval_comparison.md`](../backend/tests/reports/retrieval_comparison.md)（新增「⚠️ 口径变更说明」节 + 当前口径基线）、[`M9_testset.md`](modules/M9_testset.md) §8、[`M9_evaluation.md`](modules/M9_evaluation.md) §8.1b（旧 cservice 数字加口径注记）；评测报告归档 `backend/tests/final_results/`。**代码零改动**。
+
+### 一、背景（口径修复后旧数字失效）
+
+客服库两评测最近一次出值在 v5.13（35 题 retrieval）/ v5.15（50 题 e2e，2026-09-24~25），**均早于评测口径修复**。2026-10-06 用当前代码重跑，**同 testset / 同 mode / 同 collection，仅代码版本不同**，Recall 大幅回落而 nDCG/gold_rank 反向上升：
+
+| 评测 | 新报告 | Recall | nDCG | gold_rank 均值 |
+|---|---|---|---|---|
+| 35 题 retrieval | `run_retrieval_cservice_35_20261006.json` | 0.9520 → **0.7515** | 0.9028 → **0.9443** | 1.74 → **1.6** |
+| 50 题 e2e | `run_e2e_cservice_50_20261006.json` | 0.9601 → **0.8** | 0.8898 → **0.9377** | 1.74 → **1.49** |
+
+**根因 = 评测口径修复，非检索链路退化**：决定性证据——若链路退化，nDCG/gold_rank 应同步下降，实际二者反向上升（排序质量真实改善）；且同 testset/mode/collection 仅代码版本不同即复现，排除题集/模式差异。相关修复（均晚于旧报告）：**v5.23** gold_rank 匹配器数字粘连假阴性修复；**v5.29** 裁判 `hit` 字段修复；**v5.30** `context_recall.py` 缓存键改含完整 `context_str`（剔跨窗口串键假阳性，主导 recall 回落）；**v5.31** 评测窗口 @8→@5 单窗口（对齐生产 `RERANK_TOP=5`）。
+
+### 二、处置
+
+1. **旧 recall 判定为修复前口径的虚高值**——v5.13 及以前的 cservice recall 与当前不可横比（Precision/nDCG 口径亦有差异）。**历史条目与历史表保留不改**（作旧口径演进史，遵循 CHANGELOG「历史不改」）。
+2. `retrieval_comparison.md` 新增「⚠️ 口径变更说明」节，记入**当前口径基线（35 题 @5：Recall 0.7515 / nDCG 0.9443 / gold_rank 1.6）**作新起点。
+3. 两份新报告归档 `backend/tests/final_results/`（归档命名统一为 `run_{mode}_{库}_{题数}_{YYYYMMDD}.json`；旧口径报告移入 `final_results/history/` 保留作历史对照）；`M9_testset.md` §8 与 `M9_evaluation.md` §8.1b 的旧 cservice 数字加口径注记。
+
+### 三、当前口径基线（新起点）
+
+**35 题 retrieval（@5 生产口径）**：Recall **0.7515** / Precision 0.4971 / 加权 Precision 0.6188 / nDCG@5 **0.9443** / gold_rank 1.6（中位 1.48）/ 事实覆盖率 top1 0.554 · top3 0.7611 · top5 0.8227。按类目 recall：`fact_single` 0.925 ｜ `proper_noun` 0.8333 ｜ `comparison` 0.6875 ｜ `table_numeric` 0.6458 ｜ `fact_cross_doc` 0.631 ｜ `summary` 0.4（分母 33 题，unanswerable 2 题不计）。
+
+**50 题 e2e（@5）**：Context Recall **0.8** / Faithfulness **0.9975** / Correctness **0.8149** / Answer Relevance 0.952 / Citation Accuracy 0.8594 / nDCG 0.9377（judge_failed=0）。
+
+> **口径注记**：本条目为口径回填，非能力变化——recall 数值下降是假阳性被剔除的结果，链路排序（nDCG/gold_rank）实际改善。旧报告 `backend/tests/final_results/history/run_e2e_cservice_50_20260924.json`（2026-09-24，旧口径）保留作历史对照。
+
+---
+
 ## [v5.35] 2026-10-05 —— comparison 功能弃用（前端入口隐藏，后端保留）
 
 **影响模块**：`frontend/src/components/Sidebar.tsx`（`NAV_ITEMS` 移除「参数对比」导航项）。后端与其余前端代码零改动。

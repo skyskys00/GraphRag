@@ -1,8 +1,8 @@
 # M9 模块规划：评测层
 
-> **版本：** v1.12
-> **状态：** 可用（retrieval 模式 + gold_rank 诊断 + 双窗口 + nDCG + **e2e 生成四指标** + **行政库完整版 30 题检索基线 / NL 摘要激活复测 / 30 题全量 e2e / 裁判一致性抽检 10/10** + **可選 reranker=llm（LLM listwise 终审）** + **gold_rank 词汇匹配器强化（v5.23）** + **裁判 hit 字段修复（v5.29：context_recall 假阳性修正 + comparison per-doc 检索）**）；Phase 3 待执行
-> **更新：** 2026-10-03
+> **版本：** v1.14
+> **状态：** 可用（retrieval 模式 + gold_rank 诊断 + 双窗口 + nDCG + **e2e 生成四指标** + **行政库完整版 30 题检索基线 / NL 摘要激活复测 / 30 题全量 e2e / 裁判一致性抽检 10/10** + **可選 reranker=llm（LLM listwise 终审）** + **gold_rank 词汇匹配器强化（v5.23）** + **裁判 hit 字段修复（v5.29：context_recall 假阳性修正 + comparison per-doc 检索）** + **评测窗口收敛 @5（v5.31）** + **三库评测横向汇总表 + 客服 50 题 / 行政 30 题 retrieval 当前口径重跑（v5.37）**）；Phase 3 待执行
+> **更新：** 2026-10-06
 > **定位：** 中文 RAG 系统量化评测——测试集 + 指标 + ablation + 回归
 > **契约：** 测试集（question + contexts + ground_truth）→ 评测报告（各指标分数 + 对比基线）
 > **上游：** [M5 检索层](M5_retrieve.md) / [M6 生成层](M6_generate.md) / [M7 交互层](M7_interact.md) | **下游：** 回归门禁 / 评测量化数据 / README 展示
@@ -192,10 +192,10 @@ reports/                      # 评测输出（gitignore，关键版本存档）
 3. **修复分级（v5.22 已实施 P0 + P1，P2 未做）**：
    - **P1 已落地**（precision 数字纪律）：`context_precision.py` 不再把 `ground_truth[:500]` 整段喂裁判（68.5 幻读根源），改 `build_gt_points` 归一化 = 要点句 + 显式【关键数值】清单（`extract_number_facts` 确定性提取）+ prompt「数字纪律」。缓存版本 `p1_norm_gt`。**验证：两库重跑 precision reason 含 68.5 处数 0（修复前 4），judge 显式按清单逐字核对**。
    - **P0 已落地**（recall 证据强制）：`context_recall.py` SYSTEM_PROMPT 要求 hit 必引原文证据 + 代码层 `_enforce_evidence` 兜底（`_PROMPT_VERSION=p0_evidence`）。**验证：原人工标注 6 处无条件过宽全部降 miss，`[证据强制校正]` 触发 27 次（v5.22 粗校版）**。
-   - **落地边界（已精准化，v5.22.1）**：v5.22 粗校版「有否定词即降 miss」误杀恰 20 处（客服 12 / 行政 8，v5.22.1 逐一核对恢复）——有块引用证据却夹带免责否定（CS-TN-002「[1]表格列出华南168为最高…其他/总部未给出」）、逐字命中（adm_q011 领用方式/价值）、负向断言 type（CS-CP-004/adm_q010×2，命中证据恰是「未出现/X未定义」）、算术/映射推导型（CS-TN-001/004、CS-SM-001 问题1、adm_q014）。**v5.22.1 把降级收窄为「空洞否定」**：仅当 reason 自述否定且无任何证据信号（数值锚点非否定出现 / 推导缺口基础单位 / `上下文[N]` 块引用 / ≥4 字核心词组非否定出现）才校正 miss，负向断言型 fact 整体豁免（`_judge_fact` → `_enforce_evidence` + `_primary_nums`/`_num_found_affirmed` 三轨/`_block_affirmed`/`_core_needles`）。**验证**：27 例离线回归人工标签 STRICT 20/20、SOFT 5/7；两库重跑校正 27→5/2，recall 0.7778→0.8626 / 0.8571→0.9321（+8.5pt/+7.5pt），误杀恢复；剩余 7 次校正皆符合人工标注（CS-FC-001 / CS-FC-005 Q3 / CS-TN-003 / adm_q004 / adm_q008 真实缺口；CS-PN-003 / CS-SM-001 问题3 概念归纳边界）——留档见 CHANGELOG v5.22.1 + `tests/reports/P0P1_precise_rerun_contrast_20260927.md`。
+   - **落地边界（已精准化，v5.22.1）**：v5.22 粗校版「有否定词即降 miss」误杀恰 20 处（客服 12 / 行政 8，v5.22.1 逐一核对恢复）——有块引用证据却夹带免责否定（CS-TN-002「[1]表格列出华南168为最高…其他/总部未给出」）、逐字命中（adm_q011 领用方式/价值）、负向断言 type（CS-CP-004/adm_q010×2，命中证据恰是「未出现/X未定义」）、算术/映射推导型（CS-TN-001/004、CS-SM-001 问题1、adm_q014）。**v5.22.1 把降级收窄为「空洞否定」**：仅当 reason 自述否定且无任何证据信号（数值锚点非否定出现 / 推导缺口基础单位 / `上下文[N]` 块引用 / ≥4 字核心词组非否定出现）才校正 miss，负向断言型 fact 整体豁免（`_judge_fact` → `_enforce_evidence` + `_primary_nums`/`_num_found_affirmed` 三轨/`_block_affirmed`/`_core_needles`）。**验证**：27 例离线回归人工标签 STRICT 20/20、SOFT 5/7；两库重跑校正 27→5/2，recall 0.7778→0.8626 / 0.8571→0.9321（+8.5pt/+7.5pt），误杀恢复；剩余 7 次校正皆符合人工标注（CS-FC-001 / CS-FC-005 Q3 / CS-TN-003 / adm_q004 / adm_q008 真实缺口；CS-PN-003 / CS-SM-001 问题3 概念归纳边界）——留档见 CHANGELOG v5.22.1 + `tests/reports/probe/P0P1_precise_rerun_contrast_20260927.md`。
    - **P2 未做**（partial 0.5 档，降低 score>=0.5 一刀切）。
 
-> 逐题抽检细节见 [`tests/reports/human_checklist_rerun_20260927.md`](tests/reports/human_checklist_rerun_20260927.md)（20 题 + 汇总发现表）。
+> 逐题抽检细节见 [`tests/reports/checklists/human_checklist_rerun_20260927.md`](tests/reports/checklists/human_checklist_rerun_20260927.md)（20 题 + 汇总发现表）。
 
 ### 4.4 代码结构（`app/m9_eval/`）
 
@@ -438,7 +438,7 @@ cd backend && python -m app.m9_eval.runner \
 
 ### 8.1 办公行政库（eval_admin）检索基线（2026-09-25，M9 v1.5 → v1.7）
 
-15 题最小集（`testsets/testset_admin_15.json`，建库 3 篇 117 chunks）retrieval 模式评测（`tests/reports/run_retr_admin_baseline.json`，双窗口 top5/top8）：
+15 题最小集（`testsets/testset_admin_15.json`，建库 3 篇 117 chunks）retrieval 模式评测（`tests/reports/retrieval/history/run_retr_admin_baseline.json`，双窗口 top5/top8）：
 
 | 指标 | top5 | top8 | 说明 |
 |---|---|---|---|
@@ -456,11 +456,11 @@ gold_rank top5 覆盖率仅 0.261（客服库 v5.9 基线 52%）——行政库�
 - **q010（字符串命中）**：抓到 A3「关联文件」块（FIN-FAS-2024-002 字符命中），prec 0.2——正是该干扰题想验证的场景，系统确实会被字符命中骗到，但凭此块不足以作答，不影响 GT 判断。
 - **q015（拒答前提）**：prec 0.0（无相关块）→ 拒答前提成立，e2e 时验证系统正确拒答。
 
-报告：`backend/tests/reports/run_retr_admin_baseline.json`。e2e 生成四指标评测留待下一轮。
+报告：`backend/tests/reports/retrieval/history/run_retr_admin_baseline.json`。e2e 生成四指标评测留待下一轮。
 
 ### 8.1a 表格 NL 摘要激活后复测（2026-09-25，M9 v1.6 → v1.7）
 
-**背景**：v5.16 对 q013 的「建库未套用 table_nl_summary」推断经排查**修正**——真正根因是稀疏索引缺 `block_type` 元数据（M7 `build_workspace_deps` 重建 sparse 漏传 `chunks_dir`，`sparse_index.build` 从不读 chunk jsonl 顶层的 block_type），导致 `build_rerank_text` 对 admin 表格块从未触发 NL 摘要注入。修复 + 重建后复测（`tests/reports/run_retr_admin_nl.json`）：
+**背景**：v5.16 对 q013 的「建库未套用 table_nl_summary」推断经排查**修正**——真正根因是稀疏索引缺 `block_type` 元数据（M7 `build_workspace_deps` 重建 sparse 漏传 `chunks_dir`，`sparse_index.build` 从不读 chunk jsonl 顶层的 block_type），导致 `build_rerank_text` 对 admin 表格块从未触发 NL 摘要注入。修复 + 重建后复测（`tests/reports/retrieval/history/run_retr_admin_nl.json`）：
 
 | 指标 | v5.16 基线 | v5.17（NL 摘要激活） | Δ |
 |---|---|---|---|
@@ -476,7 +476,7 @@ gold_rank top5 覆盖率仅 0.261（客服库 v5.9 基线 52%）——行政库�
 
 ### 8.1b 行政库 e2e 生成质量评测（2026-09-25，M9 v1.7 → v1.8）
 
-15 题最小集全量 e2e（`tests/reports/run_e2e_admin_15.json`，judge_failed=0，耗时 556.4s≈9.3 分钟 < 10 分钟验收线），生成输入为 v5.17 NL 摘要激活后的检索结果：
+15 题最小集全量 e2e（`tests/reports/e2e/history/run_e2e_admin_15.json`，judge_failed=0，耗时 556.4s≈9.3 分钟 < 10 分钟验收线），生成输入为 v5.17 NL 摘要激活后的检索结果：
 
 | 指标 | e2e 值 | 客服库 50 题参考 | 说明 |
 |---|---|---|---|
@@ -489,6 +489,8 @@ gold_rank top5 覆盖率仅 0.261（客服库 v5.9 基线 52%）——行政库�
 
 > 两库题型/题数不同，数值不作横向排名——仅作为「同一套系统参数在第二垂直域端到端表现正常」的泛化信号。
 
+> ⚠️ **口径注记（2026-10-06）**：上表「客服库 50 题参考」列为 **v5.15 旧口径**（Context Recall 0.9601 为虚高值，早于评测口径修复）；当前口径重跑 Context Recall **0.8**，详见 [M9_testset.md](M9_testset.md) §8 与 [CHANGELOG](../CHANGELOG.md) v5.36。
+
 **逐题要点**：
 - **拒答验证通过** `adm_q015`（unanswerable）：材料无年假天数事实（v5.16 检索诊断 prec@5 0.0「拒答前提成立」→ e2e 正确拒答），correctness **1.0**。
 - **干扰题行为正确** `adm_q010`（FAS）：材料仅含编号片段无业务定义，系统如实作答（correctness 1.0），answer_relevance 0.2 属该题设计预期（检索不被字符命中骗到即达标）。
@@ -499,7 +501,7 @@ gold_rank top5 覆盖率仅 0.261（客服库 v5.9 基线 52%）——行政库�
 
 ### 8.1c 行政库 30 题全量检索基线（2026-09-25，M9 v1.9）
 
-六篇文档完整版（203 chunks）+ 30 题测试集 v0.2 全量 retrieval 模式（`tests/reports/run_retr_admin_30_baseline.json`，733.4s）。top8 窗口与 gold_rank 同跑（零额外检索成本）：
+六篇文档完整版（203 chunks）+ 30 题测试集 v0.2 全量 retrieval 模式（`tests/reports/retrieval/history/run_retr_admin_30_baseline.json`，733.4s）。top8 窗口与 gold_rank 同跑（零额外检索成本）：
 
 | 指标 | 30 题 | 15 题 NL 摘要基线（v5.17） | 说明 |
 |---|---|---|---|
@@ -510,9 +512,11 @@ gold_rank top5 覆盖率仅 0.261（客服库 v5.9 基线 52%）——行政库�
 
 **拒答前提成立**：unanswerable 题（q029 年度经营目标 / q030 CEO 姓名）prec@5 = 0.0，检索未召回任何可答片段，与 e2e 拒答行为自洽。
 
+> ⚠️ **口径注记（2026-10-06）**：上表为 **v5.19 旧口径**数值（早于评测口径修复），**Context Recall@5 0.9524 为修复前虚高值**，与当前口径不可横比。当前口径重跑（`tests/final_results/run_retrieval_admin_30_20261006.json`，289.8s）：Context Recall **0.8363** / Precision 0.42 / 加权 Precision 0.5937 / nDCG@5 **0.8935** / gold_rank 1.39（中位 1.38）/ 事实覆盖率 top1 0.6661 · top3 0.8476 · top5 0.878；**nDCG/gold_rank 较旧值改善**，证明为口径修复而非链路退化。按类目 recall：`fact_single` 0.9394 ｜ `table_numeric` 0.8133 ｜ `proper_noun` 0.8125 ｜ `fact_cross_doc` 0.775 ｜ `comparison` 0.6666 ｜ `unanswerable` 0.0。口径变更详见 [CHANGELOG](../CHANGELOG.md) v5.36/v5.37 与 [retrieval_comparison.md](../../backend/tests/reports/retrieval_comparison.md)「口径变更说明」。三库横向汇总见 [`eval_results_summary.md`](../../backend/tests/final_results/eval_results_summary.md)。
+
 ### 8.1d 行政库 30 题全量 e2e + 裁判一致性抽检（2026-09-25，M9 v1.9）
 
-30 题全量 e2e（`tests/reports/run_e2e_admin_30.json`，1298.9s ≈ 21.6 分钟，judge_failed=0），与 15 题基线 / 客服库 50 题参考：
+30 题全量 e2e（`tests/reports/e2e/history/run_e2e_admin_30.json`，1298.9s ≈ 21.6 分钟，judge_failed=0），与 15 题基线 / 客服库 50 题参考：
 
 | 指标 | 30 题 | 15 题基线 | 客服库 50 题参考 | 说明 |
 |---|---|---|---|---|
@@ -521,7 +525,7 @@ gold_rank top5 覆盖率仅 0.261（客服库 v5.9 基线 52%）——行政库�
 | Correctness | **0.9713** | 0.9373 | 0.8353 | 当前三个库/版本最高 |
 | Citation Accuracy | **0.8187** | 0.8928 | 0.8465 | 表格拆碎 + 跨文档交叉引用增多拉低 |
 
-**裁判一致性人工抽检（10 题样本，验收线 ≥80%）= 10/10 = 100% 达标**（`tests/reports/human_checklist_run_e2e_admin_30.md`）：
+**裁判一致性人工抽检（10 题样本，验收线 ≥80%）= 10/10 = 100% 达标**（`tests/reports/checklists/human_checklist_run_e2e_admin_30.md`）：
 - 平均 |人工−裁判| 0.049、最大 0.15（adm_q010），与客服库校准后抽检（0.043/0.15）同级。
 - **低分题评价一致**：adm_q016（裁判 0.60 / 人工 0.50——制度名+适用岗位全对，但标准/弹性/综合工时制的量化要求 3 处缺失）；adm_q008（0.89 / 0.75——5 事实点缺赔偿标准）。
 - **拒答与干扰题评价一致**：adm_q029 正确拒答 1.0、adm_q010 干扰项正确拒答 1.0（裁判与人工同判）。
@@ -549,11 +553,12 @@ gold_rank top5 覆盖率仅 0.261（客服库 v5.9 基线 52%）——行政库�
 - **v1.2**（2026-09-24）：新增 gold_rank 诊断维度 + 双窗口评测（top5/top8 同跑）。gold_rank 双模式（词汇/LLM），定位为排序质量诊断工具而非精确指标。
 - **v1.3**（2026-09-24）：新增 nDCG@k 排序质量指标。从 CP 的 per_chunk score 推导，零额外 LLM 成本；MRR 不实现，由 nDCG 替代。
 - **v1.4**（2026-09-25）：Phase 2 落地。e2e 生成四指标：faithfulness / answer_relevance / correctness / citation_accuracy（各自 LLM 裁判 + 缓存）；50 题客服业务测试集全量跑通 + 逐题可追溯（ground_truth/key_facts/retrieval/gen_meta）；裁判一致性人工抽检（10 题，LLM 判定与人工一致性约 7/10，偏差集中在「表述不同但实质覆盖」被裁判低估）。测试集 GT 修正 5 题（CS-FC-005/007、CS-CP-003/004、CS-SM-001，含 CS-CP-004 人工抽检发现 v1.0 指标目标纯属幻觉→GT 改为「不可比」）。
-- **v1.5**（2026-09-25）：裁判校准。correctness 裁判 prompt 校准（分母改标准答案事实点 + 语义对齐含中文译名 + 额外正确信息不计入分母 + 部分覆盖按比例），judge 透传 total_facts/correct_facts/incorrect。全量重判 correctness 0.8321→**0.8353**（详见 [CHANGELOG](../CHANGELOG.md) v5.15）。校准后重做人工一致性抽检 **10/10 达标**（|diff|≤0.25 判一致，平均 0.043、最大 0.15；报告 `tests/reports/human_checklist_run_e2e_cservice_50_v2.md`）。
-- **v1.7**（2026-09-25）：行政库表格 NL 摘要激活。排查并修正 v5.16 推断（q013 非「建库未套用摘要」，真因是稀疏索引缺 block_type → M7 `build_workspace_deps` 漏传 `chunks_dir`）；M7 修复 + admin sparse 重建后复测（`tests/reports/run_retr_admin_nl.json`），Recall@5 0.9405→0.9583、加权 Prec@5 0.5878→0.6122、nDCG@5 0.8518→0.8649，`adm_q012` nDCG 0.83→0.99（能力生效直接证据）；q013/q014 排序不变——表格碎片化确认为 M2 行级切分独立问题。详见 [§8.1a](#81a-表格-nl-摘要激活后复测2026-09-25m9-v16--v17) 与 [CHANGELOG](../CHANGELOG.md) v5.17。
+- **v1.5**（2026-09-25）：裁判校准。correctness 裁判 prompt 校准（分母改标准答案事实点 + 语义对齐含中文译名 + 额外正确信息不计入分母 + 部分覆盖按比例），judge 透传 total_facts/correct_facts/incorrect。全量重判 correctness 0.8321→**0.8353**（详见 [CHANGELOG](../CHANGELOG.md) v5.15）。校准后重做人工一致性抽检 **10/10 达标**（|diff|≤0.25 判一致，平均 0.043、最大 0.15；报告 `tests/reports/checklists/human_checklist_run_e2e_cservice_50_v2.md`）。
+- **v1.7**（2026-09-25）：行政库表格 NL 摘要激活。排查并修正 v5.16 推断（q013 非「建库未套用摘要」，真因是稀疏索引缺 block_type → M7 `build_workspace_deps` 漏传 `chunks_dir`）；M7 修复 + admin sparse 重建后复测（`tests/reports/retrieval/history/run_retr_admin_nl.json`），Recall@5 0.9405→0.9583、加权 Prec@5 0.5878→0.6122、nDCG@5 0.8518→0.8649，`adm_q012` nDCG 0.83→0.99（能力生效直接证据）；q013/q014 排序不变——表格碎片化确认为 M2 行级切分独立问题。详见 [§8.1a](#81a-表格-nl-摘要激活后复测2026-09-25m9-v16--v17) 与 [CHANGELOG](../CHANGELOG.md) v5.17。
 - **v1.6**（2026-09-25）：行政库（eval_admin）首轮检索基线。15 题最小集 retrieval 模式评测出值（Recall@5 0.9405 / Prec@5 0.5878 / nDCG@5 0.8518），逐题检索质量诊断定位四大问题（q013 表碎片化、q004 跨表依赖、q010 字符串命中、q015 拒答前提成立），gold_rank 词汇模式 top5 覆盖率 0.261 印证 [§7.5](M9_evaluation.md) 文档型事实边界。详见 [CHANGELOG](../CHANGELOG.md) v5.16 与本文 §8.1。
 - **v1.9**（2026-09-25）：行政库 30 题完整版评测。六文档 203 chunks 建库 + 测试集 v0.2（30 题），全量检索基线（Rec@5/8 0.9524、Prec@5 加权 0.619 / @8 0.5359、nDCG@5 0.8567 / @8 0.9019、gold_rank avg 2.04）+ 全量 e2e（faithfulness 0.884 / answer_relevance 0.9333 / correctness 0.9713 / citation_accuracy 0.8187，judge_failed=0）+ 裁判一致性抽检 **10/10 达标**（平均 |diff| 0.049、最大 0.15）。详见 [§8.1c/8.1d](#81c-行政库30题全量检索基线2026-09-25m9-v19) 与 [CHANGELOG](../CHANGELOG.md) v5.19。
 - **v1.8**（2026-09-25）：行政库 e2e 生成质量评测。15 题全量四指标首次出值（faithfulness 0.9277 / answer_relevance 0.9000 / correctness 0.9373 / citation_accuracy 0.8928，judge_failed=0，耗时 9.3 分钟），拒答验证通过（q015 正确拒答）、干扰题行为正确（q010）、检索缺口传导到生成（q004 correctness 0.5）。详见 [§8.1b](#81b-行政库e2e生成质量评测2026-09-25m9-v17--v18) 与 [CHANGELOG](../CHANGELOG.md) v5.18。
 - **v1.10**（2026-09-27）：LLM listwise 终审正式化（`--reranker llm`，对应 CHANGELOG v5.21）。新增 §7.7 正式使用小节（机制 / 启用 / 决策边界）；nDCG@5 0.8567→**0.9479**、Re@5 0.9524→**0.9857**、gold_rank avg 2.04→**1.76**。仅 M9 评测启用，不接 answer / 生产 M5。
 - **v1.11**（2026-09-27）：judge 可靠性修复 P0 + P1 落地（对应 CHANGELOG v5.22）。P1 precision 数字纪律（归一化标准答案 → 要点句 + 【关键数值】清单，消除 68.5 类数值幻读，两库重跑 0 处）；P0 recall 证据强制（hit 必引原文 + `_enforce_evidence` 兜底，原 6 处过宽全降 miss）。v5.22 粗校版误杀 20 处合法命中（客服 12 / 行政 8，v5.22.1 逐一核对全恢复），**v5.22.1 精准化已落地**（空洞否定才降 miss，27 例离线回归 STRICT 20/20，两库重跑校正 27→5/2、recall +8.5pt/+7.5pt）——详见 §4.3 第 3 条 + CHANGELOG v5.22.1。
 - **v1.12**（2026-09-27）：gold_rank 词汇匹配器修复（对应 CHANGELOG v5.23）。`metrics/gold_rank.py` `_lexical_match` 四层修复：数字边界正则（千分位等价 + 防「30」误中「130」）、分隔符归一化（「疏忽大意30%」↔分离表格块跨单元格连续匹配）、文本佐证累计匹配长度、锚定分类（结论位 = 等式右值必中 / 弱锚版本年份差值序数不算强证据）。三态回归 35 题 135 facts：NEW 107/135=79.3%（vs STRICT 找回 43，新增漏仅 2 皆如实缺口：CS-TN-003 推导型 1.29 倍、CS-FC-005 Q3 AHT 等式主结论 top8 无支撑）；伪命中被拒：合计扣分=30、剩余=70 分。两库定向重跑（客服 35 题）：judge 判据零改动（context_recall/precision/ndcg 逐位不变），gold_rank_avg 2.08→**1.71**、top8 事实覆盖率 0.517→**0.838** ——详见 §7.5 词汇模式边界更新 + CHANGELOG v5.23。
+- **v1.13**（2026-10-06）：**客服库评测口径回填**（对应 CHANGELOG v5.36，代码零改动）。v5.23/v5.29/v5.30/v5.31 四次口径修复（gold_rank 匹配器、裁判 hit 字段、context_recall 缓存键含完整 context_str、评测窗口 @5）后，旧 recall 判定为修复前口径的虚高值。§8.1b 加口径注记；当前代码重跑 35 题 retrieval（Recall 0.7515 / nDCG 0.9443 / gold_rank 1.6）与 50 题 e2e（Recall 0.8 / Correctness 0.8149 / nDCG 0.9377），nDCG/gold_rank 均较旧值改善证明非链路退化，报告归档 `tests/final_results/`。详见 [CHANGELOG](../CHANGELOG.md) v5.36 与 [retrieval_comparison.md](../../backend/tests/reports/retrieval_comparison.md)「口径变更说明」。

@@ -16,7 +16,7 @@
 跑法：
   cd backend && python3 scripts/probe_expand_ablation.py \
       --testset tests/testsets/testset_admin_30.json --collection eval_admin \
-      --expand off --report tests/reports/run_ablation_admin30_expOFF_20261003.json
+      --expand off --report tests/reports/ablation/run_ablation_admin30_expOFF_20261003.json
 """
 from __future__ import annotations
 

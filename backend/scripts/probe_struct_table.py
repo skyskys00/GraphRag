@@ -225,7 +225,7 @@ CASES = [
 
 def main():
     tables = parse_table_blocks()
-    out_json = "tests/reports/probe_struct_table.json"
+    out_json = "tests/reports/probe/probe_struct_table.json"
     results = {"collection": "eval_admin", "n_table_blocks": len(tables),
                "note": "结构化表索引探针：值/数值/列语义匹配能否给缺口表块候选资格。score>0=具备进池理由。",
                "cases": []}

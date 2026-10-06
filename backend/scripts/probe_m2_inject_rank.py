@@ -241,7 +241,7 @@ async def main() -> None:
 
     (PROJ / "tests" / "reports" / "probe_m2_inject_rank.json").write_text(
         json.dumps(out, ensure_ascii=False, indent=2))
-    print("\n[report] tests/reports/probe_m2_inject_rank.json")
+    print("\n[report] tests/reports/probe/probe_m2_inject_rank.json")
     await rag.finalize_storages()
 
 

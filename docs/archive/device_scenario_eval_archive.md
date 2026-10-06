@@ -129,7 +129,7 @@ Gold Rank 平均 1.67 / 中位 1.66；事实覆盖率 top1 0.5 → top3 0.7308 �
 
 ## 未满分题逐 fact 漏召归因（v5.33 探针实测）
 
-> 探针 `backend/scripts/probe_hard_miss_rank.py`，日志 `backend/tests/reports/probe_hard_miss_rank.log`。复现 runner 生产检索形态，把每个失败 fact 的目标块当「鱼」解剖三路候选 / RRF 全序 / fused top40 / 精排 top5。常量 `RRF_K=60` / `FUSED_TOP=40` / `RERANK_TOP=5`。
+> 探针 `backend/scripts/probe_hard_miss_rank.py`，日志 `backend/tests/reports/probe/probe_hard_miss_rank.log`。复现 runner 生产检索形态，把每个失败 fact 的目标块当「鱼」解剖三路候选 / RRF 全序 / fused top40 / 精排 top5。常量 `RRF_K=60` / `FUSED_TOP=40` / `RERANK_TOP=5`。
 
 **前置结论**：15 道未满分题共 **25 个失败 fact**，按失败性质三分：
 
@@ -146,6 +146,6 @@ Gold Rank 平均 1.67 / 中位 1.66；事实覆盖率 top1 0.5 → top3 0.7308 �
 ## 可复现文件清单
 
 - 题集（已归档）：`backend/tests/testsets/archive/testset_device_30.json` / `testset_device_50.json`
-- 报告：`backend/tests/reports/run_retrieval_device30_v531_leakfix.json` / `run_retrieval_device30_v532_localize.json` / `run_e2e_device30_honest.json` / `run_e2e_device30.json` / `run_retrieval_device50.json` / `run_retrieval_device_v2.json` / `run_e2e_device_v2.json`
-- 探针：`backend/scripts/probe_perdoc_subquery.py` / `probe_compare_localize.py` / `probe_hard_miss_rank.py` / `probe_comparison_miss_paths.py`，日志 `backend/tests/reports/probe_hard_miss_rank.log`
+- 报告：`backend/tests/reports/retrieval/current/run_retrieval_device30_v531_leakfix.json` / `run_retrieval_device30_v532_localize.json` / `run_e2e_device30_honest.json` / `run_e2e_device30.json` / `run_retrieval_device50.json` / `run_retrieval_device_v2.json` / `run_e2e_device_v2.json`
+- 探针：`backend/scripts/probe_perdoc_subquery.py` / `probe_compare_localize.py` / `probe_hard_miss_rank.py` / `probe_comparison_miss_paths.py`，日志 `backend/tests/reports/probe/probe_hard_miss_rank.log`
 - 交叉参考：检索全库归纳见 `docs/archive/retrieval_probing_archive.md`；v5.34 v2 题集实测见 `backend/tests/reports/retrieval_comparison.md` v5.34 节

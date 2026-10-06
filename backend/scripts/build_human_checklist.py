@@ -2,7 +2,7 @@
 
 用法：python3 scripts/build_human_checklist.py <report.json> <testset.json> <ids...>
 输出：stdout 打印抽检条目的浓缩 JSON（question/ground_truth/key_facts/answer/裁判 reason），
-并保存一份 markdown 到 tests/reports/human_checklist_<report名>.md 供用户打开对照判定。
+并保存一份 markdown 到 tests/reports/checklists/human_checklist_<report名>.md 供用户打开对照判定。
 """
 import json
 import sys

@@ -4,13 +4,13 @@
 
 > **优化目标**：提升 `table_numeric`（表格数字题）类目的 Context Precision
 
-> **数据事实源**：本表收录各版评测指标 + A/B 明细 + 探针数据复原。方法 → 阶段 → 状态的方法总表见 [docs/modules/RETRIEVAL_OPTIMIZATION.md](../../docs/modules/RETRIEVAL_OPTIMIZATION.md)；版本时序见 [docs/CHANGELOG.md](../../docs/CHANGELOG.md)。
+> **数据事实源**：本表收录各版评测指标 + A/B 明细 + 探针数据复原。方法 → 阶段 → 状态的方法总表见 [docs/modules/RETRIEVAL_OPTIMIZATION.md](../../../docs/modules/RETRIEVAL_OPTIMIZATION.md)；版本时序见 [docs/CHANGELOG.md](../../../docs/CHANGELOG.md)。
 
 ## ⚠️ 口径变更说明（2026-10-06，读表前必读）
 
-**2026-10-06 用当前代码重跑 35 题 retrieval**（`retrieval/current/run_retrieval_cservice35_20261006.json`）：**同 testset（`testset_cservice_35.json`）/ 同 mode（retrieval）/ 同 collection（`eval_cservice`），仅代码版本不同** —— Recall 0.9520→**0.7515**（-0.2005），而 nDCG@5 0.9028→**0.9443**（+0.0415）、gold_rank 均值 1.74→**1.6**（改善）。
+**2026-10-06 用当前代码重跑 35 题 retrieval**（`run_retrieval_cservice_35_20261006.json`）：**同 testset（`testset_cservice_35.json`）/ 同 mode（retrieval）/ 同 collection（`eval_cservice`），仅代码版本不同** —— Recall 0.9520→**0.7515**（-0.2005），而 nDCG@5 0.9028→**0.9443**（+0.0415）、gold_rank 均值 1.74→**1.6**（改善）。
 
-**根因 = 评测口径修复，非检索链路退化。** 决定性证据：若链路退化，nDCG/gold_rank 应同步下降，实际二者反向上升（排序质量真实改善）；且 50 题 e2e 重跑复现同一模式（`e2e/current/run_e2e_cservice50_20261006.json`：Recall 0.9601→0.8，nDCG 0.8898→0.9377，gold_rank 1.74→1.49）。
+**根因 = 评测口径修复，非检索链路退化。** 决定性证据：若链路退化，nDCG/gold_rank 应同步下降，实际二者反向上升（排序质量真实改善）；且 50 题 e2e 重跑复现同一模式（`run_e2e_cservice_50_20261006.json`：Recall 0.9601→0.8，nDCG 0.8898→0.9377，gold_rank 1.74→1.49）。
 
 **v5.13 及以前的 Recall 为修复前口径的虚高值，与当前口径不可横比。** 相关修复（均在 v5.13 之后）：
 
@@ -133,8 +133,8 @@
 8. **v5.10 列名前缀 → 纯 Recall 收益，但来源需修正**：总体 Recall 0.9202 → 0.9323（+0.012）、CP 微降 0.5657 → 0.5543；table_numeric Recall 0.792 → 0.917（+0.125）是本轮真正拐点。**逐题核对后归因修正**：类目增益全部来自 **CS-TN-004（2/4→4/4）**，CS-TN-003 全版本恒 0.667（早期记录「0.333→0.667，提升集中在 CS-TN-003」有误）。列名前缀给表格块加自然语言列名框架，dense/sparse 召回与 judge 推导同时受益，但它对 CS-TN-003 的市场规模表无效（见 #9 探针）。
 9. **~~v5.11/v5.12~~ numeric_match 增益 → 完全无效（已弃用）**：数值型问题中表格块 numeric_match ×2.0（v5.11）叠加 1 位数字/空格匹配修复（v5.12）后，检索结果与 v5.10 逐字节一致。根因：**四道 table_numeric 题中三题 Recall 已满（1.0），剩下一题差的是 rank6 之外的补充块，numeric_match 类的跨类特征只能调整已经在 top5 里的相关块之间的相对排序，无法把噪音块（CP 分母）替换掉** → CP 不动，Recall 不动。**探针实测（CS-TN-003，v5.10 索引）**：2023 年市场规模表块（chunk-3e7b9f…）graph/vector/kw 三路都召回、RRF 池第 7，但 bge-reranker 只给 0.1328，融合后落到**第 13 名**。到 rank5 的融合分差约 0.31，numeric_match 权重仅 0.15，boost 封顶也补不上——该类目缺口是 **reranker 对数字表语义失明**，既不是候选缺口（块在池内），也不是 top5/top8 窗口缺口（top8 同样丢）。
 10. **CP=0.40 的本质**：table_numeric 题目本身相关块就少（答案高度集中在 1-2 个表格块），top5 中其余位是上下文块。CP 0.40 对应「每 5 块中约 2 块直接相关」，这是分母约束下的合理值。后续若要继续升 CP，需换特征思路（如列名匹配、非表格块减分），而不是增强数字匹配。
-11. **v5.10 生成端实测（4 题 table_numeric）**：答案质量与 CP 数字脱钩——CS-TN-001/002/004 三题在 CP 只有 0.4~0.8 的情况下**答案完全正确**（数值全对、引用正确、无幻觉），CS-TN-003 部分正确（2026E=425 亿答对，但 2023 年市场规模表格块 chunk-003 未进 top5，如实说明「材料未提供」而未胡编）。**唯一暴露缺陷的题恰好是 Recall=0.667 的 CS-TN-003**：2023 表存在于稀疏索引（`chunk-3e7b9fcceb58079f032479c73fd63634`）且在候选池内，但融合后排在 13（reranker 对数字表失明，见 #9 探针），超出任何窗口而非召回缺口。结论：CP 0.4 级噪音块不干扰生成，Recall 0.917 是实际可用性的主要约束。报告见 `retrieval/history/qa_v510_table_numeric.json`。
-12. **gold_rank 评测工具 + 双窗口验证（2026-09-24 新增）**：给 M9 评测加 gold_rank 诊断维度（每个 fact 最早出现在第几块）+ top5/top8 双窗口同跑。v5.9 基线复测：**top5 与 top8 的 Recall 完全一致（0.9202）**——33 道有答案题中没有任何一道的 fact 在 top8 有但 top5 没有，top5 窗口对 recall 零损失；top8 precision 0.425 远低于 top5 的 0.566（多的 3 块全是噪音）。**结论：v5.9 检索质量下 top5 完全够用，top8 没有召回增益只有精度损失。** gold_rank 词汇模式 avg=1.95（命中事实平均第 2 块出现），对数值型事实可靠、对推导型漏检多，定位为排序质量诊断工具而非精确评测指标。报告：`retrieval/history/run_retrieval_v5.9_goldrank.json`，工具：`metrics/gold_rank.py`。
+11. **v5.10 生成端实测（4 题 table_numeric）**：答案质量与 CP 数字脱钩——CS-TN-001/002/004 三题在 CP 只有 0.4~0.8 的情况下**答案完全正确**（数值全对、引用正确、无幻觉），CS-TN-003 部分正确（2026E=425 亿答对，但 2023 年市场规模表格块 chunk-003 未进 top5，如实说明「材料未提供」而未胡编）。**唯一暴露缺陷的题恰好是 Recall=0.667 的 CS-TN-003**：2023 表存在于稀疏索引（`chunk-3e7b9fcceb58079f032479c73fd63634`）且在候选池内，但融合后排在 13（reranker 对数字表失明，见 #9 探针），超出任何窗口而非召回缺口。结论：CP 0.4 级噪音块不干扰生成，Recall 0.917 是实际可用性的主要约束。报告见 `qa_v510_table_numeric.json`。
+12. **gold_rank 评测工具 + 双窗口验证（2026-09-24 新增）**：给 M9 评测加 gold_rank 诊断维度（每个 fact 最早出现在第几块）+ top5/top8 双窗口同跑。v5.9 基线复测：**top5 与 top8 的 Recall 完全一致（0.9202）**——33 道有答案题中没有任何一道的 fact 在 top8 有但 top5 没有，top5 窗口对 recall 零损失；top8 precision 0.425 远低于 top5 的 0.566（多的 3 块全是噪音）。**结论：v5.9 检索质量下 top5 完全够用，top8 没有召回增益只有精度损失。** gold_rank 词汇模式 avg=1.95（命中事实平均第 2 块出现），对数值型事实可靠、对推导型漏检多，定位为排序质量诊断工具而非精确评测指标。报告：`run_retrieval_v5.9_goldrank.json`，工具：`metrics/gold_rank.py`。
 
 13. **nDCG 排序质量指标（2026-09-24 新增）**：从 context_precision 的 per-chunk 相关度（0~1 score）推导 nDCG@k，零额外 LLM 成本，替代原规划的 MRR（信息密度低）。**检索指标体系最终定为 4 个，各司其职**：
     - **Recall**：召回够不够 → 召回层改动的核心指标
@@ -148,8 +148,8 @@
 
 ## 备注
 
-- 数据来源：`tests/reports/retrieval/{current,history}/run_retrieval_*.json`（机器可读原始数据）
-- Recall / Precision 由 LLM 裁判判分；v5.9-top5 对应 `retrieval/history/run_retrieval_v5.9_top5.json`
+- 数据来源：`tests/reports/run_retrieval_*.json`（机器可读原始数据）
+- Recall / Precision 由 LLM 裁判判分；v5.9-top5 对应 `run_retrieval_v5.9_top5.json`
 - unanswerable 类 recall=0 符合预期（材料中无答案，检索系统不应召回）
 
 ---
@@ -164,29 +164,29 @@
 
 ## 行政库表格语义注入与 title_path 校准（v5.19→v5.20，旧 admin_30 题集）
 
-表格语义缺口分「召回层进不了池」与「reranker 数字表失明」两层；注入手段与病灶错配（全量前缀 -0.94pt / 结构化补召回指标逐位不变），**缺口真实存在、手段需精准**；唯一落地的是 chapter fix（M1 解析正确性，正式修复，见 CHANGELOG）。→ [完整明细](../../docs/archive/retrieval_probing_archive.md)
+表格语义缺口分「召回层进不了池」与「reranker 数字表失明」两层；注入手段与病灶错配（全量前缀 -0.94pt / 结构化补召回指标逐位不变），**缺口真实存在、手段需精准**；唯一落地的是 chapter fix（M1 解析正确性，正式修复，见 CHANGELOG）。→ [完整明细](../../../docs/archive/retrieval_probing_archive.md)
 
 ## LLM listwise 终审探底 A/B（v5.21，旧 admin_30 题集）
 
-LLM 终审治「reranker 失明」（nDCG 0.8567→0.9479）但**只治池内不治池外**；决策：仅 M9 评测 `--reranker llm` 可选，生产检索/answer 链路不接。→ [完整明细](../../docs/archive/retrieval_probing_archive.md)
+LLM 终审治「reranker 失明」（nDCG 0.8567→0.9479）但**只治池内不治池外**；决策：仅 M9 评测 `--reranker llm` 可选，生产检索/answer 链路不接。→ [完整明细](../../../docs/archive/retrieval_probing_archive.md)
 
 ## children/neighbor 展开探底（2026-09-27，三连收尾不落地）
 
-children 0 救回、neighbor ±K 仅 1 fact 却新增 2290 块 —— 池外缺口靠展开补噪声比远超验收线，**不落地**。→ [完整明细](../../docs/archive/retrieval_probing_archive.md)
+children 0 救回、neighbor ±K 仅 1 fact 却新增 2290 块 —— 池外缺口靠展开补噪声比远超验收线，**不落地**。→ [完整明细](../../../docs/archive/retrieval_probing_archive.md)
 
 ## 两线收口：检索优化阶段结束（2026-09-27）
 
-召回层只剩池外缺口（承认搁置）、排序层已封顶（rerank 输入侧改造用尽）；**cross-encoder 对数字/专名表失明是贯穿各库的共性病根**。→ [完整明细](../../docs/archive/retrieval_probing_archive.md)
+召回层只剩池外缺口（承认搁置）、排序层已封顶（rerank 输入侧改造用尽）；**cross-encoder 对数字/专名表失明是贯穿各库的共性病根**。→ [完整明细](../../../docs/archive/retrieval_probing_archive.md)
 
 ## 补档：LLM 版表格摘要进 rerank 输入（v5.20 探针）
 
-与规则版（v5.13）同构：**LLM 摘要单块提升但 top5 名单逐位不变** —— 输入侧换内容救不了排名结构。→ [完整明细](../../docs/archive/retrieval_probing_archive.md)
+与规则版（v5.13）同构：**LLM 摘要单块提升但 top5 名单逐位不变** —— 输入侧换内容救不了排名结构。→ [完整明细](../../../docs/archive/retrieval_probing_archive.md)
 
 ## gold_rank 匹配器修复三库统一（v5.23.3，2026-09-27）
 
 **背景**：v5.23 修掉 `_lexical_match` 数字粘连假阴性（修复机制见 CHANGELOG v5.23），当时只定向重跑客服库；本小节补齐行政库同口径重跑，两评测库 gold_rank 口径统一。default_ws 无评测测试集，不涉及该维度。
 
-**行政库 30 题重跑**（`tests/reports/retrieval/history/run_retrieval_goldrank_final_admin30_20260927.json`，277.7s，judge 缓存全命中）：
+**行政库 30 题重跑**（`tests/reports/run_retrieval_goldrank_final_admin30_20260927.json`，277.7s，judge 缓存全命中）：
 
 | gold_rank | 行政 v5.22.1（旧口径） | 行政 v5.23（新口径） | Δ |
 |---|---|---|---|
@@ -201,7 +201,7 @@ children 0 救回、neighbor ±K 仅 1 fact 却新增 2290 块 —— 池外缺�
 
 ## 召回路数对照（route ablation，v5.24，旧 admin_30/cservice_35 题集）
 
-graph 路召回零增益、keyword 路双刃（跨文档召回 +12.5pt、top5 净 -1.2pt）——**「keep 三路、不调配置」跨领域复现**。→ [完整明细](../../docs/archive/retrieval_probing_archive.md)
+graph 路召回零增益、keyword 路双刃（跨文档召回 +12.5pt、top5 净 -1.2pt）——**「keep 三路、不调配置」跨领域复现**。→ [完整明细](../../../docs/archive/retrieval_probing_archive.md)
 
 ---
 
@@ -211,11 +211,11 @@ graph 路召回零增益、keyword 路双刃（跨文档召回 +12.5pt、top5 �
 - v5.30 泄漏治理：`per_doc_queries` 系评测独有输入（eval-shape 0.8889 vs prod-shape 0.6667）→ **处置已落地 v5.30**（删字段/完整 question/窗口回 8），分析过程归档。
 - v5.32 逐路定位：4 漏召 fact **0/4 由切分导致**，精排截断 2 + 匹配太弱 2；精排截断与 reranker 失明同源、方向已封闭。
 
-→ 三节完整明细见 [docs/archive/retrieval_probing_archive.md](../../docs/archive/retrieval_probing_archive.md)
+→ 三节完整明细见 [docs/archive/retrieval_probing_archive.md](../../../docs/archive/retrieval_probing_archive.md)
 
 ## 三库检索效果横向对比（2026-10-04，旧 30/35 题集）
 
-器械「差」非系统退化，是**难度结构 / 题型构成 / 语料规模三重结构性差异**；v5.33 难度收敛后 aggregate 大涨正面验证「难度配比是主杠杆」——**纵向对比须按题型/难度分层读**。→ [完整明细](../../docs/archive/retrieval_probing_archive.md)
+器械「差」非系统退化，是**难度结构 / 题型构成 / 语料规模三重结构性差异**；v5.33 难度收敛后 aggregate 大涨正面验证「难度配比是主杠杆」——**纵向对比须按题型/难度分层读**。→ [完整明细](../../../docs/archive/retrieval_probing_archive.md)
 
 ---
 
@@ -223,7 +223,7 @@ graph 路召回零增益、keyword 路双刃（跨文档召回 +12.5pt、top5 �
 
 ⚠️ **与 v5.33 数字不可横比**：题集完全不同（非增量），v5.33 列仅作方向参考。
 
-实测（`retrieval/current/run_retrieval_device_v2.json` / `e2e/current/run_e2e_device_v2.json`，standard，@5，分母 50）：
+实测（`run_retrieval_device_50_20261005.json` / `run_e2e_device_50_20261005.json`，standard，@5，分母 50）：
 
 | 维度 | 器械 v2 题集（v5.34） | 器械 50 题（v5.33，旧制） | 变化（方向参考） |
 |---|---|---|---|
@@ -253,4 +253,4 @@ graph 路召回零增益、keyword 路双刃（跨文档召回 +12.5pt、top5 �
 
 ## 精排文本工程探底（增补 / 去噪双向无效，v5.33，2026-10-05）
 
-给图像块 / 段落块做同类文本工程（轮 A 加字补语境、轮 B 删字去噪）：final5 **0/13**，fused40 位次随机漂移（IO-004 正负翻转）——**cross-encoder 对块文本的表层格式工程免疫**，失败在语义层非格式层；精排侧「文本工程」方向封闭，要动名次只剩换赛道（LLM 终审进生产 / 换 reranker）。→ [完整明细](../../docs/archive/retrieval_probing_archive.md)
+给图像块 / 段落块做同类文本工程（轮 A 加字补语境、轮 B 删字去噪）：final5 **0/13**，fused40 位次随机漂移（IO-004 正负翻转）——**cross-encoder 对块文本的表层格式工程免疫**，失败在语义层非格式层；精排侧「文本工程」方向封闭，要动名次只剩换赛道（LLM 终审进生产 / 换 reranker）。→ [完整明细](../../../docs/archive/retrieval_probing_archive.md)

@@ -21,7 +21,7 @@ from app.m9_eval.judge import clear_cache
 from app.m9_eval.metrics.correctness import compute_correctness
 from app.m9_eval.runner import _load_dotenv
 
-REPORT = PROJ / "tests/reports/run_e2e_cservice_50.json"
+REPORT = PROJ / "tests/reports/e2e/history/run_e2e_cservice_50.json"
 TESTSET = PROJ / "tests/testsets/testset_cservice_50.json"
 
 ASSUMED_IDS = [
