@@ -315,7 +315,10 @@ VISION_MIN_AREA=10000         # px²，成本兜底：小于此面积不调模�
 
 | 步骤 | 检查项 | 实施实测（2026-09-29） |
 |---|---|---|
-| **1. M1 单元** | 对两份样本跑 `python -m app.m1_parse.run -s backend/corpus -o /tmp/m1_mm`：drawing 块 content **非空**、`img_path` **有值**；`image_captions.json` 生成；小图标**不在**其中 | ✅ 铭昇 15 drawing / content 非空 8 / img_path 15；融柏 35 / 30 / 35；`image_captions.json` 落盘；面积阈值滤 6 与 4 张 |
+| **1. M1 单元** | 对两份样本跑 `python -m app.m1_parse.run -s <样本目录> -o /tmp/m1_mm`：drawing 块 content **非空**、`img_path` **有值**；`image_captions.json` 生成；小图标**不在**其中 | ✅ 铭昇 15 drawing / content 非空 8 / img_path 15；融柏 35 / 30 / 35；`image_captions.json` 落盘；面积阈值滤 6 与 4 张 |
+
+> 样本来源：当年放 `backend/corpus/`（v5.25 混入 git），建器械库时已并入正式源 `backend/data/collections/col_b7b876b1/uploads/`（逐字节一致），`backend/corpus/` 于 2026-10-07 清理删除，此处仅作历史回溯。
+
 | **2. M2 单元** | `python -m app.m2_chunk.runner -s /tmp/m1_mm -o /tmp/m2_mm`：jsonl 含 `block_type=drawing` 且 content 非空的 TextUnit；`image_path` 字段存在；`chunk_order_index` 落在原位 | ✅ 铭昇 45 units / 9 drawing；融柏 123 / 27；`image_path` 全带、`title_path` 上下文正确。注：`chunk_order_index` 有缺口是 M2 **既有行为**（末尾 `[u for u in out if u["content"].strip()]` 丢弃空 content 块），与本次改动无关 |
 | **3. 降级** | `VISION_ENABLED=false` 重跑 M1+M2：**不因视觉产生块**（`drawing` 块只可能来自过滤后的 MinerU 真图注） | ✅ 铭昇 **0** drawing；融柏 **4**（正是 §2.2 的 3 条真图注 + p22 footnote，零纯图号垃圾）。铭昇 29 units、融柏 83 units |
 | **4. M3/M5 零改动** | 按 M3_index §3.5 重建链建**临时 workspace**（遵守探底纪律第 4 条，不污染标准库）：PG `lightrag_doc_chunks` 含图片块；`m5_sparse.json` 含图片块 | ✅ 已实测（2026-10-01，临时库 `mm_verify_ws`，用后即收）：M2 38 drawing → PG 38（24 按序号命中 + 14 按 content 命中）→ sparse 38 条 `block_type=drawing`，**M1/M2/M3/M5 零改动**。验证中另发现并修复重建链一个**既有**对齐缺陷（与多模态无关，见 CHANGELOG v5.25.1） |
