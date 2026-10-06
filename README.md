@@ -1,21 +1,22 @@
 # GraphRAG
 
-面向中文场景的**图增强检索生成（GraphRAG）**系统 —— 基于 LightRAG 内核，支持多格式文档解析入库、双层知识图谱可视化、**多模态图片检索**、SSE 流式问答与 `[n]` 引用溯源。
+面向中文场景的**通用型图增强检索生成（GraphRAG）**系统 —— 基于 LightRAG 内核，支持多格式文档解析入库、双层知识图谱可视化、**多模态图片检索**、SSE 流式问答与 `[n]` 引用溯源。链路不绑定特定领域，已在**客服、行政、器械**三个领域数据集上完成量化评测验证，获得可复用的通用 RAG 能力。
 
 FastAPI + React/TypeScript 前后端分离；Postgres/pgvector 存储；bge-m3 向量（经 Xinference）；DeepSeek V4-Flash 生成与视觉理解。内置**量化评测体系**（检索 + 生成共八维指标，三库 130 题）。
 
 ## 界面预览
 
-| 仪表盘（库概览） | 文档问答（SSE 流式 + `[n]` 引用溯源） |
-|---|---|
-| ![仪表盘](docs/screenshots/01-dashboard.png) | ![文档问答](docs/screenshots/04-chat.png) |
-| 知识图谱（双层图谱：文档级 + 实体级） | 文档管理（上传自动入库 / 软删 / 多库隔离） |
-| ![知识图谱](docs/screenshots/03-graph.png) | ![文档管理](docs/screenshots/02-docs.png) |
+| 知识图谱 · 实体级（`默认知识库`） | 知识图谱 · 文档级（`有源器械说明书`） | 表格预览 |
+|---|---|---|
+| ![实体级图谱](docs/screenshots/03-graph-entity.png) | ![文档级图谱](docs/screenshots/02-graph-doc.png) | ![表格预览](docs/screenshots/04-table-preview.png) |
+| 仪表盘 · 库概览 | 文档问答（SSE 流式 + `[n]` 引用溯源） | 文档管理 |
+| ![仪表盘](docs/screenshots/01-dashboard.png) | ![文档问答](docs/screenshots/04-chat.png) | ![文档管理](docs/screenshots/02-docs.png) |
 
 ## 功能特性
 
+- **多格式解析**：PDF / DOCX / PPTX / XLSX / Markdown / HTML / TXT / EPUB 等，经 MinerU + Docling 统一结构化，图片型内容经视觉模型转写
 - **文档问答**：SSE 流式输出，答案带 `[n]` 引用标注，可溯源到原文片段；多文档交叉引用
-- **知识图谱**：双层图谱（文档级 + 实体级），力导向布局，支持话题聚类 / 关系分类 / 实体筛选 / 图片节点预览
+- **知识图谱**：双层图谱（文档级 + 实体级），力导向布局，支持话题聚类 / 关系分类 / 实体筛选 / 图片节点预览，详见上「界面预览」
 - **多模态检索**：文档图片入索引，图片型表格经视觉模型转写，带图内容可检索、可溯源
 - **文档管理**：上传自动入库（解析 → 切块 → 建图），软删，多知识库隔离
 - **仪表盘**：库概览统计 + 最近问答 + 文档概览
@@ -23,7 +24,7 @@ FastAPI + React/TypeScript 前后端分离；Postgres/pgvector 存储；bge-m3 �
 
 ## 量化评测
 
-M9 评测层（`backend/tests/`），指标与生产口径对齐（`@5` 单窗口，`RERANK_TOP=5`）：
+M9 评测层（`backend/tests/`），指标与生产口径对齐（`@5` 单窗口，`RERANK_TOP=5`）。**链路不做领域定制**，直接以三套跨领域场景题集（客服 / 行政 / 器械）验证系统的通用知识问答能力：
 
 - **检索四维**：Context Recall / Precision（含加权）/ nDCG@5 / 自研 **gold_rank**（事实最早命中位次）
 - **生成四维**：Faithfulness / Answer Relevance / Correctness / Citation Accuracy
@@ -87,7 +88,7 @@ GraphRAG/
 
 | 层 | 技术 |
 |----|------|
-| 解析 | MinerU 3.x（PDF 主力）+ Docling（多格式补充）+ DeepSeek 视觉（图片转写） |
+| 解析 | MinerU（PDF / 图片 / DOCX / PPTX / XLSX）+ Docling（HTML / Markdown / TXT / EPUB / DOC）+ DeepSeek 视觉（图片转写） |
 | 索引 | LightRAG + bge-m3（dense + sparse，经 Xinference） |
 | 存储 | Postgres + pgvector |
 | 生成 / 视觉 | DeepSeek V4-Flash（文本生成 + 图片理解，关思考模式） |
