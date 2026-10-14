@@ -67,16 +67,21 @@
 │  用户问题                                                                 │
 │    │                                                                      │
 │    ▼                                                                      │
-│  [5 检索召回] 内建 mix(图+向量local/global/naive) + 关键词sparse/BM25        │
-│              → RRF(k=60) 融合 → bge-reranker 精排（外层增强，M5）            │
+│  [5 检索召回]（外层自研增强，M5）：query 预处理 → 三路召回                │
+│    ├─ query 预处理：同义词扩展 + 专名识别加权（A+B）                      │
+│    ├─ 三路召回：graph(mix) / vector(naive) / keyword(bge-m3 sparse)       │
+│    │          数字型问题 → 精确数字 token 追加进 keyword 路（v5.8）       │
+│    ├─ RRF(k=60) 融合 → fused_top40 候选池                                 │
+│    ├─ bge-reranker 精排（表格块注入 NL 摘要进输入，v5.13）                │
+│    └─ 五特征融合排序（rerank/sparse/rrf/数字匹配/密度）→ top5（v5.9）     │
 │    │                                                                      │
 │    ▼                                                                      │
-│  [6 Agent 编排] LangChain 薄包装（history+工具协议）：                      │
-│    意图识别 → 多路召回 → context 组装（带引用/来源 ID）→ 生成(流式)         │
-│    全局性/跨文档问题 → map-reduce 分块合并                                  │
+│  [6 Agent 编排]：自研极简编排（不引 LangChain/LangGraph）                 │
+│    意图路由（v1 single-window，map-reduce 留位）→ 上下文组装（token 预算）│
+│    → DeepSeek 生成（[n] grounded 标注）→ 引用解析（回连 TextUnit→原文）   │
 │    │                                                                      │
 │    ▼                                                                      │
-│  [7 交互层]  WebUI / FastAPI（SSE 流式 + 引用标注）                        │
+│  [7 交互层]  FastAPI + SSE 流式（token 增量）+ 引用标注 + 多知识库/多会话 │
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
