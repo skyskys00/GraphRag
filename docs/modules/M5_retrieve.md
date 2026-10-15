@@ -2,7 +2,7 @@
 
 > **版本：** v1.14
 > **状态：** 已落地
-> **更新：** 2026-10-01
+> **更新：** 2026-10-15（正文补齐 v5.8/v5.9/v5.13 检索优化实现细节，功能代码早已在 HEAD）
 > **定位：** 三路召回（graph/vector/keyword）+ RRF(k=60) + bge-reranker + 五特征融合排序 + 表格 NL 摘要 + query 预处理 + 白名单过滤
 > **契约：** query + 模式 → 精排后 chunk 列表（full_doc_id / score / snippet）
 > **上游：** [M3 索引层](M3_index.md) / [M4 存储层](M4_storage.md) | **下游：** [M6 生成层](M6_generate.md)
@@ -24,6 +24,8 @@ M5 = **多源召回 + 融合 + 精排 + 溯源**，位于 LightRAG 外层自研�
 | **vector**（密集向量） | `aquery_data(mode='naive', enable_rerank=False)` → 取 chunks 列表（20 块），位次为 bge-m3 余弦相似度 | LightRAG PGVectorStorage（HNSW + `<=>`） |
 | **keyword**（稀疏） | bge-m3 sparse 内积排序，top 40。索引从 PG `lightrag_doc_chunks` 直接读全量，分批 sparse 编码，落盘 `m5_sparse.json` | Xinference bge-m3 flag 引擎（**return_sparse=true 重载**，同实例 dense 不受影响） |
 
+**数字感知检索（v5.8）**：数字型问题（`is_numeric_query` 判定，含精确数字/单位 token 或「最高/占比/同比增长」等语义线索词）把 query 里抽出的精确数字 token 追加进 keyword 路 query——正文段落常提关键词却无精确数字，而表格单元格数字完整，追加后含同数字的表格行内积分显著抬升。
+
 **bge-m3 sparse 重载要点**：
 - `return_sparse` 是 **flag 引擎加载参数**（`FlagEmbeddingModel.__init__` → `BGEM3FlagModel(return_sparse=...)`），不是请求参数；请求层只是二选一地返回 dense 或 sparse。
 - 2026-09-13 已将 Xinference 中 bge-m3 以 `return_sparse=true` 重启，CPU flag 引擎。同一实例：不传 return_sparse → dense 1024d（M3 dense 通路不变）；传 `return_sparse=true` → sparse `{token_id:score}`。
@@ -33,9 +35,23 @@ M5 = **多源召回 + 融合 + 精排 + 溯源**，位于 LightRAG 外层自研�
 
 `_rrf(ranked_lists, k=60)` —— 三路位次独立，按 `1/(k+rank)` 累加后降序，top 40 进精排。k=60 是社区常用值；三路权重等同（个人规模不用加权）。
 
-### 2.3 精排（bge-reranker-v2-m3）
+### 2.3 精排 + 多特征融合（bge-reranker-v2-m3，v5.9/v5.13）
 
-走 Xinference `/v1/rerank`，候选 = RRF top 40 的 content，返回 top 8（`app/m5_retrieve/rerank.py`）。内部 LightRAG 自带 `enable_rerank=True` 空转（因为没配模型），三路召回调用显式传 `enable_rerank=False` 关掉，避免日志噪音。
+**精排 = 全候选打分、不截断**：走 Xinference `/v1/rerank`，候选 = RRF top 40 的 content，`rerank.py` 以 `top_n=len(candidates)` 返回**全部候选**的 `{chunk_id, score}`（而非只取 top 8）——rerank 在本系统只是「打分器」，不承担筛除职责；表格块即使语义分低也不会被提前踢出，翻盘机会留给下一级特征融合。内部 LightRAG 自带 `enable_rerank=True` 空转（因为没配模型），三路召回调用显式传 `enable_rerank=False` 关掉，避免日志噪音。
+
+**表格 NL 摘要注入 rerank 输入（v5.13）**：cross-encoder 对纯 Markdown 表格语义失明，喂 rerank 前先把表格块加工成一句自然语言描述——提取 caption + 列名 + 首末行数据（`table_summary.py::build_rerank_text`，输出 = `summary + "\n" + content` 拼进候选文本），再送 rerank。落地实测单块 rerank 分 +165%。
+
+**五特征融合排序（v5.9）**：`feature_fusion.py::fuse_and_rank` 把 40 个候选的五路特征 min-max 归一化后加权求和，按总分排序取前 `RERANK_TOP=5` 个下发生成层：
+
+| 特征 | 权重 | 说明 |
+|---|---|---|
+| rerank | 0.50 | cross-encoder 语义分（主特征） |
+| numeric_match | 0.15 | query 数字 token 在 chunk 的命中比例（0~1） |
+| sparse | 0.15 | bge-m3 sparse 内积（keyword 路原始分） |
+| numeric_density | 0.10 | chunk 数字字符密度（表格行 > 普通段落） |
+| rrf | 0.10 | 三路召回位次融合分 |
+
+numeric_match / numeric_density 两路仅在数字型问题（`is_numeric_query`）时启用。**RERANK_TOP 从 8 收到 5**：评审实测 top8 多出的块全是噪音（precision 0.566→0.425），top5 是当前检索质量下的最优窗口（见 CHANGELOG v5.9 实测表）。
 
 ### 2.4 引用溯源（chunk → full_doc_id）
 
@@ -47,8 +63,10 @@ PG 路径最直接：`lightrag_doc_chunks` 自带 `full_doc_id` 列，sparse 索
 |---|---|
 | `app/m5_retrieve/sparse_index.py` | 关键词路：读 PG doc_chunks → sparse 编码 → 落盘 `m5_sparse.json`；score() 做内积排序 |
 | `app/m5_retrieve/rerank.py` | Xinference /v1/rerank 封装（bge-reranker-v2-m3） |
-| `app/m5_retrieve/retriever.py` | 编排：三路召回 → RRF → rerank → 溯源元数据，返回结构化结果 |
-| `app/m5_retrieve/query_preprocess.py` | query 预处理（v1.5）：A 同义词扩展 + B 专名识别加权（见 §7） |
+| `app/m5_retrieve/retriever.py` | 编排：三路召回 → RRF → rerank（全候选打分）→ 五特征融合 → top5，返回结构化结果 |
+| `app/m5_retrieve/feature_fusion.py` | 五特征加权融合排序（rerank/sparse/rrf/numeric_match/numeric_density） |
+| `app/m5_retrieve/table_summary.py` | 表格 NL 摘要：提取 caption+列名+首末行，拼进 rerank 输入（v5.13） |
+| `app/m5_retrieve/query_preprocess.py` | query 预处理（v1.5）：A 同义词扩展 + B 专名识别加权 + 数字感知（`is_numeric_query`/`numeric_terms`，见 §2.1） |
 | `app/m5_retrieve/runner.py` | CLI：`--formal` 走正式链路（`-w data/default_ws --formal`）；默认仍保留 v0.1 四模式冒烟 |
 
 ## 3. 复现命令
@@ -91,7 +109,7 @@ LightRAG 同文档 content 去重导致 `block_type` 对齐错位（`build()` �
 
 - [x] 关键词路（bge-m3 sparse）：30 chunks 索引构建成功，单 query 打分可用；
 - [x] RRF(k=60) 三路融合：graph + vector + keyword → top 40；
-- [x] bge-reranker-v2-m3 精排：Xinference /v1/rerank 接入，top 8 输出；
+- [x] bge-reranker-v2-m3 精排：Xinference /v1/rerank 接入，全候选打分 + 五特征融合取 top5（RERANK_TOP=5）;
 - [x] 引用溯源：chunk → full_doc_id 直接从 PG 表带出；
 - [x] 四题端到端跑通，rerank 分数区分度显著（0.9+ vs 0.0x）；
 - [x] 关掉 LightRAG 内部空转 rerank 日志噪音；

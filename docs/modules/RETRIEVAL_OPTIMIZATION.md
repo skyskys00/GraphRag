@@ -52,6 +52,16 @@ M1 解析 → M2 切分 → M3 索引 → M5 检索（三路召回 → RRF 融�
 | RERANK_TOP 收窄 | v5.9-top5 | 检索只返回 top5（8→5） | **正式（top5 转正）**：CP 全类目上升，Recall 0.9202 无损 |
 | 规则版表格 NL 摘要进 rerank 输入 | v5.13 | `table_summary.build_rerank_text`：table 块注入「caption+列名+首尾行」摘要进 rerank 输入文本 | **正式（M5 功能）**：单块 rerank 0.133→0.352（+165%），融合 13→10；top5 组成不变，类目指标与 v5.10 持平 |
 
+#### 五特征融合排序
+| 特征 | 权重 | 语义 |
+| --- | --- | --- |
+| `rerank_score` | 0.50 | bge-reranker-v2-m3 对 query+块整体建模 |
+| `sparse_score` | 0.15 | keyword 路 bge-m3 sparse 内积原始分 |
+| `numeric_match` | 0.15 | query 数字 token 在块内命中占比 |
+| `numeric_density` | 0.10 | 块内数字密度（表格行 > 段落，数字型问题时激活） |
+| `rrf_score` | 0.10 | 召回阶段综合位次分 |
+
+
 ### 组 D：评测层（M9，可选终审）
 
 | 方法 | 版本 | 机制 | 状态 |
