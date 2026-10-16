@@ -1,6 +1,6 @@
 # M3 模块记录：索引层（LightRAG 建图 + bge-m3 向量）
 
-> **版本：** v0.3.4
+> **版本：** v0.3.5
 > **状态：** 已落地
 > **更新：** 2026-10-01
 > **定位：** TextUnit → LightRAG 知识图谱 + bge-m3 向量索引
@@ -22,7 +22,7 @@
 | 文件 | 职责 |
 |---|---|
 | `runner.py` | CLI 入口：`-c` chunks 根、`-w` working_dir（默认 `data/default_ws`）、`--limit`、`--only <doc_id前缀>`；逐文档隔离失败；初始化/收尾 storages |
-| `providers.py` | LLM（GLM/DeepSeek 可切换）+ embedding 构造器（见 §4 实测） |
+| `providers.py` | LLM（GLM/DeepSeek 可切换）+ embedding 构造器（见 §4 实测）；**兼任全项目共享 config / LLM / Embedding client（M0 客户端落点，M5/M6/M7/M9 复用）** |
 
 **关键参数**：`addon_params={"language": "zh"}`（中文实体抽取）、`llm_model_kwargs={"temperature": 0.1, "max_tokens": 8000}`、`role_llm_configs={"extract": RoleLLMConfig(max_async=2)}`。
 
@@ -113,4 +113,5 @@ DeepSeek：实体「ARPU」+ 关系描述写道「…提升8%」 ← 干净，�
 - **v0.3**（2026-09-14）：增量建图 `ainsert_custom_chunks` 被 M7 上传管线复用。
 - **v0.3.3**（2026-09-26）：新增 §3.5 全链路索引重建命令链（M2→M3→M5），索引层改动后重建标准库、禁旁路 workspace。
 - **v0.3.4**（2026-10-01）：§3.5 补「对齐校验口径」——`_align_check` 比 content 集合（非计数）、元数据关联按 content（非序号），修 LightRAG 同文档 content 去重导致的对齐错位（v5.25.1）。
+- **v0.3.5**（2026-10-16）：§2 注明「providers.py 兼任全项目共享 config / LLM / Embedding client（M0 客户端落点）」——对齐实际代码无独立 m0 包（CHANGELOG v5.39）。
 - 变更记录：**逐条版本历史见 `docs/CHANGELOG.md`**（v0.1 GLM 冒烟 → v0.2 DeepSeek 定案+思考模式修复 → v0.3 联动复用）。本文件不再维护历史流水。

@@ -37,10 +37,10 @@
 
 | 模块 | 文档 | 一句话职责 |
 |------|------|-----------|
-| M0 共享层 | [`modules/M0_contracts/`](modules/M0_contracts/) | 数据契约（TextUnit v2 / parse 产物） |
+| M0 数据契约层 | [`modules/M0_contracts/`](modules/M0_contracts/) | 数据契约（parse 产物 / TextUnit v2）；config+LLM/Embedding client 见 [M3 `providers.py`](modules/M3_index.md) |
 | M1 解析层 | [`modules/M1_parse.md`](modules/M1_parse.md) | MinerU + Docling 双引擎解析 |
 | M2 切分层 | [`modules/M2_chunk.md`](modules/M2_chunk.md) | 标题驱动切块 → TextUnit |
-| M3 索引层 | [`modules/M3_index.md`](modules/M3_index.md) | LightRAG 建图 + bge-m3 向量编码 |
+| M3 索引层 | [`modules/M3_index.md`](modules/M3_index.md) | LightRAG 建图 + bge-m3 编码 + 共享 LLM/Embedding client |
 | M4 存储层 | [`modules/M4_storage.md`](modules/M4_storage.md) | Postgres + pgvector 持久化 |
 | M5 检索层 | [`modules/M5_retrieve.md`](modules/M5_retrieve.md) | 三路召回 + RRF + rerank + query 预处理 |
 | M6 生成层 | [`modules/M6_generate.md`](modules/M6_generate.md) | 上下文组装 + DeepSeek 生成 + 引用标注 |

@@ -59,16 +59,16 @@
 用户问题             │  M5 检索层   M6 编排层        M7 交互层          │
   │  HTTP/SSE       │  LightRAG召回 → RRF+rerank → 组装+引用 → FastAPI/UI│
   └────────────────┼───────────────────────────────────────────────────┘
-        M0 共享层（数据契约 / 配置 / LLM 与 Embedding client）──所有模块只依赖它
+        M0 数据契约层（parse 产物契约 + TextUnit 检索管线数据规范）──所有模块以契约衔接
         M9 评测层（中文测试集 + RAGAS 指标，贯穿全程）
 ```
 
 | 模块 | 职责边界 | 输入 → 输出契约 |
 |---|---|---|
-| **M0 共享层** | 数据模型、config、LLM/Embedding client（经 **Xinference**）、日志（唯一对外依赖） | 定义 TextUnit 契约 |
+| **M0 数据契约层** | 契约文档：parse 产物契约 + TextUnit v2（全系统唯一"块"标准）；**config / LLM / Embedding client 无独立 m0 包**，落实于 `m3_index/providers.py`（见 M3） | 定义 parse / TextUnit 契约 |
 | **M1 解析层** | MinerU 主力 / Docling 多格式 / 扫描件路由；解析状态与重试 | 原文件 → 统一 Markdown |
 | **M2 切分层** | 标题层级切分 / TokenChunker / 表格整块 / 元数据抽取 | 统一 Markdown → TextUnit(JSONL) |
-| **M3 索引层** | LightRAG 建图（中文实体抽取、增量/选择性删除）+ bge-m3 编码 | TextUnit → 图+向量 |
+| **M3 索引层** | LightRAG 建图（中文实体抽取、增量/选择性删除）+ bge-m3 编码；**兼任全项目共享 config / LLM / Embedding client（`providers.py`）** | TextUnit → 图+向量 |
 | **M4 存储层** | 统一存取接口，后端可切换（默认 → Postgres+pgvector） | 供 M3 写、M5 读 |
 | **M5 检索层** | 内建三路 + sparse/BM25（bge-m3 sparse 关键词路）+ RRF(k=60) + rerank（经 **Xinference** bge-reranker）+ query 预处理 | query+模式 → 精排 context 带来源 |
 | **M6 编排层** | 意图路由 / map-reduce / 上下文组装（token 预算）/ 引用标注 / 流式事件 | query+context → 答案+引用 |
@@ -80,17 +80,17 @@
 
 | 关键技术 | 归属模块 | 在本项目的角色 |
 |---|---|---|
-| **Xinference（模型服务网关）** | M0（client）＋ M5（rerank） | 统一承载 bge-m3（dense+sparse）与 bge-reranker-v2-m3，全项目经 HTTP 共用；**不属于任一个模块的内建部分** |
+| **Xinference（模型服务网关）** | M3（`providers.py` client）＋ M5（rerank） | 统一承载 bge-m3（dense+sparse）与 bge-reranker-v2-m3，全项目经 HTTP 共用；**不属于任一个模块的内建部分** |
 | **LangChain / LangGraph** | M6（薄包装） | 仅用于对话 history 管理与工具调用协议（agent 可调图谱/文档检索工具）；组装逻辑自研，不深度用 LCEL |
 | **Postgres + pgvector** | M4（存储实现） | 准生产地基：图 / 向量 / 原文块 / 状态一库 |
 | **FastAPI + SSE** | M7（后端壳） | 对外 HTTP + 流式响应 |
 | **AntV G6** | M8（前端渲染） | **已落地 v2.2**：知识图谱渲染 + 引用→图谱联动（答案→引用→原文→图上游走），v5.1.1 |
 | **RAGAS** | M9（评测） | LLM 裁判打分 |
-| **DeepSeek**（deepseek-v4-flash） | M0（LLM client） | 抽取/生成统一 flash（2026-09-13 实测定案） |
+| **DeepSeek**（deepseek-v4-flash） | M3（`providers.py` LLM client） | 抽取/生成统一 flash（2026-09-13 实测定案） |
 | **MinerU / Docling** | M1（解析层） | PDF 主力 / 多格式兜底 |
 
 **低耦合三原则**
-1. 只 import M0；模块间走「写文件 / 写库」衔接，不互调业务函数。
+1. 共享资源只从契约与 `m3_index/providers.py` 取（config / LLM / Embedding client）；模块间走「写文件 / 写库」衔接，不互调业务函数。
 2. TextUnit 契约先行（M0 里定死 Schema），模块用样例数据 mock 上下游。
 3. 每模块交付：独立 CLI 入口 + 契约校验 + 冒烟样例；联调先过契约再过行为。
 

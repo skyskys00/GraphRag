@@ -23,6 +23,18 @@
 
 ---
 
+## [v5.39] 2026-10-16 —— M0 重新定位为「数据契约层」+ 文档对齐实际代码
+
+**影响模块**：`docs/FRAMEWORK_NOTES.md` §3 模块表与低耦合三原则、`docs/ARCHITECTURE.md` 实施步骤④、`docs/README.md` 模块表、`docs/modules/M3_index.md` §2（状态行 v0.3.5）。**代码/功能零改动。**
+
+**背景（对齐实际落地）**：项目代码从一开始就没有独立 `m0_shared` 包——M0 全体现在契约文档（`docs/modules/M0_contracts/`：parse.md + textunit.md），而 config / LLM / Embedding client 实际落在 `backend/app/m3_index/providers.py`（被 M5/M6/M7/M9 复用，历史原因是 M3 建图最早需要 client、就近放置）。此前文档把 M0 描述成「数据模型 + config + LLM/Embedding client + 日志」的独立共享层，与实际不符。
+
+**本次对齐**：
+- M0 定位改述为「**数据契约层**」：parse 产物契约 + TextUnit v2（全系统唯一"块"标准 = 检索管线数据规范）
+- config / LLM / Embedding client 归属改标至 M3 `providers.py`（Xinference client、DeepSeek/GLM 切换、embedding/rerank/stream 构造器）
+- 低耦合原则第 1 条「只 import M0」→「共享资源只从契约与 `m3_index/providers.py` 取，模块间走写文件/写库衔接」
+- M3_index.md §2 明确 providers.py「兼任全项目共享 client」（M0 客户端落点）
+
 ## [v5.38] 2026-10-06 —— `backend/tests/reports/` 目录分类重组
 
 **影响模块**：`backend/tests/reports/` 目录结构（96 文件由扁平重组为分类子目录）；6 个活文档 + 5 个脚本的引用路径同步更新。**代码/功能零改动，评测数字不变**。
