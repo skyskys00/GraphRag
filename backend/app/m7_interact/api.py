@@ -147,7 +147,15 @@ async def post_agent(req: AgentRequest) -> dict[str, Any]:
         deps = await get_deps(req.collection_id)
         _ensure_conversation(deps, req.conversation_id)
         history = _conv_history(deps, req.conversation_id)
-        return await run_agent(deps, req.query, history=history, response_type=req.response_type)
+        result = await run_agent(deps, req.query, history=history, response_type=req.response_type)
+        if req.conversation_id:
+            await conversations.append_round(
+                deps, req.conversation_id,
+                user=req.query,
+                assistant={"content": result.get("answer", ""),
+                           "citations": result.get("citations", []), "meta": None},
+            )
+        return result
     except Exception as e:  # noqa: BLE001 —— 边界：LLM/工具异常转可读 500
         raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}") from e
 
@@ -170,6 +178,13 @@ async def stream_agent_ep(
             for evt in result["events"]:
                 payload = {k: v for k, v in evt.items() if k != "type"}
                 yield sse(evt["type"], payload)
+            if conversation_id and result.get("answer"):
+                await conversations.append_round(
+                    deps, conversation_id,
+                    user=q,
+                    assistant={"content": result["answer"],
+                               "citations": result.get("citations", []), "meta": None},
+                )
         except Exception as e:  # noqa: BLE001
             yield sse("error", {"message": f"{type(e).__name__}: {e}"})
 

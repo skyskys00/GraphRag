@@ -1,12 +1,14 @@
 """M10 agent 内核：显式 StateGraph（route / execute_tools / generate + 条件边）。
 
-P0 骨架（2026-10-23，探底结论见 M10_agent §10-8）：
+P1 骨架（2026-10-23，P0 探底结论见 M10_agent §10-8）：
 - LLM = v4-flash 原生 function calling（thinking=disabled 最稳，探底实证）；
 - 工具注册表 = app/m10_agent/registry.py（唯一接缝，fn_factory 按 deps 绑定）；
+- P1 三工具全量 = tool_list_docs / tool_retrieve（M5）/ tool_rag_answer（M6）；
 - 事件 = tool_decision → tool_result → …(逐轮)… → delta → citations → done；
-- 节点函数必须返回 dict（LangGraph 1.x 纪律），路由选择用独立条件函数。
+- 节点函数必须返回 dict（LangGraph 1.x 纪律），路由选择用独立条件函数；
+- conversation 落库由 m7_interact/api.py 承接（append_round，沿 respond.py 口径）。
 
-尚未接入（P1 起）：M7 conversations 落库、token 级流式 delta、三工具全量。
+P1 剩余：token 级流式 delta、前端接 agent、M9 评测回归。
 """
 from __future__ import annotations
 
@@ -18,6 +20,8 @@ from langgraph.graph import END, START, StateGraph
 from openai import AsyncOpenAI
 
 from app.m3_index.providers import _llm_config
+from app.m5_retrieve.retriever import retrieve
+from app.m6_generate.orchestrator import answer as rag_answer
 from app.m7_interact import documents
 
 from . import registry
@@ -42,12 +46,88 @@ class AgentState(TypedDict, total=False):
     _deps: Any                          # AppDeps（进程内传递，跨节点工具绑定）
 
 
+async def _retrieve_tool(deps: Any):
+    """tool_retrieve：M5 三路召回+RRF+rerank（含软删过滤/白名单），返回带来源上下文。"""
+
+    async def fn(query: str, top_k: int = 5, **_kw: Any) -> dict[str, Any]:
+        result = await retrieve(
+            deps.rag, query, deps.sparse,
+            entities=deps.entities,
+            exclude_docs=sorted(deps.excluded_docs),
+            allowed_docs=sorted(deps.allowed_docs) if deps.allowed_docs else None,
+        )
+        res = result.get("results", [])[: max(1, int(top_k))]
+        return {
+            "query": result.get("query"),
+            "n_results": len(res),
+            "results": [
+                {
+                    "rank": r["rank"],
+                    "doc_id": r["full_doc_id"],
+                    "content": r["content"][:1500],
+                    "score": round(r.get("score", 0.0), 4),
+                }
+                for r in res
+            ],
+            "citations": [{"doc_id": r["full_doc_id"], "chunk_id": r["chunk_id"], "rank": r["rank"]} for r in res],
+        }
+
+    return fn
+
+
+async def _rag_answer_tool(deps: Any):
+    """tool_rag_answer：M6 综合应答一条龙（组装+生成+引用），简单/综述问题直答落点。"""
+
+    async def fn(query: str, response_type: str | None = None, **_kw: Any) -> dict[str, Any]:
+        result = await rag_answer(
+            deps.rag, query, deps.sparse, entities=deps.entities,
+            sidecar=deps.sidecar, query_func=deps.query_func,
+            response_type=response_type or None,
+            exclude_docs=sorted(deps.excluded_docs),
+            allowed_docs=sorted(deps.allowed_docs) if deps.allowed_docs else None,
+            retrieval_query=query,
+        )
+        return {
+            "text": result.get("text", ""),
+            "citations": result.get("citations", []),
+            "status": "answered",
+        }
+
+    return fn
+
+
 def _register_builtin_tools() -> None:
     registry.register_tool(
         "tool_list_docs",
         lambda deps: lambda **kw: documents.list_docs(deps),
         "列出知识库中的文档清单（doc_id/文件名/状态），用于确认有哪些文档可查、存在性核对",
         {"type": "object", "properties": {}},
+    )
+    registry.register_tool(
+        "tool_retrieve",
+        _retrieve_tool,
+        "在知识库中检索 query，返回带来源（doc_id）的上下文片段——查找具体信息的首选工具",
+        {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "检索问题"},
+                "top_k": {"type": "integer", "description": "返回片段条数（默认 5）"},
+            },
+            "required": ["query"],
+        },
+    )
+    registry.register_tool(
+        "tool_rag_answer",
+        _rag_answer_tool,
+        "直接生成一份带引用的综合应答——适用于需要立即可答/综述/对比，无需再分步检索的场景",
+        {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "要回答的问题"},
+                "response_type": {"type": "string", "description": "回答要求，如：分段落、先总后分、对比、汇总"},
+            },
+            "required": ["query"],
+        },
     )
 
 

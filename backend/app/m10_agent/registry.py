@@ -42,10 +42,13 @@ def tool_definitions() -> list[dict[str, Any]]:
 
 
 async def dispatch(name: str, args: dict[str, Any], deps: Any) -> Any:
-    """执行工具：按当前 deps 生成绑定函数并调用，返回 JSON 化结果。"""
+    """执行工具：按当前 deps 生成绑定函数并调用，返回 JSON 化结果。sync/async factory 与 fn 通吃。"""
     if name not in TOOLS:
         raise KeyError(f"未知工具: {name}")
-    fn = TOOLS[name]["fn_factory"](deps)
+    factory = TOOLS[name]["fn_factory"]
+    fn = factory(deps)
+    if inspect.isawaitable(fn):
+        fn = await fn
     out = fn(**args)
     if inspect.isawaitable(out):
         out = await out

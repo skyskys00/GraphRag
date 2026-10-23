@@ -26,6 +26,22 @@
 
 ---
 
+## [v5.43] 2026-10-23 —— M10 P1 后端骨架落地：三工具全量 + 会话读写闭环 + 端到端实测
+
+**影响模块**：`backend/app/m10_agent/agent.py`（P1 三工具 + 显式 StateGraph 全量，docstring 更新）；`backend/app/m10_agent/registry.py`（dispatch 支持 async factory）；`app/m7_interact/api.py`（`/agent` 两入口补 conversation 落库）；`docs/modules/M10_agent.md` 状态行同步。
+
+**内容**：
+- **P1 三工具全量**：`tool_retrieve` = 薄封装 M5 `retrieve()`（三路+RRF+rerank 全复用，含软删过滤/白名单）；`tool_rag_answer` = 薄封装 M6 `answer()`（简单/综述直答落点，吸收原直连语义）；`tool_list_docs`（P0 已有）= M7 文档清单。工具注册表仍为唯一接缝，fn_factory(deps) 按 collection 绑定。
+- **conversation 读写闭环**：`POST /agent` 与 `GET /agent/stream` 从「只读注入历史」升级为「跑完写回」——沿 respond.py 同口径 `conversations.append_round` 落 user + assistant（content + citations）。
+- **端到端实测（col_b7b876b1 有源器械库）**：
+  - 简单问直答短路（无 tool 事件，delta/done）✓
+  - 「便携式心电监测设备功能」→ 决策 tool_retrieve + tool_list_docs（并行 2 call）→ 真实 12 文档命中、答案带 doc_id 引用 ✓
+  - 「动态心电记录仪怎么开机」→ **两轮决策**（首轮 retrieve+list_docs，次轮换更聚焦 query 再查）——「换问法再查」实证 ✓
+  - 会话落库：messages 含 user/assistant + citations ✓；空库（不存在 collection）如实说明不编造，诚实红线 ✓
+  - SSE 事件线 tool_decision → tool_result →…… → delta → citations → done 完整 ✓
+
+**待 P1 剩余（即 v6.0 判据余量）**：token 级流式 delta、前端问答接 agent（M8）、agent 测试集 v0 + RAG 对比回归（M9）。
+
 ## [v5.42] 2026-10-23 —— M10 `/agent` 统一对话入口骨架落地（P0 剩余项完成）
 
 **影响模块**：新增 `backend/app/m10_agent/`（agent 内核：`agent.py` 显式 StateGraph + `registry.py` 工具注册表）；`m7_interact/api.py` 新增 `POST /agent` + `GET /agent/stream`；`docs/modules/M10_agent.md` v0.4 → 状态「P0 完成」。
