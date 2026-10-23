@@ -61,6 +61,7 @@
   └────────────────┼───────────────────────────────────────────────────┘
         M0 数据契约层（parse 产物契约 + TextUnit 检索管线数据规范）──所有模块以契约衔接
         M9 评测层（中文测试集 + RAGAS 指标，贯穿全程）
+        M10 Agent 系统（规划中：统一对话入口 + 工具注册表，主体内嵌 M5/M6/M7 底座能力）
 ```
 
 | 模块 | 职责边界 | 输入 → 输出契约 |
@@ -75,13 +76,14 @@
 | **M7 交互层** | FastAPI + SSE + 多轮记忆 + WebUI + **文档管理**（`POST/GET /docs`、`DELETE /docs/{doc_id}` 软删，见 v3）+ **图谱导出**（`GET /graph`，软删过滤，见 v4）+ **文档预览**（`GET /docs/{doc_id}/preview`，见 v5）+ **按文档过滤图谱**（`GET /graph?doc_id=`，见 v5）+ 引用排序修复 | HTTP → 流式响应 / 文档列表 / 图谱 JSON / 预览 JSON |
 | **M8 前端实现** | 正式 Web 前端（消费 M7 契约）：**v1** 答案 + 引用定位原文（SSE 逐字）→ **v2.1** 文档上传/文档管理视图 → **v2.2** 知识图谱（AntV G6 全图 + 引用「在图谱中查看」联动聚焦） → **v2.3** 左侧可折叠侧边栏 + 右栏 tab（引用/预览）+ 文档全文预览（置信度第一片段高亮）+ 引用按置信度排序并限前 5 条 + 图谱按文档过滤 | HTTP/SSE → 用户界面 |
 | **M9 评测层** | 中文测试集 + RAGAS 指标 + 回归对比 | 测试集 → 指标报告 |
+| **M10 Agent 系统** | **Agent 为主体、RAG 为底座**：统一对话入口（`/agent`）+ 工具注册表（检索/综合应答/文档/图谱/对比，薄封装 M5/M6/M7）+ **LangGraph 编排内核**（显式 StateGraph：route / execute_tools / generate，决策协议原生 function calling 优先·JSON 兜底，最多 N=5 轮）；RAG 直连降为内部工具落点 + 评测对照；**方案稿 v0.3，规划中（2026-10-23）** | query+history → 多轮工具决策 → 答案+引用 |
 
 > **关键技术排查清单**（拆模块时容易漏的技术支撑，与模块的归属对应）：
 
 | 关键技术 | 归属模块 | 在本项目的角色 |
 |---|---|---|
 | **Xinference（模型服务网关）** | M3（`providers.py` client）＋ M5（rerank） | 统一承载 bge-m3（dense+sparse）与 bge-reranker-v2-m3，全项目经 HTTP 共用；**不属于任一个模块的内建部分** |
-| **LangChain / LangGraph** | M6（薄包装） | 仅用于对话 history 管理与工具调用协议（agent 可调图谱/文档检索工具）；组装逻辑自研，不深度用 LCEL |
+| **LangChain / LangGraph** | ~~M6~~ → **M10（引入 LangGraph 编排内核）** | 蓝图曾规划 M6 薄包装 LangChain 做工具调用协议；**M10 方案（v0.3）定 LangGraph 为 agent 编排内核**——工具注册表自研（agent 与底座的唯一接缝），StateGraph 承载决策环（route / execute_tools / generate），决策协议先探底 v4-flash 原生 function calling（`with_structured_output` JSON 兜底）；**不单独引 LangChain**（langchain-core 随 langgraph 依赖树自带），不深度用 LCEL |
 | **Postgres + pgvector** | M4（存储实现） | 准生产地基：图 / 向量 / 原文块 / 状态一库 |
 | **FastAPI + SSE** | M7（后端壳） | 对外 HTTP + 流式响应 |
 | **AntV G6** | M8（前端渲染） | **已落地 v2.2**：知识图谱渲染 + 引用→图谱联动（答案→引用→原文→图上游走），v5.1.1 |

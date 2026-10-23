@@ -47,6 +47,7 @@
 | M7 交互层 | [`modules/M7_interact.md`](modules/M7_interact.md) | FastAPI + SSE + 文档管理 + 图谱 API |
 | M8 前端 | [`modules/M8_frontend.md`](modules/M8_frontend.md) | React + TS + Vite + AntV G6 |
 | M9 评测层 | [`modules/M9_evaluation.md`](modules/M9_evaluation.md) ｜ [`modules/M9_testset.md`](modules/M9_testset.md) | 中文测试集 + LLM 裁判 + ablation 回归 |
+| M10 Agent 系统 | [`modules/M10_agent.md`](modules/M10_agent.md) | Agent 为主体 · RAG 为底座：统一对话入口 + LangGraph 编排 + 工具调用（**方案稿 v0.4，P0 完成 `/agent` 骨架落地，P1 待实施**） |
 
 ### 📋 需求与参考层
 

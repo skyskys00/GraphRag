@@ -14,6 +14,8 @@ dependencies:
       - lightrag-hku
       # ---- R 切块（标题感知，P2.1 起使用）----
       - langchain-text-splitters
+      # ---- Agent 编排（M10，P0 探底通过 2026-10-23，见 CHANGELOG v5.41）----
+      - langgraph==1.2.16   # 依赖树自带 langchain-core，不装全量 langchain
       # ---- 解析引擎 ----
       - mineru
       - docling               # docx/pptx/xlsx/html/epub 兜底（PDF 一律走 MinerU）

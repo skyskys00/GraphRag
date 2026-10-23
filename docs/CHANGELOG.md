@@ -13,6 +13,9 @@
 | `vX.Y`（次） | **功能迭代**：新增可感知能力 | M8 v2.1 文档管理 / v2.2 图谱 / v2.3 侧边栏+预览 |
 | `vX.Y.Z`（补丁） | **修复 / 微小调整 / 文档勘误**，不改变能力形态 | 引用排序 bug 修复、样式微调 |
 
+**主版本切分判据（重要）**：主版本 = **能力里程碑实际落地**时切换（对照 v1–v5：全链重构 / 文档治理 / 多库仪表盘 / 双层图谱 / 多对话管理，均在落地时切）。规划与探底不占用主版本位。
+**v6.0 判据 = M10 P1 落地：`/agent` 成为唯一对话入口、RAG 底座化成形**（当前 v5.4x 为 Agent 阶段规划与探底，仍属 v5 序列）。
+
 **更新规则（写给未来的自己）**：
 
 1. **每次改动先在此登记**（哪怕一行），并顺带在受影响模块文件**状态行**同步版本号。
@@ -22,6 +25,58 @@
 5. **实测记录统一登记在本文对应版本条目**（结论 + 关键数据，不做过程叙述 / 表格全量）；模块记录只留一句话结论 + 指向本文。
 
 ---
+
+## [v5.42] 2026-10-23 —— M10 `/agent` 统一对话入口骨架落地（P0 剩余项完成）
+
+**影响模块**：新增 `backend/app/m10_agent/`（agent 内核：`agent.py` 显式 StateGraph + `registry.py` 工具注册表）；`m7_interact/api.py` 新增 `POST /agent` + `GET /agent/stream`；`docs/modules/M10_agent.md` v0.4 → 状态「P0 完成」。
+
+**内容**：
+- **LangGraph 显式 StateGraph**（route / execute_tools / generate + 条件边）：route 用 v4-flash `bind_tools` 原生 function calling（thinking=disabled，探底 v5.41 结论）；工具注册表 `register_tool(name, fn_factory, desc, schema)` 为唯一接缝，**fn_factory(deps) 按 collection 绑定**避免跨库串扰；一次注册驱动 ① tools 定义 ② dispatch ③ 前端展示位（M10 §4 双注册）。
+- **工具**：P0 注册 `tool_list_docs`（薄封装 M7 `documents.list_docs`）。
+- **事件线**：`tool_decision → tool_result →(逐轮)→ delta → citations → done`（沿 M6 线，见 M10 §5），POST JSON 与 GET SSE 同源。
+- **实测**：问「知识库里有哪些文档？」→ 模型决策调 tool_list_docs → 真实返回 4 文档 → 生成带来源答案，事件线完整；直答短路（无工具）路径验证通过（无 tool 事件直接 delta/done）。
+
+**P0 完成标志**：探底结论回填 §10 ✓；`POST /agent` 健康应答可用 ✓（并超出：真实 LLM 决策闭环 + SSE 事件线）。
+
+**待 P1（即 v6.0 判据）**：三工具全量（retrieve / rag_answer / list_docs）+ conversation 落库 + token 级流式 delta + 前端接 agent + agent 测试集 v0 + RAG 对比回归。
+
+## [v5.41] 2026-10-23 —— M10 P0 探底完成：v4-flash 原生 tools + langgraph 均实证可用
+
+**影响模块**：`docs/modules/M10_agent.md`（v0.4，§3/§10-8 回填探底结论）；backend 新增依赖 **langgraph 1.2.16**；探底脚本留档 `backend/scripts/probe_langgraph_p0.py` / `probe_v4flash_tools.py`（可复跑）。**M10 尚未实施（代码零功能改动）**。
+
+**探底三项实测（2026-10-23）**：
+
+1. **v4-flash 原生 `tools`（function calling）可用**：OpenAI-compatible `tools` 参数合法返回 `finish_reason=tool_calls` + 工具名/参数正确；**一次决策可返回多个 tool_call**（实测一次决策返回 2 个 `tool_retrieve` 变体 → execute_tools 节点须批量处理）。与 thinking **不互斥**（开/关都能出 tool_calls），但 thinking 开着额外烧 reasoning_tokens 且偶发 `finish=length` 吞 max_tokens 导致 content 为空（首次采样 A/C 即现）→ **生产保持 `thinking=disabled` 最稳**（completion 最低 42 tokens、无 reasoning、无截断风险）。**结论：决策协议实证通过，无需 JSON 兜底**，`bind_tools` + 现有 extra_body 照常落地。
+
+2. **langgraph 最小依赖**：`langgraph 1.2.16` + `langgraph-checkpoint 4.3.0` + `langgraph-prebuilt 1.1.1` + `langgraph-sdk 0.4.8`（+ ormsgpack）；依赖树只含 **langchain-core**（环境已有 1.6.2），**确认无全量 langchain 包**。
+
+3. **async StateGraph 空跑**：route / execute_tools / generate 三节点 + 条件边的循环（剩余轮数驱动）与耗尽出口（直答）全可达。**LangGraph 1.x API 纪律**：节点函数必须返回 **dict（状态更新）**，路由选择需用**独立条件函数**（初版把决策节点当路由返回字符串 → `InvalidUpdateError: Expected dict`）——写入 M10 §10-8 备忘。
+
+**M10 状态**：方案稿 v0.4，P0 三项探底完成；剩余 P0 事项为 `/agent` 路由骨架（API 壳，落 m7 侧）与真实 LLM route 节点接 `bind_tools`。下一步 P1 MVP：显式 StateGraph + 三工具 + 事件线 + 前端接 agent + 评测回归。
+
+## [v5.40.1] 2026-10-23 —— M7 定位澄清：交互适配壳 → 应用服务层（文档补丁级）
+
+**影响模块**：`docs/modules/M7_interact.md` 状态行升 v10.6.1；§1 定位补「实际边界」澄清——m7 事实上已 = **系统唯一对外 HTTP/SSE 面 + 应用服务层**混合体（对外契约面 / 产品外观逻辑 / 编排+应用服务 三块归类，附边界漂移声明与取舍依据）；新增 §11 演进提示（M10 agent 化后 `/agent` 路由落 m7、agent 内核落 `app/m10_agent/`，包内分目录收敛、不拆新模块；某服务需独立部署时才评估下沉）。**代码/功能零改动。**
+
+## [v5.40] 2026-10-23 —— M10 Agent 系统方案稿落定：**Agent 为主体 / RAG 为底座**（规划中，未实施）
+
+**影响模块**：`docs/modules/M10_agent.md`（v0.2 方案稿，**范式重启自 v0.1**）；`docs/README.md` 模块清单、`docs/FRAMEWORK_NOTES.md` §3 模块表同步。**代码/功能零改动。**
+
+**背景**：RAG 全链（M0–M7）已评测稳定，检索侧探底收敛封闭；`ARCHITECTURE §2.7` 蓝图已预留 agent 编排。**用户转向（2026-10-23）**：v0.1「RAG 附加 agent」→ v0.2「agent 做完整系统、RAG 属于它的一部分」（Agentic RAG 形态）。
+
+**v0.2 方案要点**（全文见 `docs/modules/M10_agent.md`）：
+- **范式**：Agent 为系统主体（对话状态 + 规划/决策循环 + 工具注册表）；M1–M7 作**底座能力区，本体零改写**，经「工具适配器（描述 + 入参 schema + 结果回填）」薄封装。松耦合关键：新能力=注册新工具，不动 agent 内核。
+- **入口**：`POST /agent` + `GET /agent/stream` 统一对话入口，**一切对话先进 agent**；`/answer` 直连降为内部 `tool_rag_answer` 落点 + M9 评测/调试对照路径。**数据面板**（`/graph /docs /compare /collections`）保留直连 + 同能力注册为 agent 工具（双注册）。
+- **工具**：P1 三个（`tool_retrieve`=M5 / `tool_rag_answer`=M6 / `tool_list_docs`=M7），首版即撑起「对话式系统」；P2 加 `tool_graph` / `tool_compare`。
+- **决策协议**：先探底 v4-flash 原生 `tools`，JSON 协议兜底（含与思考/`extra_body` 互斥性的探底）。
+- **评测**：新增 agent 端到端测试集（tool_accuracy / multi_hop_recall + 现有四指标）+ **RAG 对比回归**（agent 首轮直答 vs 直连不劣化 = 底座收纳门禁）。
+- **分期**：P0 探底（`/agent` 骨架）→ P1 MVP（loop + 三工具 + 前端接 agent）→ P2（graph/compare 多工具）→ P3（可选：意图路由显性化/记忆/拆解）。
+
+**拍板决策（2026-10-23）**：①Agent 为主体 ②独立 M10（M6 纯净契约仅被适配）③agent 唯一对话入口，直连降级 ④先探底原生 function calling ⑤面板直连 + 双注册 ⑥P1 三工具。
+
+> 下一步：P0 探底 v4-flash 原生 `tools` 支持与互斥性，结果回填 M10_agent §10；随后 P1 落地 agent loop + 三工具。
+
+**技术调研 + 选型修订（2026-10-23，随方案稿落定）**：调研 LangChain / LangGraph / pi-agent / pydantic-ai / OpenAI Agents SDK / smolagents / AG2 / CrewAI / MCP 后——**无「像 lightrag 一样开箱即用」的 agent 一体化框架**（各框架均通用 agent 编排；pi-agent=pi.dev 的 TS 编码助手 harness；MCP 是协议非框架；LightRAG v1.5.7 自身仅 AG2 示例）。~~自研 loop~~ → **agent 编排内核采用 LangGraph**（用户确认）。动因：①**可持续演进**——P3 复杂 agentic-rag（多 agent / 持久化 / 中断恢复）在已知框架上编排，后续迭代成本更低；②**蓝图本就预留此位**（ARCHITECTURE §2.7「若后续要多智能体、复杂工具调用，再引入 LangGraph 状态机」）。**约束**：用**显式 StateGraph**（route / execute_tools / generate + 条件边），不用 prebuilt `create_react_agent`（需事件透出 SSE / 直答短路 / citations 收集）；工具注册表自研 = 唯一接缝，M5/M6/M7 零改写；**不单独引 LangChain**（langchain-core 随 langgraph 自带）；pydantic-ai 弃选；**MCP 本期不引**（进程内工具）。编排方案见 `M10_agent.md` §2.1/§2.2，决策表 §10-7；P0 探底新增一项：langgraph 依赖树最小安装。
 
 ## [v5.39] 2026-10-16 —— M0 重新定位为「数据契约层」+ 文档对齐实际代码
 
@@ -164,128 +219,6 @@ v5.33 把 50 题做成了「旧 30 题冻结 + 新 20 题」，覆盖失衡被�
 
 > **口径注记**：v5.34 题集全删重建，与 v5.33 **不可横比**（题集不同非增量）；e2e 对比 v5.31 诚实口径 30 题（Correctness 0.6286）的 +0.2447 主要来自**剔除 comparison**（诚实口径下 comparison 曾崩 0.0875），comparison 检索短板并未闭环、只是新题集不再考核。
 
-## [v5.29] 2026-10-03 —— 器械 30 题评测集跑通 + M9 裁判 `hit` 字段修复
-
-**影响模块**：M9 `judge.py`（解析并归一化 `hit`）、`metrics/context_recall.py`（采信 `hit`，`_PROMPT_VERSION` bump 至 `p1_llm_hit`）、`runner.py`（新式 collection 兼容 + comparison per-doc 检索）、`testset.py`（`VALID_CATEGORIES` 补 `image_only`）；新增 `backend/tests/testsets/testset_device_30.json`；方案文档 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) v0.5→v0.6（新增 §11 实测结果）、[`M9_evaluation.md`](modules/M9_evaluation.md)（状态行 + 变更历史）。
-
-### 一、器械场景 30 题评测集
-
-题集 `testset_device_30.json`，配比 `table_numeric` 8 / `fact_single` 8 / `image_only` 6 / `comparison` 4 / `unanswerable` 4，跑在器械库 `col_b7b876b1`（10 份说明书 / 857 chunk）。
-
-**关键纪律（v5.25.3 起，v5.29 修正口径）**：`image_only` 题的**答案完整内容必须存在于 `block_type=drawing` 块**——这是"多模态有贡献"的必要条件。既不能用 `pdftotext` 文本层 0 命中当基线（图片里的字文本层当然查不到，不够严），也不能要求"`paragraph`/`table` 全 0 命中"（功能项名天然跨界面重合，过严）。实测 6 题 **5 题严格合格**；DV-IO-004 保留为**已知例外**——其 KF3 除命中 `drawing`（第 19 页设置图）外还在 `table`（第 20 页）命中，原因是 **MinerU 把第 20 页「绑定医生机构」子页图误判为 `type=table`**（该条目同时带 `img_path`，本质是图片），属 M1 解析质量缺陷而非出题错误。附带发现：10 份文档 69 个 `table` 块中约 2 个属此类误判（博声 1、KE-2000 1），低频，暂不修。
-
-### 二、M9 runner 跑新式 collection 的 4 处兼容改动
-
-新式 `col_<uuid8>` 库与旧式扁平库（`default_ws` 等）布局不同，runner 原本只认后者。改动：① `testset.py` 补 `image_only` 类别（原缺失致 6 题校验失败）；② `runner.py` 新增 `_resolve_collection()`（`col_*` 走 `collection_paths()` → `data/collections/<col_id>/`，旧三库保持扁平映射，零回归）；③ `_build_deps()` 补 `load_entities_async()`（原缺失会**系统性低估**生产 recall，线上 `retriever.py` 是加载的）；④ comparison 题走 **per-doc 检索**（`_comparison_targets` + `_interleave`）。旧三库（行政/cservice）跑法不变。
-
-**per-doc 为何必须配子查询**（实测，可复现）：用完整对比问题（含两个型号名）做 per-doc 检索时，**其他型号名会把该文档的向量召回打到 0**（LightRAG 向量路 `cosine=0.2` 阈值）。实测 `allowed_docs=[LSP-1C]`：完整对比 query → **0 条**；去掉其他型号名 → **5 条**。复跑：`cd backend && python3 scripts/probe_perdoc_subquery.py`（新增探针脚本）。故题集 comparison 题须配 `per_doc_queries`（key = `source_docs` 文件名）。线上 `compare.py` 用的是「参数名 + 指定文档」，评测题面是完整对比问题——跑法对齐了但输入形态没对齐，这是补子查询的原因。
-
-### 三、M9 裁判 `hit` 字段修复（假阳性）
-
-**缺陷**：`judge.py:_parse_judge_output` 只提取 `score`/`reason`，**丢弃了 LLM 输出的 `hit` 字段**；`context_recall.py` 遂用 `score >= 0.5` 反推命中。而 prompt 里 `score` 的语义是「**判定置信度**」而非"命中度"——`hit=false, score=0.95` 意为「95% 确信上下文里没有」，被 `score>=0.5` 错误翻转成命中。
-
-**扫描 4255 条缓存实测矛盾率**：`context_recall` **13.4%**（172/183 是 `hit=false, score 0.95-1.0`）、`context_precision` 5.2%（109/109 是 `relevant=true, score<0.5`，属 LLM 自身不一致，语义上 `score>=0.5` 判相关合理，**不改**）、`citation_accuracy` 0.3%（**不改**）。`faithfulness`/`correctness`/`answer_relevance` 的 score 是**比例**，无此 bug。
-
-**修复**：judge 解析并归一化 `hit`（兼容 `"true"`/`"是"` 等字符串）；`_judge_fact` 优先采信 `hit`，缺失时（旧缓存）回退 `score` 阈值；`_PROMPT_VERSION` bump 使旧缓存失效。既有 `_enforce_evidence` 正则兜底保留（修复后触发数 9 → 0，已基本空转）。
-
-### 四、实测（器械库 `col_b7b876b1`）
-
-**检索（`--mode retrieval`，30 题，867.5s）**：Context Recall **0.7436** / nDCG@8 **0.7730** / Context Precision 0.2492 / 平均 gold_rank 2.30。按题型 Recall：`table_numeric` 0.8125、`fact_single` 0.8125、`image_only` 0.7500、`comparison` 0.4583（`unanswerable` 跳过）。按难度：easy 0.9167 / medium 0.8958 / **hard 0.3854**。
-
-**修复前口径（`*_pre_hitfix.json`，仅供参考、不可直接比较）**：Context Recall 0.9199——其中约 13.4% 是裁判假阳性。修复后 0.7436 为**真实值**。comparison 从旧口径 0.625 变 0.4583，混合了两个方向相反的改动（per-doc 提升召回、hit 修复压低假阳性），净效果为下降。
-
-**生成（`--mode e2e`，30 题，1243.9s）**：Faithfulness **0.7757** / Answer Relevance **0.8650** / Correctness 0.7950 / Citation Accuracy 0.6707。按题型正确性：`fact_single` 0.8812 > `unanswerable` 0.8500 > `table_numeric` 0.8187 > `image_only` 0.7500 > **`comparison` 0.5875**；`table_numeric` 忠实度满分 1.0，`fact_single` 引用准确率最高 0.9167。**`comparison` 四项生成指标全为最低，与检索侧 Recall 0.4583 同源**（漏召回 ⇒ 生成阶段拿不到第二个型号的数据）。**诚实性验证：4/4 `unanswerable` 题全部正确拒答、无编造**（如 DV-UA-003「双相波脉冲宽度」→「所有材料均未提及脉冲宽度（ms）这一参数」）。
-
-> **⚠️ 本节 e2e 数字为 v5.29 泄漏窗口口径（per_doc_queries + @8），仅作历史对照**；诚实重跑数据见 [v5.31] 段「诚实 e2e 生成重跑」与 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §11.2。
-
-**`unanswerable` 口径**：runner 对这类题**跳过 recall 计算**，`by_category.unanswerable.context_recall = 0.0` 只是占位值；**总体 Recall 分母是 26 道可答题**。这类题考的是 e2e 的**拒答行为**（上段已验证）。
-
-报告：`backend/tests/reports/run_retrieval_device30.json`、`run_e2e_device30.json`（正式跑）、`device30_smoke.json`（2 题冒烟，跑全量前验证链路）；旧报告归档为 `*_pre_hitfix.json`。详细读数见 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §11。
-
-**遗留**：comparison 题实测有**真实漏召回**——答案 chunk 存在但三路候选池（graph 20 / vector 20 / keyword 40）**全不含**。例：LSP-1C「行程必须大于 0 小于 120mm」在 PG chunk `chunk-bb7dc287…`，关键词「行程」被正确提取（权重 2.0）却排不进 keyword top40 → 根因指向 **M2 切分粒度**（该 chunk 一块塞了内径/行程/时钟三个主题，被长度归一化稀释）+ M5 稀疏权重（**已排除**，见下条探底）。属 M2 独立任务，另按"探底实验三条纪律"处理。
-
-**探底：关闭 M5 query 扩展 —— 不采纳，已回滚（2026-10-03）**：动机是 `query_preprocess` 的 A2「实体名反向模糊匹配」把噪声词喂进 vector/keyword 两路（器械库「融柏」→ `保定融柏恒流泵制造有限公司 / 保险 / 特点 / 简介`），稀释真正相关块的分数。探针 `probe_expand_ablation.py` 三库消融显示：**检索排序质量净升**（device nDCG@8 0.7730→**0.8045**、gold_rank 2.30→**2.16**、precision 0.2492→0.2558、precision_w 0.3538→0.3736；recall −0.0096；cservice nDCG +0.0040；admin 不触发扩展、ON=OFF），**但 e2e 生成全面下降**（correctness 0.7950→0.7473、faithfulness 0.7757→0.7490、answer_relevance 0.8650→0.8300）。逐题定位：检索侧改动**只影响 1/30 题**（DV-FS-008 丢「维护周期表」chunk → 生成正确拒答，correct 0.8→0.0），其余 29 题检索逐题**完全相同**却仍升降剧烈 ⇒ 生成降幅约一半是该题真退化、一半是 LLM 噪声。**结论：不采纳，`retriever.py` 维持 `q_vec/q_kw = prep.expanded`（已 `git checkout` 回滚，代码与 M5 文档零净改动）**。
-
-**副产品（排除上条「遗留」的 M5 假设）**：探针 `probe_cmp_miss.py` 逐环定位 comparison 漏召回目标块（`chunk-bb7dc287…`，per-doc 限 LSP）：关扩展后 keyword 路它**擦边进池**（第 39/40 名），但 RRF 是跨路聚合、单路 rank 39 贡献仅 `1/(60+39)≈0.0101`，被多路命中块碾压；该块 vector（第 65/287）/graph（第 92）两路均 0 贡献 ⇒ 仍进不了 RRF 池。**⇒ 「M5 稀疏权重」排除，真瓶颈是目标块语义匹配本身不足（M2 切分粒度）**。报告：`backend/tests/reports/run_ablation_{device30,cservice35,admin30}_expON/OFF_20261003.json`、`run_e2e_device30_expOFF_20261003.json`。
-
----
-
-## [v5.30] 2026-10-03 —— comparison 评测口径泄漏治理（退役 `per_doc_queries`，口径归位）
-
-**影响模块**：M9 评测（`app/m9_eval/runner.py` `_comparison_targets` 每 doc 直接用完整 `question`、删除 `COMPARISON_WINDOW=12`）、`metrics/context_recall.py`（`_PROMPT_VERSION` bump 至 `p2_llm_hit_fullctx`，缓存键含完整 context_str）、题集 `testset_device_30.json`（删 4 题 `per_doc_queries` 字段、DV-CP-004 key_facts 回滚 HEAD 措辞）；新增探针 `backend/scripts/probe_prod_vs_eval_shape.py`；文档 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) v0.6→v0.7；项目 `CLAUDE.md` 新增「评测信息泄漏红线」规则。
-
-### 一、泄漏点（用户 ML 类比：训练/服务偏差 + 标签污染触发）
-
-器械评测集 comparison 题存在三类**评测独有输入**，生产 `compare.py` 均不消费：
-
-| 泄漏点 | 评测侧 | 生产侧 |
-|---|---|---|
-| 定制子查询 | 4 题配 `per_doc_queries`（每文档各自定制子查询） | 同一 query 打所有 doc |
-| key_facts 措辞 | DV-CP-004 从 ground_truth 复制「携带式/内部电源设备/CF 型」等词 | 无此措辞 |
-| 评测窗口 | comparison 窗口 12 | `compare.py` top_k=3 |
-
-用定制子查询抬高的 comparison 数字只配当「检索上界」，不能当产品参考——触发用户把「评测信息泄漏红线」写入项目 `CLAUDE.md`。
-
-### 二、处置（v5.30）
-
-1. 题集删除 4 题 `per_doc_queries` 字段；runner `_comparison_targets` 每 doc 直接用完整 `q["question"]` + `allowed_docs`（与生产同形）。
-2. 窗口统一回全题型 8（删 `COMPARISON_WINDOW=12`/`_main_window`/`_merge_subqueries`）。
-3. DV-CP-004 key_facts 回滚到 HEAD 措辞。
-4. `context_recall.py` 缓存键修复：`_PROMPT_VERSION` bump 至 `p2_llm_hit_fullctx`，缓存键含完整 `context_str`（防不同窗口 top5/top8 上下文互相串换/内容拼错键）——**⑤是真实 bug 修复，保留**。
-
-### 三、泄漏量级证据（`backend/scripts/probe_prod_vs_eval_shape.py`，可复跑）
-
-| 题号 | eval-shape（定制子查询，top12） | prod-shape（同一 query 打所有 doc，top3） |
-|---|---|---|
-| DV-CP-001 | 2/3 | **0/3** |
-| 汇总 4 题 9 fact | **8/9 = 0.8889** | **6/9 = 0.6667** |
-
-落差集中在 DV-CP-001——该题定制子查询把「X 型号灌注/抽取/连续模式」拆成单型号子查询，生产完整对比问题直接召回失败（其他型号名把向量召回打到 0）。**v5.29 的 comparison Recall 0.4583 是定制子查询抬出的上界，非产品口径**。
-
-### 四、诚实口径实测（`--mode retrieval`，30 题，721.1s，报告 `run_retrieval_device30_v531_leakfix.json`）
-
-**总体**：Recall **top5 0.6635 / top8 0.7019**（v5.29 泄漏口径 0.7436 已不可比）；Precision 0.2362/0.1756；nDCG 0.6906/0.7623；gold_rank 均值 2.43；top1 覆盖率 0.4551 / top3 0.7051 / top8 0.8269。
-
-**按题型 Recall（top5/top8）**：`table_numeric` 0.8125/0.8125、`fact_single` 0.6562/0.8438、`image_only` 0.6667/0.7500、**`comparison` 0.3750/0.1250**（v5.29 0.4583=泄漏上界，已不可比）、`unanswerable` 跳过。按难度：easy 0.6667/0.9167、medium 0.8542/0.8125、hard 0.3750/0.3750。
-
-**⚠️ 非单调异常（@8 < @5）已定论 = LLM 裁判噪声，非 runner bug**：runner 窗口切片无 bug（同列表 `[:5]`/`[:8]`），top8 ⊇ top5 是硬保证，证据块在 top5 被判 hit 则 top8 必然还在。缓存证据：DV-CP-003 fact2（KE-2000 血氧范围）同一事实两次独立 LLM 调用产生两条缓存——top5 判 True（reason 精确引用 doc `0d5c7f07d607e9c4` 中「血氧饱和度测量范围：不窄于35%～100%」规格）、top8 判 False（reason 引用**同样那串**证据却要求上下文必须出现「KE-2000」型号字样）⇒ 裁判归因标准两次不自洽。DV-CP-004 fact1（IDEM）同模式；`by_difficulty.medium` 亦非单调（R5 0.8542 > R8 0.8125）。**诚实读数：comparison 检索能力接近 @5=0.375，@8=0.125 被裁判噪声压低**；DV-CP-004 fact2（博声 APP）才是真漏召回（top8 上下文确实缺博声块）。judge 缓存条目可逐条复核（`app/m9_eval/cache/context_recall_*.json`）。
-
-**e2e 生成侧随后在 v5.31 后用诚实口径重跑完成**：见下方 v5.31 段「诚实 e2e 生成重跑」。`run_e2e_device30.json`（v5.29 泄漏窗口口径）仅作上界参考。
-
----
-
-## [v5.31] 2026-10-04 —— 评测窗口收敛 top5 单窗口（对齐生产 RERANK_TOP，@8 文档作废）
-
-**影响模块**：`app/m9_eval/runner.py`（`eval_top_n` 默认 8→5，双窗口收敛单窗口，LLM 调用减半）、`app/m9_eval/report.py`（双列收敛单列）；文档 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) v0.7→v0.8（§11 只报 @5 = 生产口径）。
-
-**背景（口径对齐纪律）**：v5.9 已实测「top5 是最优窗口」并落地 `RERANK_TOP=5`（commit `205b445`）；`eval_top_n` 原默认 8 让评测打 @8 宽口径，与生产不一致，且双窗口跑两遍 context_recall（LLM 约 +50%）。@8 列是 v5.9 已否定的**诊断残留**——v5.30 泄漏治理后的诚实基线 v531 里 @8 只剩「非单调 = 裁判噪声」等调查价值，无产品参考意义。用户拍板：`eval_top_n` 默认回 5，@8 列标注作废 / 只报 @5。
-
-**处置**：
-
-1. `evaluate_retrieval`/`evaluate_answer`：`eval_top_n` 默认 8→5（docstring 注明「对齐生产 RERANK_TOP=5；探底放宽可传更大值」）；删 `contexts_top5/top8` 双切片 → 单窗口 `contexts[:eval_top_n]`；context_recall 只跑一遍（LLM 调用减半）；context_precision 从单窗口 per_chunk 推导 nDCG；detail 的 `window` 字段动态标注 `top{eval_top_n}`。
-2. `report.py`：overall/cat_stats 删 `*_top5/top8` 双字段收敛单列；markdown 总体表/按题型表/GoldRank 覆盖率表（top1/3/5）全部单列，去 `Remember@8` 存根。
-3. `gold_rank.py` `top_ks=[1,3,5,8]` **保留**（词汇模式零 LLM 成本；runner 传入 contexts ≤5 时 top8 覆盖率恒等于 top5，无需改）。
-
-**口径与兼容**：只报 @5 = 生产口径；探底仍可 `--eval-top-n 8` 放宽（window 字段动态标注）。旧报告 JSON/历史条目不受影响，旧三库跑法不变。
-
-**诚实 e2e 生成重跑（2026-10-04，生成项补齐）**：上报 v5.30 遗留的「e2e 生成未重跑」完成。跑法同 §11 引语（退役 per_doc_queries、单窗口 @5、p2 缓存键），报告 `backend/tests/reports/run_e2e_device30_honest.json`（1154.9s，judge_failed=0）。**对比 v5.29 泄漏窗口口径大洗牌**：
-
-| 生成指标 | 诚实（当前） | 旧泄漏口径（仅参考） |
-|---|---|---|
-| Faithfulness | **0.9843** | 0.7757 |
-| Answer Relevance | 0.7617 | 0.8650 |
-| Correctness | 0.6286 | 0.7950 |
-| Citation Accuracy | 0.6764 | 0.6707 |
-
-**关键结论**：
-
-- **忠实度满格 = 泄漏口径 generation「低 faith」是上下文外编造，非能力极限**：诚实口径下 `table_numeric`/`fact_single`/`image_only`/`unanswerable` 各题型 faithfulness 全部 1.0（旧 0.64–1.0 不等）；comparison faith 0.43 → **0.8825**。诚实的「保守」反而让答案收束到上下文内。
-- **comparison Correctness 0.5875 → 0.0875 崩盘**，且 Answer Relevance 0.7375 → 0.5000：诚实口径下 4 题全拒答/答单边（完整对比 query 一个型号块都没进 top5 → 编码到「诚实拒答」而非编造）。**这坐实检索 > 生成：comparison 瓶颈在 M5/M2 检索漏召回，生成层只是忠实呈现**。与 §11.1 comparison Recall 0.375@5 同源。
-- **拒答（unanswerable）4/4 依旧全部正确、无编造**。
-- 读数与旧报告逐题型并存，详见 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §11.2。
-
----
-
 ## [v5.33] 2026-10-05 —— 器械题集扩到 50 题（难度收敛 5:3:2）+ 两文档入库
 
 > ⚠️ **本条目题集已被 [v5.34] 取代**：v5.33 的 `testset_device_50.json` 与旧 `testset_device_30.json` 已归档至 `tests/testsets/archive/`，新题集 `testset_device_v2.json`（12 文档全覆盖重建）为准。
@@ -379,6 +312,128 @@ v5.32 后器械 30 题诚实口径 Recall **0.6763**，用户判断偏低。诊�
   - **CP-001.f2（融柏 注射器内径/行程）、CP-004.f2（博声「会诊」）——内容匹配本身不足**：主路三路全 MISS，放宽到 200/200/100 仍够不着（kw@200=82/0.0965、vec@200=140；博声 kw@200=140、vec@200=109）——真漏召回但属匹配质量问题，目标块非多主题堆叠，M2 无从下手。
 - **对 v5.29「遗留」归因的直接证伪**：旧归因指向 `chunk-bb7dc287`（LSP-1C 行程块「一块塞内径/行程/时钟被长度归一化稀释」）。该 fact（CP-001.f2）语料内可定位目标块实为 **111 字单主题 paragraph**；v5.29 探针自记该块 keyword **第 39 名擦边进池**——稀疏打分可达，差在 RRF 跨路聚合而非切分。若切分是主因，4 块应全像 f2/博声那样进不了候选；而 2/4 已进 RRF 前 11，切分假设不成立。
 - **本次探底零代码改动，无需回滚。交叉历史（勿重复探底）**：f3 / CP-002 的「精排截断」正是客服库 CS-TN-003 同款画像（三路召回、RRF 池内、被 rerank 主导序压出 top5）——客服/admin 库已系统性试过调权重这条路并封闭：v5.11/12 numeric_match boost **逐字节无效**、v5.13 表格 NL 摘要 **分数变序不变**（rerank 0.133→0.352 但排名 13→10 仍不进 top5）、v5.20 结构化补召回 **指标逐位不变**；贯穿病根 = bge-reranker 对数字/专名块语义失明，rerank 输入怎么喂只改量级不改排名结构。**唯一被验证能救池内块的是 v5.21 LLM listwise 终审，而生产决策已定不引入**（流式不兼容 + 评测同源偏置 + token 成本）。故「reranker/特征加权」方向不重复探底；f3/CP-002 要动名次只能 reranker 侧换赛道（LLM 终审进生产 / 换 reranker 模型），属方向决策。已同步 `DEVICE_SCENARIO.md` §5.1/§11.1 归因修正。
+
+---
+
+## [v5.31] 2026-10-04 —— 评测窗口收敛 top5 单窗口（对齐生产 RERANK_TOP，@8 文档作废）
+
+**影响模块**：`app/m9_eval/runner.py`（`eval_top_n` 默认 8→5，双窗口收敛单窗口，LLM 调用减半）、`app/m9_eval/report.py`（双列收敛单列）；文档 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) v0.7→v0.8（§11 只报 @5 = 生产口径）。
+
+**背景（口径对齐纪律）**：v5.9 已实测「top5 是最优窗口」并落地 `RERANK_TOP=5`（commit `205b445`）；`eval_top_n` 原默认 8 让评测打 @8 宽口径，与生产不一致，且双窗口跑两遍 context_recall（LLM 约 +50%）。@8 列是 v5.9 已否定的**诊断残留**——v5.30 泄漏治理后的诚实基线 v531 里 @8 只剩「非单调 = 裁判噪声」等调查价值，无产品参考意义。用户拍板：`eval_top_n` 默认回 5，@8 列标注作废 / 只报 @5。
+
+**处置**：
+
+1. `evaluate_retrieval`/`evaluate_answer`：`eval_top_n` 默认 8→5（docstring 注明「对齐生产 RERANK_TOP=5；探底放宽可传更大值」）；删 `contexts_top5/top8` 双切片 → 单窗口 `contexts[:eval_top_n]`；context_recall 只跑一遍（LLM 调用减半）；context_precision 从单窗口 per_chunk 推导 nDCG；detail 的 `window` 字段动态标注 `top{eval_top_n}`。
+2. `report.py`：overall/cat_stats 删 `*_top5/top8` 双字段收敛单列；markdown 总体表/按题型表/GoldRank 覆盖率表（top1/3/5）全部单列，去 `Remember@8` 存根。
+3. `gold_rank.py` `top_ks=[1,3,5,8]` **保留**（词汇模式零 LLM 成本；runner 传入 contexts ≤5 时 top8 覆盖率恒等于 top5，无需改）。
+
+**口径与兼容**：只报 @5 = 生产口径；探底仍可 `--eval-top-n 8` 放宽（window 字段动态标注）。旧报告 JSON/历史条目不受影响，旧三库跑法不变。
+
+**诚实 e2e 生成重跑（2026-10-04，生成项补齐）**：上报 v5.30 遗留的「e2e 生成未重跑」完成。跑法同 §11 引语（退役 per_doc_queries、单窗口 @5、p2 缓存键），报告 `backend/tests/reports/run_e2e_device30_honest.json`（1154.9s，judge_failed=0）。**对比 v5.29 泄漏窗口口径大洗牌**：
+
+| 生成指标 | 诚实（当前） | 旧泄漏口径（仅参考） |
+|---|---|---|
+| Faithfulness | **0.9843** | 0.7757 |
+| Answer Relevance | 0.7617 | 0.8650 |
+| Correctness | 0.6286 | 0.7950 |
+| Citation Accuracy | 0.6764 | 0.6707 |
+
+**关键结论**：
+
+- **忠实度满格 = 泄漏口径 generation「低 faith」是上下文外编造，非能力极限**：诚实口径下 `table_numeric`/`fact_single`/`image_only`/`unanswerable` 各题型 faithfulness 全部 1.0（旧 0.64–1.0 不等）；comparison faith 0.43 → **0.8825**。诚实的「保守」反而让答案收束到上下文内。
+- **comparison Correctness 0.5875 → 0.0875 崩盘**，且 Answer Relevance 0.7375 → 0.5000：诚实口径下 4 题全拒答/答单边（完整对比 query 一个型号块都没进 top5 → 编码到「诚实拒答」而非编造）。**这坐实检索 > 生成：comparison 瓶颈在 M5/M2 检索漏召回，生成层只是忠实呈现**。与 §11.1 comparison Recall 0.375@5 同源。
+- **拒答（unanswerable）4/4 依旧全部正确、无编造**。
+- 读数与旧报告逐题型并存，详见 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §11.2。
+
+---
+
+## [v5.30] 2026-10-03 —— comparison 评测口径泄漏治理（退役 `per_doc_queries`，口径归位）
+
+**影响模块**：M9 评测（`app/m9_eval/runner.py` `_comparison_targets` 每 doc 直接用完整 `question`、删除 `COMPARISON_WINDOW=12`）、`metrics/context_recall.py`（`_PROMPT_VERSION` bump 至 `p2_llm_hit_fullctx`，缓存键含完整 context_str）、题集 `testset_device_30.json`（删 4 题 `per_doc_queries` 字段、DV-CP-004 key_facts 回滚 HEAD 措辞）；新增探针 `backend/scripts/probe_prod_vs_eval_shape.py`；文档 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) v0.6→v0.7；项目 `CLAUDE.md` 新增「评测信息泄漏红线」规则。
+
+### 一、泄漏点（用户 ML 类比：训练/服务偏差 + 标签污染触发）
+
+器械评测集 comparison 题存在三类**评测独有输入**，生产 `compare.py` 均不消费：
+
+| 泄漏点 | 评测侧 | 生产侧 |
+|---|---|---|
+| 定制子查询 | 4 题配 `per_doc_queries`（每文档各自定制子查询） | 同一 query 打所有 doc |
+| key_facts 措辞 | DV-CP-004 从 ground_truth 复制「携带式/内部电源设备/CF 型」等词 | 无此措辞 |
+| 评测窗口 | comparison 窗口 12 | `compare.py` top_k=3 |
+
+用定制子查询抬高的 comparison 数字只配当「检索上界」，不能当产品参考——触发用户把「评测信息泄漏红线」写入项目 `CLAUDE.md`。
+
+### 二、处置（v5.30）
+
+1. 题集删除 4 题 `per_doc_queries` 字段；runner `_comparison_targets` 每 doc 直接用完整 `q["question"]` + `allowed_docs`（与生产同形）。
+2. 窗口统一回全题型 8（删 `COMPARISON_WINDOW=12`/`_main_window`/`_merge_subqueries`）。
+3. DV-CP-004 key_facts 回滚到 HEAD 措辞。
+4. `context_recall.py` 缓存键修复：`_PROMPT_VERSION` bump 至 `p2_llm_hit_fullctx`，缓存键含完整 `context_str`（防不同窗口 top5/top8 上下文互相串换/内容拼错键）——**⑤是真实 bug 修复，保留**。
+
+### 三、泄漏量级证据（`backend/scripts/probe_prod_vs_eval_shape.py`，可复跑）
+
+| 题号 | eval-shape（定制子查询，top12） | prod-shape（同一 query 打所有 doc，top3） |
+|---|---|---|
+| DV-CP-001 | 2/3 | **0/3** |
+| 汇总 4 题 9 fact | **8/9 = 0.8889** | **6/9 = 0.6667** |
+
+落差集中在 DV-CP-001——该题定制子查询把「X 型号灌注/抽取/连续模式」拆成单型号子查询，生产完整对比问题直接召回失败（其他型号名把向量召回打到 0）。**v5.29 的 comparison Recall 0.4583 是定制子查询抬出的上界，非产品口径**。
+
+### 四、诚实口径实测（`--mode retrieval`，30 题，721.1s，报告 `run_retrieval_device30_v531_leakfix.json`）
+
+**总体**：Recall **top5 0.6635 / top8 0.7019**（v5.29 泄漏口径 0.7436 已不可比）；Precision 0.2362/0.1756；nDCG 0.6906/0.7623；gold_rank 均值 2.43；top1 覆盖率 0.4551 / top3 0.7051 / top8 0.8269。
+
+**按题型 Recall（top5/top8）**：`table_numeric` 0.8125/0.8125、`fact_single` 0.6562/0.8438、`image_only` 0.6667/0.7500、**`comparison` 0.3750/0.1250**（v5.29 0.4583=泄漏上界，已不可比）、`unanswerable` 跳过。按难度：easy 0.6667/0.9167、medium 0.8542/0.8125、hard 0.3750/0.3750。
+
+**⚠️ 非单调异常（@8 < @5）已定论 = LLM 裁判噪声，非 runner bug**：runner 窗口切片无 bug（同列表 `[:5]`/`[:8]`），top8 ⊇ top5 是硬保证，证据块在 top5 被判 hit 则 top8 必然还在。缓存证据：DV-CP-003 fact2（KE-2000 血氧范围）同一事实两次独立 LLM 调用产生两条缓存——top5 判 True（reason 精确引用 doc `0d5c7f07d607e9c4` 中「血氧饱和度测量范围：不窄于35%～100%」规格）、top8 判 False（reason 引用**同样那串**证据却要求上下文必须出现「KE-2000」型号字样）⇒ 裁判归因标准两次不自洽。DV-CP-004 fact1（IDEM）同模式；`by_difficulty.medium` 亦非单调（R5 0.8542 > R8 0.8125）。**诚实读数：comparison 检索能力接近 @5=0.375，@8=0.125 被裁判噪声压低**；DV-CP-004 fact2（博声 APP）才是真漏召回（top8 上下文确实缺博声块）。judge 缓存条目可逐条复核（`app/m9_eval/cache/context_recall_*.json`）。
+
+**e2e 生成侧随后在 v5.31 后用诚实口径重跑完成**：见下方 v5.31 段「诚实 e2e 生成重跑」。`run_e2e_device30.json`（v5.29 泄漏窗口口径）仅作上界参考。
+
+---
+
+## [v5.29] 2026-10-03 —— 器械 30 题评测集跑通 + M9 裁判 `hit` 字段修复
+
+**影响模块**：M9 `judge.py`（解析并归一化 `hit`）、`metrics/context_recall.py`（采信 `hit`，`_PROMPT_VERSION` bump 至 `p1_llm_hit`）、`runner.py`（新式 collection 兼容 + comparison per-doc 检索）、`testset.py`（`VALID_CATEGORIES` 补 `image_only`）；新增 `backend/tests/testsets/testset_device_30.json`；方案文档 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) v0.5→v0.6（新增 §11 实测结果）、[`M9_evaluation.md`](modules/M9_evaluation.md)（状态行 + 变更历史）。
+
+### 一、器械场景 30 题评测集
+
+题集 `testset_device_30.json`，配比 `table_numeric` 8 / `fact_single` 8 / `image_only` 6 / `comparison` 4 / `unanswerable` 4，跑在器械库 `col_b7b876b1`（10 份说明书 / 857 chunk）。
+
+**关键纪律（v5.25.3 起，v5.29 修正口径）**：`image_only` 题的**答案完整内容必须存在于 `block_type=drawing` 块**——这是"多模态有贡献"的必要条件。既不能用 `pdftotext` 文本层 0 命中当基线（图片里的字文本层当然查不到，不够严），也不能要求"`paragraph`/`table` 全 0 命中"（功能项名天然跨界面重合，过严）。实测 6 题 **5 题严格合格**；DV-IO-004 保留为**已知例外**——其 KF3 除命中 `drawing`（第 19 页设置图）外还在 `table`（第 20 页）命中，原因是 **MinerU 把第 20 页「绑定医生机构」子页图误判为 `type=table`**（该条目同时带 `img_path`，本质是图片），属 M1 解析质量缺陷而非出题错误。附带发现：10 份文档 69 个 `table` 块中约 2 个属此类误判（博声 1、KE-2000 1），低频，暂不修。
+
+### 二、M9 runner 跑新式 collection 的 4 处兼容改动
+
+新式 `col_<uuid8>` 库与旧式扁平库（`default_ws` 等）布局不同，runner 原本只认后者。改动：① `testset.py` 补 `image_only` 类别（原缺失致 6 题校验失败）；② `runner.py` 新增 `_resolve_collection()`（`col_*` 走 `collection_paths()` → `data/collections/<col_id>/`，旧三库保持扁平映射，零回归）；③ `_build_deps()` 补 `load_entities_async()`（原缺失会**系统性低估**生产 recall，线上 `retriever.py` 是加载的）；④ comparison 题走 **per-doc 检索**（`_comparison_targets` + `_interleave`）。旧三库（行政/cservice）跑法不变。
+
+**per-doc 为何必须配子查询**（实测，可复现）：用完整对比问题（含两个型号名）做 per-doc 检索时，**其他型号名会把该文档的向量召回打到 0**（LightRAG 向量路 `cosine=0.2` 阈值）。实测 `allowed_docs=[LSP-1C]`：完整对比 query → **0 条**；去掉其他型号名 → **5 条**。复跑：`cd backend && python3 scripts/probe_perdoc_subquery.py`（新增探针脚本）。故题集 comparison 题须配 `per_doc_queries`（key = `source_docs` 文件名）。线上 `compare.py` 用的是「参数名 + 指定文档」，评测题面是完整对比问题——跑法对齐了但输入形态没对齐，这是补子查询的原因。
+
+### 三、M9 裁判 `hit` 字段修复（假阳性）
+
+**缺陷**：`judge.py:_parse_judge_output` 只提取 `score`/`reason`，**丢弃了 LLM 输出的 `hit` 字段**；`context_recall.py` 遂用 `score >= 0.5` 反推命中。而 prompt 里 `score` 的语义是「**判定置信度**」而非"命中度"——`hit=false, score=0.95` 意为「95% 确信上下文里没有」，被 `score>=0.5` 错误翻转成命中。
+
+**扫描 4255 条缓存实测矛盾率**：`context_recall` **13.4%**（172/183 是 `hit=false, score 0.95-1.0`）、`context_precision` 5.2%（109/109 是 `relevant=true, score<0.5`，属 LLM 自身不一致，语义上 `score>=0.5` 判相关合理，**不改**）、`citation_accuracy` 0.3%（**不改**）。`faithfulness`/`correctness`/`answer_relevance` 的 score 是**比例**，无此 bug。
+
+**修复**：judge 解析并归一化 `hit`（兼容 `"true"`/`"是"` 等字符串）；`_judge_fact` 优先采信 `hit`，缺失时（旧缓存）回退 `score` 阈值；`_PROMPT_VERSION` bump 使旧缓存失效。既有 `_enforce_evidence` 正则兜底保留（修复后触发数 9 → 0，已基本空转）。
+
+### 四、实测（器械库 `col_b7b876b1`）
+
+**检索（`--mode retrieval`，30 题，867.5s）**：Context Recall **0.7436** / nDCG@8 **0.7730** / Context Precision 0.2492 / 平均 gold_rank 2.30。按题型 Recall：`table_numeric` 0.8125、`fact_single` 0.8125、`image_only` 0.7500、`comparison` 0.4583（`unanswerable` 跳过）。按难度：easy 0.9167 / medium 0.8958 / **hard 0.3854**。
+
+**修复前口径（`*_pre_hitfix.json`，仅供参考、不可直接比较）**：Context Recall 0.9199——其中约 13.4% 是裁判假阳性。修复后 0.7436 为**真实值**。comparison 从旧口径 0.625 变 0.4583，混合了两个方向相反的改动（per-doc 提升召回、hit 修复压低假阳性），净效果为下降。
+
+**生成（`--mode e2e`，30 题，1243.9s）**：Faithfulness **0.7757** / Answer Relevance **0.8650** / Correctness 0.7950 / Citation Accuracy 0.6707。按题型正确性：`fact_single` 0.8812 > `unanswerable` 0.8500 > `table_numeric` 0.8187 > `image_only` 0.7500 > **`comparison` 0.5875**；`table_numeric` 忠实度满分 1.0，`fact_single` 引用准确率最高 0.9167。**`comparison` 四项生成指标全为最低，与检索侧 Recall 0.4583 同源**（漏召回 ⇒ 生成阶段拿不到第二个型号的数据）。**诚实性验证：4/4 `unanswerable` 题全部正确拒答、无编造**（如 DV-UA-003「双相波脉冲宽度」→「所有材料均未提及脉冲宽度（ms）这一参数」）。
+
+> **⚠️ 本节 e2e 数字为 v5.29 泄漏窗口口径（per_doc_queries + @8），仅作历史对照**；诚实重跑数据见 [v5.31] 段「诚实 e2e 生成重跑」与 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §11.2。
+
+**`unanswerable` 口径**：runner 对这类题**跳过 recall 计算**，`by_category.unanswerable.context_recall = 0.0` 只是占位值；**总体 Recall 分母是 26 道可答题**。这类题考的是 e2e 的**拒答行为**（上段已验证）。
+
+报告：`backend/tests/reports/run_retrieval_device30.json`、`run_e2e_device30.json`（正式跑）、`device30_smoke.json`（2 题冒烟，跑全量前验证链路）；旧报告归档为 `*_pre_hitfix.json`。详细读数见 [`DEVICE_SCENARIO.md`](modules/DEVICE_SCENARIO.md) §11。
+
+**遗留**：comparison 题实测有**真实漏召回**——答案 chunk 存在但三路候选池（graph 20 / vector 20 / keyword 40）**全不含**。例：LSP-1C「行程必须大于 0 小于 120mm」在 PG chunk `chunk-bb7dc287…`，关键词「行程」被正确提取（权重 2.0）却排不进 keyword top40 → 根因指向 **M2 切分粒度**（该 chunk 一块塞了内径/行程/时钟三个主题，被长度归一化稀释）+ M5 稀疏权重（**已排除**，见下条探底）。属 M2 独立任务，另按"探底实验三条纪律"处理。
+
+**探底：关闭 M5 query 扩展 —— 不采纳，已回滚（2026-10-03）**：动机是 `query_preprocess` 的 A2「实体名反向模糊匹配」把噪声词喂进 vector/keyword 两路（器械库「融柏」→ `保定融柏恒流泵制造有限公司 / 保险 / 特点 / 简介`），稀释真正相关块的分数。探针 `probe_expand_ablation.py` 三库消融显示：**检索排序质量净升**（device nDCG@8 0.7730→**0.8045**、gold_rank 2.30→**2.16**、precision 0.2492→0.2558、precision_w 0.3538→0.3736；recall −0.0096；cservice nDCG +0.0040；admin 不触发扩展、ON=OFF），**但 e2e 生成全面下降**（correctness 0.7950→0.7473、faithfulness 0.7757→0.7490、answer_relevance 0.8650→0.8300）。逐题定位：检索侧改动**只影响 1/30 题**（DV-FS-008 丢「维护周期表」chunk → 生成正确拒答，correct 0.8→0.0），其余 29 题检索逐题**完全相同**却仍升降剧烈 ⇒ 生成降幅约一半是该题真退化、一半是 LLM 噪声。**结论：不采纳，`retriever.py` 维持 `q_vec/q_kw = prep.expanded`（已 `git checkout` 回滚，代码与 M5 文档零净改动）**。
+
+**副产品（排除上条「遗留」的 M5 假设）**：探针 `probe_cmp_miss.py` 逐环定位 comparison 漏召回目标块（`chunk-bb7dc287…`，per-doc 限 LSP）：关扩展后 keyword 路它**擦边进池**（第 39/40 名），但 RRF 是跨路聚合、单路 rank 39 贡献仅 `1/(60+39)≈0.0101`，被多路命中块碾压；该块 vector（第 65/287）/graph（第 92）两路均 0 贡献 ⇒ 仍进不了 RRF 池。**⇒ 「M5 稀疏权重」排除，真瓶颈是目标块语义匹配本身不足（M2 切分粒度）**。报告：`backend/tests/reports/run_ablation_{device30,cservice35,admin30}_expON/OFF_20261003.json`、`run_e2e_device30_expOFF_20261003.json`。
 
 ---
 

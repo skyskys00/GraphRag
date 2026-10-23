@@ -22,6 +22,7 @@ from .compare import compare_params
 from .events import sse
 from .graph import collect_document_graph, collect_graph
 from .respond import make_answer, stream_answer
+from app.m10_agent.agent import run_agent
 
 _PROJ = Path(__file__).resolve().parents[2]
 
@@ -108,6 +109,67 @@ async def stream_answer_ep(
         try:
             async for evt in stream_answer(deps, q, hist, response, conversation_id):
                 yield evt
+        except Exception as e:  # noqa: BLE001
+            yield sse("error", {"message": f"{type(e).__name__}: {e}"})
+
+    return StreamingResponse(
+        gen(), media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
+class AgentRequest(BaseModel):
+    query: str
+    collection_id: str = "default"
+    conversation_id: str | None = None
+    response_type: str | None = None
+
+
+def _conv_history(deps: Any, conv_id: str | None) -> list[dict[str, Any]]:
+    """从会话读多轮历史（沿 respond._history_from_conversation 同样口径）。"""
+    if not conv_id:
+        return []
+    conv = conversations.get_conversation(deps, conv_id)
+    if conv is None:
+        return []
+    return [{"role": m.get("role"), "content": m.get("content") or ""}
+            for m in conv.get("messages", [])
+            if m.get("role") in ("user", "assistant") and m.get("content")]
+
+
+@app.post("/agent")
+async def post_agent(req: AgentRequest) -> dict[str, Any]:
+    """Agent 统一对话入口（M10 v0.4）：LangGraph 决策循环 + 工具注册表。
+
+    返回 {answer, events, citations}。RAG 直连 /answer 保留作内部工具落点 + 评测对照。
+    """
+    try:
+        deps = await get_deps(req.collection_id)
+        _ensure_conversation(deps, req.conversation_id)
+        history = _conv_history(deps, req.conversation_id)
+        return await run_agent(deps, req.query, history=history, response_type=req.response_type)
+    except Exception as e:  # noqa: BLE001 —— 边界：LLM/工具异常转可读 500
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}") from e
+
+
+@app.get("/agent/stream")
+async def stream_agent_ep(
+    q: str = Query(..., description="问题"),
+    response: str | None = Query(None, description="response_type 中文要求"),
+    collection_id: str = Query("default"),
+    conversation_id: str | None = Query(None, description="会话 id，缺省无会话模式"),
+) -> StreamingResponse:
+    """Agent 事件级 SSE：tool_decision → tool_result →(逐轮)→ delta → citations → done。"""
+    deps = await get_deps(collection_id)
+    _ensure_conversation(deps, conversation_id)
+    history = _conv_history(deps, conversation_id)
+
+    async def gen() -> AsyncIterator[str]:
+        try:
+            result = await run_agent(deps, q, history=history, response_type=response)
+            for evt in result["events"]:
+                payload = {k: v for k, v in evt.items() if k != "type"}
+                yield sse(evt["type"], payload)
         except Exception as e:  # noqa: BLE001
             yield sse("error", {"message": f"{type(e).__name__}: {e}"})
 
