@@ -167,26 +167,55 @@ async def stream_agent_ep(
     collection_id: str = Query("default"),
     conversation_id: str | None = Query(None, description="会话 id，缺省无会话模式"),
 ) -> StreamingResponse:
-    """Agent 事件级 SSE：tool_decision → tool_result →(逐轮)→ delta → citations → done。"""
+    """Agent 事件级 SSE（v5.45 实时透出）：tool_decision → tool_result → delta×N → citations → done。
+
+    节点内 on_event 回调 → asyncio.Queue → 逐事件发送；token 级 delta 打字机效果，TTFT 提前到首个事件。
+    """
     deps = await get_deps(collection_id)
     _ensure_conversation(deps, conversation_id)
     history = _conv_history(deps, conversation_id)
 
     async def gen() -> AsyncIterator[str]:
+        queue: asyncio.Queue = asyncio.Queue()
+
+        async def emit(evt: dict) -> None:
+            await queue.put(evt)
+
+        async def runner() -> None:
+            try:
+                result = await run_agent(deps, q, history=history, response_type=response, on_event=emit)
+                await queue.put({"type": "__run_done__", "result": result})
+            except Exception as e:  # noqa: BLE001 —— 失败转 error 事件并收尾
+                await queue.put({"type": "__run_error__", "message": f"{type(e).__name__}: {e}"})
+                await queue.put({"type": "__run_done__", "result": None})
+
+        task = asyncio.create_task(runner())
         try:
-            result = await run_agent(deps, q, history=history, response_type=response)
-            for evt in result["events"]:
+            result: dict[str, Any] | None = None
+            while True:
+                evt = await queue.get()
+                if evt.get("type") == "__run_done__":
+                    result = evt.get("result")
+                    break
+                if evt.get("type") == "__run_error__":
+                    yield sse("error", {"message": evt["message"]})
+                    continue
                 payload = {k: v for k, v in evt.items() if k != "type"}
                 yield sse(evt["type"], payload)
-            if conversation_id and result.get("answer"):
+            if conversation_id and result and result.get("answer"):
                 await conversations.append_round(
                     deps, conversation_id,
                     user=q,
                     assistant={"content": result["answer"],
                                "citations": result.get("citations", []), "meta": None},
                 )
+        except asyncio.CancelledError:
+            raise
         except Exception as e:  # noqa: BLE001
             yield sse("error", {"message": f"{type(e).__name__}: {e}"})
+        finally:
+            if not task.done():
+                task.cancel()
 
     return StreamingResponse(
         gen(), media_type="text/event-stream",

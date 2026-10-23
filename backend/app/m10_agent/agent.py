@@ -6,13 +6,16 @@ P1 骨架（2026-10-23，P0 探底结论见 M10_agent §10-8）：
 - P1 三工具全量 = tool_list_docs / tool_retrieve（M5）/ tool_rag_answer（M6）；
 - 事件 = tool_decision → tool_result → …(逐轮)… → delta → citations → done；
 - 节点函数必须返回 dict（LangGraph 1.x 纪律），路由选择用独立条件函数；
-- conversation 落库由 m7_interact/api.py 承接（append_round，沿 respond.py 口径）。
+- conversation 落库由 m7_interact/api.py 承接（append_round，沿 respond.py 口径）；
+- 事件实时透出 = 节点内 await _emit → on_event 回调 → SSE queue（token 级 delta，v5.45）；
+- 生成引用 = [n] 角标协议（对齐 M6 直连语义）：编号清单注入 → LLM 出 [n] → 还原带 marker citations。
 
-P1 剩余：token 级流式 delta、前端接 agent、M9 评测回归。
+P1 剩余：M9 评测回归（agent 测试集 v0 + RAG 对比），[n] 与 token 流式已结。
 """
 from __future__ import annotations
 
 import json
+import re
 from typing import Any, Literal
 from typing_extensions import TypedDict
 
@@ -27,8 +30,9 @@ from app.m7_interact import documents
 from . import registry
 
 SYSTEM_PROMPT = (
-    "你是中文知识库助手。基于工具返回的结果回答问题，答案需带来源（doc_id）。"
-    "工具结果不足时如实说明，不要编造。不要复述工具原始输出的非答案内容。"
+    "你是中文知识库助手。基于工具返回的结果回答问题；答案需带引用来源，"
+    "回答时用 [n] 标注（n 为最末一条消息中给出的资料编号）。工具结果不足时如实说明，不要编造。"
+    "不要复述工具原始输出的非答案内容。"
 )
 MAX_ROUNDS = 5  # 最大决策轮 N（M10 §2.2 硬约束）
 
@@ -44,6 +48,14 @@ class AgentState(TypedDict, total=False):
     citations: list[dict[str, Any]]
     answer_text: str
     _deps: Any                          # AppDeps（进程内传递，跨节点工具绑定）
+    _on_event: Any                      # 异步事件回调 on_event(evt)——SSE 实时透出（进程内传递）
+
+
+async def _emit(state: AgentState, type_: str, **payload: Any) -> None:
+    """若配置了事件回调（SSE 流式），立即透出该事件；否则仅累积（POST JSON 模式）。"""
+    fn = state.get("_on_event")
+    if fn:
+        await fn({"type": type_, **payload})
 
 
 async def _retrieve_tool(deps: Any):
@@ -171,9 +183,11 @@ async def route(state: AgentState) -> dict[str, Any]:
         })
     else:
         msgs.append({"role": "assistant", "content": msg.content or ""})
-    events = list(state["events"]) + [
-        {"type": "tool_decision", "tool": c.function.name, "args": c.function.arguments or ""} for c in tc
-    ]
+    events = list(state["events"])
+    for c in tc:
+        evt = {"type": "tool_decision", "tool": c.function.name, "args": c.function.arguments or ""}
+        events.append(evt)
+        await _emit(state, "tool_decision", tool=evt["tool"], args=evt["args"])
     return {
         "messages": msgs,
         "events": events,
@@ -203,7 +217,9 @@ async def execute_tools(state: AgentState) -> dict[str, Any]:
             "role": "tool", "tool_call_id": call["id"],
             "content": json.dumps(result, ensure_ascii=False, default=str)[:4000],
         })
-        events.append({"type": "tool_result", "tool": name, "args": args, "summary": _result_summary(result)})
+        summary = _result_summary(result)
+        events.append({"type": "tool_result", "tool": name, "args": args, "summary": summary})
+        await _emit(state, "tool_result", tool=name, args=args, summary=summary)
         if isinstance(result, dict) and result.get("citations"):
             citations.extend(result["citations"])
     return {"messages": msgs, "events": events, "citations": citations}
@@ -219,17 +235,89 @@ def _result_summary(result: Any) -> str:
     return str(result)[:80]
 
 
+_NUM_RE = re.compile(r"\[(\d+)\]")
+
+
+def _build_citation_index(citations: list[dict]) -> tuple[dict[int, dict], str | None]:
+    """把累积 citations 按 (doc_id, chunk_id) 去重编号，返回 (编号→引用, 注入清单文本)。
+
+    编号 n 即生成阶段的 [n] 引用号（对齐 M6 直连语义：正文 [n] ↔ citations marker）。
+    """
+    seen: set[tuple[str, str]] = set()
+    index: dict[int, dict] = {}
+    lines: list[str] = []
+    for c in citations:
+        doc_id = c.get("doc_id") or c.get("full_doc_id") or ""
+        chunk_id = c.get("chunk_id") or ""
+        key = (doc_id, chunk_id)
+        if not doc_id or key in seen:
+            continue
+        seen.add(key)
+        n = len(index) + 1
+        index[n] = c
+        snippet = (c.get("snippet") or "")[:120] or (c.get("content") or "")[:120]
+        lines.append(f"[{n}] {doc_id}：{snippet}")
+    return index, "\n".join(lines) if lines else None
+
+
+def _resolve_citations(text: str, index: dict[int, dict]) -> list[dict]:
+    """从答案文本提取 [n]，映射回带 marker 的引用；未在清单中的编号（编造/漂移）直接丢弃。"""
+    used: list[dict] = []
+    seen: set[int] = set()
+    for m in _NUM_RE.finditer(text):
+        n = int(m.group(1))
+        if n in seen or n not in index:
+            continue
+        seen.add(n)
+        c = dict(index[n])
+        c["marker"] = n
+        used.append(c)
+    return used
+
+
+async def _stream_chat(cfg: dict, messages: list[dict]) -> Any:
+    """流式对话调用（generate 用）：逐 chunk yield content 增量文本。"""
+    client = AsyncOpenAI(api_key=cfg["api_key"], base_url=cfg["base_url"])
+    try:
+        kw: dict[str, Any] = {"model": cfg["query_model"], "messages": messages, **cfg["extra_kwargs"]}
+        stream = await client.chat.completions.create(**kw, stream=True)
+        async for chunk in stream:
+            delta = chunk.choices[0].delta.content or ""
+            if delta:
+                yield delta
+    finally:
+        await client.close()
+
+
 async def generate(state: AgentState) -> dict[str, Any]:
-    """生成节点：基于含工具往返的完整消息产出最终答案，收尾事件。"""
+    """生成节点：流式产出最终答案 + [n] 引用还原。
+
+    事件：SSE 侧逐 chunk 透出 delta（打字机），聚合端（POST）events 保留整段 delta；
+    末尾 citations/done 使用还原后的带 marker 引用。
+    """
     cfg = _llm_config()
-    resp = await _chat(cfg, state["messages"], tools=False)
-    text = resp.choices[0].message.content or ""
-    events = list(state["events"]) + [
-        {"type": "delta", "text": text},
-        {"type": "citations", "citations": state["citations"]},
-        {"type": "done", "text": text, "citations": state["citations"]},
+    index, index_text = _build_citation_index(state["citations"])
+    messages = list(state["messages"])
+    if index_text:
+        messages.append({"role": "system", "content": f"可引用资料（编号即 [n]）：\n{index_text}"})
+
+    text = ""
+    events = list(state["events"])
+    async for delta in _stream_chat(cfg, messages):
+        if not delta:
+            continue
+        text += delta
+        await _emit(state, "delta", text=delta)
+    events.append({"type": "delta", "text": text})
+
+    final = _resolve_citations(text, index) or state["citations"]
+    events += [
+        {"type": "citations", "citations": final},
+        {"type": "done", "text": text, "citations": final},
     ]
-    return {"answer_text": text, "events": events}
+    await _emit(state, "citations", citations=final)
+    await _emit(state, "done", text=text, citations=final)
+    return {"answer_text": text, "events": events, "citations": final}
 
 
 def build_graph() -> StateGraph:
@@ -262,8 +350,12 @@ async def run_agent(
     history: list[dict] | None = None,
     response_type: str | None = None,
     max_rounds: int = MAX_ROUNDS,
+    on_event: Any = None,
 ) -> dict[str, Any]:
-    """跑一次 agent 决策循环。POST /agent（JSON）与 GET /agent/stream（事件）共用入口。"""
+    """跑一次 agent 决策循环。POST /agent（JSON）与 GET /agent/stream（事件）共用入口。
+
+    on_event: 可选异步回调 on_event(evt)，SSE 端点传入以实时透出事件（节点内 await 透出）。
+    """
     app = build_graph()
     res = await app.ainvoke({
         "query": query,
@@ -275,6 +367,7 @@ async def run_agent(
         "events": [],
         "citations": [],
         "_deps": deps,
+        "_on_event": on_event,
     })
     return {
         "answer": res.get("answer_text", ""),

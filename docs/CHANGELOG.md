@@ -26,6 +26,17 @@
 
 ---
 
+## [v5.45] 2026-10-23 —— M10 P1 体验增强：SSE 事件实时透出（token 级流式）+ 引用 `[n]` 角标协议
+
+**影响模块**：`backend/app/m10_agent/agent.py`（on_event 回调 + 流式 generate + `[n]` 引用还原）；`app/m7_interact/api.py`（`/agent/stream` 改 asyncio.Queue 实时透出）；`docs/modules/M10_agent.md` 状态行同步。
+
+**内容**：
+- **SSE 实时透出（token 级流式）**：节点内 `await _emit` → on_event 异步回调 → asyncio.Queue → 逐事件发送。TTFT 从「全流程跑完一次性 emit（实测 ~40s）」提前到首个事件（决策约 1.6s）；generate 节点改流式调用（`stream=True`）逐 chunk 透出 delta（实测 254 段打字机效果）。聚合端 `POST /agent` 保持整段 delta（events 兼容 curl/评测）。
+- **[n] 引用角标协议**：对齐 M6 直连语义——generate 前把累积 citations 按 (doc_id, chunk_id) 去重编号、注入「可引用资料清单」消息，LLM 输出 `[n]`；`_resolve_citations` 从文本提取 `[n]` 还原带 marker 的 citations（未在清单中的编号=编造/漂移，直接丢弃）。正文 `[n]` 可点击、引用面板 marker 定位——前端 `splitCitations`/`CitationPanel` 复用，零改动。
+- **实测（col_b7b876b1）**：POST「便携式心电监测设备功能」→ 正文 `…[2]`，citations markers [2,3,5,1,4] 与 doc_id/chunk_id 对应；SSE「动态心电记录仪怎么开机」→ 1.6s `tool_decision` → 19s `tool_result` → 22.6s `delta` 逐 token ×254 → `citations` → `done`；浏览器正文 `[1][2][3][4]` 角标 + 引用面板 marker/doc_id 对应验证通过。
+- **修过的坑**：stream 端点局部 `q`（Queue）变量名遮蔽了 ep 参数 `q`（问题），把 Queue 当 query 传给 run_agent → `TypeError: Queue is not JSON serializable`；改名 `queue` 修复。
+- **P1 剩余**：仅 M9 评测回归（agent 测试集 v0 + RAG 对比）。三工具 / 显式 StateGraph / 会话落库 / 前端接 agent / 决策卡片 / token 流式 / [n] 角标已结。
+
 ## [v5.44] 2026-10-23 —— M10 P1 前端问答接 agent：SSE 切 `/agent/stream` + 决策链折叠卡片
 
 **影响模块**：`frontend/src/`（`lib/sse.ts` 端点、`hooks/useChat.ts` 决策链、`components/MessageBubble.tsx` 卡片、`components/CitationPanel.tsx` 引用面板容错、`types.ts`、`mocks/events.ts`、`App.css`）；`backend/app/m10_agent/agent.py`（tool_retrieve citations 补 `full_doc_id` 别名）；`docs/modules/M8_frontend.md` v5.6 → v5.7。
