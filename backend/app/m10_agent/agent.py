@@ -24,6 +24,7 @@ from openai import AsyncOpenAI
 
 from app.m3_index.providers import _llm_config
 from app.m5_retrieve.retriever import retrieve
+from app.m6_generate.cite import _html_to_text
 from app.m6_generate.orchestrator import answer as rag_answer
 from app.m7_interact import documents
 
@@ -69,6 +70,26 @@ async def _retrieve_tool(deps: Any):
             allowed_docs=sorted(deps.allowed_docs) if deps.allowed_docs else None,
         )
         res = result.get("results", [])[: max(1, int(top_k))]
+        citations: list[dict[str, Any]] = []
+        for r in res:
+            # 复用 M6 sidecar 溯源：chunk_id → M2 text_unit（对齐直连引用字段）
+            meta = deps.sidecar.resolve(r["chunk_id"]) if deps.sidecar else None
+            c: dict[str, Any] = {
+                "doc_id": r["full_doc_id"],
+                "full_doc_id": r["full_doc_id"],
+                "chunk_id": r["chunk_id"],
+                "rank": r["rank"],
+                "score": r.get("score", 0.0),
+                "snippet": _html_to_text(r["content"])[:120],
+                "text_unit_id": (meta.text_unit_id if meta else r["chunk_id"]),
+            }
+            if meta:
+                c["file_path"] = meta.file_path
+                if meta.title_path:
+                    c["title_path"] = meta.title_path
+                if meta.page_range:
+                    c["page_range"] = meta.page_range
+            citations.append(c)
         return {
             "query": result.get("query"),
             "n_results": len(res),
@@ -81,15 +102,7 @@ async def _retrieve_tool(deps: Any):
                 }
                 for r in res
             ],
-            "citations": [
-                {
-                    "doc_id": r["full_doc_id"],
-                    "full_doc_id": r["full_doc_id"],
-                    "chunk_id": r["chunk_id"],
-                    "rank": r["rank"],
-                }
-                for r in res
-            ],
+            "citations": citations,
         }
 
     return fn

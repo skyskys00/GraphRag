@@ -26,6 +26,15 @@
 
 ---
 
+## [v5.45.1] 2026-10-23 —— M10 引用字段补全：tool_retrieve 溯源对齐 M6 直连（修复引用来源/预览空片段）
+
+**影响模块**：`backend/app/m10_agent/agent.py`（`_retrieve_tool` 的 citations 构造）。
+
+**内容**：
+- **问题**：agent 线 `tool_retrieve` 的 citation 只回 `{doc_id, chunk_id, rank}`——无 `snippet`（引用来源面板显示空）、无 `text_unit_id`（「原文档 #」预览跳转定位不到片段，只显示空 id）。
+- **修复**：复用 M6 sidecar（chunk_id → M2 text_unit 溯源）+ `cite._html_to_text`，citations 补全 `snippet`（前 120 字纯文本）/ `text_unit_id`（sidecar 未命中的降级 chunk_id）/ `file_path` / `title_path` / `page_range` / `score`，与直连引用同构；`_build_citation_index` 的资料清单同步受益。
+- **实测（col_b7b876b1，POST /agent「动态心电记录仪怎么开机」）**：citations 4 条全带 text_unit_id（如 `447207be927c51ff-chunk-034`）+ file_path（英菲泰克动态心电记录仪.pdf）+ title_path（佩戴方式及操作说明）+ page_range [7,7] + snippet（步骤六…）；`/docs/{doc_id}/preview` 按该 text_unit_id 精确命中目标单元。前端零改动（渲染分支 v5.44 已存在）。
+
 ## [v5.45] 2026-10-23 —— M10 P1 体验增强：SSE 事件实时透出（token 级流式）+ 引用 `[n]` 角标协议
 
 **影响模块**：`backend/app/m10_agent/agent.py`（on_event 回调 + 流式 generate + `[n]` 引用还原）；`app/m7_interact/api.py`（`/agent/stream` 改 asyncio.Queue 实时透出）；`docs/modules/M10_agent.md` 状态行同步。
