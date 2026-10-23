@@ -26,6 +26,18 @@
 
 ---
 
+## [v5.44] 2026-10-23 —— M10 P1 前端问答接 agent：SSE 切 `/agent/stream` + 决策链折叠卡片
+
+**影响模块**：`frontend/src/`（`lib/sse.ts` 端点、`hooks/useChat.ts` 决策链、`components/MessageBubble.tsx` 卡片、`components/CitationPanel.tsx` 引用面板容错、`types.ts`、`mocks/events.ts`、`App.css`）；`backend/app/m10_agent/agent.py`（tool_retrieve citations 补 `full_doc_id` 别名）；`docs/modules/M8_frontend.md` v5.6 → v5.7。
+
+**内容**：
+- **前端无感切 agent（M10 §6）**：问答 SSE 端点 `/answer/stream` → `/agent/stream`，agent 为唯一对话入口（无模式开关）；`/answer` 直连降为内部工具落点 + 评测对照（M10 §5）。
+- **决策链折叠卡片**：每条 assistant 消息顶部渲染每轮工具调用卡片（`🔧 知识库检索、文档清单（结果已返回 · 12 项结果）`），默认收起、流式中最后轮展开；展开显示每步工具名 + 检索 query + 结果摘要。`useChat` 按「tool_decision 组 + pendingResult 归零封存」分轮累积 `ChatMessage.rounds`。
+- **引用面板容错**：agent 线 citations 为简化结构（`{doc_id, chunk_id, rank}`，无 marker/score/file_path）→ 面板不再假渲染「相关度 NaN%」（无 score 即隐藏角标/置信度条），标题回退 `doc_id`；后端 tool_retrieve 同时补齐 `full_doc_id` 别名，引用标题显示真实文档 id。
+- **SSE 事件线扩展**：`sse.ts` 注册 tool_decision/tool_result（`types.ts` `SseEvent` 同步扩展）；`mocks/events.ts` mock 线补工具事件（离线走查可用）。
+- **浏览器实测（col_b7b876b1）**：问「便携式心电监测设备有哪些常见功能」→ 决策卡片两轮 + grounded 答案（doc_id 溯源）+ 引用面板 5 条真实 doc_id + 诚实说明（库中无专门功能清单文档、功能因型号而异）；`npm run build` 0 错。
+- **已知差异（登记 P1 剩余）**：agent 最终答案用 doc_id 文本溯源而非 M6 直连的 `[n]` 角标（generate 阶段未接 parse_citations 还原）；token 级流式 delta 未接入；M9 测试集/对比回归未做。
+
 ## [v5.43] 2026-10-23 —— M10 P1 后端骨架落地：三工具全量 + 会话读写闭环 + 端到端实测
 
 **影响模块**：`backend/app/m10_agent/agent.py`（P1 三工具 + 显式 StateGraph 全量，docstring 更新）；`backend/app/m10_agent/registry.py`（dispatch 支持 async factory）；`app/m7_interact/api.py`（`/agent` 两入口补 conversation 落库）；`docs/modules/M10_agent.md` 状态行同步。

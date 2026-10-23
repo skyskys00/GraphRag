@@ -1,4 +1,4 @@
-> **状态行**：版本 v0.4（方案稿，P1 后端完成：三工具 + 显式 StateGraph + 事件线 + 会话落库）｜ 状态：实施中（P1 后端落地，前端/评测待）｜ 更新：2026-10-23 ｜ 定位：**Agent 为完整系统主体，RAG 全链（M0–M7）作为其底座能力区**——不是「RAG + agent 附加」，而是「agent 系统内嵌 RAG 能力」 ｜ 契约：待定（见 §5） ｜ 上游（底座）：[M5 检索层](M5_retrieve.md) · [M6 生成层](M6_generate.md) · [M7 交互层](M7_interact.md)（完整 RAG 底座 M1–M4 见 [FRAMEWORK_NOTES §3](../../FRAMEWORK_NOTES.md) / [ARCHITECTURE §1](../../ARCHITECTURE.md)） ｜ 下游：[M8 前端](M8_frontend.md) ｜ 依据：用户拍板「agent 做完整系统、RAG 属于它的一部分」（2026-10-23 范式重启；同日选型定稿 LangGraph；P0 探底+骨架完成）｜ 运行：待定 ｜ 变更历史：见 `docs/CHANGELOG.md`
+> **状态行**：版本 v0.4（方案稿，P1 后端+前端落地：三工具 + 显式 StateGraph + 事件线 + 会话落库 + 前端接 agent）｜ 状态：实施中（P1 前后端落地，评测待）｜ 更新：2026-10-23 ｜ 定位：**Agent 为完整系统主体，RAG 全链（M0–M7）作为其底座能力区**——不是「RAG + agent 附加」，而是「agent 系统内嵌 RAG 能力」 ｜ 契约：待定（见 §5） ｜ 上游（底座）：[M5 检索层](M5_retrieve.md) · [M6 生成层](M6_generate.md) · [M7 交互层](M7_interact.md)（完整 RAG 底座 M1–M4 见 [FRAMEWORK_NOTES §3](../../FRAMEWORK_NOTES.md) / [ARCHITECTURE §1](../../ARCHITECTURE.md)） ｜ 下游：[M8 前端](M8_frontend.md) ｜ 依据：用户拍板「agent 做完整系统、RAG 属于它的一部分」（2026-10-23 范式重启；同日选型定稿 LangGraph；P0 探底+骨架完成）｜ 运行：待定 ｜ 变更历史：见 `docs/CHANGELOG.md`
 
 # M10 Agent 系统（方案稿 v0.4 —— Agent 为主体 / RAG 为底座）
 
@@ -155,7 +155,7 @@ v0.1 的方向是「在已评测稳定的 RAG 之上叠一层 agent 编排」。
 | Phase | 内容 | 完成标志（可验证） |
 |---|---|---|
 | **P0（探底）✔ 完成 2026-10-23** | v4-flash 原生 `tools` + 与思考/`extra_body` 互斥性；langgraph 依赖树最小安装（无全量 langchain）；`/agent` 路由骨架 + async StateGraph（注册 `tool_list_docs` 一个真实工具） | 探底结论回填 §10 ✓（§10-8）；`POST /agent` 健康应答可用 ✓（v5.42，实测工具决策→执行→生成→事件线闭环） |
-| **P1 (MVP)** | **显式 StateGraph**（route / execute_tools / generate + 条件边）+ 三工具（retrieve / rag_answer / list_docs）+ 流式事件线 + 前端问答接 agent + agent 测试集 v0 + RAG 对比回归 | **后端已完成**（v5.43：三工具 + StateGraph + 事件线 + 会话落库，真实库端到端实测）；待 M8 前端接 agent、M9 测试集 v0 + RAG 对比回归；agent 首轮直答 vs 直连 A/B **不劣化** correctness/faith/cite；无编造 |
+| **P1 (MVP)** | **显式 StateGraph**（route / execute_tools / generate + 条件边）+ 三工具（retrieve / rag_answer / list_docs）+ 流式事件线 + 前端问答接 agent + agent 测试集 v0 + RAG 对比回归 | **后端+前端已完成**（v5.43 三工具+StateGraph+事件线+会话落库；v5.44 前端切 `/agent/stream` + 决策链折叠卡片 + 面板容错，真实库浏览器实测）；待 M9 测试集 v0 + RAG 对比回归；agent 首轮直答 vs 直连 A/B **不劣化** correctness/faith/cite；无编造 |
 | **P2** | + `tool_graph` / `tool_compare` + 多工具组合 + agent 评测全量 + A/B 报告 | 跨库多步问题可编排；A/B 报告归档；CHANGELOG 新版本条目 |
 | **P3（可选）** | 意图路由显性化、agent 多轮记忆增强、复杂任务拆解（sub-agent） | 跨文档综述 / 参数对比类问题 by-tool 达标 |
 

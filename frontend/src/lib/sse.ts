@@ -3,8 +3,8 @@ import type { SseEvent } from '../types'
 const API_BASE = import.meta.env.VITE_API_BASE ?? '/api'
 
 /**
- * 订阅 SSE 流式回答。返回 AsyncIterable<SseEvent>。
- * done/error 事件驱动结束；底层连接意外断开时兜底发 error。
+ * 订阅 SSE 回答流（M10 后为 /agent/stream，agent 唯一对话入口；RAG 直连仅作内部工具落点）。
+ * 返回 AsyncIterable<SseEvent>。done/error 事件驱动结束；底层连接意外断开时兜底发 error。
  */
 export function subscribeStream(params: {
   query: string
@@ -16,7 +16,7 @@ export function subscribeStream(params: {
   events: AsyncIterable<SseEvent>
   close: () => void
 } {
-  const url = new URL(`${API_BASE}/answer/stream`, window.location.origin)
+  const url = new URL(`${API_BASE}/agent/stream`, window.location.origin)
   url.searchParams.set('q', params.query)
   if (params.history) url.searchParams.set('history', params.history)
   if (params.response) url.searchParams.set('response', params.response)
@@ -41,6 +41,12 @@ export function subscribeStream(params: {
 
       const parseMsg = (e: Event) => (e as MessageEvent).data
 
+      es.addEventListener('tool_decision', (e) =>
+        enqueue({ type: 'tool_decision', data: JSON.parse(parseMsg(e)) }),
+      )
+      es.addEventListener('tool_result', (e) =>
+        enqueue({ type: 'tool_result', data: JSON.parse(parseMsg(e)) }),
+      )
       es.addEventListener('retrieved', (e) =>
         enqueue({ type: 'retrieved', data: JSON.parse(parseMsg(e)) }),
       )

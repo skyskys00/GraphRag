@@ -69,7 +69,15 @@ async def _retrieve_tool(deps: Any):
                 }
                 for r in res
             ],
-            "citations": [{"doc_id": r["full_doc_id"], "chunk_id": r["chunk_id"], "rank": r["rank"]} for r in res],
+            "citations": [
+                {
+                    "doc_id": r["full_doc_id"],
+                    "full_doc_id": r["full_doc_id"],
+                    "chunk_id": r["chunk_id"],
+                    "rank": r["rank"],
+                }
+                for r in res
+            ],
         }
 
     return fn

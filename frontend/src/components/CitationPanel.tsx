@@ -17,7 +17,7 @@ export function CitationPanel({
   onOpenPreview,
 }: CitationPanelProps) {
   // 按置信度降序展示（后端已做相对阈值过滤，前端不再固定条数截断）
-  const sorted = [...citations].sort((a, b) => b.score - a.score)
+  const sorted = [...citations].sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
 
   return (
     <>
@@ -29,23 +29,28 @@ export function CitationPanel({
       </div>
       <div className="cite-list">
         {citations.length === 0 && <p className="cite-empty">发送问题后将展示引用来源</p>}
-        {sorted.map((c) => (
-          <div
-            key={c.marker}
-            id={`cite-${c.marker}`}
+        {sorted.map((c, i) => {
+          // M10 agent 线 citations 为简化结构（{doc_id, chunk_id, rank}），无 marker/score/snippet 等完整字段 → 缺失即隐藏，不渲染假数据
+          const hasScore = typeof c.score === 'number' && Number.isFinite(c.score)
+          const title = c.file_path || c.full_doc_id || '(未知文档)'
+          const key = c.marker ?? c.full_doc_id ?? `cite-${i}`
+          return (
+            <div
+              key={key}
+            id={`cite-${c.marker ?? i}`}
             className={`cite-item ${activeMarker === c.marker ? 'active' : ''}`}
           >
-            <span className="cite-marker">{c.marker}</span>
-            <div className="cite-title">{c.file_path || c.full_doc_id}</div>
+            {typeof c.marker === 'number' && <span className="cite-marker">{c.marker}</span>}
+            <div className="cite-title">{title}</div>
             <div className="cite-meta">
               {c.page_range
                 ? `P${c.page_range[0]}–P${c.page_range[1]}`
                 : c.title_path
                   ? c.title_path
                   : '—'}
-              {' · '}相关度 {Math.round(c.score * 100)}%
+              {hasScore ? ` · 相关度 ${Math.round(c.score! * 100)}%` : ''}
             </div>
-            <div className="cite-snippet">{c.snippet}</div>
+            {c.snippet && <div className="cite-snippet">{c.snippet}</div>}
             {c.image_path && (
               <img
                 className="cite-thumb"
@@ -55,30 +60,33 @@ export function CitationPanel({
                 onClick={() => onOpenPreview(c.full_doc_id, c.text_unit_id)}
               />
             )}
-            <div className="cite-score">
-              <span>置信度</span>
-              <span className="bar">
-                <span style={{ width: `${c.score * 100}%` }} />
-              </span>
-            </div>
+            {hasScore && (
+              <div className="cite-score">
+                <span>置信度</span>
+                <span className="bar">
+                  <span style={{ width: `${(c.score ?? 0) * 100}%` }} />
+                </span>
+              </div>
+            )}
             <div className="cite-actions">
-              <button
-                className="cite-graph-link"
-                onClick={() => onJumpToGraph(c)}
-                title="在图谱中定位该引用涉及的实体"
-              >
-                在图谱中查看 ↗
-              </button>
-              <button
-                className="cite-preview-link"
-                onClick={() => onOpenPreview(c.full_doc_id, c.text_unit_id)}
-                title="在预览中打开原文档"
-              >
-                原文档 #
-              </button>
+                <button
+                  className="cite-graph-link"
+                  onClick={() => onJumpToGraph(c)}
+                  title="在图谱中定位该引用涉及的实体"
+                >
+                  在图谱中查看 ↗
+                </button>
+                <button
+                  className="cite-preview-link"
+                  onClick={() => onOpenPreview(c.full_doc_id, c.text_unit_id)}
+                  title="在预览中打开原文档"
+                >
+                  原文档 #
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </>
   )

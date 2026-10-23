@@ -60,6 +60,16 @@ export async function* mockEventStream(query: string): AsyncGenerator<SseEvent> 
     },
   }
 
+  // M10 agent 决策链：工具决策 → 结果
+  yield {
+    type: 'tool_decision',
+    data: { tool: 'tool_retrieve', args: JSON.stringify({ query, top_k: 5 }) },
+  }
+  yield {
+    type: 'tool_result',
+    data: { tool: 'tool_retrieve', args: { query, top_k: 5 }, summary: '结果已返回' },
+  }
+
   // 模拟 token 级流式：按 ~2-3 字为一步，间隔 25-40ms
   let i = 0
   while (i < FULL_TEXT.length) {

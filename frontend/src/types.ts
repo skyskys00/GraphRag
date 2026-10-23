@@ -30,12 +30,22 @@ export interface Answer {
   meta: AnswerMeta
 }
 
-// SSE 事件线：retrieved → delta ×N → citations → done（异常时 error 结束）
+// M10 agent 决策链：工具一次调用（tool_decision 无 summary；tool_result 补 summary）
+export interface ToolStep {
+  tool: string
+  args?: string // tool_decision 的原始 JSON 参数字符串
+  summary?: string // tool_result 的事件线摘要（多为『N 项结果』类）
+}
+
+// SSE 事件线：agent = tool_decision → tool_result ×(逐轮)→ delta → citations → done
+// （M10 接管后无 retrieved；citations 不带 meta）
 export type SseEvent =
+  | { type: 'tool_decision'; data: { tool: string; args: string } }
+  | { type: 'tool_result'; data: { tool: string; args: unknown; summary: string } }
   | { type: 'retrieved'; data: AnswerMeta }
   | { type: 'delta'; data: { text: string } }
-  | { type: 'citations'; data: { citations: Citation[]; meta: AnswerMeta } }
-  | { type: 'done'; data: { text: string; query: string } }
+  | { type: 'citations'; data: { citations: Citation[]; meta?: AnswerMeta } }
+  | { type: 'done'; data: { text: string; citations?: Citation[]; query?: string } }
   | { type: 'error'; data: { message: string } }
 
 export interface HistoryMessage {
@@ -66,6 +76,8 @@ export interface ChatMessage {
   citations?: Citation[]
   meta?: AnswerMeta
   error?: string
+  /** M10 决策链：每轮一组工具调用（并行多 tool 同轮），供折叠卡片渲染 */
+  rounds?: ToolStep[][]
 }
 
 // M8 图谱契约镜像（GET /graph；服务端已按软删文档过滤）

@@ -5,6 +5,7 @@ import type {
   Citation,
   ConversationDetail,
   ConversationInfo,
+  ToolStep,
 } from '../types'
 import {
   createConversation,
@@ -215,8 +216,30 @@ export function useChat({ useMock = false }: UseChatOptions = {}) {
           prev.map((m) => (m.id === assistantMsg.id ? { ...m, state: 'streaming' } : m)),
         )
 
+        // 决策链按轮分组：tool_decision 先到（同轮可并行多 tool），tool_result 配对补 summary；
+        // 每轮 expected = 该轮 tool_call 数，pendingResult 归零即封存，后到的 decision 开新轮
+        let rounds: ToolStep[][] = []
+        let curRound: ToolStep[] = []
+        let pendingResult = 0
+        const patchRounds = () =>
+          patchIfActive((prev) =>
+            prev.map((m) => (m.id === assistantMsg.id ? { ...m, rounds } : m)),
+          )
+
         for await (const evt of iterator) {
-          if (evt.type === 'retrieved') {
+          if (evt.type === 'tool_decision') {
+            if (pendingResult === 0 && curRound.length > 0) {
+              rounds = [...rounds, curRound]
+              curRound = []
+            }
+            pendingResult += 1
+            curRound = [...curRound, { tool: evt.data.tool, args: evt.data.args }]
+            patchRounds()
+          } else if (evt.type === 'tool_result') {
+            pendingResult = Math.max(0, pendingResult - 1)
+            curRound = [...curRound, { tool: evt.data.tool, summary: evt.data.summary }]
+            patchRounds()
+          } else if (evt.type === 'retrieved') {
             meta = evt.data
             patchIfActive((prev) =>
               prev.map((m) => (m.id === assistantMsg.id ? { ...m, meta: evt.data } : m)),
@@ -235,10 +258,11 @@ export function useChat({ useMock = false }: UseChatOptions = {}) {
               ),
             )
           } else if (evt.type === 'done') {
+            if (evt.data.citations) citations = evt.data.citations
             patchIfActive((prev) =>
               prev.map((m) =>
                 m.id === assistantMsg.id
-                  ? { ...m, text: evt.data.text, state: 'complete', citations, meta }
+                  ? { ...m, text: evt.data.text, state: 'complete', citations, meta, rounds }
                   : m,
               ),
             )
@@ -251,6 +275,11 @@ export function useChat({ useMock = false }: UseChatOptions = {}) {
             )
             break
           }
+        }
+        // 断流兜底：最后未封存的一轮并入（保证卡片可见）
+        if (curRound.length > 0) {
+          rounds = [...rounds, curRound]
+          patchRounds()
         }
       } catch (err) {
         patchIfActive((prev) =>
