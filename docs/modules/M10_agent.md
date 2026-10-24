@@ -1,4 +1,4 @@
-> **状态行**：版本 v0.4（方案稿，P1 功能落地：三工具 + 显式 StateGraph + 会话落库 + 前端接 agent + token 级流式 + `[n]` 引用）｜ 状态：实施中（P1 功能完成，仅 M9 评测回归待）｜ 更新：2026-10-23 ｜ 定位：**Agent 为完整系统主体，RAG 全链（M0–M7）作为其底座能力区**——不是「RAG + agent 附加」，而是「agent 系统内嵌 RAG 能力」 ｜ 契约：待定（见 §5） ｜ 上游（底座）：[M5 检索层](M5_retrieve.md) · [M6 生成层](M6_generate.md) · [M7 交互层](M7_interact.md)（完整 RAG 底座 M1–M4 见 [FRAMEWORK_NOTES §3](../../FRAMEWORK_NOTES.md) / [ARCHITECTURE §1](../../ARCHITECTURE.md)） ｜ 下游：[M8 前端](M8_frontend.md) ｜ 依据：用户拍板「agent 做完整系统、RAG 属于它的一部分」（2026-10-23 范式重启；同日选型定稿 LangGraph；P0 探底+骨架完成）｜ 运行：待定 ｜ 变更历史：见 `docs/CHANGELOG.md`
+> **状态行**：版本 v0.4（方案稿，P1 功能落地：三工具 + 显式 StateGraph + 会话落库 + 前端接 agent + token 级流式 + `[n]` 引用 + 决策链折叠/回放）｜ 状态：**P1 功能与评测回归已完成，验收待定**——correctness/relevance 显著优于直连（Δ+0.04/+0.05），faithfulness/citation_accuracy 真实劣化（Δ-0.21/-0.17）；判别性验证已坐实劣化为**引用标注粒度**、非检索/生成遗漏（见 §7.2），核心五项未全绿，见 §7/§8｜ 更新：2026-10-24 ｜ 定位：**Agent 为完整系统主体，RAG 全链（M0–M7）作为其底座能力区**——不是「RAG + agent 附加」，而是「agent 系统内嵌 RAG 能力」 ｜ 契约：待定（见 §5） ｜ 上游（底座）：[M5 检索层](M5_retrieve.md) · [M6 生成层](M6_generate.md) · [M7 交互层](M7_interact.md)（完整 RAG 底座 M1–M4 见 [FRAMEWORK_NOTES §3](../../FRAMEWORK_NOTES.md) / [ARCHITECTURE §1](../../ARCHITECTURE.md)） ｜ 下游：[M8 前端](M8_frontend.md) ｜ 依据：用户拍板「agent 做完整系统、RAG 属于它的一部分」（2026-10-23 范式重启；同日选型定稿 LangGraph；P0 探底+骨架完成）｜ 运行：待定 ｜ 变更历史：见 `docs/CHANGELOG.md`
 
 # M10 Agent 系统（方案稿 v0.4 —— Agent 为主体 / RAG 为底座）
 
@@ -142,20 +142,62 @@ v0.1 的方向是「在已评测稳定的 RAG 之上叠一层 agent 编排」。
 
 ## 7. 评测方案（M9 扩展）
 
-- **新增 agent 端到端测试集**（复用 M9 runner / judge 基础设施，测试集 v0 设计走 `M9_testset.md` 规范）。
+- **新增 agent 端到端评测**（复用 M9 runner / judge 基础设施，测试集 `testset_device_v2` 50 题，collection `col_b7b876b1`）。
 - **指标**：
   - `tool_accuracy`：每步工具选择是否合理（LLM 裁判）；
   - `multi_hop_recall`：多步检索后目标信息是否进入最终上下文；
-  - e2e `Correctness / Faithfulness / Citation` 沿用现有四指标；
-  - **RAG 对比回归**：同一题集，agent 首轮直答 vs 原 `/answer` 直连 vs 旧基线，量化「agent 引入不劣化底座」——这是「底座收纳」的回归门禁。
+  - e2e `Correctness / Faithfulness / Answer Relevance / Citation Accuracy` 沿用现有四指标；
+  - **RAG 对比回归**：同一题集，agent 首轮直答 vs 原 `/answer` 直连基线，量化「agent 引入不劣化底座」——这是「底座收纳」的回归门禁。
 - **诚实红线**：agent 工具描述不得含 key_facts 措辞；评测口径 = 生产口径（沿 v5.30 泄漏治理）。
+- **评测口径约定（2026-10-24 修正）**：agent 答案的 `[n]` 是**生成阶段编号**（非检索位次），judge 必须按 marker 精确对齐到对应 text_unit——`citation_accuracy` 以 `ctx_by_marker` 显式映射传入（runner 由 citations 反查 sidecar 构建），**禁用**直连的「marker n = contexts[n-1]」位次约定。基线同题 A/B 时基线也须按「citations → 完整内容」窄池重判（`scripts/recompute_baseline_strict.py`），避免 top5 宽池虚高。
+
+### 7.1 A/B 实测结果（2026-10-24，source_set v5.46）
+
+同口径对比（agent eval 报告 `backend/tests/reports/agent/run_agent_device_50_20261023_fixed.json` vs 基线 strict `run_e2e_device_50_20261005_strict.json`），完整表见 `backend/tests/reports/agent/agent_vs_direct_ab.md`：
+
+| 指标 | Agent | strict 基线 | Δ | 判定 |
+|---|---|---|---|---|
+| Correctness（正确性） | 0.9115 | 0.8733 | +0.038 | 不劣化 |
+| Answer Relevance（答案相关性） | 0.9830 | 0.9314 | +0.052 | 不劣化 |
+| Faithfulness（忠实度） | 0.7528 | 0.9655 | −0.213 | **劣化** |
+| Citation Accuracy（引用准确率） | 0.7264 | 0.8960 | −0.170 | **劣化** |
+| Multi-hop Recall（agent 上下文召回） | 0.9080 | —（直连无此项） | +0.908 | agent 增益 |
+| Tool Accuracy（工具链合理性） | 0.8330 | —（直连无此项） | +0.833 | agent 增益 |
+| Context Recall（检索召回） | —（由 Multi-hop Rec 替代） | 0.8833 | — | 不可比 |
+
+**判定（M10 §7 / build_agent_ab 回归门禁 Δ ≥ −0.03）**：**未全绿**。核心五项 −0.03 门禁下，correctness / answer_relevance 显著**不劣化甚至更优**；faithfulness、citation_accuracy **劣化**（Δ 约 −0.2）。
+
+**劣化归因（非评测噪声，已排除两种 artifact）**：
+1. ~~marker 位次错配~~：初版 agent 评测按 list order 传 citations → 编号与上下文错位造成虚低（0.612）。修正为 marker 精确对齐后 → 0.7264，且逐条复核（DV-FS-001 引用装箱单块判 False、DV-TN-010 重复编号 [9] 挂两处事实）确认修正判定正确。
+2. ~~top5 宽池 vs 窄池~~：基线重判为「citations 完整内容」同口径后仍 0.896 / 0.966，差距依旧。
+3. **真实结构性差异**：agent 多轮检索拿到更多资料 → 答案更全面正确（correctness↑），但**引用标注粒度不够**——一个 `[n]` 覆盖整句/整表，而依据分散在多个 text_unit 细分块（如 DV-TN-010 的规格表 6 行来自多个 block，答案只标 [9] 绑定其中一个）。裁判按被引用 text_unit 判 → 判无依据。直连「贴块写作」天然逐句对应，反而高分。
+
+**结论（记录在案，待 P1 验收拍板）**：agent 引入后「答得更对但引用更散」——正确性收益真实、忠诚/引用劣化真实，二者同源（答案综合多来源而未细分标注）。P2 增强候选：生成阶段要求逐陈述标注来源 / 将跨块聚合事实 `[n]` 展开为多编号 / generate 提示强化「只引实际依据块」。
+
+### 7.2 判别性验证：劣化确实是标注粒度（2026-10-24，v5.46.1）
+
+为了区分「引用标注粒度」与「检索/生成遗漏」两个假说，对 v5.46 评测中 faithfulness ≤ 0.75 的 **26 个劣化题**，用同一份 agent answer 重建完整 agent 上下文（确定性 retrieve 按 tool_chain args + top_k），再做「宽松池」（全部检索命中而非仅被引用的 text_unit）重判：
+
+**结果：回升 16 / 持平 2 / 回落 8，平均 Δ = +0.090**。强回升样例（宽松池几乎完全恢复）：
+- DV-TN-010（六行规格表跨块聚合，v5.46 的 `[9]` 重复编号案例）：0.300 → **0.875**（+0.575）
+- DV-SUM-008：0.680 → 0.930（+0.250）；DV-SUM-001 +0.233；DV-SUM-006 +0.183；DV-TN-012 +0.336
+
+回落 8 题中 2 题为重建超时伪影（DV-IO-004、DV-FS-018，rebuild_ctx=0 → 宽松池空上下文判 0，非真实回落），其余 6 题回落均 ≤ −0.167。
+
+**结论**：信息**全部在 agent 上下文**（宽松池基本满分），评分损失集中在「标注某一具体 text_unit 作为整句依据」这一步——**纯标注粒度问题，无检索遗漏、无生成丢失**。P1 归因闭环。
+
+### 7.3 决策链体验增强（v5.46.1）
+
+- tool_result 事件携带命中预览 `snippets`（citations[].snippet 前 100 字），前端「Agent 执行过程」折叠块展示 N 轮/M 次调用 + 每轮 `第 i 轮` 卡片（决策=查询、结果=`→ summary` + 命中预览）。
+- tool_steps 历史回放：`_events_to_tool_steps`（分轮规则与前端 useChat 同构）在 POST /agent 与 /agent/stream 均随 `append_round` 落库；刷新重进会话决策链可恢复。
+- 修复 **/agent/stream 422 路由 bug**：`@app.get("/agent/stream")` 误挂辅助函数 `_events_to_tool_steps`（要求 body → GET 恒 422），SSE 端点 `stream_agent_ep` 反成普通函数 → 前端「连接已断开」。恢复装饰器归属后浏览器端到端（实时渲染 + 刷新回放）全通过。
 
 ## 8. 分期落地
 
 | Phase | 内容 | 完成标志（可验证） |
 |---|---|---|
 | **P0（探底）✔ 完成 2026-10-23** | v4-flash 原生 `tools` + 与思考/`extra_body` 互斥性；langgraph 依赖树最小安装（无全量 langchain）；`/agent` 路由骨架 + async StateGraph（注册 `tool_list_docs` 一个真实工具） | 探底结论回填 §10 ✓（§10-8）；`POST /agent` 健康应答可用 ✓（v5.42，实测工具决策→执行→生成→事件线闭环） |
-| **P1 (MVP)** | **显式 StateGraph**（route / execute_tools / generate + 条件边）+ 三工具（retrieve / rag_answer / list_docs）+ 流式事件线 + 前端问答接 agent + agent 测试集 v0 + RAG 对比回归 | **后端+前端+体验已完成**（v5.43 三工具+StateGraph+事件线+会话落库；v5.44 前端切 `/agent/stream` + 决策链折叠卡片 + 面板容错，真实库浏览器实测；v5.45 token 级流式 + 事件实时透出 + `[n]` 引用角标，SSE 实测 TTFT 1.6s）；待 M9 测试集 v0 + RAG 对比回归；agent 首轮直答 vs 直连 A/B **不劣化** correctness/faith/cite；无编造 |
+| **P1 (MVP)** | **显式 StateGraph**（route / execute_tools / generate + 条件边）+ 三工具（retrieve / rag_answer / list_docs）+ 流式事件线 + 前端问答接 agent + agent 测试集 v0 + RAG 对比回归 | **功能全部完成**（v5.43 三工具+StateGraph+事件线+会话落库；v5.44 前端切 `/agent/stream` + 决策链折叠卡片 + 面板容错；v5.45 token 级流式 + `[n]` 引用角标；v5.46 评测回归；v5.46.1 判别性验证 + 决策链增强/回放）→ **评测回归完成但验收待定**：correctness/relevance 显著更优，faithfulness/citation_accuracy 真实劣化（Δ≈−0.2），核心五项未全绿；判别性验证坐实劣化为**引用标注粒度**非检索遗漏（§7.2），详见 §7.1 |
 | **P2** | + `tool_graph` / `tool_compare` + 多工具组合 + agent 评测全量 + A/B 报告 | 跨库多步问题可编排；A/B 报告归档；CHANGELOG 新版本条目 |
 | **P3（可选）** | 意图路由显性化、agent 多轮记忆增强、复杂任务拆解（sub-agent） | 跨文档综述 / 参数对比类问题 by-tool 达标 |
 
@@ -167,6 +209,29 @@ v0.1 的方向是「在已评测稳定的 RAG 之上叠一层 agent 编排」。
 - **LLM 工具调用可靠性**：JSON 格式稳定性 P0 探底；兜底——解析失败重试 1 次、仍失败退化为 `tool_rag_answer` 单轮应答（诚实标注「退化为单次检索」）。
 - **Token / 延迟成本**：多轮多次 LLM 调用。约束：N=5、工具结果入上下文前压缩（复用 M6 assemble token 预算）、流式不破坏 TTFT。
 - **评测泄漏红线**：工具描述不得含 key_facts 措辞；同库同裁判同口径。
+- **引用标注粒度风险（2026-10-24 实测证实）**：agent 多轮检索后答案综合跨 text_unit 内容，但 `[n]` 一个编号只绑定一个块 → faithfulness/citation 较直连劣化（Δ≈−0.2，见 §7.1）。判别性验证（§7.2）确认信息均在 agent 上下文，**为纯标注粒度问题**（非检索/生成遗漏），对应 P2 候选见 **§9.1 P2-cite**。
+
+### 9.1 P2 候选：P2-cite —— generate 阶段逐陈述标注真实块
+
+**背景**：§7.2 判别性验证坐实 v5.46 忠实/引用劣化为「标注粒度」——信息在上下文，loss 仅在 `[n]` 一个编号绑一个块、而被引块无法承载整句跨块综合。P1 线下关，P2 选线收编。
+
+**方案（A，首选）text_unit_id 直引**：
+- generate 节点不再注入 `[n]` 编号清单（`_build_citation_index`/`_resolve_citations` 移除），改为要求 LLM 在陈述后用实际 `text_unit_id` 标注来源；
+- 收尾按 text_unit 解析成 citations，`marker` 仍照还原（前端引用面板/预览跳转零改动）。
+
+**取舍 vs 现状**：
+| | 现状 `[n]`+清单（v5.46） | text_unit_id 直引 |
+|---|---|---|
+| 账本层 | 去重编号 + 清单注入（生成阶段带清单、多轮一致性靠提示） | 消除——LLM 直接指真实块 |
+| 标注粒度 | 一编号一块，跨块综合无法并列 | 一陈述可列多个 text_unit → 粒度对齐直连「贴块」 |
+| token/延迟 | 清单每轮占上下文 | 省清单；ID 略长于 `[n]` |
+| 风险 | LLM 编造带外 ID → 需解析校验+回退（沿用 drop 策略） | 同左 |
+
+**验证**：P1 全量 50 题复跑，faithfulness/citation_accuracy 应回升至 ≥直连基线（0.9655/0.8960）或 Δ≥−0.03 绿；A/B 表重出。
+
+**（候补 B）**：聚合事实 `[n]` 展开为多编号（保持角标协议、代价是编号膨胀）——仅当 A 解析容错成本过高时回退。
+
+**拍板状态**：已收进 P2（2026-10-24 用户确认），不占 P1 验收阻塞项。
 
 ## 10. 已拍板决策（2026-10-23）
 

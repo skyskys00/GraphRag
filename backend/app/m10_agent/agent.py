@@ -231,11 +231,32 @@ async def execute_tools(state: AgentState) -> dict[str, Any]:
             "content": json.dumps(result, ensure_ascii=False, default=str)[:4000],
         })
         summary = _result_summary(result)
-        events.append({"type": "tool_result", "tool": name, "args": args, "summary": summary})
-        await _emit(state, "tool_result", tool=name, args=args, summary=summary)
+        snippets = _result_snippets(result)
+        events.append({"type": "tool_result", "tool": name, "args": args, "summary": summary, "snippets": snippets})
+        await _emit(state, "tool_result", tool=name, args=args, summary=summary, snippets=snippets)
         if isinstance(result, dict) and result.get("citations"):
             citations.extend(result["citations"])
     return {"messages": msgs, "events": events, "citations": citations}
+
+
+def _result_snippets(result: Any, limit: int = 3) -> list[str]:
+    """从工具返回提取命中预览（决策链展开用，前 limit 条、每条 ~100 字）。
+
+    来源优先级：citations[].snippet（回收缩器的检索片段）→ results[].content。
+    """
+    out: list[str] = []
+    if not isinstance(result, dict):
+        return out
+    for c in result.get("citations") or []:
+        if isinstance(c, dict):
+            s = (c.get("snippet") or "") or (c.get("content") or "")[:100]
+            if s:
+                out.append(s[:100])
+    if not out:
+        for r in (result.get("results") or []):
+            if isinstance(r, dict) and r.get("content"):
+                out.append(r["content"][:100])
+    return out[:limit]
 
 
 def _result_summary(result: Any) -> str:

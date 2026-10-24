@@ -35,6 +35,7 @@ function conversationToMessages(conv: ConversationDetail): ChatMessage[] {
       state: 'complete' as const,
       citations: m.citations ?? undefined,
       meta: m.meta ?? undefined,
+      rounds: m.tool_steps ?? undefined,
     }))
 }
 
@@ -237,7 +238,10 @@ export function useChat({ useMock = false }: UseChatOptions = {}) {
             patchRounds()
           } else if (evt.type === 'tool_result') {
             pendingResult = Math.max(0, pendingResult - 1)
-            curRound = [...curRound, { tool: evt.data.tool, summary: evt.data.summary }]
+            curRound = [
+              ...curRound,
+              { tool: evt.data.tool, summary: evt.data.summary, snippets: evt.data.snippets },
+            ]
             patchRounds()
           } else if (evt.type === 'retrieved') {
             meta = evt.data

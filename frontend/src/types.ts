@@ -35,13 +35,14 @@ export interface ToolStep {
   tool: string
   args?: string // tool_decision 的原始 JSON 参数字符串
   summary?: string // tool_result 的事件线摘要（多为『N 项结果』类）
+  snippets?: string[] // tool_result 的命中预览（前若干条，决策链展开显示 agent 实际检索到的材料）
 }
 
 // SSE 事件线：agent = tool_decision → tool_result ×(逐轮)→ delta → citations → done
 // （M10 接管后无 retrieved；citations 不带 meta）
 export type SseEvent =
   | { type: 'tool_decision'; data: { tool: string; args: string } }
-  | { type: 'tool_result'; data: { tool: string; args: unknown; summary: string } }
+  | { type: 'tool_result'; data: { tool: string; args: unknown; summary: string; snippets?: string[] } }
   | { type: 'retrieved'; data: AnswerMeta }
   | { type: 'delta'; data: { text: string } }
   | { type: 'citations'; data: { citations: Citation[]; meta?: AnswerMeta } }
@@ -199,6 +200,8 @@ export interface ConversationMessage {
   ts?: string
   citations?: Citation[] | null
   meta?: AnswerMeta | null
+  /** M10 决策链（历史回放恢复折叠卡片）：每轮一组工具调用，同 message.rounds 结构 */
+  tool_steps?: ToolStep[][] | null
 }
 
 export interface ConversationDetail {

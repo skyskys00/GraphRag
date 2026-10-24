@@ -153,11 +153,42 @@ async def post_agent(req: AgentRequest) -> dict[str, Any]:
                 deps, req.conversation_id,
                 user=req.query,
                 assistant={"content": result.get("answer", ""),
-                           "citations": result.get("citations", []), "meta": None},
+                           "citations": result.get("citations", []), "meta": None,
+                           "tool_steps": _events_to_tool_steps(result.get("events", []))},
             )
         return result
     except Exception as e:  # noqa: BLE001 —— 边界：LLM/工具异常转可读 500
         raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}") from e
+
+
+def _events_to_tool_steps(events: list[dict]) -> list[list[dict]]:
+    """将 agent 事件线中的决策链转成前端 rounds 同构结构（每轮一组工具调用）。
+
+    分轮规则与前端 useChat 一致：tool_decision 到达时若上轮 pending 已清空则开新轮，
+    一次 decision 记一轮待结；tool_result 逐条归位。tool_decision 存 args、tool_result
+    补 summary/snippets，供历史回放恢复决策链折叠卡片。
+    """
+    rounds: list[list[dict]] = []
+    cur: list[dict] = []
+    pending = 0
+    for evt in events or []:
+        t = evt.get("type")
+        if t == "tool_decision":
+            if pending == 0 and cur:
+                rounds.append(cur)
+                cur = []
+            pending += 1
+            cur.append({"tool": evt.get("tool", ""), "args": evt.get("args") or ""})
+        elif t == "tool_result":
+            pending = max(0, pending - 1)
+            cur.append({
+                "tool": evt.get("tool", ""),
+                "summary": evt.get("summary") or "",
+                "snippets": evt.get("snippets") or [],
+            })
+    if cur:
+        rounds.append(cur)
+    return rounds
 
 
 @app.get("/agent/stream")
@@ -207,7 +238,8 @@ async def stream_agent_ep(
                     deps, conversation_id,
                     user=q,
                     assistant={"content": result["answer"],
-                               "citations": result.get("citations", []), "meta": None},
+                               "citations": result.get("citations", []), "meta": None,
+                               "tool_steps": _events_to_tool_steps(result.get("events", []))},
                 )
         except asyncio.CancelledError:
             raise

@@ -30,30 +30,58 @@ function roundTitle(round: ToolStep[]): string {
 function ToolRounds({ message }: { message: ChatMessage }) {
   const rounds = message.rounds
   if (!rounds || rounds.length === 0) return null
+  const totalCalls = rounds.reduce((n, r) => n + r.filter((s) => s.summary === undefined).length, 0)
   return (
-    <div className="steps">
-      {rounds.map((round, i) => {
-        const isLast = i === rounds.length - 1
-        const live = isLast && (message.state === 'pending' || message.state === 'streaming')
-        return (
-          <details key={i} className="step-card" open={live}>
-            <summary>{roundTitle(round)}</summary>
-            <div className="step-body">
-              {round.map((s, j) => {
-                const q = stepQuery(s)
-                const label = TOOL_LABEL[s.tool] ?? s.tool
-                return (
-                  <div key={j} className="step-row">
-                    <span className="step-label">{label}</span>
-                    {q && <span className="step-args">“{q}”</span>}
-                    {s.summary && <span className="step-summary">{s.summary}</span>}
-                  </div>
-                )
-              })}
-            </div>
-          </details>
-        )
-      })}
+    <div className="chain-block">
+      <div className="chain-head">
+        <span className="chain-tag">Agent 执行过程</span>
+        <span className="chain-sub">
+          {rounds.length} 轮 / {totalCalls} 次工具调用
+        </span>
+      </div>
+      <div className="steps">
+        {rounds.map((round, i) => {
+          const isLast = i === rounds.length - 1
+          const live = isLast && (message.state === 'pending' || message.state === 'streaming')
+          return (
+            <details key={i} className="step-card" open={live}>
+              <summary>
+                <span className="step-no">第 {i + 1} 轮</span>
+                {roundTitle(round)}
+              </summary>
+              <div className="step-body">
+                {round.map((s, j) => {
+                  const isResult = s.summary !== undefined
+                  const q = stepQuery(s)
+                  const label = TOOL_LABEL[s.tool] ?? s.tool
+                  if (isResult) {
+                    return (
+                      <div key={j} className="step-row step-result">
+                        <span className="step-summary">→ {s.summary}</span>
+                        {s.snippets && s.snippets.length > 0 && (
+                          <ul className="step-snippets">
+                            {s.snippets.map((sn, k) => (
+                              <li key={k} className="step-snippet">
+                                {sn}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    )
+                  }
+                  return (
+                    <div key={j} className="step-row">
+                      <span className="step-label">{label}</span>
+                      {q && <span className="step-args">“{q}”</span>}
+                    </div>
+                  )
+                })}
+              </div>
+            </details>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -93,13 +121,13 @@ export function MessageBubble({ message, onCitationClick, activeCitation }: Mess
           <span>{message.text}</span>
         ) : (
           <>
-            <ToolRounds message={message} />
             <RenderedText
               text={message.text}
               hasCitations={!!message.citations?.length}
               onCitationClick={onCitationClick}
               activeCitation={activeCitation}
             />
+            <ToolRounds message={message} />
           </>
         )}
         {!isUser && message.state === 'streaming' && (

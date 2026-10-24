@@ -26,6 +26,31 @@
 
 ---
 
+## [v5.46.1] 2026-10-24 —— M10 P1 判别性验证结论 + 决策链体验增强（tool_steps 持久化回放）
+
+**影响模块**：`backend/app/m10_agent/agent.py`（tool_result 事件补 `snippets`）；`backend/app/m7_interact/api.py`（tool_steps 落会话 + 修复 `/agent/stream` 装饰器错挂 422 路由 bug）；`frontend/src/types.ts`、`App.css`、`components/MessageBubble.tsx`、`hooks/useChat.ts`（决策链折叠卡片 + 回放）；`backend/scripts/probe_agent_loose.py`（判别性验证）；`docs/modules/M10_agent.md`。
+
+**内容**：
+- **判别性验证（probe_agent_loose，26 劣化题）**：对同份 answer 改用宽松池重判 → **回升 16 / 持平 2 / 回落 8，平均 Δ=+0.090**（DV-TN-010 0.300→0.875、DV-SUM-008 0.680→0.930 等强回升）。回落中 2 题（DV-IO-004、DV-FS-018）为 rebuild 超时伪影（rebuild_ctx=0），其余 6 题回落 ≤−0.167。**结论坐实**：信息均在 agent 上下文，v5.46 忠实/引用劣化是纯引用标注粒度问题、非检索/生成遗漏——P1 归因完成。
+- **决策链体验增强**：tool_result event 携带命中预览 `snippets`（citations[].snippet 前 100 字）；前端新增「Agent 执行过程」折叠块（N 轮/M 次工具调用 + 每轮 `第 i 轮` 卡片，决策显示查询、结果显示 →summary + snippets 预览），置于答案下方、与引用模块分职（过程透明 vs 材料溯源）。
+- **tool_steps 历史回放**：`_events_to_tool_steps` 以 useChat 同构分轮规则把事件线折叠成 rounds，POST /agent 与 /agent/stream 均随 `append_round` 落库；前端会话明细映射 `rounds: tool_steps`，刷新重进会话决策链可恢复。
+- **修复 `/agent/stream` 422 路由 bug**：`@app.get("/agent/stream")` 装饰器误挂至辅助函数 `_events_to_tool_steps`（要求 body 参数 → GET 恒 422），真正 SSE 端点 `stream_agent_ep` 无注册 → 前端「连接已断开」。恢复装饰器归属后浏览器端到端（实时渲染 + 刷新回放）全通过。
+- **P2 候选收编（P2-cite）**：M10 §9.1 落 text_unit_id 直引方案（generate 阶段逐陈述标注真实块，替代 `[n]`+清单），A/B 方案取舍表 + 复跑验证口径，2026-10-24 用户确认收入 P2，不占 P1 验收阻塞项。
+- **验收状态**：仍为**待定**——判别性验证已收口，等用户拍板 P1 定性。
+
+## [v5.46] 2026-10-24 —— M10 P1 评测回归完成：agent 直答 vs 直连同口径 A/B（验收待定性）
+
+**影响模块**：`backend/app/m9_eval/runner.py`（`evaluate_agent` + `--mode agent`）；`app/m9_eval/metrics/citation_accuracy.py`（`ctx_by_marker` 显式映射）；`app/m9_eval/report.py`（agent 专属指标上报）；`backend/scripts/build_agent_ab.py`（A/B 表）；`backend/scripts/recompute_agent_citation.py`、`recompute_baseline_strict.py`（口径修正重判）；`backend/tests/reports/agent/`、`backend/tests/final_results/run_e2e_device_50_20261005_strict.json`；`docs/modules/M10_agent.md` §7/§8/§9/状态行。
+
+**内容**：
+- **agent 端到端评测落地**：`runner.py` 新增 `evaluate_agent`（跑 `run_agent` 收 tool_chain/answer/citations + agent 专属指标 `multi_hop_recall`/`tool_accuracy` + 复用四件套），`--mode agent` 直接 bootstrap `AppDeps`；`report.py` overall 增 `multi_hop_recall`/`tool_accuracy`。
+- **引用口径修正（关键）**：agent 的 `[n]` 是生成阶段编号非检索位次，`compute_citation_accuracy` 新增 `ctx_by_marker` 显式映射参数，`evaluate_agent` 由 citations 反查 sidecar 构建 marker→完整内容，**弃用**直连「marker n = contexts[n-1]」位次约定——修正后 citation_accuracy 0.612 → **0.7264**（逐条复核确认修正判定更正确：DV-FS-001 装箱单块真为 False、DV-TN-010 重复编号 [9] 挂两处事实）。
+- **基线同口径重判**：基线原 top5 宽池判 0.896/0.995 与 agent 窄池不对等；`recompute_baseline_strict.py` 按「citations→完整内容」重判 → **faithfulness 0.9655 / citation_accuracy 0.8960**（窄池微降，M6 引用本就准确）。
+- **A/B 结果（`agent_vs_direct_ab.md`）**：correctness **+0.038**、answer_relevance **+0.052** 不劣化且更优；faithfulness **−0.213**、citation_accuracy **−0.170** **劣化**（Δ≥−0.03 门禁未全绿）；multi_hop_recall 0.908 / tool_accuracy 0.833 为 agent 独有增益。
+- **归因**：已排除 marker 错配与宽窄池两种 artifact——劣化为真实结构性差异：agent 多轮检索答案更全面正确，但 `[n]` 一个编号只绑定一个 text_unit，跨块聚合事实（如 DV-TN-010 六行规格表）标注粒度不足 → 忠实/引用被判无依据。P2 增强候选入 §9 风险。
+- **附带修复**：agent 模式收尾 `rag` 未定义 NameError（改 `deps.dispose()`）；content 组装 `or ""` 短路 bug。
+- **验收状态**：**P1 功能全部完成；评测回归完成但验收待定**——忠实/引用劣化项记录在案，待用户拍板 P1 定性（现已收口 v5.46）。
+
 ## [v5.45.1] 2026-10-23 —— M10 引用字段补全：tool_retrieve 溯源对齐 M6 直连（修复引用来源/预览空片段）
 
 **影响模块**：`backend/app/m10_agent/agent.py`（`_retrieve_tool` 的 citations 构造）。

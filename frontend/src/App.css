@@ -529,12 +529,30 @@
   color: #fff;
 }
 
-/* M10 决策链折叠卡片 */
+/* M10 决策链折叠卡片（答案下方，agent 身份标识 + 命中预览） */
+.chain-block {
+  margin-top: 10px;
+}
+.chain-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.chain-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--primary);
+  letter-spacing: 0.3px;
+}
+.chain-sub {
+  font-size: 11px;
+  color: var(--text-mute);
+}
 .steps {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  margin-bottom: 6px;
 }
 .step-card {
   border: 1px solid var(--border-soft);
@@ -550,6 +568,9 @@
   color: var(--text-soft);
   font-weight: 500;
   list-style: none;
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
 }
 .step-card summary::-webkit-details-marker {
   display: none;
@@ -557,7 +578,7 @@
 .step-card summary::before {
   content: '▶';
   display: inline-block;
-  margin-right: 6px;
+  margin-right: 2px;
   font-size: 10px;
   color: var(--text-mute);
   transition: transform 0.12s;
@@ -567,6 +588,11 @@
 }
 .step-card[open] summary {
   border-bottom: 1px dashed var(--border-soft);
+}
+.step-no {
+  color: var(--text-mute);
+  font-weight: 600;
+  white-space: nowrap;
 }
 .step-body {
   padding: 2px 0;
@@ -578,7 +604,7 @@
   align-items: baseline;
   flex-wrap: wrap;
 }
-.step-row + .step-row {
+.step-row + .step-row:not(:last-child) {
   border-top: 1px solid var(--border-soft);
 }
 .step-label {
@@ -588,8 +614,27 @@
 .step-args {
   color: var(--text-soft);
 }
-.step-summary {
+.step-result .step-summary {
   color: var(--text-mute);
+}
+.step-snippets {
+  list-style: none;
+  margin: 3px 0 2px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+.step-snippet {
+  padding: 5px 7px;
+  border-left: 2px solid var(--border-soft);
+  background: var(--surface-muted, rgba(128, 128, 128, 0.06));
+  border-radius: 0 5px 5px 0;
+  color: var(--text-soft);
+  font-size: 11.5px;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .cursor {

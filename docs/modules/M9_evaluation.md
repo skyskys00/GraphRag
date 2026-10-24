@@ -1,14 +1,14 @@
 # M9 模块规划：评测层
 
-> **版本：** v1.14
-> **状态：** 可用（retrieval 模式 + gold_rank 诊断 + 双窗口 + nDCG + **e2e 生成四指标** + **行政库完整版 30 题检索基线 / NL 摘要激活复测 / 30 题全量 e2e / 裁判一致性抽检 10/10** + **可選 reranker=llm（LLM listwise 终审）** + **gold_rank 词汇匹配器强化（v5.23）** + **裁判 hit 字段修复（v5.29：context_recall 假阳性修正 + comparison per-doc 检索）** + **评测窗口收敛 @5（v5.31）** + **三库评测横向汇总表 + 客服 50 题 / 行政 30 题 retrieval 当前口径重跑（v5.37）**）；Phase 3 待执行
-> **更新：** 2026-10-06
+> **版本：** v1.15
+> **状态：** 可用（retrieval 模式 + gold_rank 诊断 + 双窗口 + nDCG + **e2e 生成四指标** + **行政库完整版 30 题检索基线 / NL 摘要激活复测 / 30 题全量 e2e / 裁判一致性抽检 10/10** + **可选 reranker=llm（LLM listwise 终审）** + **gold_rank 词汇匹配器强化（v5.23）** + **裁判 hit 字段修复（v5.29：context_recall 假阳性修正 + comparison per-doc 检索）** + **评测窗口收敛 @5（v5.31）** + **三库评测横向汇总表 + 客服 50 题 / 行政 30 题 retrieval 当前口径重跑（v5.37）** + **M10 agent 端到端评测（v5.46：`--mode agent` + multi_hop_recall/tool_accuracy + 引用口径修正）**）；Phase 3 待执行
+> **更新：** 2026-10-24
 > **定位：** 中文 RAG 系统量化评测——测试集 + 指标 + ablation + 回归
 > **契约：** 测试集（question + contexts + ground_truth）→ 评测报告（各指标分数 + 对比基线）
 > **上游：** [M5 检索层](M5_retrieve.md) / [M6 生成层](M6_generate.md) / [M7 交互层](M7_interact.md) | **下游：** 回归门禁 / 评测量化数据 / README 展示
 > **依据：** [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.7 ｜ [`FRAMEWORK_NOTES.md`](../FRAMEWORK_NOTES.md) §3 ｜ [`M9_testset.md`](M9_testset.md)（测试语料与测试集设计规范）
 > **运行：** `cd backend && python -m app.m9_eval.runner --testset testsets/default.json --report reports/run_xxx.json`；重排终审：`--reranker llm`
-> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md) v5.6（Phase 1 落地）/ v5.7（裁判稳定性 + 测试集 GT 修正 + 表格双表示后新基线）/ v5.14（Phase 2 生成四指标 + 50 题全量）/ v5.15（裁判 prompt 校准：correctness 语义对齐 + judge 明细字段透传）/ v5.21（--reranker llm 可选终审）/ v5.29（裁判 hit 字段修复 + comparison per-doc 检索）
+> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md) v5.6（Phase 1 落地）/ v5.7（裁判稳定性 + 测试集 GT 修正 + 表格双表示后新基线）/ v5.14（Phase 2 生成四指标 + 50 题全量）/ v5.15（裁判 prompt 校准：correctness 语义对齐 + judge 明细字段透传）/ v5.21（--reranker llm 可选终审）/ v5.29（裁判 hit 字段修复 + comparison per-doc 检索）/ v5.46（M10 agent 端到端评测：`--mode agent` + multi_hop_recall/tool_accuracy + citation `ctx_by_marker` 口径修正）
 
 ---
 

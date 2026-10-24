@@ -595,6 +595,213 @@ async def evaluate_answer(
     return results
 
 
+async def evaluate_agent(
+    testset: dict[str, Any],
+    deps: Any,
+    *,
+    max_rounds: int = 5,
+) -> list[dict[str, Any]]:
+    """M10 agent 端到端评测：逐题跑 run_agent + agent 专属指标。
+
+    每题收集：answer / citations / tool_chain（工具决策序列）。
+    contexts = 最终引用对应 text_unit 的完整内容（sidecar 反查）——即
+    「多步检索后实际进入生成上下文的资料」，用于：
+      - multi_hop_recall（= context_recall 用 agent 上下文算）
+      - faithfulness / citation_accuracy（答案相对 agent 实际引用资料判忠实/引用支撑）
+    生成四件套 + tool_accuracy（裁判判工具链合理性）同出。
+    """
+    from app.m5_retrieve import retriever as ret_mod
+    from app.m10_agent.agent import run_agent
+    from .metrics.correctness import compute_correctness
+    from .metrics.faithfulness import compute_faithfulness
+    from .metrics.answer_relevance import compute_answer_relevance
+    from .metrics.citation_accuracy import compute_citation_accuracy
+    from .metrics.context_recall import compute_context_recall
+    from .metrics.tool_accuracy import compute_tool_accuracy
+
+    questions = testset["questions"]
+    total = len(questions)
+    results: list[dict[str, Any]] = []
+
+    for i, q in enumerate(questions):
+        qid = q["id"]
+        question_text = q["question"]
+        print(f"[{i+1}/{total}] {qid} - {q['category']} - {question_text[:50]}...", flush=True)
+
+        t0 = time.time()
+        tool_chain: list[dict[str, Any]] = []
+        answered: dict[str, Any] = {}
+
+        async def on_event(evt: dict) -> None:
+            if evt.get("type") == "tool_decision":
+                tool_chain.append({"tool": evt.get("tool"), "args": evt.get("args")})
+            if evt.get("type") == "__result__":
+                answered.update(evt.get("result") or {})
+
+        try:
+            # agent 内部无 stream 时该回调收不到 __result__，直接用返回值
+            res_raw = await run_agent(deps, question_text, max_rounds=max_rounds, on_event=on_event)
+            if not answered:
+                answered = res_raw
+        except Exception as e:
+            print(f"  ⚠️  agent 失败: {e}", flush=True)
+            answered = {}
+
+        answer_text = answered.get("answer", "")
+        citations = answered.get("citations", [])
+        answer_time = round(time.time() - t0, 2)
+
+        # contexts：最终引用 → sidecar 反查完整内容（无序窗口，rank 仅是序号）
+        # marker_ctx：citation marker → 完整内容 的显式映射（agent 的 [n] 是生成阶段编号，
+        # 不是检索位次，citation_accuracy 须按 marker 精确对齐而非 contexts 顺序）
+        contexts: list[dict[str, Any]] = []
+        marker_ctx: dict[int, str] = {}
+        seen: set[tuple[str, str]] = set()
+        for c in citations:
+            if not isinstance(c, dict):
+                continue
+            tid = c.get("text_unit_id") or c.get("chunk_id")
+            doc_id = c.get("full_doc_id") or c.get("doc_id") or "?"
+            key = (doc_id, str(tid))
+            if not tid or key in seen:
+                continue
+            seen.add(key)
+            meta = deps.sidecar.by_text_unit(tid) if getattr(deps, "sidecar", None) else None
+            content = (meta.content if meta else c.get("content") or c.get("snippet") or "")
+            contexts.append({
+                "chunk_id": str(tid),
+                "content": content,
+                "full_doc_id": doc_id,
+                "rank": len(contexts) + 1,
+                "score": c.get("score", 0.0),
+            })
+            marker = c.get("marker")
+            if isinstance(marker, int) and marker > 0 and content:
+                marker_ctx[marker] = content
+
+        metrics: dict[str, Any] = {}
+
+        # multi_hop_recall：多步检索后目标 key_facts 是否进入最终上下文
+        if q["category"] != "unanswerable" and q.get("key_facts"):
+            try:
+                mhr = await compute_context_recall(
+                    deps.query_func, question_text, q["key_facts"], contexts,
+                )
+                metrics["multi_hop_recall"] = mhr["score"]
+                metrics["multi_hop_recall_detail"] = {
+                    "total_facts": mhr["total_facts"],
+                    "hit_facts": mhr["hit_facts"],
+                    "failed_facts": mhr.get("failed_facts", 0),
+                    "per_fact": mhr["per_fact"],
+                    "reason": mhr["reason"],
+                    "contexts": len(contexts),
+                }
+            except Exception as e:
+                print(f"  ⚠️  multi_hop_recall 计算失败: {e}", flush=True)
+                metrics["multi_hop_recall"] = None
+        else:
+            metrics["multi_hop_recall"] = None
+
+        # 生成质量指标（复用 M6 e2e 全套，contexts 用 agent 实际引用）
+        try:
+            fai = await compute_faithfulness(
+                deps.query_func, question_text, answer_text, contexts,
+            )
+            metrics["faithfulness"] = fai["score"]
+            metrics["faithfulness_detail"] = {
+                "total_statements": fai.get("total_statements", 0),
+                "supported_statements": fai.get("supported_statements", 0),
+                "unsupported": fai.get("unsupported", []),
+                "reason": fai["reason"],
+            }
+        except Exception as e:
+            print(f"  ⚠️  faithfulness 计算失败: {e}", flush=True)
+            metrics["faithfulness"] = None
+
+        try:
+            ar = await compute_answer_relevance(deps.query_func, question_text, answer_text)
+            metrics["answer_relevance"] = ar["score"]
+            metrics["answer_relevance_detail"] = {"reason": ar["reason"]}
+        except Exception as e:
+            print(f"  ⚠️  answer_relevance 计算失败: {e}", flush=True)
+            metrics["answer_relevance"] = None
+
+        try:
+            crr = await compute_correctness(
+                deps.query_func, question_text,
+                q.get("ground_truth", ""), answer_text,
+            )
+            metrics["correctness"] = crr["score"]
+            metrics["correctness_detail"] = {
+                "total_facts": crr.get("total_facts", 0),
+                "correct_facts": crr.get("correct_facts", 0),
+                "incorrect": crr.get("incorrect", []),
+                "reason": crr["reason"],
+            }
+        except Exception as e:
+            print(f"  ⚠️  correctness 计算失败: {e}", flush=True)
+            metrics["correctness"] = None
+
+        try:
+            ca = await compute_citation_accuracy(
+                deps.query_func, question_text, answer_text, contexts, citations,
+                ctx_by_marker=marker_ctx,
+            )
+            metrics["citation_accuracy"] = ca["score"]
+            metrics["citation_accuracy_detail"] = {
+                "total_cites": ca.get("total_cites", 0),
+                "supported_cites": ca.get("supported_cites", 0),
+                "details": ca.get("details", []),
+                "reason": ca["reason"],
+            }
+        except Exception as e:
+            print(f"  ⚠️  citation_accuracy 计算失败: {e}", flush=True)
+            metrics["citation_accuracy"] = None
+
+        # tool_accuracy：裁判判工具链合理性
+        try:
+            ta = await compute_tool_accuracy(deps.query_func, question_text, tool_chain)
+            metrics["tool_accuracy"] = ta["score"]
+            metrics["tool_accuracy_detail"] = {"reason": ta.get("reason", ""), "chain": tool_chain}
+        except Exception as e:
+            print(f"  ⚠️  tool_accuracy 计算失败: {e}", flush=True)
+            metrics["tool_accuracy"] = None
+
+        total_time = round(time.time() - t0, 2)
+
+        result = {
+            "id": qid,
+            "category": q["category"],
+            "difficulty": q["difficulty"],
+            "question": question_text,
+            "ground_truth": q.get("ground_truth", ""),
+            "key_facts": q.get("key_facts", []),
+            "answer": answer_text,
+            "citations": citations,
+            "tool_chain": tool_chain,
+            "contexts_count": len(contexts),
+            "retrieval": {
+                "num_results": len(contexts),
+                "top_docs": [c.get("full_doc_id", "?") for c in contexts[:5]],
+            },
+            "metrics": metrics,
+            "time_s": total_time,
+            "answer_time_s": answer_time,
+        }
+
+        mhr = metrics.get("multi_hop_recall")
+        crr = metrics.get("correctness")
+        ta = metrics.get("tool_accuracy")
+        print(f"  multi_hop_recall={mhr:.2f}" if mhr is not None else "  mhr=N/A",
+              f"correctness={crr:.2f}" if crr is not None else "correctness=N/A",
+              f"tool_acc={ta:.2f}" if ta is not None else "tool_acc=N/A",
+              f"({total_time}s, tools={len(tool_chain)})", flush=True)
+
+        results.append(result)
+
+    return results
+
+
 async def main_async(args: argparse.Namespace) -> None:
     _load_dotenv()
 
@@ -623,27 +830,37 @@ async def main_async(args: argparse.Namespace) -> None:
     print(f"数据目录: {working_dir}")
     print()
 
-    # 构建依赖
-    print("初始化 RAG / 稀疏索引 / 实体 / 裁判 LLM...", flush=True)
-    rag, sparse, query_func, entities = await _build_deps(working_dir, workspace)
-    print(f"  稀疏索引 chunks: {len(sparse.get('chunks', {}))}"
-          f"｜实体 {len(entities) if entities else 0}", flush=True)
-    doc_name_map = _load_doc_name_map(working_dir)
-    print(f"  文档名映射: {len(doc_name_map)} 份（comparison 题 per-doc 检索用）", flush=True)
-    print("  初始化完成\n", flush=True)
-
-    # 执行评测
+    # M10 agent 评测：直接复用 bootstrap 的 AppDeps（rag/sparse/entities/sidecar/query_func），
+    # 跳过独立 build_deps（避免双份构建）
     t_start = time.time()
-    if args.mode in ("answer", "e2e"):
-        results = await evaluate_answer(testset, rag, sparse, query_func,
-                                        entities=entities, doc_name_map=doc_name_map)
+    if args.mode == "agent":
+        from app.m7_interact.bootstrap import get_deps
+        print("初始化 Agent 评测依赖（bootstrap get_deps）...", flush=True)
+        deps = await get_deps(collection)
+        print(f"  collection={collection} 就绪（sidecar"
+              f"{len(deps.sidecar.items) if getattr(deps, 'sidecar', None) else 0} 条）", flush=True)
+        print("  初始化完成\n", flush=True)
+        results = await evaluate_agent(testset, deps)
     else:
-        ablation_routes = args.ablation_routes.split(",") if args.ablation_routes else None
-        results = await evaluate_retrieval(testset, rag, sparse, query_func,
-                                           entities=entities,
-                                           doc_name_map=doc_name_map,
-                                           reranker=args.reranker,
-                                           ablation_routes=ablation_routes)
+        # 构建依赖
+        print("初始化 RAG / 稀疏索引 / 实体 / 裁判 LLM...", flush=True)
+        rag, sparse, query_func, entities = await _build_deps(working_dir, workspace)
+        print(f"  稀疏索引 chunks: {len(sparse.get('chunks', {}))}"
+              f"｜实体 {len(entities) if entities else 0}", flush=True)
+        doc_name_map = _load_doc_name_map(working_dir)
+        print(f"  文档名映射: {len(doc_name_map)} 份（comparison 题 per-doc 检索用）", flush=True)
+        print("  初始化完成\n", flush=True)
+
+        if args.mode in ("answer", "e2e"):
+            results = await evaluate_answer(testset, rag, sparse, query_func,
+                                            entities=entities, doc_name_map=doc_name_map)
+        else:
+            ablation_routes = args.ablation_routes.split(",") if args.ablation_routes else None
+            results = await evaluate_retrieval(testset, rag, sparse, query_func,
+                                               entities=entities,
+                                               doc_name_map=doc_name_map,
+                                               reranker=args.reranker,
+                                               ablation_routes=ablation_routes)
     total_time = round(time.time() - t_start, 1)
 
     # 汇总报告
@@ -669,15 +886,19 @@ async def main_async(args: argparse.Namespace) -> None:
     print(f"报告已保存：{report_path}")
     print("=" * 60)
 
-    await rag.finalize_storages()
+    if args.mode == "agent":
+        await deps.dispose()
+    else:
+        await rag.finalize_storages()
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="M9 RAG 评测 runner")
     parser.add_argument("--testset", required=True, help="测试集 JSON 路径")
     parser.add_argument("--mode", default="retrieval",
-                        choices=["retrieval", "e2e"],
-                        help="评测模式：retrieval=仅检索指标（Phase 1）；e2e=端到端（Phase 2）")
+                        choices=["retrieval", "e2e", "agent"],
+                        help="评测模式：retrieval=仅检索指标（Phase 1）；e2e=端到端（Phase 2）；"
+                             "agent=M10 agent 端到端（工具链 + 生成 + 对比指标）")
     parser.add_argument("--collection", default=None,
                         help="评测的 collection（缺省从测试集元数据读）")
     parser.add_argument("--workspace", default=None,

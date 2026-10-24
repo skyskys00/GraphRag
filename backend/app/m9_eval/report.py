@@ -66,6 +66,9 @@ def build_report(
         "answer_relevance": _avg(results, "answer_relevance"),
         "correctness": _avg(results, "correctness"),
         "citation_accuracy": _avg(results, "citation_accuracy"),
+        # M10 agent 专属（agent 模式才有值，其余模式为 0）
+        "multi_hop_recall": _avg(results, "multi_hop_recall"),
+        "tool_accuracy": _avg(results, "tool_accuracy"),
     }
 
     # LLM 裁判失败统计（失败项已从均分排除，单列供追溯）
@@ -177,6 +180,12 @@ def to_markdown(report: dict[str, Any]) -> str:
                 lines.append(f"| {labels[k]} | {v:.4f} |")
             else:
                 lines.append(f"| {labels[k]} | — |")
+        for extra, label in (
+            ("multi_hop_recall", "Multi-hop Recall（agent 上下文召回）"),
+            ("tool_accuracy", "Tool Accuracy（工具链合理性）"),
+        ):
+            if overall.get(extra) is not None:
+                lines.append(f"| {label} | {overall[extra]:.4f} |")
     lines.append("")
     lines.append("## Gold Rank（事实最早出现的排名）")
     lines.append("")

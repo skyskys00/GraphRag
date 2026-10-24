@@ -99,6 +99,8 @@ async def compute_citation_accuracy(
     answer: str,
     contexts: list[dict],
     citations: list[dict] | None = None,
+    *,
+    ctx_by_marker: dict[int, str] | None = None,
 ) -> dict[str, Any]:
     """计算 citation accuracy。
 
@@ -106,6 +108,9 @@ async def compute_citation_accuracy(
         contexts: 检索结果列表（含完整 content），按 M6 assemble 约定 marker n = results[n-1]。
         citations: M6 返回的 citations 列表（含 marker / snippet 等），
                    用于补足 contexts 窗口外的引用上下文。
+        ctx_by_marker: 显式 marker → 上下文内容 映射。M10 agent 评测传此参数——
+                   agent 的 [n] 是生成阶段清单编号（非检索位次），须按 marker 精确对齐；
+                   不传时沿用 M6 约定（marker n = contexts[n-1]）。
     返回: {score, total_cites, supported_cites, details, reason}
     """
     if not answer or not answer.strip():
@@ -127,27 +132,30 @@ async def compute_citation_accuracy(
             "reason": "答案中未找到显式引用标记",
         }
 
-    # 构造 marker -> 上下文映射：优先用完整 blocks（marker n = results[n-1]，M6 assemble 约定），
-    # 缺失（如引用落在评估窗口外）才回退 citations 的 snippet。
-    ctx_by_marker: dict[int, str] = {}
-    if contexts:
-        for i, ctx in enumerate(contexts, 1):
-            ctx_by_marker[i] = ctx.get("content", "") or ctx.get("snippet", "")
-    if citations:
-        for c in citations:
-            marker = c.get("marker")
-            if marker is None:
-                continue
-            num = int(marker)
-            if num not in ctx_by_marker:
-                ctx_by_marker[num] = c.get("snippet", "") or c.get("content", "")
+    # marker -> 上下文映射：优先显式 ctx_by_marker（M10 agent 按 marker 精确对齐），
+    # 无显式映射时沿用 M6 约定（marker n = results[n-1]），缺失（越界）再回退 citations 的 snippet。
+    marker_ctx: dict[int, str] = {}
+    if ctx_by_marker is None:
+        if contexts:
+            for i, ctx in enumerate(contexts, 1):
+                marker_ctx[i] = ctx.get("content", "") or ctx.get("snippet", "")
+        if citations:
+            for c in citations:
+                marker = c.get("marker")
+                if marker is None:
+                    continue
+                num = int(marker)
+                if num not in marker_ctx:
+                    marker_ctx[num] = c.get("snippet", "") or c.get("content", "")
+    else:
+        marker_ctx = {int(k): v for k, v in ctx_by_marker.items()}
 
     details: list[dict[str, Any]] = []
     supported = 0
     for item in cited:
         num = item["cite_num"]
         stmt = item["statement"]
-        ctx = ctx_by_marker.get(num, "")
+        ctx = marker_ctx.get(num, "")
         if not ctx:
             details.append({
                 "cite_num": num,
