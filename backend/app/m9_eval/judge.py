@@ -79,7 +79,8 @@ def _cache_read(key: str, metric: str) -> dict | None:
     return None
 
 
-_EXTRA_FIELDS = ("total_facts", "correct_facts", "incorrect", "hit")
+_EXTRA_FIELDS = ("total_facts", "correct_facts", "incorrect", "hit",
+                 "total_statements", "fact_total", "supported_statements", "unsupported")
 
 
 def _cache_write(key: str, metric: str, result: dict[str, Any]) -> None:
