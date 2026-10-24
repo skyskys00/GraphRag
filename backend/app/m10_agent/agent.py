@@ -34,6 +34,9 @@ SYSTEM_PROMPT = (
     "你是中文知识库助手。基于工具返回的结果回答问题；答案需带引用来源，"
     "回答时用 [n] 标注（n 为最末一条消息中给出的资料编号）。工具结果不足时如实说明，不要编造。"
     "不要复述工具原始输出的非答案内容。"
+    "【答案分箱】主体部分只撰写资料中有明确依据的事实内容（每句都能 [n] 对应到资料）；"
+    "任何操作建议、安全提醒、经验性结论、超出资料范围的补充说明，必须放在答案末尾的"
+    " <advice> 与 </advice> 之间（单独成一段）；没有建议就不要输出 <advice> 段，主体不残留任何 <advice> 标签。"
 )
 MAX_ROUNDS = 5  # 最大决策轮 N（M10 §2.2 硬约束）
 
@@ -344,14 +347,24 @@ async def generate(state: AgentState) -> dict[str, Any]:
         await _emit(state, "delta", text=delta)
     events.append({"type": "delta", "text": text})
 
-    final = _resolve_citations(text, index) or state["citations"]
+    # 答案分箱（v5.48）：<advice>…</advice> 区为建议/补充，剥离开；主体不留标签。
+    # [n] 引用只对主体还原；无 <advice> 段时整段当主体（容错降级为旧形态）。
+    advice = ""
+    m = re.search(r"<advice>(.*?)</advice>", text, flags=re.S)
+    if m:
+        advice = m.group(1).strip()
+        main = re.sub(r"<advice>.*?</advice>", "", text, flags=re.S).strip()
+    else:
+        main = text.strip()
+
+    final = _resolve_citations(main, index) or state["citations"]
     events += [
         {"type": "citations", "citations": final},
-        {"type": "done", "text": text, "citations": final},
+        {"type": "done", "text": main, "advice": advice, "citations": final},
     ]
     await _emit(state, "citations", citations=final)
-    await _emit(state, "done", text=text, citations=final)
-    return {"answer_text": text, "events": events, "citations": final}
+    await _emit(state, "done", text=main, advice=advice, citations=final)
+    return {"answer_text": main, "advice": advice, "events": events, "citations": final}
 
 
 def build_graph() -> StateGraph:
@@ -405,6 +418,7 @@ async def run_agent(
     })
     return {
         "answer": res.get("answer_text", ""),
+        "advice": res.get("advice", ""),
         "events": res.get("events", []),
         "citations": res.get("citations", []),
     }

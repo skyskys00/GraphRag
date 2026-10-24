@@ -26,6 +26,18 @@
 
 ---
 
+## [v5.48] 2026-10-25 —— M10 答案分箱（`<advice>` 建议区隔离）+ 忠实度复盘为朴素单层（呼应 v5.47 §预告）
+
+**影响模块**：`backend/app/m10_agent/agent.py`（SYSTEM_PROMPT 分箱指令 + `generate` 拆分 `<advice>` 段 + `run_agent` 返回 `advice`）；`backend/app/m9_eval/metrics/faithfulness.py`（朴素单层重写 + 来源引导语判据 + 数值词面核验）；`backend/scripts/probe_agent_box.py`、`probe_agent_box.py` 产出 `tests/reports/agent/box_probe_v548.json`；`docs/modules/M10_agent.md` 状态行与 §9.3。
+
+**内容**：
+- **答案分箱（用户 2026-10-23 设想落地）**：`generate` 节点把操作建议 / 安全提醒 / 经验性结论 / 超资料补充物理拆进答案末尾 `<advice>…</advice>` 段，主体只留「每句可 [n] 对到资料」的事实；无建议不输出段、主体不残留标签；`[n]` 只对主体还原，`advice` 进响应与 `done` 事件。好处：换 agent 大脑回答准确性不受建议区影响、评测只审主体。
+- **评测口径复盘（用户拍板「朴素 + 数值核验」）**：删 v5.47 kind 三分类 / meta 指纹 / enhance 兜底，回「每陈述有依据即罚」单层；保留唯一代码侧兜底**数值词面核验**（被判无依据陈述的数值 token 在上下文逐字命中 → 救回 LLM 看漏）。再叠一层提示词判据：以「根据…说明书/资料/示意图标注」开头的**来源引导语**只声明出处、不单独计为无依据（其后续内容仍独立判断）。
+- **型号词面核验探底（无效三连，2026-10-24 回滚）**：与数值核验同构加 `_model_supported`（字母数字复合型号 token 逐字命中即救）。8 落题验证发现仅能救「型号出现在被引 text_unit content 内」的句子；`LSP-1C` / `IDEM1000-0N` 这类型号只在文档标题/文件名、不在 content → 逐字命中救不回；且 probe 逐题重新生成引入答案结构随机，净收益被噪声吞没，判定无效整段回滚，不留半截。
+- **50 题全量重生成 + 新基线**（`run_agent_device_50_v548.json`，2026-10-25 01:43，总耗时 3466.8s，judge 零失败）：vs v5.46 旧 agent 报告——faithfulness 0.7528→**0.7840**、citation_accuracy 0.7264→**0.8652**、correctness 0.9115→**0.9283**、answer_relevance 0.9830→0.9770、multi_hop_recall 0.9080→**0.9247**、tool_accuracy 0.8330→**0.8580**（六项五升一微降）。
+- **A/B vs 直连 strict 基线**（`agent_vs_direct_ab.md`，门禁 Δ ≥ −0.03）：correctness **+0.055**、answer_relevance **+0.046** 不劣化且更优；faithfulness **−0.18**、citation_accuracy **−0.031** 仍红——但较 v5.46（−0.213 / −0.170）大幅收敛，引用已贴近门禁并落在单次 judge 噪声带（±0.03）内；faithfulness 残留归因不变：信息均在 agent 上下文（multi-hop 0.925，v5.46.1 判别性验证已坐实），loss 在「[n] 一编号绑一块」的**引用标注粒度**，属 **P2-cite（M10 §9.1 候选）**，非本版引入。
+- **验收状态**：v5.48 收口。已接受现实记录在案：单次 judge 判定方差 ±0.3（v5.47 §记录），结论一律下粗粒度定性；faithfulness 缺口 = 标注粒度 + 主体残留出处/概括句的朴素浅罚，属已知项、留 P2。
+
 ## [v5.47] 2026-10-24 —— M10 P1 验收收口 + 忠实度双轨裁判（只罚 fact + meta 单报 + 数值断言强制 fact）
 
 **影响模块**：`backend/app/m9_eval/judge.py`（`_EXTRA_FIELDS` 补 `fact_total`/`unsupported` 透传）；`backend/app/m9_eval/metrics/faithfulness.py`（三分类双轨计分 + meta 指纹 + 数值词面核验）；`backend/scripts/probe_faith_bare.py`、`rejudge_agent_faith_le.py`、`rejudge_all_50.py`、`diagnose_probe_drops.py`、`loose_reason_dump.py`（8 落题定位/重判探底脚本）；`docs/modules/M10_agent.md` 状态行与 §9.2。
