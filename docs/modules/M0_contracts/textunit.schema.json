@@ -64,6 +64,10 @@
       "type": "string",
       "description": "图片块的原图相对路径 `<doc_dir>/images/<sha>.jpg`（来自 M1 blocks.jsonl 的 `img_path`，见 parse.md §3）。仅 `block_type=drawing` 的图片独立块存在；content 为该图的视觉描述文本。"
     },
+    "html": {
+      "type": "string",
+      "description": "表格块重建的 `<table>` HTML（v1.2 表格双表示）：content 为 Markdown 供索引/生成，html 供前端表格预览。由 M2 `_build_textunit`/`_build_split_unit` 产出（v1.2 起，2026-10-24 字段核对补入）。"
+    },
     "sidecar": {
       "type": "object",
       "description": "块级溯源引用（P 策略 / 多模态自带）。",

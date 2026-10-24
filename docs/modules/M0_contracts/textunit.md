@@ -25,26 +25,28 @@ Document = 文档级记录：`doc_id / file_path / content_hash / parse_engine /
 
 图例：✅ = LightRAG 现成对齐 ｜ ⚠️ = 半成品/需聚合 ｜ 🆕 = 我们新增 ｜ 取值 ≈ 解析器已给、M1 接一下
 
-| 字段 | 类型 | 必填 | 来源/对齐 | 取值现在是否明确 |
-|---|---|---|---|---|
-| `text_unit_id` | string | ✅ | LightRAG chunk_key | ✅ |
-| `content` | string | ✅ | LightRAG content | ✅ |
-| `tokens` | int | ✅ | LightRAG tokens | ✅ |
-| `full_doc_id` | string | ✅ | LightRAG full_doc_id | ✅ |
-| `chunk_order_index` | int | ✅ | LightRAG | ✅ |
-| `file_path` | string | ✅ | LightRAG | ✅ |
-| `heading` | object? | — | LightRAG，P 策略 | ✅ |
-| `title_path` | string? | — | 🆕（heading 合成） | ✅ 规则定 |
-| `page_range` | [int,int]? | — | 🆕 | ✅ 见 §4.1 |
-| `anchor` | string? | — | 🆕 | ⚠️ docx 需自研补丁（§4.2） |
-| `block_type` | enum? | — | 🆕 | ✅ 见 §4.3 |
-| `image_path` | string? | — | 🆕 | ✅ 见 §4.4 |
-| `sidecar` | object? | — | LightRAG，P/多模态 | ✅ |
-| `embedding` | float[]? | — | LightRAG | ✅ |
-| `entity_refs` | string[]? | — | ⚠️ 派生视图 | ✅ 反查规则定 |
-| `llm_cache_list` | string[]? | — | LightRAG | ✅ |
+| 字段 | 含义（这字段是什么/谁消费它） | 类型 | 必填 | 来源/对齐 | 取值现在是否明确 |
+|---|---|---|---|---|---|
+| `text_unit_id` | 块唯一标识 `<doc_id>-chunk-<序号>`；全系统「块主键」——M6 引用 `[n]`、M5 检索返回、sidecar 溯源都以此对齐 | string | ✅ | LightRAG chunk_key | ✅ |
+| `content` | 块正文（解析后渲染文本）；M3 bge-m3 编码与生成上下文组装的原料 | string | ✅ | LightRAG content | ✅ |
+| `tokens` | 文本量粗估（中文 1 字≈1 token，M3 索引重计）；生成层上下文预算控制 | int | ✅ | LightRAG tokens | ✅ |
+| `full_doc_id` | 所属文档 ID（上游 `Document.doc_id`）；跨文档检索、按文档过滤、引用分组 | string | ✅ | LightRAG full_doc_id | ✅ |
+| `chunk_order_index` | 文档内块序号；引用排序与顺序稳定性依赖它 | int | ✅ | LightRAG | ✅ |
+| `file_path` | 源文件相对路径；前端「点击引用定位原文」的文件层 | string | ✅ | LightRAG | ✅ |
+| `heading` | 标题三级结构 `{level, heading, parent_headings}`；文档结构化与引用上下文展示 | object? | — | LightRAG，P 策略 | ✅ |
+| `title_path` | 规范化标题路径 `章 / 节`（heading 合成）；引用层级展示 | string? | — | 🆕（heading 合成） | ✅ 规则定 |
+| `page_range` | 本块覆盖页码区间 `[start,end]`；前端定位「页」（docx=null） | [int,int]? | — | 🆕 | ✅ 见 §4.1 |
+| `anchor` | 原文定位锚 `page:bbox`；点击引用定位到原文具体位置（docx 无 paraId → null，降级为「文件+文本片段」） | string? | — | 🆕 | ⚠️ docx 需自研补丁（§4.2） |
+| `block_type` | 聚合块类型 `table/drawing/paragraph/...`；路由表格/图片预览、检索数字/表格特征 | enum? | — | 🆕 | ✅ 见 §4.3 |
+| `image_path` | 图片独立块的原图相对路径；前端图片预览（仅 `block_type=drawing` 存在） | string? | — | 🆕 | ✅ 见 §4.4 |
+| `html` | 表格块重建的 `<table>` HTML（v1.2 表格双表示）；前端表格预览，content 仍为 Markdown 供索引/生成 | string? | — | 🆕（M2 自产，v1.2） | ✅ |
+| `embedding` | dense 向量（bge-m3）；M3 索引时编码回填 | float[]? | — | LightRAG | ✅ |
+| `entity_refs` | 关联实体 ID 列表（派生视图）；M3 建图时由 entity_chunks 反查回填，不冗余写回 | string[]? | — | ⚠️ 派生视图 | ✅ 反查规则定 |
+| `llm_cache_list` | LLM 缓存键列表；LightRAG 实体抽取缓存控制 | string[]? | — | LightRAG | ✅ |
 
-必填六项 = LightRAG `TextChunkSchema` 核心字段 + `text_unit_id`/`file_path`。**核心链路（建图/检索/生成）只用必填 + heading 就够**；结构化展示与引用溯源依赖 `title_path / page_range / anchor / block_type / entity_refs`。
+必填六项 = LightRAG `TextChunkSchema` 核心字段 + `text_unit_id`/`file_path`。**核心链路（建图/检索/生成）只用必填 + heading 就够**；结构化展示与引用溯源依赖 `title_path / page_range / anchor / block_type / html / image_path`；`entity_refs/embedding/llm_cache_list` 为 M3 回填预留。
+
+> **⚠️ `sidecar` 不进字段表——同名但不是字段**：TextUnit 的 M2 产物里没有 `sidecar` 这个键（schema 中同名声明只是放行 LightRAG 上游可选属性，`additionalProperties: true` 而已，M2 不产出、PG `lightrag_doc_chunks.sidecar` 列为空）。真正的 `Sidecar` 是 **M6 自研的溯源服务**（`app/m6_generate/sidecar.py`，v5.25 落地 / v5.28.1 键修正）：从 `data/chunks/*.jsonl` 构建 `chunk_id → {file_path, title_path, page_range, anchor, block_type, image_path}` 索引，供 M6 引用标注与 M7 前端「点击引用定位原文」消费（见 `M6_generate.md` §4.2）。两者仅是术语重名，功能归属在 M6，与 TextUnit 字段无关。
 
 ## 4. 取值机制（v2 补全，基于 MinerU/Docling 拆解）
 
@@ -108,3 +110,4 @@ MinerU content_list[].img_path  →  M1 blocks.jsonl `img_path`（parse.md §3�
 - **2026-09-12 · v1**：初稿；字段结构基于 LightRAG v1.5.7 拆解；结构化补点标注"待拆"。
 - **2026-09-12 · v2**：MinerU/Docling 拆解完成 → 补全取值机制（§4）；`page_range`（PDF 经 content_list/`prov.page_no`）、`block_type`（text_level/label 映射）、`anchor`（docx 无 paraId → 自研补丁点）。schema `$id`→`/textunit/v2`。
 - **2026-09-29 · v2.1（增量，多模态）**：新增 `image_path`（§4.4）——图片独立块的原图相对路径，来源 M1 blocks.jsonl `img_path`。纯增量、不改既有字段语义；schema `$id` 不变（`additionalProperties: true` 本就放行，此次显式声明）。见 [`MULTIMODAL.md`](../MULTIMODAL.md)。
+- **2026-10-24 · v2.1 字段核对修正**：字段表补 `html`（表格双表示预览字段，代码 v1.2 起产出、契约漏列，schema 同步补声明）；表与 schema 补充字段含义列；`sidecar` **移出字段表**（非 M2 产出字段），表后注明「同名不同物」——schema 放行声明（LightRAG 上游可选属性）vs **M6 自研 `Sidecar` 溯源服务**（v5.25/v5.28.1）。不改既有字段语义、`$id` 不变。

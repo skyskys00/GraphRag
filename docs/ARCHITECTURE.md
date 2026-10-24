@@ -9,6 +9,7 @@
 > - **补充**：版本锁定总表（§3.1）、query 预处理（§2.6）、目录与产物规范（§6-阶段0）、图片索引策略（§6-阶段1）、评测基线贯穿（§6）、模型下载镜像（§6-阶段0）。
 > - **§6 分阶段实施路线已完整撰写**（按模块顺序、逐阶段给验收）。
 > - **2026-09-16 瘦身**：§8 实测附录并入 `docs/CHANGELOG.md`（时序内容移出蓝图，本节留指引）；§2 压缩引擎/选型过程细节，保留选型结论与「内建 vs 自研」边界。
+> - **2026-10-24 补正（对齐生产代码）**：§2.4「内建 vs 自研」边界与 §2.6 外层增强清单补「五特征融合排序（`fuse_and_rank`，v5.9 正式）」，rerank 表述修正为全候选打分、不截断、名次交由特征融合决定——此前两处均只写到 rerank 精排，遗漏 M5 检索链路末段，属历史欠账随 v5.40+ 文档核对清点（实现细节见 `docs/modules/RETRIEVAL_OPTIMIZATION.md` §五特征融合排序）。
 
 本节结论由 4 路并行调研交叉验证（框架层 / 解析层 / 存储检索层 / Agent 与平台层），信息源自 GitHub 一手仓库与官方文档，个别观点标注了来源与风险。
 
@@ -138,7 +139,7 @@
 
 **内建 vs 自研（重做关键边界，必读）**：
 - **LightRAG 内建**：`local / global / naive / hybrid / mix` 五种检索模式（图 + 向量），其中 `mix = local + global + naive`；
-- **外层自研（检索增强层，模块 M5）**：关键词路（sparse/BM25 可切换）、**RRF(k=60) 融合**、**bge-reranker 精排**、query 预处理——LightRAG **无多路融合 RRF**；chunk 重排管道实测存在但默认 off（`rerank.py`，`RERANK_BINDING="null"`），仅作用于 chunks 且需 provider，「三路融合 + 精排」仍是目标态、需外层实现。M5 可**复用其 `process_chunks_unified` 精排管道**（详见 `lightrag/docs/retriever.md`）。
+- **外层自研（检索增强层，模块 M5）**：关键词路（sparse/BM25 可切换）、**RRF(k=60) 融合**、**bge-reranker 精排**、**五特征融合排序（`fuse_and_rank`，rerank 之上再叠加数字/稀疏/位次特征）**、query 预处理——LightRAG **无多路融合 RRF**；chunk 重排管道实测存在但默认 off（`rerank.py`，`RERANK_BINDING="null"`），仅作用于 chunks 且需 provider，「三路融合 + 精排」仍是目标态、需外层实现。M5 可**复用其 `process_chunks_unified` 精排管道**（详见 `lightrag/docs/retriever.md`）。
 
 ### 2.5 持久化层
 
@@ -167,7 +168,8 @@
 **外层增强（自研实现，模块 M5）：**
 - **关键词路**：bge-m3 `sparse`（经 Xinference）或 BM25——**接口做成可切换**。精确匹配人名/机构名/中文专名/数字兜底；
 - **RRF(k=60) 融合**：三路（图 + 向量 + 关键词）按排名倒数融合，产出统一列表；
-- **rerank 精排**：bge-reranker-v2-m3（经 Xinference `/v1/rerank`）对 RRF 结果 top-K 精排；
+- **rerank 打分**：bge-reranker-v2-m3（经 Xinference `/v1/rerank`）对 RRF top-40 **全候选打分、不截断**——rerank 在本系统只做语义判断，不做筛除，最终名次交给下一级特征融合；
+- **五特征融合排序（`fuse_and_rank`，v5.9 正式）**：rerank 语义分（0.50）已非最终名次，叠加 sparse 内积、rrf 位次、`numeric_match`、`numeric_density` 五路归一化加权求和定 top5——解决 cross-encoder 对表格/数值数据失明（纯语义分压不住表格题）；
 - **query 预处理**：意图/实体识别 + 中文专名改写，提升 `local` 种子实体命中率（中文缩写/同义易漏）。
 
 > ⚠️ 边界提醒：LightRAG 的 `mix` **不含关键词路，也没有内建 RRF 与 reranker**（v1 稿把目标态写成内建能力，重做后已更正）。
