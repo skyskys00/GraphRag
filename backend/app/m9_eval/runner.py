@@ -595,6 +595,71 @@ async def evaluate_answer(
     return results
 
 
+async def _rebuild_retrieval_pool(
+    tool_chain: list[dict[str, Any]],
+    deps: Any,
+    fallback: list[dict[str, Any]] | None = None,
+    max_blocks: int = 40,
+) -> list[dict[str, Any]]:
+    """重放决策链 tool_retrieve 调用，收集全部命中的完整 content —— 宽松池（P2-cite）。
+
+    judge 视野放宽到 agent 实际检索过、且进入其决策链的资料全集（M6 直连评测同样按
+    检索结果喂池，agent 侧对齐同一口径）；§7.2 判别性验证已用同法（按 tool_chain args
+    + top_k 确定性重放）证实信息全在池内。无任何 retrieve 时退回 fallback（被引窄池）。
+    """
+    from app.m5_retrieve.retriever import retrieve
+
+    blocks: list[dict[str, Any]] = []
+    seen: set[tuple[str, str]] = set()
+    for step in tool_chain:
+        if not isinstance(step, dict) or step.get("tool") != "tool_retrieve":
+            continue
+        args = step.get("args")
+        if isinstance(args, str):
+            try:
+                args = json.loads(args)
+            except json.JSONDecodeError:
+                continue
+        query = (args or {}).get("query")
+        if not query:
+            continue
+        top_k = max(1, int((args or {}).get("top_k") or 5))
+        try:
+            result = await retrieve(
+                deps.rag, query, deps.sparse,
+                entities=deps.entities,
+                exclude_docs=sorted(deps.excluded_docs),
+                allowed_docs=sorted(deps.allowed_docs) if deps.allowed_docs else None,
+            )
+        except Exception:  # noqa: BLE001 —— 单步检索失败不杀评测
+            continue
+        for r in (result.get("results") or [])[:top_k]:
+            key = (r.get("full_doc_id") or "?", str(r.get("chunk_id") or ""))
+            content = r.get("content") or ""
+            if not content or key in seen:
+                continue
+            seen.add(key)
+            # 块所属文档标题（型号/文件名出处只存在于块外元信息，judge 需此才能核「型号归属/出处」句）
+            title = ""
+            if getattr(deps, "sidecar", None):
+                try:
+                    meta = deps.sidecar.resolve(r.get("chunk_id") or "")
+                    title = (meta.title_path or meta.file_path) if meta else ""
+                except Exception:  # noqa: BLE001 —— 溯源缺失不影响检索池
+                    title = ""
+            blocks.append({
+                "chunk_id": str(r.get("chunk_id") or ""),
+                "content": content,
+                "full_doc_id": r.get("full_doc_id") or "?",
+                "rank": len(blocks) + 1,
+                "score": r.get("score", 0.0),
+                "title": title,
+            })
+            if len(blocks) >= max_blocks:
+                return blocks
+    return blocks or (fallback or [])
+
+
 async def evaluate_agent(
     testset: dict[str, Any],
     deps: Any,
@@ -679,13 +744,18 @@ async def evaluate_agent(
             if isinstance(marker, int) and marker > 0 and content:
                 marker_ctx[marker] = content
 
+        # 重建池（P2-cite，M6 式对齐）：judge 视野放宽到决策链全部检索命中完整内容。
+        # faithfulness / multi_hop_recall 用宽池（与直连评测同口径、判别性验证一致）；
+        # citation_accuracy 仍按 marker_ctx 精确对齐（标注支撑判定）。
+        pool_ctx = await _rebuild_retrieval_pool(tool_chain, deps, fallback=contexts)
+
         metrics: dict[str, Any] = {}
 
         # multi_hop_recall：多步检索后目标 key_facts 是否进入最终上下文
         if q["category"] != "unanswerable" and q.get("key_facts"):
             try:
                 mhr = await compute_context_recall(
-                    deps.query_func, question_text, q["key_facts"], contexts,
+                    deps.query_func, question_text, q["key_facts"], pool_ctx,
                 )
                 metrics["multi_hop_recall"] = mhr["score"]
                 metrics["multi_hop_recall_detail"] = {
@@ -694,7 +764,7 @@ async def evaluate_agent(
                     "failed_facts": mhr.get("failed_facts", 0),
                     "per_fact": mhr["per_fact"],
                     "reason": mhr["reason"],
-                    "contexts": len(contexts),
+                    "contexts": len(pool_ctx),
                 }
             except Exception as e:
                 print(f"  ⚠️  multi_hop_recall 计算失败: {e}", flush=True)
@@ -702,10 +772,10 @@ async def evaluate_agent(
         else:
             metrics["multi_hop_recall"] = None
 
-        # 生成质量指标（复用 M6 e2e 全套，contexts 用 agent 实际引用）
+        # 生成质量指标（复用 M6 e2e 全套；judge 上下文用重建宽池 pool_ctx，对齐直连评测口径）
         try:
             fai = await compute_faithfulness(
-                deps.query_func, question_text, answer_text, contexts,
+                deps.query_func, question_text, answer_text, pool_ctx,
             )
             metrics["faithfulness"] = fai["score"]
             metrics["faithfulness_detail"] = {

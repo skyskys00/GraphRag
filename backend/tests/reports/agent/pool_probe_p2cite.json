@@ -1,0 +1,110 @@
+[
+  {
+    "id": "DV-FS-001",
+    "old_v548": 0.4444444444444444,
+    "narrow": 0.625,
+    "wide_plain": 0.9166666666666666,
+    "wide_title": 0.9166666666666666,
+    "delta": 0.292,
+    "title_gain": 0.0,
+    "n_blocks": 12,
+    "n_wpool": 12,
+    "wide_unsup": [
+      "知识库中只有上述两款注射泵的说明书涉及人体临床试验"
+    ]
+  },
+  {
+    "id": "DV-FS-002",
+    "old_v548": 0.375,
+    "narrow": 0.5,
+    "wide_plain": 0.25,
+    "wide_title": 0.25,
+    "delta": -0.25,
+    "title_gain": 0.0,
+    "n_blocks": 3,
+    "n_wpool": 5,
+    "wide_unsup": [
+      "知识库中有两份注射泵说明书，它们对电源开关位置的描述并不一致",
+      "《瑞创RSP系列注射泵.pdf》（Cchippump-2 双通道分体式注射泵）只说明电源接口安装在注射泵背面左侧，并说明",
+      "《融柏恒流泵_LSP-1C系列注射泵_说明书.pdf》明确说明电源开关安装在注射泵后面的右侧。"
+    ]
+  },
+  {
+    "id": "DV-IO-001",
+    "old_v548": 0.9,
+    "narrow": 1.0,
+    "wide_plain": 0.875,
+    "wide_title": 0.875,
+    "delta": -0.125,
+    "title_gain": 0.0,
+    "n_blocks": 2,
+    "n_wpool": 5,
+    "wide_unsup": [
+      "根据《融柏恒流泵 LSP-1C 系列注射泵 说明书》中流量校准界面的截图说明"
+    ]
+  },
+  {
+    "id": "DV-IO-004",
+    "old_v548": 0.6,
+    "narrow": 1.0,
+    "wide_plain": 1.0,
+    "wide_title": 1.0,
+    "delta": 0.0,
+    "title_gain": 0.0,
+    "n_blocks": 3,
+    "n_wpool": 5,
+    "wide_unsup": []
+  },
+  {
+    "id": "DV-FS-010",
+    "old_v548": 1.0,
+    "narrow": 0.8,
+    "wide_plain": 1.0,
+    "wide_title": 1.0,
+    "delta": 0.2,
+    "title_gain": 0.0,
+    "n_blocks": 5,
+    "n_wpool": 5,
+    "wide_unsup": []
+  },
+  {
+    "id": "DV-TN-008",
+    "old_v548": 1.0,
+    "narrow": 0.5,
+    "wide_plain": 0.5,
+    "wide_title": 0.5,
+    "delta": 0.0,
+    "title_gain": 0.0,
+    "n_blocks": 1,
+    "n_wpool": 5,
+    "wide_unsup": [
+      "根据《瑞创RSP系列注射泵》中的“标准注射器流量参数表”"
+    ]
+  },
+  {
+    "id": "DV-FS-013",
+    "old_v548": 1.0,
+    "narrow": 1.0,
+    "wide_plain": 1.0,
+    "wide_title": 1.0,
+    "delta": 0.0,
+    "title_gain": 0.0,
+    "n_blocks": 1,
+    "n_wpool": 5,
+    "wide_unsup": []
+  },
+  {
+    "id": "DV-FS-018",
+    "old_v548": 0.875,
+    "narrow": 0.875,
+    "wide_plain": 0.8888888888888888,
+    "wide_title": 0.8888888888888888,
+    "delta": 0.014,
+    "title_gain": 0.0,
+    "n_blocks": 6,
+    "n_wpool": 8,
+    "wide_unsup": [
+      "规范所列的标准清单（含 YY 1137-2005 骨锯通用技术条件等）是就规范范围内的无源器械给出的，并注明“应执行产品"
+    ]
+  }
+]

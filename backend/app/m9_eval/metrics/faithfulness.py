@@ -63,6 +63,16 @@ def _numerically_supported(statement: str, context_text: str) -> bool:
     return bool(int_units) and all(u in context_text for u in int_units)
 
 
+def _block_text(i: int, c: dict) -> str:
+    """块文本：带文档标题（型号/出处仅在文件名元信息）则作【文档：…】头，否则纯内容。"""
+    head = f"【文档：{c['title']}】\n" if c.get("title") else ""
+    return f"[{i+1}] {head}{c.get('content', '')}"
+
+
+def _context_text(contexts: list[dict]) -> str:
+    return "\n\n".join(_block_text(i, c) for i, c in enumerate(contexts))
+
+
 async def compute_faithfulness(
     query_func: Callable,
     question: str,
@@ -84,9 +94,7 @@ async def compute_faithfulness(
             "reason": "空答案默认忠实（无内容可幻觉）",
         }
 
-    context_text = "\n\n".join(
-        f"[{i+1}] {c.get('content', '')}" for i, c in enumerate(contexts)
-    )
+    context_text = _context_text(contexts)
 
     prompt = PROMPT_TEMPLATE.format(
         question=question,

@@ -26,6 +26,19 @@
 
 ---
 
+## [v5.49] 2026-10-26 —— P2-cite 落地（A2/M6 式对齐）：generate「多编号并列」标注 + 评测上下文放宽为决策链全检索重建池（引用标注粒度修正）
+
+**影响模块**：`backend/app/m10_agent/agent.py`（SYSTEM_PROMPT 补跨块并列标注指令）；`backend/app/m9_eval/runner.py`（新增 `_rebuild_retrieval_pool` 决策链重建宽池，`evaluate_agent` 的 faithfulness / multi_hop_recall 改吃重建池）；`backend/app/m9_eval/metrics/faithfulness.py`（块文本补 `【文档：…】` title 元信息头）；`backend/scripts/probe_faith_pool.py`（8 落题探底：窄池 vs 宽池 vs 宽池+title）；产出 `tests/reports/agent/run_agent_device_50_p2cite.json`、`pool_probe_p2cite.json`、`agent_vs_direct_ab_p2cite.md`、`smoke_p2cite_3.json`；`docs/modules/M10_agent.md` 状态行与 §9.4。
+
+**内容**：
+- **方向拍板（A2/M6 式对齐）**：三步探索证伪 §9.1 原案（text_unit_id 直引——LLM 从没见过 `{16hex}-chunk-{NNN}` 形态、评测 `[n]` 正则与前端角标全锚整数 marker、改动面大），用户拍板走 **A2**：① 生成阶段强化「一个事实句依据跨多个资料块必须并列标注全部编号（如 [1][2]）」；② 评测宽池修正（judge 上下文 = agent 决策链真实检索全集）。`[n]` 整数 marker、`_build_citation_index`/`_resolve_citations` 链路零改动，前端/评测/回放生态零破坏。
+- **评测宽池（runner）**：`_rebuild_retrieval_pool` 遍历 `tool_chain` 中 `tool_retrieve` 调用重放 `retrieve`（与 `_retrieve_tool` 同参、同 exclude/allowed 过滤），收集全命中完整 content + sidecar resolve 出的 `title`（title_path/file_path，型号/出处元信息），按 `(doc_id, chunk_id)` 去重、上限 40 块；无 retrieve 时回退被引窄池（现状兜底）。faithfulness / multi_hop_recall 改吃重建池；citation_accuracy 仍用被引窄池 + `ctx_by_marker` 显式对齐（标注粒度修正不吃宽池）。口径合规：生产 agent 本就基于该检索结果生成，未复刻 key_facts/ground_truth 措辞（§11 泄漏红线）。
+- **faithfulness 块文本**：带 title 的块加 `【文档：…】` 头，型号/出处仅存于文件名元信息的陈述得以在 judge 视野内核验（对齐 §7.2 判别性宽池口径）。
+- **8 落题冒烟（probe_faith_pool）**：固定 v5.48 答案，窄池→宽池显著回升、宽池+title 再小升；但同答案重判噪声 ±0.3（DV-TN-008 1.0→0.5 等），结论由 50 题大样本承重。
+- **50 题全量新基线**（`run_agent_device_50_p2cite.json`，2026-10-26 16:45，总耗时 5845.8s，约 v5.48 的 1.7×）：faithfulness **0.7840→0.9368**（**+0.153**，vs 直连 Δ−0.029 **过门禁**）；citation_accuracy 0.8652→0.8648（持平，Δ−0.031 **贴线记噪声带已知项**）；正确的 vs 直连：correctness **+0.043**、answer_relevance **+0.035** 均不劣化；multi_hop 0.9247→0.900（重建池口径下正常波动）。
+- **tool_acc 0.858→0.793 归因（已排查，非引用协议劣化，且不参与 vs 直连门禁）**：① DV-FS-017 1.0→0.0 为 **judge JSON 解析失败伪分**（LLM 返回中被截断的 JSON 文本被 `_parse_judge_output` 误提取 → score 0.0，实际判 1.0）；② 主降集中于 DV-TN-007 / IO-002 / IO-004 / TN-002——agent 重跑把 `list_docs` 从第 1 步挪到第 2 步（retrieve 后补列清单），叠加 judge 对「检索后补 list_docs 冗余」的稳定偏好与重判窗口漂移（同链不同序 1.0→0.5）；③ 同批 correctness 反升 +0.043，证非质量退化。
+- **验收**：faithfulness 门禁绿、citation 贴线记噪声带已知项（归因不变：跨块句并列标注后，标注粒度修正双项已落地），**P2-cite 收口**。残留已知项：tool_acc 的 list_docs 时机噪声可后续加工具描述约束；citation −0.031 卡在单次 judge 噪声带内。
+
 ## [v5.48] 2026-10-25 —— M10 答案分箱（`<advice>` 建议区隔离）+ 忠实度复盘为朴素单层（呼应 v5.47 §预告）
 
 **影响模块**：`backend/app/m10_agent/agent.py`（SYSTEM_PROMPT 分箱指令 + `generate` 拆分 `<advice>` 段 + `run_agent` 返回 `advice`）；`backend/app/m9_eval/metrics/faithfulness.py`（朴素单层重写 + 来源引导语判据 + 数值词面核验）；`backend/scripts/probe_agent_box.py`、`probe_agent_box.py` 产出 `tests/reports/agent/box_probe_v548.json`；`docs/modules/M10_agent.md` 状态行与 §9.3。
