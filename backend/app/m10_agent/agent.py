@@ -138,7 +138,8 @@ def _register_builtin_tools() -> None:
     registry.register_tool(
         "tool_list_docs",
         lambda deps: lambda **kw: documents.list_docs(deps),
-        "列出知识库中的文档清单（doc_id/文件名/状态），用于确认有哪些文档可查、存在性核对",
+        "列出知识库中的文档清单（doc_id/文件名/状态），用于盘点知识库有哪些文档、存在性核对。"
+        "应在检索/作答之前作为第一步调用；已进入检索或作答后，一般无需再调用（避免冗余盘点）",
         {"type": "object", "properties": {}},
     )
     registry.register_tool(

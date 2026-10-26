@@ -263,7 +263,7 @@ v0.1 的方向是「在已评测稳定的 RAG 之上叠一层 agent 编排」。
 
 **50 题全量（2026-10-26，`run_agent_device_50_p2cite.json`，5845.8s）**：faithfulness **0.9368**（v5.48 0.7840 → **+0.153**，Δvs直连 −0.029 **过门禁**）；citation_accuracy 0.8648（持平，Δ−0.031 贴线）；vs 直连 correctness **+0.043** / relevance **+0.035** 不劣化；multi-hop 0.900（重建池口径正常波动）；tool_acc 0.793。**tool_acc 下降归因（排查完）**：DV-FS-017 1.0→0.0 为 **judge JSON 解析失败伪分**（LLM 返回内嵌 JSON 文本被 `_parse_judge_output` 误提取 → 0.0，实际判 1.0）；主降（DV-TN-007/IO-002/IO-004/TN-002）为 agent 重跑把 `list_docs` 从第 1 步挪到第 2 步 + judge「检索后补 list_docs 冗余」稳定偏好 + 重判窗口漂移；同批 correctness 反升证非质量退化。量化全表见 CHANGELOG v5.49。
 
-**残留已知项**：citation −0.031 卡在单次 judge 噪声带内（每句重判漂移 ±0.3，指标整体波动 ±0.03）；tool_acc 的 list_docs 时机噪声可后续加工具描述约束（独立增强，非 P2-cite 范畴）。
+**残留已知项**：citation −0.031 卡在单次 judge 噪声带内（每句重判漂移 ±0.3，指标整体波动 ±0.03）；tool_acc 的 list_docs 时机噪声 → **v5.49.1 已落地工具描述引导**（「检索/作答前作为第一步调用，避免冗余盘点」），改造后单轮冒烟观察为简链直答、未重复盘库，全量影响待下次评测核算。
 
 ## 10. 已拍板决策（2026-10-23）
 

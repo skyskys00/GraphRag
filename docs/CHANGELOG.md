@@ -26,6 +26,14 @@
 
 ---
 
+## [v5.49.1] 2026-10-26 —— tool_list_docs 描述补前置语义引导 + P2-cite 浏览器目验通过（补丁）
+
+**影响模块**：`backend/app/m10_agent/agent.py`（`tool_list_docs` 工具描述）；目验（浏览器 + 前端零代码改动）；`docs/modules/M10_agent.md` §9.4。
+
+**内容**：
+- **tool_list_docs 描述引导（回应 tool_acc 归因讨论）**：用户拍板「judge 判『list_docs 应前置』是合理的」——盘库工具的语义本就应先翻清单再检索。描述补「应在检索/作答之前作为第一步调用；已进入检索或作答后一般无需再调用（避免冗余盘点）」；配套对外行为观察（目验会话）：改造后 agent 对同一注入泵对比题改走**简链一步检索直答**（引用编号全新 1-6、未重复盘库），符合「避免冗余盘点」引导方向。全量 tool_acc 影响待下次 50 题评测核算。
+- **P2-cite 前端目验通过（补 v5.49 第 5 步）**：浏览器 `/agent/stream`（localhost:5173, col_b7b876b1「有源器械说明书」）实测两问（供电配置 + 注入泵 vs 心电对比题）：① 答案 `[n]` 全部渲染为可点角标按钮（description「跳转至引用 N」，13 枚）且与 CitationPanel 映射一致；② 引用面板 7 条，doc/页面/相关度/「置信度」/图谱/原文档按钮齐全；③ 「根据知识库中的《…》说明书」来源引导语渲染正常；④ 决策链块（第 N 轮 + 工具清单）正常展开；⑤ 连标安全由 `frontend/src/lib/cite.ts` 机制保证——`splitCitations` 用 `/\ [(\d+)\]/g` 全局 `matchAll` 逐 token 迭代，`[1][2]` 必然渲染为两个相邻按钮、无独立分支（本轮题目 agent 均选择拆句单标，生产对话未现连写句，如实记录）。**前端零代码改动，`[n]` 协议生态零破坏复确认**。
+
 ## [v5.49] 2026-10-26 —— P2-cite 落地（A2/M6 式对齐）：generate「多编号并列」标注 + 评测上下文放宽为决策链全检索重建池（引用标注粒度修正）
 
 **影响模块**：`backend/app/m10_agent/agent.py`（SYSTEM_PROMPT 补跨块并列标注指令）；`backend/app/m9_eval/runner.py`（新增 `_rebuild_retrieval_pool` 决策链重建宽池，`evaluate_agent` 的 faithfulness / multi_hop_recall 改吃重建池）；`backend/app/m9_eval/metrics/faithfulness.py`（块文本补 `【文档：…】` title 元信息头）；`backend/scripts/probe_faith_pool.py`（8 落题探底：窄池 vs 宽池 vs 宽池+title）；产出 `tests/reports/agent/run_agent_device_50_p2cite.json`、`pool_probe_p2cite.json`、`agent_vs_direct_ab_p2cite.md`、`smoke_p2cite_3.json`；`docs/modules/M10_agent.md` 状态行与 §9.4。
