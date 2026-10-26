@@ -529,9 +529,9 @@
   color: #fff;
 }
 
-/* M10 决策链折叠卡片（答案下方，agent 身份标识 + 命中预览） */
+/* M10 决策链折叠卡片（AI 消息顶部，agent 身份标识 + 命中预览） */
 .chain-block {
-  margin-top: 10px;
+  margin: 2px 0 10px;
 }
 .chain-head {
   display: flex;
@@ -548,6 +548,21 @@
 .chain-sub {
   font-size: 11px;
   color: var(--text-mute);
+}
+.chain-toggle {
+  margin-left: auto;
+  border: 1px solid var(--border-soft);
+  background: var(--surface);
+  color: var(--text-mute);
+  font-size: 11px;
+  line-height: 1.4;
+  border-radius: 5px;
+  padding: 1px 8px;
+  cursor: pointer;
+}
+.chain-toggle:hover {
+  color: var(--primary);
+  border-color: var(--primary);
 }
 .steps {
   display: flex;
@@ -610,6 +625,23 @@
 .step-label {
   color: var(--primary);
   font-weight: 600;
+}
+.step-seq {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 50%;
+  background: var(--surface-muted, rgba(128, 128, 128, 0.12));
+  color: var(--text-mute);
+  flex: none;
+}
+.step-arrow {
+  color: var(--text-mute);
+  flex: none;
 }
 .step-args {
   color: var(--text-soft);

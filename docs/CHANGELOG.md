@@ -26,6 +26,18 @@
 
 ---
 
+## [v5.50] 2026-10-26 —— 前端决策链改版（AI 消息顶部 + 一键展开 + 调用序号）+ 修复多轮历史直答丢引用/编造角标（A+B）
+
+**影响模块**：`frontend/src/components/MessageBubble.tsx`（ToolRounds 位置与交互）、`frontend/src/App.css`（chain-toggle/step-seq/step-arrow 样式）；`backend/app/m10_agent/agent.py`（SYSTEM_PROMPT 强制检索约束 + generate 空清单提示 + `_strip_unbacked_markers`）；`docs/modules/M10_agent.md` 状态行与 §9.5。
+
+**内容**：
+- **前端决策链改版（用户需求）**：① 「Agent 执行过程」块移到 AI 消息**顶部**——tool_decision 事件到达即渲染，即使答案 delta 尚未流出也能立刻看到执行流程，消除「卡住/故障」错觉；② 块头新增「展开/收起」一键控制全部轮次（原先只能逐轮点）；③ 每轮展开体给工具调用加**顺序序号 + 箭头**（如 `① 知识库检索 "query" → 12 项结果 + 命中预览`），决策→结果流程更直观；④ 无工具轮次的纯文本消息自然降级、不显示空块。
+- **缺陷发现（浏览器目验时命中）**：多轮历史会话中，route 层 LLM「认为历史已足够」直接进 generate、**绕开检索工具** → generate 无编号清单 → LLM 按历史风格**编造 `[n]` 角标** → `_resolve_citations` 因编号不在清单丢弃 citations，但正文残留假角标 → 用户看到点不动、引不出的假引用；同时前端无 tool_steps/citations → 无决策链、无引用面板。评测均为单轮无历史，故长期未暴露。
+- **A·强制检索（治本）**：SYSTEM_PROMPT 追加「除纯问候或与本知识库无关的闲聊外，回答任何事实性问题前必须先调用检索工具获取新资料依据，不得仅凭已有对话历史或上一轮检索结果直接作答」。
+- **B·诚实兜底（红线）**：generate 在编号清单为空时注入「不要输出任何 [n] 角标」系统提示；并新增 `_strip_unbacked_markers` 在正文/建议区**剥离所有不在清单内的角标**（不只空清单场景——顺带堵住「清单非空但编造不存在编号」同类漏洞）。编号清单是否为空由本轮真实检索依据决定，闲聊与正常问答均不误伤。
+- **验证（curl SSE 事件序列对比 + 浏览器）**：修前带 12 条历史同题 —— `delta/citations/done` 零工具、`citations=[]`、正文含编造 `[1][2][3]`；修后 —— `tool_decision→tool_result→delta→citations→done`、`citations=4`、角标全在清单内。闲聊冒烟 —— `citations=0`、正文零角标、答案自然。浏览器目验 —— 决策链在顶部、一键展开两轮、序号/箭头/引用面板/角标按钮全部正常。
+- **遗留**：50 题全量评测未重跑；A 的提示词对评测口径的量化影响待下次评测核算（评测无历史，预期无劣化）。
+
 ## [v5.49.1] 2026-10-26 —— tool_list_docs 描述补前置语义引导 + P2-cite 浏览器目验通过（补丁）
 
 **影响模块**：`backend/app/m10_agent/agent.py`（`tool_list_docs` 工具描述）；目验（浏览器 + 前端零代码改动）；`docs/modules/M10_agent.md` §9.4。

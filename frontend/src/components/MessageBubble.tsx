@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { splitCitations } from '../lib/cite'
 import type { ChatMessage, ToolStep } from '../types'
 
@@ -29,6 +30,7 @@ function roundTitle(round: ToolStep[]): string {
 
 function ToolRounds({ message }: { message: ChatMessage }) {
   const rounds = message.rounds
+  const [expandedAll, setExpandedAll] = useState(false)
   if (!rounds || rounds.length === 0) return null
   const totalCalls = rounds.reduce((n, r) => n + r.filter((s) => s.summary === undefined).length, 0)
   return (
@@ -38,13 +40,21 @@ function ToolRounds({ message }: { message: ChatMessage }) {
         <span className="chain-sub">
           {rounds.length} 轮 / {totalCalls} 次工具调用
         </span>
+        <button
+          className="chain-toggle"
+          onClick={() => setExpandedAll((v) => !v)}
+          title={expandedAll ? '收起全部轮次' : '展开全部轮次'}
+        >
+          {expandedAll ? '收起' : '展开'}
+        </button>
       </div>
       <div className="steps">
         {rounds.map((round, i) => {
           const isLast = i === rounds.length - 1
           const live = isLast && (message.state === 'pending' || message.state === 'streaming')
+          let seq = 0
           return (
-            <details key={i} className="step-card" open={live}>
+            <details key={i} className="step-card" open={expandedAll || live}>
               <summary>
                 <span className="step-no">第 {i + 1} 轮</span>
                 {roundTitle(round)}
@@ -57,7 +67,8 @@ function ToolRounds({ message }: { message: ChatMessage }) {
                   if (isResult) {
                     return (
                       <div key={j} className="step-row step-result">
-                        <span className="step-summary">→ {s.summary}</span>
+                        <span className="step-arrow">→</span>
+                        <span className="step-summary">{s.summary}</span>
                         {s.snippets && s.snippets.length > 0 && (
                           <ul className="step-snippets">
                             {s.snippets.map((sn, k) => (
@@ -70,8 +81,10 @@ function ToolRounds({ message }: { message: ChatMessage }) {
                       </div>
                     )
                   }
+                  seq += 1
                   return (
                     <div key={j} className="step-row">
+                      <span className="step-seq">{seq}</span>
                       <span className="step-label">{label}</span>
                       {q && <span className="step-args">“{q}”</span>}
                     </div>
@@ -121,13 +134,13 @@ export function MessageBubble({ message, onCitationClick, activeCitation }: Mess
           <span>{message.text}</span>
         ) : (
           <>
+            <ToolRounds message={message} />
             <RenderedText
               text={message.text}
               hasCitations={!!message.citations?.length}
               onCitationClick={onCitationClick}
               activeCitation={activeCitation}
             />
-            <ToolRounds message={message} />
           </>
         )}
         {!isUser && message.state === 'streaming' && (

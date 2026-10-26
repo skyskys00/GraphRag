@@ -33,6 +33,8 @@ from . import registry
 SYSTEM_PROMPT = (
     "你是中文知识库助手。基于工具返回的结果回答问题；答案需带引用来源，"
     "回答时用 [n] 标注（n 为最末一条消息中给出的资料编号）。工具结果不足时如实说明，不要编造。"
+    "除纯问候或与本知识库无关的闲聊外，回答任何事实性问题前必须先调用检索工具获取新的资料依据，"
+    "不得仅凭已有对话历史或上一轮检索结果直接作答。"
     "一个事实语句若依据跨多个资料块，必须并列标注全部相关编号（如 [1][2]），禁止只标其中一块；"
     "编号必须是最末一条消息资料清单里实际出现的编号，清单里没有的不要标。"
     "不要复述工具原始输出的非答案内容。"
@@ -278,6 +280,11 @@ def _result_summary(result: Any) -> str:
 _NUM_RE = re.compile(r"\[(\d+)\]")
 
 
+def _strip_unbacked_markers(text: str, index: dict[int, dict]) -> str:
+    """剥掉编号清单之外的 [n]（未检索直答时的编造编号等），防假引用出现在正文。"""
+    return re.sub(r"[ \t]*\[(\d+)\]", lambda m: m.group(0) if int(m.group(1)) in index else "", text)
+
+
 def _build_citation_index(citations: list[dict]) -> tuple[dict[int, dict], str | None]:
     """把累积 citations 按 (doc_id, chunk_id) 去重编号，返回 (编号→引用, 注入清单文本)。
 
@@ -340,6 +347,11 @@ async def generate(state: AgentState) -> dict[str, Any]:
     messages = list(state["messages"])
     if index_text:
         messages.append({"role": "system", "content": f"可引用资料（编号即 [n]）：\n{index_text}"})
+    else:
+        messages.append({
+            "role": "system",
+            "content": "本轮可引用资料清单为空：不要输出任何 [n] 角标；如实基于现有信息回答，或说明无法回答。",
+        })
 
     text = ""
     events = list(state["events"])
@@ -359,6 +371,9 @@ async def generate(state: AgentState) -> dict[str, Any]:
         main = re.sub(r"<advice>.*?</advice>", "", text, flags=re.S).strip()
     else:
         main = text.strip()
+
+    main = _strip_unbacked_markers(main, index)
+    advice = _strip_unbacked_markers(advice, index)
 
     final = _resolve_citations(main, index) or state["citations"]
     events += [
