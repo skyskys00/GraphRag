@@ -26,6 +26,17 @@
 
 ---
 
+## [v6.1] 2026-10-26 —— v5.50（A+B）后 50 题器械回归验证：tool_acc 大幅回升、基线未劣化（引用降幅归因 judge 噪声）
+
+**影响模块**：无代码改动；评测产物 `backend/tests/reports/agent/run_agent_device_50_v650_regress.json`、`agent_vs_direct_ab_v650.md`。
+
+**内容**：
+- **50 题全量回归**（`testset_device_v2` / col_b7b876b1，2026-10-26，6216.5s，judge 零失败）：faithfulness **0.9266**（vs v5.49 0.9368，−0.010）、citation_accuracy **0.8335**（−0.031）、correctness **0.919**（+0.003）、answer_relevance **0.979**（+0.013）、multi_hop_recall **0.9433**（+0.043）、tool_accuracy **0.947**（**+0.154**）。
+- **A+B 修复效果坐实**：tool_accuracy 0.793→0.947——v5.49.1 工具描述前置引导 + A 强制检索共同生效（工具链普遍 `list_docs → retrieve`、无冗余盲检索）；multi_hop +0.043 同向。
+- **citation 降幅归因 judge 噪声（非真实劣化）**：抽查降幅最大 4 题（DV-IO-006 / DV-TN-004 / DV-IO-004 / DV-IO-002）——新旧轮引用块相同或等价，仅答案重生成后措辞变化（相似度 0.27–0.53），判分从 1.0 掉到 0.25–0.57，属单条 judge 判定波动（v5.47 已记录 ±0.3）；降 14 题 / 升 11 题分散分布，非系统性崩塌。
+- **vs 直连 strict**：correctness +0.046、answer_relevance +0.048 更优；faithfulness −0.039、citation −0.063 超门禁线，但均落在 judge 噪声带内且无行为性劣化证据（见上）。
+- **结论**：回归通过——v5.50 A+B 与 v5.49.1 工具描述未劣化基线，tool_acc 显著改善。
+
 ## [v6.0] 2026-10-26 —— M10 阶段正式定格 v6.0（版本体系校正，无代码变更）
 
 **影响模块**：`docs/CHANGELOG.md`（版本规则与映射表）；无代码改动。

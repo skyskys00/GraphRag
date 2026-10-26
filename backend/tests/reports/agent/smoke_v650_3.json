@@ -1,0 +1,641 @@
+{
+  "testset_id": "testset_device_v2",
+  "domain": "家用/医用器械说明书库（12 份，含注射泵、血压、血氧、心电、除颤、水质检测 + 骨科手术器械审评规范 + 护理不良事件上报）",
+  "version": "2026-10-05",
+  "timestamp": "2026-10-26 19:26:30",
+  "config": {
+    "mode": "agent",
+    "collection": "col_b7b876b1",
+    "workspace": "col_b7b876b1",
+    "reranker": "standard",
+    "ablation_routes": "graph,vector,keyword",
+    "comparison_mode": "per_doc"
+  },
+  "summary": {
+    "total_questions": 3,
+    "overall": {
+      "context_recall": 0.0,
+      "context_precision": 0.0,
+      "context_precision_weighted": 0.0,
+      "gold_rank_avg": null,
+      "gold_rank_median": null,
+      "gold_rank_min": null,
+      "gold_rank_max": null,
+      "gold_rank_top1_recall": null,
+      "gold_rank_top3_recall": null,
+      "gold_rank_top5_recall": null,
+      "ndcg": 0.0,
+      "faithfulness": 0.3583,
+      "answer_relevance": 0.9167,
+      "correctness": 1.0,
+      "citation_accuracy": 0.6889,
+      "multi_hop_recall": 1.0,
+      "tool_accuracy": 0.9333,
+      "judge_failed_judgments": 0
+    },
+    "by_category": {
+      "fact_single": {
+        "count": 2,
+        "context_recall": 0.0,
+        "context_precision": 0.0,
+        "gold_rank_avg": null,
+        "gold_rank_median": null,
+        "gold_rank_top5_recall": null,
+        "ndcg": 0.0,
+        "faithfulness": 0.35,
+        "answer_relevance": 0.95,
+        "correctness": 1.0,
+        "citation_accuracy": 0.8334
+      },
+      "table_numeric": {
+        "count": 1,
+        "context_recall": 0.0,
+        "context_precision": 0.0,
+        "gold_rank_avg": null,
+        "gold_rank_median": null,
+        "gold_rank_top5_recall": null,
+        "ndcg": 0.0,
+        "faithfulness": 0.375,
+        "answer_relevance": 0.85,
+        "correctness": 1.0,
+        "citation_accuracy": 0.4
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "count": 3,
+        "context_recall": 0.0,
+        "context_precision": 0.0,
+        "gold_rank_avg": null,
+        "gold_rank_median": null,
+        "gold_rank_top5_recall": null,
+        "ndcg": 0.0,
+        "faithfulness": 0.3583,
+        "answer_relevance": 0.9167,
+        "correctness": 1.0,
+        "citation_accuracy": 0.6889
+      }
+    },
+    "judge_failed_questions": 0,
+    "total_time_s": 226.6
+  },
+  "questions": [
+    {
+      "id": "DV-TN-001",
+      "category": "table_numeric",
+      "difficulty": "easy",
+      "question": "这台注射泵的最大步速是多少？",
+      "ground_truth": "最大步速为 867 steps/sec。",
+      "key_facts": [
+        "最大步速 = 867 steps/sec"
+      ],
+      "answer": "知识库中收录了两份注射泵资料，两者型号不同，最大步速数值也不同：\n\n**瑞创 RSP 系列（Cchippump-2 双通道分体式注射泵）**\n- 最大步速：1243 step/sec [1]\n- 同一参数表中的相关指标为：流量范围 0.5 nL/min–158.907 mL/min，线性推力 >20 kgf [1]；最小步速为 0 [4]；每微步距离为 0.078 μm [3]。\n\n**融柏恒流泵 LSP-1C 系列（型号 LSP01-1BC）**\n- 最大步速：867 steps/sec；该型号每微步（1/16 step）推进距离为 0.156 micron，每微步注射液量为 0.0919 μL（配合 60 mL BD 注射器）[2]。\n\n由于您没有说明具体型号，我把两个型号的最大步速都列了出来。若您指的是其中某一台，请按型号对照确认。",
+      "citations": [
+        {
+          "doc_id": "f33baf8f00190aa4",
+          "full_doc_id": "f33baf8f00190aa4",
+          "chunk_id": "chunk-9ef0860fedb24d27aa6482a99144940a",
+          "rank": 1,
+          "score": 0.7825925925925926,
+          "snippet": "【列：注射泵类型 | Cchippump-2】 | 注射泵类型 | Cchippump-2 | |---|---| | 流量范围 | 0.5nL/min-158.907mL/min | | 线性推力 | >20kgf | | 最大步速 | ",
+          "text_unit_id": "f33baf8f00190aa4-chunk-010",
+          "file_path": "4a51b34a_瑞创RSP系列注射泵.pdf",
+          "title_path": "Cchippump-2 双通道分体式注射泵 / 1.2 技术参数",
+          "page_range": [
+            3,
+            3
+          ],
+          "marker": 1
+        },
+        {
+          "doc_id": "f33baf8f00190aa4",
+          "full_doc_id": "f33baf8f00190aa4",
+          "chunk_id": "chunk-2b22c5a61e8450927acaf06de1c510fc",
+          "rank": 4,
+          "score": 0.6227740515724209,
+          "snippet": "【列：注射泵类型 | Cchippump-2】 | 注射泵类型 | Cchippump-2 | |---|---| | 最小步速 | 0 | | 控制精度 | 当>30%满行程时，控制误差≤±0.5% | | 重复精度 | ≤±0.3% |",
+          "text_unit_id": "f33baf8f00190aa4-chunk-011",
+          "file_path": "4a51b34a_瑞创RSP系列注射泵.pdf",
+          "title_path": "Cchippump-2 双通道分体式注射泵 / 1.2 技术参数",
+          "page_range": [
+            3,
+            3
+          ],
+          "marker": 4
+        },
+        {
+          "doc_id": "f33baf8f00190aa4",
+          "full_doc_id": "f33baf8f00190aa4",
+          "chunk_id": "chunk-dd905e1215376d87e9f3c340c9d1a8e4",
+          "rank": 3,
+          "score": 0.6816090961113486,
+          "snippet": "【列：注射泵类型 | Cchippump-2】 | 注射泵类型 | Cchippump-2 | |---|---| | 每微步距离 | 0.078um | | 每微步注射量 | 0.001uL(1mL 注射器)/0.052uL(60mL 注",
+          "text_unit_id": "f33baf8f00190aa4-chunk-009",
+          "file_path": "4a51b34a_瑞创RSP系列注射泵.pdf",
+          "title_path": "Cchippump-2 双通道分体式注射泵 / 1.2 技术参数",
+          "page_range": [
+            3,
+            3
+          ],
+          "marker": 3
+        },
+        {
+          "doc_id": "8a22bfff101b31f1",
+          "full_doc_id": "8a22bfff101b31f1",
+          "chunk_id": "chunk-ec7e904e0b9ae07455e9980498544b1a",
+          "rank": 2,
+          "score": 0.681935651189776,
+          "snippet": "【列：型号 | LSP01-1BC】 | 型号 | LSP01-1BC | |---|---| | 每微步推进距离(1/16 step) | 0.156 micron | | 每微步注射液量(1/16 step) | 0.0919μ1 (6",
+          "text_unit_id": "8a22bfff101b31f1-chunk-006",
+          "file_path": "5ee31a86_融柏恒流泵_LSP-1C系列注射泵_说明书.pdf",
+          "title_path": "规格表",
+          "page_range": [
+            2,
+            2
+          ],
+          "marker": 2
+        }
+      ],
+      "tool_chain": [
+        {
+          "tool": "tool_list_docs",
+          "args": "{}"
+        },
+        {
+          "tool": "tool_retrieve",
+          "args": "{\"query\": \"注射泵 最大步速 步进速率\", \"top_k\": 8}"
+        },
+        {
+          "tool": "tool_retrieve",
+          "args": "{\"query\": \"瑞创RSP系列注射泵 技术参数 流速范围 步速\", \"top_k\": 8}"
+        }
+      ],
+      "contexts_count": 4,
+      "retrieval": {
+        "num_results": 4,
+        "top_docs": [
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4",
+          "f33baf8f00190aa4",
+          "8a22bfff101b31f1"
+        ]
+      },
+      "metrics": {
+        "multi_hop_recall": 1.0,
+        "multi_hop_recall_detail": {
+          "total_facts": 1,
+          "hit_facts": 1,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "最大步速 = 867 steps/sec",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]中明确写有“最大步速 | 867 steps/sec”，与事实陈述“最大步速 = 867 steps/sec”完全一致。"
+            }
+          ],
+          "reason": "1/1 个事实点被检索结果覆盖",
+          "contexts": 8
+        },
+        "faithfulness": 0.375,
+        "faithfulness_detail": {
+          "total_statements": 8,
+          "supported_statements": 3,
+          "unsupported": [
+            {
+              "statement": "瑞创 RSP 系列（Cchippump-2 双通道分体式注射泵）",
+              "reason": "上下文仅出现“Cchippump-2 双通道分体式注射泵”，未出现“瑞创 RSP 系列”这一品牌系列名称，缺乏依据。"
+            },
+            {
+              "statement": "融柏恒流泵 LSP-1C 系列（型号 LSP01-1BC）",
+              "reason": "上下文仅出现型号 LSP01-1BC，未出现“融柏恒流泵 LSP-1C 系列”这一品牌系列名称，缺乏依据。"
+            },
+            {
+              "statement": "知识库中收录了两份注射泵资料，两者型号不同",
+              "reason": "上下文未明确说明“收录了两份注射泵资料”或“两者型号不同”的概括性陈述；虽然出现了两个型号，但该总结性判断本身没有直接依据。"
+            },
+            {
+              "statement": "由于您没有说明具体型号，我把两个型号的最大步速都列了出来",
+              "reason": "这是关于回答行为的元陈述，上下文未提供依据。"
+            },
+            {
+              "statement": "若您指的是其中某一台，请按型号对照确认",
+              "reason": "这是建议性/元陈述，上下文未提供依据。"
+            }
+          ],
+          "reason": "答案中核心参数数值（1243 step/sec、867 steps/sec、流量范围、线性推力、最小步速、每微步距离/注射量）均有上下文依据，但品牌系列名称及若干总结性、元陈述缺乏依据，整体忠实度约为0.35。"
+        },
+        "answer_relevance": 0.85,
+        "answer_relevance_detail": {
+          "reason": "答案直接回应了问题，针对未指定型号的情况给出了两份资料中注射泵的最大步速数值，并说明需按型号对照确认，虽然问题未明确型号但仍提供了相关信息。"
+        },
+        "correctness": 1.0,
+        "correctness_detail": {
+          "total_facts": 1,
+          "correct_facts": 1,
+          "incorrect": [],
+          "reason": "标准答案唯一事实点「最大步速 867 steps/sec」在答案中明确给出（LSP-1C 系列条目），完全覆盖；其余额外内容（另一型号 1243 step/sec 等）不与标准答案矛盾，按规则忽略。"
+        },
+        "citation_accuracy": 0.4,
+        "citation_accuracy_detail": {
+          "total_cites": 5,
+          "supported_cites": 2,
+          "details": [
+            {
+              "cite_num": 1,
+              "statement": "- 最大步速：1243 step/sec [1]",
+              "supported": true,
+              "score": 1.0,
+              "reason": "被引用的上下文表格中明确标注了最大步速为 1243step/sec，与陈述一致。"
+            },
+            {
+              "cite_num": 1,
+              "statement": "907 mL/min，线性推力 >20 kgf [1]；最小步速为 0 [4]；每微步距离为 0",
+              "supported": false,
+              "score": 0.0,
+              "reason": "引用[1]的上下文中提到的是'最大步速 1243step/sec'，并未提及'最小步速为 0'或'每微步距离为 0'，因此该陈述无法在引用[1]中找到依据。"
+            },
+            {
+              "cite_num": 4,
+              "statement": "907 mL/min，线性推力 >20 kgf [1]；最小步速为 0 [4]；每微步距离为 0",
+              "supported": false,
+              "score": 0.0,
+              "reason": "上下文只给出了最小步速为 0，未提到每微步距离，因此关于每微步距离为 0 的陈述没有依据。"
+            },
+            {
+              "cite_num": 3,
+              "statement": "078 μm [3]",
+              "supported": false,
+              "score": 0.0,
+              "reason": "被引用的上下文只给出了每微步距离0.078um，并未包含关于最大步速的信息，因此无法支撑该陈述。"
+            },
+            {
+              "cite_num": 2,
+              "statement": "0919 μL（配合 60 mL BD 注射器）[2]",
+              "supported": true,
+              "score": 1.0,
+              "reason": "被引用上下文的表格中明确列出“每微步注射液量(1/16 step) | 0.0919μ1 (60ml BD syringe)”，与陈述“0919 μL（配合 60 mL BD 注射器）”一致。"
+            }
+          ],
+          "reason": "2/5 个引用有依据"
+        },
+        "tool_accuracy": 0.9,
+        "tool_accuracy_detail": {
+          "reason": "步骤1调用 tool_list_docs 先确认可用文档清单，符合多文档核对前的常规做法，恰当；步骤2用『注射泵 最大步速 步进速率』检索，直接对应问题核心参数，参数与意图匹配；步骤3进一步以『瑞创RSP系列注射泵 技术参数 流速范围 步速』补充检索，虽引入了具体型号但仍在围绕设备技术参数做细化，属于不确定资料时的合理二次检索，并非无意义重复。整体工具类型匹配、参数恰当、步数精简，能高效定位答案，判为高度合理。",
+          "chain": [
+            {
+              "tool": "tool_list_docs",
+              "args": "{}"
+            },
+            {
+              "tool": "tool_retrieve",
+              "args": "{\"query\": \"注射泵 最大步速 步进速率\", \"top_k\": 8}"
+            },
+            {
+              "tool": "tool_retrieve",
+              "args": "{\"query\": \"瑞创RSP系列注射泵 技术参数 流速范围 步速\", \"top_k\": 8}"
+            }
+          ]
+        }
+      },
+      "time_s": 53.91,
+      "answer_time_s": 23.97
+    },
+    {
+      "id": "DV-FS-001",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "这台注射泵可以用来做人体临床试验吗？",
+      "ground_truth": "不可以。该泵不能用于人类的临床实验，只能用于科学研究。",
+      "key_facts": [
+        "不能用于人类的临床实验",
+        "只能用于科学研究"
+      ],
+      "answer": "**结论：不可以。**\n\n- Cchippump-2 双通道分体式注射泵（瑞创 RSP 系列）的说明书在警告部分写明：“此泵没有在 FDA 注册，不能用于人类的临床实验。”[1]\n- 融柏恒流泵 LSP-1C 系列注射泵的说明书注明：“此泵不能用于人类的临床实验，只能用于科学研究。”[2]\n\n因此，知识库中涉及的这两款注射泵均属于科研用途设备，说明书明确排除了它们用于人体临床试验的可能性[1][2]。",
+      "citations": [
+        {
+          "doc_id": "f33baf8f00190aa4",
+          "full_doc_id": "f33baf8f00190aa4",
+          "chunk_id": "chunk-a2c61e330bb690f1a10410885ba4d44f",
+          "rank": 1,
+          "score": 0.6384285894478358,
+          "snippet": "！警告： 拆开包装后，请详细按照装箱单检查配件，如有缺失，请联系销售商。在使用本产品以前，请详细阅读本使用说明。 (1)请使用和产品配套的电源线。 (2)推块和端块之间存在挤压危险，泵运行时，请勿把手指放到推块和端块之间。 (3)在使用注射",
+          "text_unit_id": "f33baf8f00190aa4-chunk-003",
+          "file_path": "4a51b34a_瑞创RSP系列注射泵.pdf",
+          "title_path": "Cchippump-2 双通道分体式注射泵 / ！警告：",
+          "page_range": [
+            1,
+            1
+          ],
+          "marker": 1
+        },
+        {
+          "doc_id": "8a22bfff101b31f1",
+          "full_doc_id": "8a22bfff101b31f1",
+          "chunk_id": "chunk-2ec883df5a39dd0844dc29d2821e2237",
+          "rank": 2,
+          "score": 0.6001343467060019,
+          "snippet": "注意： 此泵不能用于人类的临床实验，只能用于科学研究 保定融柏恒流泵制造有限公司",
+          "text_unit_id": "8a22bfff101b31f1-chunk-019",
+          "file_path": "5ee31a86_融柏恒流泵_LSP-1C系列注射泵_说明书.pdf",
+          "title_path": "注意：",
+          "page_range": [
+            3,
+            3
+          ],
+          "marker": 2
+        }
+      ],
+      "tool_chain": [
+        {
+          "tool": "tool_list_docs",
+          "args": "{}"
+        },
+        {
+          "tool": "tool_retrieve",
+          "args": "{\"query\": \"注射泵 适用范围 人体临床试验\", \"top_k\": 8}"
+        }
+      ],
+      "contexts_count": 2,
+      "retrieval": {
+        "num_results": 2,
+        "top_docs": [
+          "f33baf8f00190aa4",
+          "8a22bfff101b31f1"
+        ]
+      },
+      "metrics": {
+        "multi_hop_recall": 1.0,
+        "multi_hop_recall_detail": {
+          "total_facts": 2,
+          "hit_facts": 2,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "不能用于人类的临床实验",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[1]明确表述：“此泵没有在FDA注册，不能用于人类的临床实验。”上下文[2]也表述：“此泵不能用于人类的临床实验，只能用于科学研究”。"
+            },
+            {
+              "fact": "只能用于科学研究",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]明确表述：“此泵不能用于人类的临床实验，只能用于科学研究”，与事实陈述“只能用于科学研究”直接对应。"
+            }
+          ],
+          "reason": "2/2 个事实点被检索结果覆盖",
+          "contexts": 5
+        },
+        "faithfulness": 0.5,
+        "faithfulness_detail": {
+          "total_statements": 4,
+          "supported_statements": 2,
+          "unsupported": [
+            {
+              "statement": "Cchippump-2 双通道分体式注射泵（瑞创 RSP 系列）的说明书在警告部分写明：“此泵没有在 FDA 注册，不能用于人类的临床实验。”",
+              "reason": "上下文[1]确实包含“此泵没有在FDA注册，不能用于人类的临床实验”，但文档中并未出现“瑞创 RSP 系列”这一名称，该系列名称在上下文中无依据。"
+            },
+            {
+              "statement": "融柏恒流泵 LSP-1C 系列注射泵的说明书注明：“此泵不能用于人类的临床实验，只能用于科学研究。”",
+              "reason": "上下文[2]确实包含“此泵不能用于人类的临床实验，只能用于科学研究”，但文档中并未出现“LSP-1C 系列”这一型号名称，该型号名称在上下文中无依据。"
+            }
+          ],
+          "reason": "答案的核心结论（不可用于人体临床试验）有依据，但两条具体陈述中附加的型号/系列名称（瑞创 RSP 系列、LSP-1C 系列）在上下文中找不到依据，因此整体忠实度为 0.5。"
+        },
+        "answer_relevance": 1.0,
+        "answer_relevance_detail": {
+          "reason": "答案直接明确回答注射泵能否用于人体临床试验，并给出两款具体设备的说明依据，完全紧扣问题。"
+        },
+        "correctness": 1.0,
+        "correctness_detail": {
+          "total_facts": 2,
+          "correct_facts": 2,
+          "incorrect": [],
+          "reason": "答案明确回答「不可以」，并覆盖「不能用于人类临床实验」及「只能用于科学研究」两个事实点，与标准答案一致。"
+        },
+        "citation_accuracy": 1.0,
+        "citation_accuracy_detail": {
+          "total_cites": 4,
+          "supported_cites": 4,
+          "details": [
+            {
+              "cite_num": 1,
+              "statement": "”[1]",
+              "supported": true,
+              "score": 1.0,
+              "reason": "上下文第(9)条明确写明“此泵没有在FDA注册，不能用于人类的临床实验”，直接支持该陈述。"
+            },
+            {
+              "cite_num": 2,
+              "statement": "”[2]",
+              "supported": true,
+              "score": 0.95,
+              "reason": "上下文明确指出“此泵不能用于人类的临床实验，只能用于科学研究”，直接支撑了该陈述。"
+            },
+            {
+              "cite_num": 1,
+              "statement": "因此，知识库中涉及的这两款注射泵均属于科研用途设备，说明书明确排除了它们用于人体临床试验的可能性[1][2]",
+              "supported": true,
+              "score": 0.95,
+              "reason": "上下文明确写明“此泵没有在FDA注册，不能用于人类的临床实验”，直接支撑了该陈述关于排除人体临床试验用途的说法。"
+            },
+            {
+              "cite_num": 2,
+              "statement": "因此，知识库中涉及的这两款注射泵均属于科研用途设备，说明书明确排除了它们用于人体临床试验的可能性[1][2]",
+              "supported": true,
+              "score": 0.95,
+              "reason": "上下文明确写明“此泵不能用于人类的临床实验，只能用于科学研究”，直接支撑了该陈述排除人体临床试验用途的说法。"
+            }
+          ],
+          "reason": "4/4 个引用有依据"
+        },
+        "tool_accuracy": 1.0,
+        "tool_accuracy_detail": {
+          "reason": "第1步 tool_list_docs({}) 用于确认可用文档清单，为后续精确检索提供上下文，参数无问题，属于合理的前置操作；第2步 tool_retrieve({\"query\": \"注射泵 适用范围 人体临床试验\", \"top_k\": 8}) 直接针对问题意图（设备适用范围是否涵盖人体临床试验）进行检索，query 参数语义准确，top_k=8 合理。两步调用类型匹配、参数恰当、步数精简，整体能高效获取回答问题所需资料，判定为完全合理。",
+          "chain": [
+            {
+              "tool": "tool_list_docs",
+              "args": "{}"
+            },
+            {
+              "tool": "tool_retrieve",
+              "args": "{\"query\": \"注射泵 适用范围 人体临床试验\", \"top_k\": 8}"
+            }
+          ]
+        }
+      },
+      "time_s": 68.96,
+      "answer_time_s": 13.26
+    },
+    {
+      "id": "DV-FS-002",
+      "category": "fact_single",
+      "difficulty": "easy",
+      "question": "这台注射泵的电源开关装在机器的哪个位置？",
+      "ground_truth": "电源开关安装在注射泵后面的右侧。",
+      "key_facts": [
+        "电源开关位于注射泵后面的右侧"
+      ],
+      "answer": "资料中两台注射泵说明书对电源开关位置的描述不同，具体位置取决于机型：\n\n- **融柏恒流泵 LSP-1C 系列注射泵**：电源开关安装在注射泵后面的右侧 [2]。\n- **瑞创 RSP 系列注射泵（Cchippump-2 双通道分体式注射泵）**：说明书 2.1 节提到，电源接口安装在注射泵背面左侧（AC220V-DC24V 电源），并通过电源开关打开或关闭仪器 [1]；该节没有明确说明电源开关本体位于哪一侧 [1]。\n\n在上述说明中，只有融柏恒流泵 LSP-1C 系列明确给出了开关所在的一侧（后面右侧）[2]。",
+      "citations": [
+        {
+          "doc_id": "8a22bfff101b31f1",
+          "full_doc_id": "8a22bfff101b31f1",
+          "chunk_id": "chunk-a0e951dbb2a5917b2a1b773cbfdd70d9",
+          "rank": 2,
+          "score": 0.7192939272347181,
+          "snippet": "电源开关 电源开关安装在注射泵后面的右侧。",
+          "text_unit_id": "8a22bfff101b31f1-chunk-041",
+          "file_path": "5ee31a86_融柏恒流泵_LSP-1C系列注射泵_说明书.pdf",
+          "title_path": "电源开关",
+          "page_range": [
+            6,
+            6
+          ],
+          "marker": 2
+        },
+        {
+          "doc_id": "f33baf8f00190aa4",
+          "full_doc_id": "f33baf8f00190aa4",
+          "chunk_id": "chunk-bf38c02c039905f39f952268ea9957c4",
+          "rank": 1,
+          "score": 0.7300624212053411,
+          "snippet": "2.1 电源线的连接 电源接口安装在注射泵背面左侧（AC220V-DC24V 电源），通过标配电源给仪器供电，通过电源开关打开或关闭仪器。",
+          "text_unit_id": "f33baf8f00190aa4-chunk-026",
+          "file_path": "4a51b34a_瑞创RSP系列注射泵.pdf",
+          "title_path": "Cchippump-2 双通道分体式注射泵 / 2.1 电源线的连接",
+          "page_range": [
+            5,
+            5
+          ],
+          "marker": 1
+        }
+      ],
+      "tool_chain": [
+        {
+          "tool": "tool_list_docs",
+          "args": "{}"
+        },
+        {
+          "tool": "tool_retrieve",
+          "args": "{\"query\": \"注射泵 电源开关 位置\", \"top_k\": 5}"
+        },
+        {
+          "tool": "tool_retrieve",
+          "args": "{\"query\": \"RSP系列注射泵 电源开关 后面板 侧面\", \"top_k\": 5}"
+        }
+      ],
+      "contexts_count": 2,
+      "retrieval": {
+        "num_results": 2,
+        "top_docs": [
+          "8a22bfff101b31f1",
+          "f33baf8f00190aa4"
+        ]
+      },
+      "metrics": {
+        "multi_hop_recall": 1.0,
+        "multi_hop_recall_detail": {
+          "total_facts": 1,
+          "hit_facts": 1,
+          "failed_facts": 0,
+          "per_fact": [
+            {
+              "fact": "电源开关位于注射泵后面的右侧",
+              "hit": true,
+              "score": 1.0,
+              "reason": "上下文[2]中明确记载：“电源开关安装在注射泵后面的右侧。”"
+            }
+          ],
+          "reason": "1/1 个事实点被检索结果覆盖",
+          "contexts": 8
+        },
+        "faithfulness": 0.2,
+        "faithfulness_detail": {
+          "total_statements": 5,
+          "supported_statements": 1,
+          "unsupported": [
+            {
+              "statement": "资料中两台注射泵说明书对电源开关位置的描述不同",
+              "reason": "上下文中只出现 Cchippump-2 注射泵的说明书内容，并未出现其他机型（如融柏恒流泵 LSP-1C 系列）的说明书，无法得出“两台说明书描述不同”的结论。"
+            },
+            {
+              "statement": "融柏恒流泵 LSP-1C 系列注射泵：电源开关安装在注射泵后面的右侧",
+              "reason": "上下文[2]仅称“电源开关安装在注射泵后面的右侧”，并未将其归属于“融柏恒流泵 LSP-1C 系列”这一机型，该机型与开关位置的对应关系在上下文中无依据。"
+            },
+            {
+              "statement": "瑞创 RSP 系列注射泵（Cchippump-2 双通道分体式注射泵）",
+              "reason": "上下文中的文档名称均为“Cchippump-2 双通道分体式注射泵”，未出现“瑞创 RSP 系列”这一名称，该机型归属在上下文中无依据。"
+            },
+            {
+              "statement": "在上述说明中，只有融柏恒流泵 LSP-1C 系列明确给出了开关所在的一侧（后面右侧）",
+              "reason": "该陈述依赖上下文中不存在的“融柏恒流泵 LSP-1C 系列”机型信息，且上下文[2]本身已明确给出开关在后面的右侧，无需借助该不存在的机型归属。"
+            }
+          ],
+          "reason": "答案将上下文中仅归属 Cchippump-2 的开关位置信息错误地分配给未出现在上下文中的融柏恒流泵 LSP-1C 系列和瑞创 RSP 系列，多个关键陈述在上下文中无依据，忠实度低。"
+        },
+        "answer_relevance": 0.9,
+        "answer_relevance_detail": {
+          "reason": "答案直接针对电源开关位置的问题给出了具体机型的位置说明，并明确指出了资料中的信息局限，回应了问题核心。"
+        },
+        "correctness": 1.0,
+        "correctness_detail": {
+          "total_facts": 1,
+          "correct_facts": 1,
+          "incorrect": [],
+          "reason": "答案明确指出融柏恒流泵 LSP-1C 系列注射泵的电源开关安装在后面右侧，与标准答案完全一致，其余内容为不影响判断的额外说明。"
+        },
+        "citation_accuracy": 0.6667,
+        "citation_accuracy_detail": {
+          "total_cites": 3,
+          "supported_cites": 2,
+          "details": [
+            {
+              "cite_num": 2,
+              "statement": "- **融柏恒流泵 LSP-1C 系列注射泵**：电源开关安装在注射泵后面的右侧 [2]",
+              "supported": true,
+              "score": 1.0,
+              "reason": "被引用上下文明确写明“电源开关安装在注射泵后面的右侧”，与陈述内容完全一致。"
+            },
+            {
+              "cite_num": 1,
+              "statement": "1 节提到，电源接口安装在注射泵背面左侧（AC220V-DC24V 电源），并通过电源开关打开或关闭仪器 [1]；该节没有明确说明电源开关本体位于哪一侧 [1]",
+              "supported": true,
+              "score": 0.95,
+              "reason": "上下文明确说明电源接口在背面左侧，并提到通过电源开关打开或关闭仪器，但未说明开关本体具体位置，与陈述一致。"
+            },
+            {
+              "cite_num": 2,
+              "statement": "在上述说明中，只有融柏恒流泵 LSP-1C 系列明确给出了开关所在的一侧（后面右侧）[2]",
+              "supported": false,
+              "score": 0.0,
+              "reason": "被引用的上下文只说明电源开关安装在注射泵后面的右侧，并未提及“融柏恒流泵 LSP-1C 系列”，也未说明“只有该系列明确给出了开关所在的一侧”，因此引用无法支撑该陈述。"
+            }
+          ],
+          "reason": "2/3 个引用有依据"
+        },
+        "tool_accuracy": 0.9,
+        "tool_accuracy_detail": {
+          "reason": "步骤1 tool_list_docs({}) 先确认可用文档清单，为后续检索定位设备手册是合理的前置步骤；步骤2 用关键词「注射泵 电源开关 位置」进行检索，与问题意图高度匹配，参数恰当；步骤3 进一步用更具体的设备型号及位置线索（后面板/侧面）细化检索，属于对不确定资料的补充核对，不算无意义重复。整体工具类型匹配、参数合理、步数不多余，能高效地定位答案。唯一可扣分点是若第一次检索已返回明确位置，第二次检索略显冗余，但属于合理的细化确认，不影响整体高效性。",
+          "chain": [
+            {
+              "tool": "tool_list_docs",
+              "args": "{}"
+            },
+            {
+              "tool": "tool_retrieve",
+              "args": "{\"query\": \"注射泵 电源开关 位置\", \"top_k\": 5}"
+            },
+            {
+              "tool": "tool_retrieve",
+              "args": "{\"query\": \"RSP系列注射泵 电源开关 后面板 侧面\", \"top_k\": 5}"
+            }
+          ]
+        }
+      },
+      "time_s": 103.08,
+      "answer_time_s": 49.34
+    }
+  ]
+}
