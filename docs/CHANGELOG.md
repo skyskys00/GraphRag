@@ -26,6 +26,27 @@
 
 ---
 
+## [v6.1.2] 2026-10-27 —— M10 模块文档精简：记录并入 CHANGELOG、状态行压缩（纯文档，无代码变更）
+
+**影响模块**：`docs/modules/M10_agent.md`（387 → 315 行）。
+
+**内容**：
+- **状态行压缩**：原 1 行巨型 blockquote（约 900 字、6 屏宽）改为按模板的 8 个短字段（版本/状态/更新/定位/契约/上游/依据/变更历史），量化数据全部移交 CHANGELOG。
+- **记录类章节瘦身**（99 → 36 行）：§7.1 A/B 表、§7.2 判别性验证样例、§7.3 决策链增强、§9.1 P2 候选方案表、§9.2 双轨裁判细节、§9.3 分箱复盘、§9.4 P2-cite 过程、§9.5 多轮缺陷排查，均压为「一句话结论 + 指向 CHANGELOG 版本」；原有量化数据经核对已全部在 CHANGELOG v5.46 / v5.46.1 / v5.47 / v5.48 / v5.49 / v5.50 条目中，无信息丢失。
+- **其它**：§2.2「与现栈衔接」8 条合并为 5 条；§3 决策协议与 §2.2/§10-8 去重压为 2 行；§8 P1 行收敛；删除文末已过时的「下一步（P0）」。
+- **规则依据**：本文《更新规则》第 2 条「模块文件不再维护变更记录章，回溯以 CHANGELOG 为准」。
+
+## [v6.1.1] 2026-10-27 —— M10 §11 Agent 能力演进路线落档（P0–P3 调研方案，无代码变更）
+
+**影响模块**：`docs/modules/M10_agent.md`（新增 §11 + 状态行）。
+
+**内容**：
+- **调研结论落档**：成熟 agent 不按「认知功能」切架构，而按**可独立替换的运行时接口**分层（Anthropic Managed Agents：session / harness / sandbox）；「记忆/规划/反思/人工介入/可观测」是能力目录。依据：Anthropic《Building Effective Agents / Context Engineering / Managed Agents》、LangGraph memory & HITL、Manus 上下文工程、Cognition《Don't Build Multi-Agents》、Claude Code sandboxing、OpenAI Agents SDK。
+- **演进路线（每项含目标/初步设计/验证标准/不做清单）**：P0 可观测埋点（run/span 落 PG，字段对齐 OTel GenAI）→ P0 上下文管理（token 预算、历史压缩、**历史旧角标注入前剥离**、结构化历史）→ P1 checkpointer 统一（`conversation_id↔thread_id`）+ 小型长期记忆 → P1 受控 plan 分支（仅多跳/多文档）→ P2 verifier 反思（评测驱动）→ P2 人工介入（`interrupt` + checkpoint）→ P3 沙箱最小版（subprocess/超时/禁网）。
+- **与已知缺陷衔接**：§9.5 的多轮问题由 P0 上下文管理根治——含「旧 `[n]` 语义漂移」（每轮重编号导致旧角标指向错块）的剥离方案。
+- **过度设计红线**：多智能体角色编排、通用记忆平台、无判据反思/LATS、工具 RAG、自建可观测 UI、BPMN 审批、无场景代码解释器。
+- 建议版本位 P0→P3 对应 v6.2–v6.8（按实际落地调整）。
+
 ## [v6.1] 2026-10-26 —— v5.50（A+B）后 50 题器械回归验证：tool_acc 大幅回升、基线未劣化（引用降幅归因 judge 噪声）
 
 **影响模块**：无代码改动；评测产物 `backend/tests/reports/agent/run_agent_device_50_v650_regress.json`、`agent_vs_direct_ab_v650.md`。
