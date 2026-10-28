@@ -22,6 +22,7 @@ from .compare import compare_params
 from .events import sse
 from .graph import collect_document_graph, collect_graph
 from .respond import make_answer, stream_answer
+from app.m10_agent import telemetry
 from app.m10_agent.agent import run_agent
 
 _PROJ = Path(__file__).resolve().parents[2]
@@ -44,6 +45,7 @@ def _ensure_conversation(deps: Any, conv_id: str | None) -> None:
 @asynccontextmanager
 async def lifespan(fastapi_app: FastAPI):
     await get_deps()  # 预热默认库（单库行为不变）
+    await telemetry.ensure_schema()  # v6.2 可观测表（失败仅告警，不阻塞启动）
     yield
     await dispose()
 
@@ -143,11 +145,18 @@ async def post_agent(req: AgentRequest) -> dict[str, Any]:
 
     返回 {answer, events, citations}。RAG 直连 /answer 保留作内部工具落点 + 评测对照。
     """
+    run_id: str | None = None
     try:
         deps = await get_deps(req.collection_id)
         _ensure_conversation(deps, req.conversation_id)
         history = _conv_history(deps, req.conversation_id)
+        run_id = await telemetry.start_run(
+            collection_id=req.collection_id,
+            conversation_id=req.conversation_id,
+            question=req.query,
+        )
         result = await run_agent(deps, req.query, history=history, response_type=req.response_type)
+        telemetry.finish_run(run_id, "completed", result=result)
         if req.conversation_id:
             await conversations.append_round(
                 deps, req.conversation_id,
@@ -158,6 +167,7 @@ async def post_agent(req: AgentRequest) -> dict[str, Any]:
             )
         return result
     except Exception as e:  # noqa: BLE001 —— 边界：LLM/工具异常转可读 500
+        telemetry.finish_run(run_id, "error", error=f"{type(e).__name__}: {e}")
         raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}") from e
 
 
@@ -205,6 +215,8 @@ async def stream_agent_ep(
     deps = await get_deps(collection_id)
     _ensure_conversation(deps, conversation_id)
     history = _conv_history(deps, conversation_id)
+    run_id = await telemetry.start_run(
+        collection_id=collection_id, conversation_id=conversation_id, question=q)
 
     async def gen() -> AsyncIterator[str]:
         queue: asyncio.Queue = asyncio.Queue()
@@ -215,8 +227,13 @@ async def stream_agent_ep(
         async def runner() -> None:
             try:
                 result = await run_agent(deps, q, history=history, response_type=response, on_event=emit)
+                telemetry.finish_run(run_id, "completed", result=result)
                 await queue.put({"type": "__run_done__", "result": result})
+            except asyncio.CancelledError:  # 客户端断流：标记终态后继续向上传播
+                telemetry.finish_run(run_id, "cancelled")
+                raise
             except Exception as e:  # noqa: BLE001 —— 失败转 error 事件并收尾
+                telemetry.finish_run(run_id, "error", error=f"{type(e).__name__}: {e}")
                 await queue.put({"type": "__run_error__", "message": f"{type(e).__name__}: {e}"})
                 await queue.put({"type": "__run_done__", "result": None})
 

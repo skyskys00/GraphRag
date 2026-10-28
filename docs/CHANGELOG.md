@@ -26,6 +26,19 @@
 
 ---
 
+## [v6.2] 2026-10-28 —— M10 P0 可观测埋点落地：agent_runs / agent_spans 落 PG（OTel GenAI 语义）
+
+**影响模块**：新增 `backend/app/m10_agent/telemetry.py`（建表 + start/finish 落库）；`backend/app/m10_agent/agent.py`（节点级 span 采集 + `_stream_chat` 取 usage）；`backend/app/m7_interact/api.py`（POST /agent 与 /agent/stream 接 start/finish，SSE 断流标 cancelled）；`lifespan` 启动建表。
+
+**内容**：
+- **分层**：内核只采集（`AgentState.spans`，不碰 DB），API 层落库；M9 评测路径不写库——生产与评测共享行为、分离入口与落点。
+- **表结构**：`agent_runs`（run_id、conversation_id、collection_id、question、status、model、started_at、duration_ms、tokens_in、tokens_out、tool_calls、error）+ `agent_spans`（run_id、span_id、node、tool、started_at、duration_ms、tokens_in、tokens_out、detail jsonb，主键 run_id+span_id）。刻意简化：省 `parent_span_id`（当前单层 span）、不存 ttft。
+- **容错**：写入 fire-and-forget（`finish_run` 同步调度，可在 CancelledError 中安全调用）；PG 不可用只告警、不阻塞对话；`include_usage` 若被后端拒绝则回退一次不带该参数（token 记空）。
+- **验证（真实运行）**：① 闲聊「你好」2.2s → completed、route/generate 两段 span、tokens 1034/71；② 真实检索题 → completed、223.6s、tokens 73034/1478、tool_calls 10；③ SSE 请求 3s 强断 → cancelled、duration 2913ms。自测写入后已清理测试行。
+- **已知限制**：cancelled/error 行 `model` 为空（model 随 result 返回，异常路径无 result）；进程崩溃时停留 running（靠 started_at 目视判定 stale，不自动清理）。
+- **首日数据发现**：同一题出现 5 轮决策、10 次工具调用（≈3:43）——多轮检索长尾已可量化，交给 v6.3 上下文管理与后续规划优化核对。
+- **不做**：自建可观测 UI、Langfuse/Phoenix 接入（字段语义已对齐，将来零改造接入）。
+
 ## [v6.1.2] 2026-10-27 —— M10 模块文档精简：记录并入 CHANGELOG、状态行压缩（纯文档，无代码变更）
 
 **影响模块**：`docs/modules/M10_agent.md`（387 → 315 行）。

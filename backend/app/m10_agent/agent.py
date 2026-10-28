@@ -16,6 +16,9 @@ from __future__ import annotations
 
 import json
 import re
+import time
+import uuid
+from datetime import datetime, timezone
 from typing import Any, Literal
 from typing_extensions import TypedDict
 
@@ -55,6 +58,7 @@ class AgentState(TypedDict, total=False):
     events: list[dict[str, Any]]        # 决策链事件（供 SSE 透出）
     citations: list[dict[str, Any]]
     answer_text: str
+    spans: list[dict[str, Any]]        # 节点级运行数据（v6.2 可观测；内核只采集，API 层落库）
     _deps: Any                          # AppDeps（进程内传递，跨节点工具绑定）
     _on_event: Any                      # 异步事件回调 on_event(evt)——SSE 实时透出（进程内传递）
 
@@ -64,6 +68,21 @@ async def _emit(state: AgentState, type_: str, **payload: Any) -> None:
     fn = state.get("_on_event")
     if fn:
         await fn({"type": type_, **payload})
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _span(node: str, t0: float, started_at: str, **fields: Any) -> dict[str, Any]:
+    """节点级 span：耗时 + 可选 token 用量，供 API 层落库（v6.2）。"""
+    return {
+        "span_id": uuid.uuid4().hex[:12],
+        "node": node,
+        "started_at": started_at,
+        "duration_ms": int((time.perf_counter() - t0) * 1000),
+        **fields,
+    }
 
 
 async def _retrieve_tool(deps: Any):
@@ -188,6 +207,7 @@ async def _chat(cfg: dict, messages: list[dict], tools: bool) -> Any:
 
 async def route(state: AgentState) -> dict[str, Any]:
     """决策节点：LLM bind_tools 判「调工具 / 直答」，把 assistant 消息与 tool_decision 事件写入状态。"""
+    t0, started_at = time.perf_counter(), _now()
     cfg = _llm_config()
     resp = await _chat(cfg, state["messages"], tools=True)
     msg = resp.choices[0].message
@@ -209,9 +229,16 @@ async def route(state: AgentState) -> dict[str, Any]:
         evt = {"type": "tool_decision", "tool": c.function.name, "args": c.function.arguments or ""}
         events.append(evt)
         await _emit(state, "tool_decision", tool=evt["tool"], args=evt["args"])
+    u = resp.usage
+    spans = [*state.get("spans", []), _span(
+        "route", t0, started_at,
+        tokens_in=getattr(u, "prompt_tokens", None),
+        tokens_out=getattr(u, "completion_tokens", None),
+    )]
     return {
         "messages": msgs,
         "events": events,
+        "spans": spans,
         "remaining_rounds": state["remaining_rounds"] - 1,
     }
 
@@ -227,13 +254,19 @@ async def execute_tools(state: AgentState) -> dict[str, Any]:
     """工具节点：本批 tool_calls 全部 dispatch，ToolMessage 回填 + tool_result 事件 + citations 收集。"""
     calls = (state["messages"][-1].get("tool_calls") or [])
     msgs, events, citations = list(state["messages"]), list(state["events"]), list(state["citations"])
+    spans = list(state.get("spans", []))
     for call in calls:
         name = call["function"]["name"]
         args = json.loads(call["function"]["arguments"] or "{}")
+        t0, started_at = time.perf_counter(), _now()
         try:
             result = await registry.dispatch(name, args, state["_deps"])
         except Exception as e:  # noqa: BLE001 —— 工具失败不杀 agent loop
             result = {"__error__": f"{type(e).__name__}: {e}"}
+        spans.append(_span(
+            "execute_tools", t0, started_at, tool=name,
+            detail={"args": json.dumps(args, ensure_ascii=False)[:300]},
+        ))
         msgs.append({
             "role": "tool", "tool_call_id": call["id"],
             "content": json.dumps(result, ensure_ascii=False, default=str)[:4000],
@@ -244,7 +277,7 @@ async def execute_tools(state: AgentState) -> dict[str, Any]:
         await _emit(state, "tool_result", tool=name, args=args, summary=summary, snippets=snippets)
         if isinstance(result, dict) and result.get("citations"):
             citations.extend(result["citations"])
-    return {"messages": msgs, "events": events, "citations": citations}
+    return {"messages": msgs, "events": events, "citations": citations, "spans": spans}
 
 
 def _result_snippets(result: Any, limit: int = 3) -> list[str]:
@@ -322,13 +355,27 @@ def _resolve_citations(text: str, index: dict[int, dict]) -> list[dict]:
     return used
 
 
-async def _stream_chat(cfg: dict, messages: list[dict]) -> Any:
-    """流式对话调用（generate 用）：逐 chunk yield content 增量文本。"""
+async def _stream_chat(cfg: dict, messages: list[dict], usage: dict[str, int] | None = None) -> Any:
+    """流式对话调用（generate 用）：逐 chunk yield content 增量文本。
+
+    传入 usage 字典时顺带回填 token 用量（v6.2 可观测）。include_usage 是 OpenAI 兼容扩展，
+    个别后端会拒绝 —— 此时回退一次不带该参数，用量记空，不影响生成。
+    """
     client = AsyncOpenAI(api_key=cfg["api_key"], base_url=cfg["base_url"])
     try:
         kw: dict[str, Any] = {"model": cfg["query_model"], "messages": messages, **cfg["extra_kwargs"]}
-        stream = await client.chat.completions.create(**kw, stream=True)
+        try:
+            stream = await client.chat.completions.create(
+                **kw, stream=True, stream_options={"include_usage": True})
+        except Exception:  # noqa: BLE001 —— 后端不支持 include_usage 时降级
+            stream = await client.chat.completions.create(**kw, stream=True)
         async for chunk in stream:
+            u = getattr(chunk, "usage", None)
+            if u is not None and usage is not None:
+                usage["tokens_in"] = getattr(u, "prompt_tokens", None) or 0
+                usage["tokens_out"] = getattr(u, "completion_tokens", None) or 0
+            if not chunk.choices:
+                continue
             delta = chunk.choices[0].delta.content or ""
             if delta:
                 yield delta
@@ -343,6 +390,7 @@ async def generate(state: AgentState) -> dict[str, Any]:
     末尾 citations/done 使用还原后的带 marker 引用。
     """
     cfg = _llm_config()
+    t0, started_at = time.perf_counter(), _now()
     index, index_text = _build_citation_index(state["citations"])
     messages = list(state["messages"])
     if index_text:
@@ -355,7 +403,8 @@ async def generate(state: AgentState) -> dict[str, Any]:
 
     text = ""
     events = list(state["events"])
-    async for delta in _stream_chat(cfg, messages):
+    usage: dict[str, int] = {}
+    async for delta in _stream_chat(cfg, messages, usage):
         if not delta:
             continue
         text += delta
@@ -382,7 +431,11 @@ async def generate(state: AgentState) -> dict[str, Any]:
     ]
     await _emit(state, "citations", citations=final)
     await _emit(state, "done", text=main, advice=advice, citations=final)
-    return {"answer_text": main, "advice": advice, "events": events, "citations": final}
+    spans = [*state.get("spans", []), _span(
+        "generate", t0, started_at,
+        tokens_in=usage.get("tokens_in"), tokens_out=usage.get("tokens_out"),
+    )]
+    return {"answer_text": main, "advice": advice, "events": events, "citations": final, "spans": spans}
 
 
 def build_graph() -> StateGraph:
@@ -431,6 +484,7 @@ async def run_agent(
         "messages": _initial_messages(query, history, response_type),
         "events": [],
         "citations": [],
+        "spans": [],
         "_deps": deps,
         "_on_event": on_event,
     })
@@ -439,4 +493,6 @@ async def run_agent(
         "advice": res.get("advice", ""),
         "events": res.get("events", []),
         "citations": res.get("citations", []),
+        "spans": res.get("spans", []),
+        "model": _llm_config()["query_model"],
     }

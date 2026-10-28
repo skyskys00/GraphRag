@@ -1,6 +1,6 @@
-> **版本：** v0.4（方案稿；项目版本 **v6.x**——v6.0 追认定格历史 v5.43–v5.50，能力演进路线 P0–P3 见 §11）
-> **状态：** P1 已验收（v5.47）｜ P2-cite 收口（v5.49）｜ 多轮直答修复 + 前端决策链改版（v5.50）；评测量化基线见 CHANGELOG
-> **更新：** 2026-10-27
+> **版本：** v0.5（方案稿；项目版本 **v6.x**——v6.0 追认定格历史 v5.43–v5.50，能力演进路线 P0–P3 见 §11）
+> **状态：** P1 已验收（v5.47）｜ P2-cite 收口（v5.49）｜ 多轮直答修复 + 前端决策链改版（v5.50）｜ P0 可观测埋点落地（v6.2）；评测量化基线见 CHANGELOG
+> **更新：** 2026-10-28
 > **定位：** **Agent 为完整系统主体，RAG 全链（M0–M7）作为其底座能力区**——不是「RAG + agent 附加」，而是「agent 系统内嵌 RAG 能力」
 > **契约：** 待定，见 §5（API 以 Swagger 为准）
 > **上游：** [M5 检索层](M5_retrieve.md) · [M6 生成层](M6_generate.md) · [M7 交互层](M7_interact.md)（M1–M4 见 [FRAMEWORK_NOTES §3](../../FRAMEWORK_NOTES.md)）｜ **下游：** [M8 前端](M8_frontend.md)
@@ -236,14 +236,21 @@ tool_acc 下降归因：DV-FS-017 为 judge JSON 解析失败伪分（实际 1.0
 
 纪律：每个板块先落**可替换接口**再落能力；正式功能守 §2 简单优先；探索性能力单独 commit、必要时开关隔离（§10 探底纪律）。调研依据见 §11.9。
 
-### 11.1 P0 可观测埋点
+### 11.1 P0 可观测埋点 ✔ 落地（v6.2）
 
-**目标**：每次 agent 运行可追溯，字段对齐 OTel GenAI 语义，将来接 Langfuse/Phoenix 零改造。
+**目标**：每次 agent 运行可追溯，字段语义对齐 OTel GenAI，将来接 Langfuse/Phoenix 零改造。
 
-- **现状**：SSE 决策链（tool_decision/tool_result/delta/citations/done）+ `_events_to_tool_steps` 落库已有一半，缺 trace 元数据与耗时/用量。
-- **设计**：每次运行生成 `run_id`；节点级 span 记 `node / tool / started_at / duration_ms`，可选 `tokens_in/out`；落 PG 表 `agent_runs`（run_id、conversation_id、question、status、duration_ms、tokens）+ `agent_spans`（run_id、span_id、parent_span_id、node、meta jsonb）——字段按 `gen_ai.*` 命名。
-- **验证**：任一轮对话后 SQL 可还原 run→spans 全链；断流/异常也有终态 status。
-- **不做**：自建可观测 UI（交给 Langfuse/Phoenix）。
+**实现**（`telemetry.py` + `agent.py` 采集 + `api.py` 落库）：
+- **两层分工**：内核只把节点级 span 写进 `AgentState.spans`（不碰 DB）；API 层 `start_run` 插 running 行、`finish_run` 更新终态并批量写 spans。M9 评测路径不写库（生产与评测共享行为、分离入口与落点）。
+- **表**：`agent_runs`（run_id / conversation_id / question / status / model / duration_ms / tokens_in / tokens_out / tool_calls / error）+ `agent_spans`（run_id / span_id / node / tool / started_at / duration_ms / tokens / detail jsonb）。省略 `parent_span_id`（当前单层）与 ttft。
+- **容错**：写入 best-effort（PG 故障只告警）；`finish_run` 同步调度写入，可在 CancelledError 中安全调用；`include_usage` 不被支持时降级、token 记空。
+- **状态机**：running → completed / error / cancelled（SSE 断流）；进程崩溃停留 running，不自动清理。
+
+**验证（v6.2 实测）**：闲聊 2.2s（route+generate 两段 span、tokens 1034/71）；真实检索题 223.6s（tokens 73034/1478、10 次工具调用）；SSE 3s 强断 → cancelled。SQL 一条 join 即可还原任意 run 的全链。
+
+**已知限制**：cancelled/error 行 model 为空；跨运行聚合查询（p95、平均工具轮数）尚未做成报告，直接用 SQL。
+
+**不做**：自建可观测 UI（交给 Langfuse/Phoenix）。
 
 ### 11.2 P0 上下文管理（token 预算 / 压缩 / 编号漂移）
 
@@ -294,7 +301,7 @@ tool_acc 下降归因：DV-FS-017 为 judge JSON 解析失败伪分（实际 1.0
 
 | 期 | 内容 | 建议版本 | 验证方式 |
 |---|---|---|---|
-| P0 | 可观测埋点 | v6.2 | SQL 可还原 run→spans |
+| P0 | 可观测埋点 ✔ v6.2 | v6.2 | SQL 可还原 run→spans（已实测） |
 | P0 | 上下文管理（预算/压缩/编号剥离） | v6.3 | 长会话 + 多轮测试集 |
 | P1 | checkpointer 统一 + 长期记忆 | v6.4 | resume 成功、追问增量检索 |
 | P1 | 受控 plan 分支 | v6.5 | 多跳题步数/覆盖提升 |
