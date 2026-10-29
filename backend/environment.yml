@@ -16,6 +16,9 @@ dependencies:
       - langchain-text-splitters
       # ---- Agent 编排（M10，P0 探底通过 2026-10-23，见 CHANGELOG v5.41）----
       - langgraph==1.2.16   # 依赖树自带 langchain-core，不装全量 langchain
+      - langgraph-checkpoint-postgres==3.2.0   # M10 checkpointer（v6.4）
+      - psycopg[binary]==3.3.6                 # 上面的 PG saver 驱动（v3，勿装 psycopg2）
+      - psycopg-pool==3.3.3
       # ---- 解析引擎 ----
       - mineru
       - docling               # docx/pptx/xlsx/html/epub 兜底（PDF 一律走 MinerU）

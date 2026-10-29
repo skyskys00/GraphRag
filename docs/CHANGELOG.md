@@ -26,6 +26,28 @@
 
 ---
 
+## [v6.4] 2026-10-29 —— M10 checkpointer 统一：多轮历史改建 LangGraph PG 快照
+
+**影响模块**：`backend/app/m10_agent/telemetry.py`（新增 checkpointer 生命周期 open/close/get/delete_thread）；`backend/app/m10_agent/agent.py`（`_deps`/`_on_event` 移入 contextvar、`build_graph(checkpointer)`、`run_agent(conversation_id=)` 从快照取历史、新增 `_messages_to_history`）；`backend/app/m7_interact/api.py`（lifespan 开关 checkpointer、两个 agent 端点传 `conversation_id`、删库清 thread）；`backend/app/m7_interact/conversations.py`（删会话清 thread）；`backend/environment.yml`（+`langgraph-checkpoint-postgres==3.2.0` / `psycopg[binary]==3.3.6` / `psycopg-pool==3.3.3`）。
+
+**内容**：
+- **checkpoint = 多轮历史唯一权威源**：`thread_id = conversation_id`；每轮先 `aget_state` 取上一轮 state，`_messages_to_history` 转成可复用历史（只留 user 与「已作答」的 assistant，跳过 tool 消息与带 `tool_calls` 的 route 前导语），再走既有 `_prepare_history` 裁剪（8 条 / 6000 字符）。`conversations.json` 降级为前端 sidebar 展示数据，不再作为 LLM 历史来源；无快照（新会话 / 老会话）时用 JSON 历史作种子。
+- **依赖搬出 state**：checkpointer 会把 state msgpack 序列化落 PG，`AppDeps`（LightRAG 实例 / 函数 / Path / set）不可序列化，恢复后亦是死对象 → 改走 `contextvar`（等价 LangGraph runtime context），节点内 `_ctx("deps")` 读取。
+- **生命周期对齐**：删会话 `adelete_thread`；删库先读注册表拿 conv_ids、rmtree 后逐个清 thread（否则 PG 留孤儿快照）。PG 不可用 → `get_checkpointer()` 返回 None，全链回退 JSON 历史，与 v6.2 埋点同口径。
+- **评测隔离**：`m9_eval.runner` 与脚本不传 `conversation_id` → 不挂 thread、不写 checkpoint。
+
+**验证（真实运行）**：
+- 两轮对话后该 thread **6 个快照**；重启 API 进程后第三轮正常读到前两轮历史（13 条 state messages → 裁出 7 条注入）。
+- checkpoint 读回内容完整：10 条消息中 tool 消息被正确过滤；修掉 route 前导语被当历史答案保留的噪音后，历史为干净的 user/assistant 交替。
+- SSE 事件线正常：202 个 delta + citations + done（`on_event` 经 contextvar 传递有效）。
+- 删会话：checkpoints 行 **14 → 0**。
+- 30 题行政库 agent 基线（首次建立）：faithfulness **0.9817** / answer_relevance 0.9650 / correctness 0.9579 / citation_accuracy 0.8493 / multi_hop_recall 0.8451 / tool_accuracy 0.9523，judge 失败 0（`run_agent_admin_30_v64.json`）。
+- 多轮冒烟 **7/10**；用 v6.3.1 原代码同测试对照 **6/10** → 失败模式一致（追问 `tool_calls=0`），**非 v6.4 回归**，系 LLM 决策波动（v6.3.1 记录 10/10 为单次采样偏乐观）。
+
+**已知限制**：每轮 5–6 份全量快照（裁剪后约 6000 字符/份），20 轮会话约 3–5MB，暂不做清理策略；同一会话并发请求会互相覆盖 state（单用户场景接受）；checkpointer 仅 API lifespan 打开，脚本/评测进程内 `get_checkpointer()` 为 None。
+
+**附带发现（未修）**：`_llm_config()` 未设 `temperature`，工具决策随机性偏高（v5.50 A 规则在追问场景约 50% 概率被绕过），需独立评估后再改。
+
 ## [v6.3.1] 2026-10-29 —— M10 工作记忆（跨轮引用复用）+ 多轮结构测试集；附带修复旧式评测库加载
 
 **影响模块**：`backend/app/m10_agent/agent.py`（`run_agent` 新增 `prior_citations`，`_prior_context_text` + `_initial_messages` 注入已知资料）；`backend/app/m7_interact/api.py`（`_last_citations`，POST/SSE 传入上一轮引用）；`backend/app/m7_interact/bootstrap.py`（旧式库 workspace 映射）；新增 `backend/scripts/multi_turn_smoke.py`、`backend/tests/testsets/testset_admin_multi_10.json`；报告 `backend/tests/reports/agent/multi_turn_v631.json`。

@@ -15,9 +15,11 @@ P1 剩余：M9 评测回归（agent 测试集 v0 + RAG 对比），[n] 与 token
 from __future__ import annotations
 
 import json
+import logging
 import re
 import time
 import uuid
+from contextvars import ContextVar
 from datetime import datetime, timezone
 from typing import Any, Literal
 from typing_extensions import TypedDict
@@ -31,7 +33,9 @@ from app.m6_generate.cite import _html_to_text
 from app.m6_generate.orchestrator import answer as rag_answer
 from app.m7_interact import documents
 
-from . import registry
+from . import registry, telemetry
+
+log = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = (
     "你是中文知识库助手。基于工具返回的结果回答问题；答案需带引用来源，"
@@ -61,13 +65,21 @@ class AgentState(TypedDict, total=False):
     citations: list[dict[str, Any]]
     answer_text: str
     spans: list[dict[str, Any]]        # 节点级运行数据（v6.2 可观测；内核只采集，API 层落库）
-    _deps: Any                          # AppDeps（进程内传递，跨节点工具绑定）
-    _on_event: Any                      # 异步事件回调 on_event(evt)——SSE 实时透出（进程内传递）
+
+
+# v6.4：deps / on_event 不进 state —— checkpointer 会把 state msgpack 序列化落 PG，
+# 而 AppDeps（LightRAG 实例/函数/Path/set）不可序列化，恢复后也是死对象。
+# 改走 contextvar：同 asyncio 任务内可见、不进快照（等同 LangGraph 的 runtime context）。
+_CTX: ContextVar[dict[str, Any]] = ContextVar("agent_ctx", default={})
+
+
+def _ctx(key: str, default: Any = None) -> Any:
+    return _CTX.get().get(key, default)
 
 
 async def _emit(state: AgentState, type_: str, **payload: Any) -> None:
     """若配置了事件回调（SSE 流式），立即透出该事件；否则仅累积（POST JSON 模式）。"""
-    fn = state.get("_on_event")
+    fn = _ctx("on_event")
     if fn:
         await fn({"type": type_, **payload})
 
@@ -262,7 +274,7 @@ async def execute_tools(state: AgentState) -> dict[str, Any]:
         args = json.loads(call["function"]["arguments"] or "{}")
         t0, started_at = time.perf_counter(), _now()
         try:
-            result = await registry.dispatch(name, args, state["_deps"])
+            result = await registry.dispatch(name, args, _ctx("deps"))
         except Exception as e:  # noqa: BLE001 —— 工具失败不杀 agent loop
             result = {"__error__": f"{type(e).__name__}: {e}"}
         spans.append(_span(
@@ -440,7 +452,7 @@ async def generate(state: AgentState) -> dict[str, Any]:
     return {"answer_text": main, "advice": advice, "events": events, "citations": final, "spans": spans}
 
 
-def build_graph() -> StateGraph:
+def build_graph(checkpointer: Any = None) -> StateGraph:
     g = StateGraph(AgentState)
     g.add_node("route", route)
     g.add_node("execute_tools", execute_tools)
@@ -449,7 +461,7 @@ def build_graph() -> StateGraph:
     g.add_conditional_edges("route", decide, {"execute_tools": "execute_tools", "generate": "generate"})
     g.add_edge("execute_tools", "route")
     g.add_edge("generate", END)
-    return g.compile()
+    return g.compile(checkpointer=checkpointer)
 
 
 _HIST_MARK_RE = re.compile(r"\s*\[\d+\]")
@@ -485,6 +497,22 @@ def _prepare_history(history: list[dict]) -> tuple[list[dict], int]:
         if m["role"] == "assistant":
             m["content"] = _strip_history_markers(m["content"])
     return msgs, dropped
+
+
+def _messages_to_history(messages: list[dict]) -> list[dict]:
+    """checkpoint 消息流 → 可复用历史：只留 user 与「已作答」的 assistant 文本。
+
+    跳过 tool 消息、空内容、以及带 tool_calls 的 assistant 消息——后者是 route 节点的
+    决策前导语（「我先检索…」），不是给用户看的答案，进历史会污染上下文（且导致连续 assistant）。
+    裁剪交给下游 `_prepare_history`（预算 6000 字符），此处不做二次裁剪。
+    """
+    return [
+        {"role": m["role"], "content": m["content"]}
+        for m in messages or []
+        if m.get("role") in ("user", "assistant")
+        and (m.get("content") or "").strip()
+        and not m.get("tool_calls")
+    ]
 
 
 def _prior_context_text(citations: list[dict]) -> str:
@@ -526,6 +554,7 @@ async def run_agent(
     deps: Any,
     query: str,
     *,
+    conversation_id: str | None = None,
     history: list[dict] | None = None,
     prior_citations: list[dict] | None = None,
     response_type: str | None = None,
@@ -534,23 +563,44 @@ async def run_agent(
 ) -> dict[str, Any]:
     """跑一次 agent 决策循环。POST /agent（JSON）与 GET /agent/stream（事件）共用入口。
 
+    conversation_id: 有值时挂 checkpointer（thread_id = conversation_id），
+      多轮历史以 checkpoint 为唯一来源；无快照（新会话/老会话）时用 history 作种子。
+      评测与脚本不传该参数 → 走调用方给的 history，不写 checkpoint。
+    history: 无 checkpoint 时的历史来源（评测路径 / PG 不可用降级）。
     prior_citations: 上一轮的引用（工作记忆）——并入本轮引用池，追问可直接复用已检索依据。
     on_event: 可选异步回调 on_event(evt)，SSE 端点传入以实时透出事件（节点内 await 透出）。
     """
-    app = build_graph()
-    res = await app.ainvoke({
-        "query": query,
-        "collection_id": getattr(deps, "collection_id", "default"),
-        "response_type": response_type,
-        "history": history or [],
-        "remaining_rounds": max_rounds,
-        "messages": _initial_messages(query, history, response_type, prior_citations),
-        "events": [],
-        "citations": list(prior_citations or []),
-        "spans": [],
-        "_deps": deps,
-        "_on_event": on_event,
-    })
+    ckpt = telemetry.get_checkpointer()
+    config = {"configurable": {"thread_id": conversation_id}} if (ckpt and conversation_id) else None
+    app = build_graph(ckpt if config else None)
+
+    base_history, base_prior = history or [], prior_citations
+    if config:
+        try:
+            snap = await app.aget_state(config)
+            vals = snap.values or {}
+            seed = _messages_to_history(vals.get("messages") or [])
+            if seed:  # 有快照 → checkpoint 为准；首轮用调用方 history 作种子
+                base_history = seed
+                base_prior = vals.get("citations") or base_prior
+        except Exception:  # noqa: BLE001 —— checkpoint 读失败降级为 JSON 历史
+            log.warning("agent: 读取 checkpoint 失败，回退调用方 history", exc_info=True)
+
+    token = _CTX.set({"deps": deps, "on_event": on_event})
+    try:
+        res = await app.ainvoke({
+            "query": query,
+            "collection_id": getattr(deps, "collection_id", "default"),
+            "response_type": response_type,
+            "history": base_history,
+            "remaining_rounds": max_rounds,
+            "messages": _initial_messages(query, base_history, response_type, base_prior),
+            "events": [],
+            "citations": list(base_prior or []),
+            "spans": [],
+        }, config)
+    finally:
+        _CTX.reset(token)
     return {
         "answer": res.get("answer_text", ""),
         "advice": res.get("advice", ""),

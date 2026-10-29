@@ -46,7 +46,9 @@ def _ensure_conversation(deps: Any, conv_id: str | None) -> None:
 async def lifespan(fastapi_app: FastAPI):
     await get_deps()  # 预热默认库（单库行为不变）
     await telemetry.ensure_schema()  # v6.2 可观测表（失败仅告警，不阻塞启动）
+    await telemetry.open_checkpointer()  # v6.4 会话状态快照（失败回退 JSON 历史）
     yield
+    await telemetry.close_checkpointer()
     await dispose()
 
 
@@ -169,8 +171,9 @@ async def post_agent(req: AgentRequest) -> dict[str, Any]:
             conversation_id=req.conversation_id,
             question=req.query,
         )
-        result = await run_agent(deps, req.query, history=history,
-                                 prior_citations=prior, response_type=req.response_type)
+        result = await run_agent(deps, req.query, conversation_id=req.conversation_id,
+                                 history=history, prior_citations=prior,
+                                 response_type=req.response_type)
         telemetry.finish_run(run_id, "completed", result=result)
         if req.conversation_id:
             await conversations.append_round(
@@ -242,8 +245,9 @@ async def stream_agent_ep(
 
         async def runner() -> None:
             try:
-                result = await run_agent(deps, q, history=history,
-                                         prior_citations=prior, response_type=response, on_event=emit)
+                result = await run_agent(deps, q, conversation_id=conversation_id,
+                                         history=history, prior_citations=prior,
+                                         response_type=response, on_event=emit)
                 telemetry.finish_run(run_id, "completed", result=result)
                 await queue.put({"type": "__run_done__", "result": result})
             except asyncio.CancelledError:  # 客户端断流：标记终态后继续向上传播
@@ -443,8 +447,14 @@ async def rename_collection(col_id: str, name: str = Query(...)) -> dict[str, st
 async def delete_collection(col_id: str) -> dict[str, str]:
     if col_id == "default":
         raise HTTPException(status_code=409, detail="默认知识库不可删除")
+    # v6.4：删库前先记下该库会话，rmtree 后逐个清 checkpoint（注册表随目录一起删除）
+    wd = _PROJ / collections.collection_paths(_PROJ, col_id)["working_dir"]
+    reg_file = wd / conversations.CONVS_FILE
+    conv_ids = list(json.loads(reg_file.read_text(encoding="utf-8"))) if reg_file.exists() else []
     if not await collections.delete_collection(_PROJ, col_id):
         raise HTTPException(status_code=404, detail=f"知识库不存在: {col_id}")
+    for cid in conv_ids:
+        await telemetry.delete_thread(cid)
     await evict_deps(col_id)
     return {"deleted": col_id}
 

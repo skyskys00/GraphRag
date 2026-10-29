@@ -1,9 +1,12 @@
-"""M10 可观测埋点（v6.2 / P0）：run + span 落 PG，字段语义对齐 OTel GenAI。
+"""M10 可观测埋点（v6.2 / P0）+ LangGraph checkpointer 生命周期（v6.4）。
 
 分层约定（M10 §11.1）：
 - 内核（agent.py）只采集 spans，不碰数据库；
 - API 层（m7_interact/api.py）负责 start/finish 落库；评测路径（m9_eval）不写库；
 - 写入 best-effort：PG 异常只告警，不阻塞对话主链。
+
+checkpointer（v6.4，M10 §11.3）：由 API lifespan 打开，`conversation_id ↔ thread_id`。
+PG 不可用则 get_checkpointer() 返回 None，agent 回退到 conversations JSON 历史。
 """
 from __future__ import annotations
 
@@ -158,3 +161,74 @@ async def _finish(
             await conn.close()
     except Exception:  # noqa: BLE001
         log.warning("agent telemetry: finish_run 写入失败", exc_info=True)
+
+
+# ---------- LangGraph checkpointer（v6.4，M10 §11.3）----------
+# 单进程单实例：一个 saver + 一个连接池，所有请求共用（多 worker 时各进程各一份，
+# 数据在 PG 天然共享；真正的多 worker 阻碍是 bootstrap._deps_map 的进程内缓存）。
+
+_CONNINFO = (
+    f"postgresql://{_PG['user']}:{_PG['password']}@{_PG['host']}:{_PG['port']}/{_PG['database']}"
+    "?connect_timeout=3"
+)
+
+_ckpt: Any = None
+_ckpt_pool: Any = None
+_ckpt_lock = asyncio.Lock()
+
+
+async def open_checkpointer() -> Any:
+    """打开 PG checkpointer 并建表（幂等）。PG 不可用返回 None → 调用方回退 JSON 历史。"""
+    global _ckpt, _ckpt_pool
+    if _ckpt is not None:
+        return _ckpt
+    async with _ckpt_lock:
+        if _ckpt is not None:
+            return _ckpt
+        from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+        from psycopg.rows import dict_row
+        from psycopg_pool import AsyncConnectionPool
+
+        pool = None
+        try:
+            pool = AsyncConnectionPool(
+                _CONNINFO, min_size=1, max_size=4, open=False, timeout=5,
+                kwargs={"autocommit": True, "prepare_threshold": 0, "row_factory": dict_row},
+            )
+            await pool.open()
+            await pool.wait(timeout=10)
+            saver = AsyncPostgresSaver(pool)
+            await saver.setup()
+            _ckpt, _ckpt_pool = saver, pool
+            log.info("agent telemetry: checkpointer 就绪")
+        except Exception:  # noqa: BLE001 —— 无 checkpoint 只是少一层持久化，不阻断对话
+            log.warning("agent telemetry: checkpointer 初始化失败（PG 不可用？），回退 JSON 历史",
+                        exc_info=True)
+            if pool is not None:
+                try:
+                    await pool.close()
+                except Exception:  # noqa: BLE001
+                    pass
+    return _ckpt
+
+
+async def close_checkpointer() -> None:
+    global _ckpt, _ckpt_pool
+    pool, _ckpt_pool, _ckpt = _ckpt_pool, None, None
+    if pool is not None:
+        await pool.close()
+
+
+def get_checkpointer() -> Any:
+    """API 层已打开则返回 saver；评测脚本/未初始化时为 None。"""
+    return _ckpt
+
+
+async def delete_thread(thread_id: str | None) -> None:
+    """删会话/删库时清理该 thread 的全部快照，避免 PG 留孤儿。best-effort。"""
+    if _ckpt is None or not thread_id:
+        return
+    try:
+        await _ckpt.adelete_thread(thread_id)
+    except Exception:  # noqa: BLE001
+        log.warning("agent telemetry: 删除 thread %s 失败", thread_id, exc_info=True)

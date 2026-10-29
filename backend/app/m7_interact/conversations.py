@@ -114,6 +114,8 @@ async def delete_conversation(deps: Any, conv_id: str) -> bool:
     del reg[conv_id]
     _save(deps, reg)
     _conv_path(deps, conv_id).unlink(missing_ok=True)
+    from app.m10_agent import telemetry
+    await telemetry.delete_thread(conv_id)  # v6.4：连带清 checkpoint，避免 PG 留孤儿
     return True
 
 
