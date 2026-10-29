@@ -46,6 +46,8 @@ SYSTEM_PROMPT = (
     " <advice> 与 </advice> 之间（单独成一段）；没有建议就不要输出 <advice> 段，主体不残留任何 <advice> 标签。"
 )
 MAX_ROUNDS = 5  # 最大决策轮 N（M10 §2.2 硬约束）
+MAX_HISTORY_MSGS = 8        # 历史注入上限：最近 4 轮（问+答）
+HISTORY_CHAR_BUDGET = 6000  # 历史字符预算（中文约 1 字 ≈ 1 token，留余量）
 
 
 class AgentState(TypedDict, total=False):
@@ -450,11 +452,50 @@ def build_graph() -> StateGraph:
     return g.compile()
 
 
+_HIST_MARK_RE = re.compile(r"\s*\[\d+\]")
+
+
+def _strip_history_markers(text: str) -> str:
+    """剥除历史答案里的旧 [n] 角标。
+
+    编号每轮按当轮 citations 重排，旧编号复用会指向错块（§11.2「旧角标语义漂移」）。
+    """
+    return _HIST_MARK_RE.sub("", text)
+
+
+def _prepare_history(history: list[dict]) -> tuple[list[dict], int]:
+    """裁剪历史：最近 MAX_HISTORY_MSGS 条 + 字符预算，剥除旧角标；返回 (历史, 省略条数)。"""
+    msgs = [
+        {"role": h["role"], "content": str(h.get("content") or "")}
+        for h in history or []
+        if h.get("role") in ("user", "assistant") and h.get("content")
+    ]
+    dropped = 0
+    if len(msgs) > MAX_HISTORY_MSGS:
+        dropped += len(msgs) - MAX_HISTORY_MSGS
+        msgs = msgs[-MAX_HISTORY_MSGS:]
+    total = sum(len(m["content"]) for m in msgs)
+    while msgs and total > HISTORY_CHAR_BUDGET:
+        total -= len(msgs.pop(0)["content"])
+        dropped += 1
+    if msgs and msgs[0]["role"] != "user":  # 按轮裁剪：不从答案中间切断
+        dropped += 1
+        msgs.pop(0)
+    for m in msgs:
+        if m["role"] == "assistant":
+            m["content"] = _strip_history_markers(m["content"])
+    return msgs, dropped
+
+
 def _initial_messages(query: str, history: list[dict] | None, response_type: str | None) -> list[dict]:
     msgs: list[dict] = [{"role": "system", "content": SYSTEM_PROMPT}]
-    for h in history or []:
-        if h.get("role") in ("user", "assistant") and h.get("content"):
-            msgs.append({"role": h["role"], "content": str(h["content"])})
+    hist, dropped = _prepare_history(history or [])
+    if dropped:
+        msgs.append({
+            "role": "system",
+            "content": f"更早的 {dropped} 条历史对话已省略；如需依赖更早内容，请重新检索确认。",
+        })
+    msgs.extend(hist)
     if response_type:
         query = f"{query}\n（回答要求：{response_type}）"
     msgs.append({"role": "user", "content": query})

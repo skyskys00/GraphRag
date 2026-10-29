@@ -26,6 +26,16 @@
 
 ---
 
+## [v6.3] 2026-10-29 —— M10 P0 上下文管理第一切片：历史注入裁剪 + 旧角标剥离
+
+**影响模块**：`backend/app/m10_agent/agent.py`（新增 `MAX_HISTORY_MSGS` / `HISTORY_CHAR_BUDGET` / `_strip_history_markers` / `_prepare_history`，改写 `_initial_messages`）。
+
+**内容**：
+- **历史注入改造**（此前为全量注入、无预算）：①只取最近 8 条（4 轮问+答）；②6000 字符预算（中文约 1 字 ≈ 1 token，留余量），超限从最旧开始丢弃；③按轮裁剪——裁剪后若首条是 assistant，一并丢弃，不从半轮开始；④assistant 历史里的旧 `[n]` 角标全部剥离（编号每轮按当轮 citations 重排，旧编号复用会指向错块）；⑤有裁剪时注入一条 system 提示「更早的 N 条历史对话已省略」。
+- **不做（留后续）**：LLM 摘要压缩（先看裁剪后是否够用）、工作记忆（上轮 citations 结构化传入）、长期记忆——对应 §11.2 剩余项与 §11.3。
+- **验证（单测 + 真实多轮）**：①单测——20 条历史裁到 8 条、首条为 user、旧角标清零；4 轮各 3000 字时压到 6000 字符。②真实会话（设备库，conv_b84e7c67）：落盘 4 条消息含 3 个旧角标 → 注入后 0 个；两轮分别 32.3s / 24.1s，**第二轮仍触发检索**（1 次）、引用 [2] 来自当轮编号清单；第二轮首轮 route 的 `tokens_in` 仅 836（历史 654 字符），无跨轮膨胀。
+- **观察**：v6.2 记录的「单题 5 轮决策 / 10 次检索 / 223s」为模型探索性波动；本次同库同类问题 2 轮 / 1–2 次检索。检索单次仍约 18–27s，是延迟主因，留待后续规划优化核对。
+
 ## [v6.2] 2026-10-28 —— M10 P0 可观测埋点落地：agent_runs / agent_spans 落 PG（OTel GenAI 语义）
 
 **影响模块**：新增 `backend/app/m10_agent/telemetry.py`（建表 + start/finish 落库）；`backend/app/m10_agent/agent.py`（节点级 span 采集 + `_stream_chat` 取 usage）；`backend/app/m7_interact/api.py`（POST /agent 与 /agent/stream 接 start/finish，SSE 断流标 cancelled）；`lifespan` 启动建表。
