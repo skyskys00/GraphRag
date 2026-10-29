@@ -275,7 +275,7 @@ tool_acc 下降归因：DV-FS-017 为 judge JSON 解析失败伪分（实际 1.0
 
 - **checkpointer ✔ 落地（v6.4）**：`build_graph()` 挂 `AsyncPostgresSaver`，`conversation_id ↔ thread_id` 一一映射；**checkpoint 为多轮历史唯一权威源**，conversations JSON 降级为前端展示，老会话用 JSON 历史作种子，PG 不可用回退 JSON。`_deps`/`_on_event` 移出 state（msgpack 不可序列化 → contextvar）。验证与已知限制见 CHANGELOG v6.4。
 - **工作记忆 ✔ 落地（v6.3.1）**：上轮 citations 以结构化形式进入新轮 state（「已知上下文」），追问走增量检索而非重复全量检索。
-- **长期记忆（待 v6.4.1）**：profile 小表（常用实体、常用文档计数）+ 后台写入、检索前限量注入（限 token）；不引 mem0/Zep。
+- **长期记忆（探底无效，已回滚）**：计数版「常引用文档」表测试——30 题全面劣化（citation −0.046 / correctness −0.026 / multi_hop −0.009），单轮场景提示无收益、只占 token。若重做须针对跨会话偏好（LLM 抽取）而非文档热度。详见 CHANGELOG v6.4.1 探底条目。
 - **不做**：mem0/Zep 式通用记忆平台（会变成第二套检索系统）。
 
 ### 11.4 P1 规划（受控 plan 分支）
@@ -310,7 +310,7 @@ tool_acc 下降归因：DV-FS-017 为 judge JSON 解析失败伪分（实际 1.0
 | P0 | 可观测埋点 ✔ v6.2 | v6.2 | SQL 可还原 run→spans（已实测） |
 | P0 | 上下文管理 ✔ v6.3 / v6.3.1（裁剪 + 角标剥离 + 工作记忆 + 多轮测试集；摘要压缩暂缓） | v6.3 | 单测 + 10 组多轮 10/10 |
 | P1 | checkpointer 统一 ✔ v6.4 | v6.4 | 重启后 state 可读回、删会话清快照（已实测） |
-| P1 | 长期记忆（计数版探底） | v6.4.1 | 注入不劣化主链；探底无效即回滚 |
+| P1 | 长期记忆（计数版探底）✘ 无效回滚 | v6.4.2 | 30 题全面劣化（citation −0.046），已回滚 |
 | P1 | 受控 plan 分支 | v6.5 | 多跳题步数/覆盖提升 |
 | P2 | verifier 反思 | v6.6 | 评测净增益才保留 |
 | P2 | 人工介入 interrupt | v6.7 | 中断→确认→resume |

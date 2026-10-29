@@ -49,6 +49,8 @@
 
 5 项上升、1 项小幅下降。answer_relevance 的 −0.022 落在 judge 单次判定方差内（§9.2：同题多轮重判可跳 0→0.83），且温度降低会减少口语化补充、使答案更贴事实陈述——结论以「不劣化 + 其余五项改善」为准。
 
+**探底：长期记忆计数版（无效）**：新增 `agent_memory` 表记录集合级「常引用文档」（按每轮 citations 计数，hits≥2 且 30 天内才注入 route 前，≤200 字），零 LLM 成本。30 题 A/B（`--memory` vs 无）：faithfulness −0.004 / relevance −0.005 / correctness −0.026 / citation −0.046 / multi_hop −0.009，仅 tool_accuracy +0.003 —— **全面劣化**；5 组单题对照 token 成本 +110~235、引用数变化无规律。结论：单轮评测场景下「常引用文档」提示无收益、只占 token；长期记忆若要做，须针对跨会话偏好（需 LLM 抽取）而非文档热度。改动已整文件回滚、`agent_memory` 表已删除，报告存档 `run_agent_admin_30_v642_memory.json`。
+
 ## [v6.4] 2026-10-29 —— M10 checkpointer 统一：多轮历史改建 LangGraph PG 快照
 
 **影响模块**：`backend/app/m10_agent/telemetry.py`（新增 checkpointer 生命周期 open/close/get/delete_thread）；`backend/app/m10_agent/agent.py`（`_deps`/`_on_event` 移入 contextvar、`build_graph(checkpointer)`、`run_agent(conversation_id=)` 从快照取历史、新增 `_messages_to_history`）；`backend/app/m7_interact/api.py`（lifespan 开关 checkpointer、两个 agent 端点传 `conversation_id`、删库清 thread）；`backend/app/m7_interact/conversations.py`（删会话清 thread）；`backend/environment.yml`（+`langgraph-checkpoint-postgres==3.2.0` / `psycopg[binary]==3.3.6` / `psycopg-pool==3.3.3`）。
