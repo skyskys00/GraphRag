@@ -89,9 +89,23 @@ async def _ensure_sparse(ws: str, path: Path) -> dict[str, Any]:
     return load_sparse(path)
 
 
+# 旧式扁平评测库：collection id → LightRAG workspace（数据目录 data/<ws>，
+# chunks/parse 走 data/{chunks,parse}/<col>；与 m9_eval.runner._LEGACY_WS 同源）
+_LEGACY_WORKSPACES = {"eval_admin": "eval_admin_ws", "eval_cservice": "eval_cservice_ws"}
+
+
 async def build_deps(proj: Path, col_id: str) -> AppDeps:
-    ws = "default_ws" if col_id == "default" else col_id
-    paths = collection_paths(proj, col_id, _default_layout())
+    if col_id in _LEGACY_WORKSPACES:
+        ws = _LEGACY_WORKSPACES[col_id]
+        paths = {
+            "working_dir": f"data/{ws}",
+            "chunks_dir": f"data/chunks/{col_id}",
+            "parse_dir": f"data/parse/{col_id}",
+            "uploads_dir": "data/uploads",
+        }
+    else:
+        ws = "default_ws" if col_id == "default" else col_id
+        paths = collection_paths(proj, col_id, _default_layout())
 
     rag = await build_rag(proj / paths["working_dir"], ws)
     sparse = await _ensure_sparse(ws, proj / paths["working_dir"] / SPARSE_FILE)

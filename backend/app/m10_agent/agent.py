@@ -487,7 +487,25 @@ def _prepare_history(history: list[dict]) -> tuple[list[dict], int]:
     return msgs, dropped
 
 
-def _initial_messages(query: str, history: list[dict] | None, response_type: str | None) -> list[dict]:
+def _prior_context_text(citations: list[dict]) -> str:
+    """把上一轮引用压成「已知资料」提示（工作记忆）：让 route 知道已有哪些依据，追问走增量检索。"""
+    lines = []
+    for c in citations[:5]:
+        doc = c.get("doc_id") or c.get("full_doc_id") or ""
+        snip = (c.get("snippet") or "")[:80]
+        lines.append(f"- {doc}：{snip}")
+    return (
+        "上一轮已检索到的资料（可结合本轮检索使用；引用编号在生成时统一分配，勿自行编造）：\n"
+        + "\n".join(lines)
+    )
+
+
+def _initial_messages(
+    query: str,
+    history: list[dict] | None,
+    response_type: str | None,
+    prior_citations: list[dict] | None = None,
+) -> list[dict]:
     msgs: list[dict] = [{"role": "system", "content": SYSTEM_PROMPT}]
     hist, dropped = _prepare_history(history or [])
     if dropped:
@@ -496,6 +514,8 @@ def _initial_messages(query: str, history: list[dict] | None, response_type: str
             "content": f"更早的 {dropped} 条历史对话已省略；如需依赖更早内容，请重新检索确认。",
         })
     msgs.extend(hist)
+    if prior_citations:
+        msgs.append({"role": "system", "content": _prior_context_text(prior_citations)})
     if response_type:
         query = f"{query}\n（回答要求：{response_type}）"
     msgs.append({"role": "user", "content": query})
@@ -507,12 +527,14 @@ async def run_agent(
     query: str,
     *,
     history: list[dict] | None = None,
+    prior_citations: list[dict] | None = None,
     response_type: str | None = None,
     max_rounds: int = MAX_ROUNDS,
     on_event: Any = None,
 ) -> dict[str, Any]:
     """跑一次 agent 决策循环。POST /agent（JSON）与 GET /agent/stream（事件）共用入口。
 
+    prior_citations: 上一轮的引用（工作记忆）——并入本轮引用池，追问可直接复用已检索依据。
     on_event: 可选异步回调 on_event(evt)，SSE 端点传入以实时透出事件（节点内 await 透出）。
     """
     app = build_graph()
@@ -522,9 +544,9 @@ async def run_agent(
         "response_type": response_type,
         "history": history or [],
         "remaining_rounds": max_rounds,
-        "messages": _initial_messages(query, history, response_type),
+        "messages": _initial_messages(query, history, response_type, prior_citations),
         "events": [],
-        "citations": [],
+        "citations": list(prior_citations or []),
         "spans": [],
         "_deps": deps,
         "_on_event": on_event,

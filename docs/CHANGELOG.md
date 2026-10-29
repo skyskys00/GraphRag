@@ -26,6 +26,18 @@
 
 ---
 
+## [v6.3.1] 2026-10-29 —— M10 工作记忆（跨轮引用复用）+ 多轮结构测试集；附带修复旧式评测库加载
+
+**影响模块**：`backend/app/m10_agent/agent.py`（`run_agent` 新增 `prior_citations`，`_prior_context_text` + `_initial_messages` 注入已知资料）；`backend/app/m7_interact/api.py`（`_last_citations`，POST/SSE 传入上一轮引用）；`backend/app/m7_interact/bootstrap.py`（旧式库 workspace 映射）；新增 `backend/scripts/multi_turn_smoke.py`、`backend/tests/testsets/testset_admin_multi_10.json`；报告 `backend/tests/reports/agent/multi_turn_v631.json`。
+
+**内容**：
+- **工作记忆**：取上一条 assistant 消息的 citations，①并入新一轮引用池（生成时可再次标注，编号统一重排）②以「上一轮已检索到的资料」system 提示注入 route，便于追问走增量检索。**不触碰 v5.50 的 A 规则**（事实性问题仍必须先检索），避免「凭历史直答编造角标」回归。
+- **多轮结构测试集（10 组 × 追问两轮，行政库）**：`testset_admin_multi_10.json`，turn2 均依赖 turn1 上下文（「那…呢」式）；脚本 `multi_turn_smoke.py` 断言每轮：①工具调用 ≥1（必检索）②正文角标非空且全部解析到当轮引用清单。只做结构断言、不做语义判分（不引入 ground_truth 措辞，符合评测泄漏红线）。
+- **顺手修复**：`bootstrap.build_deps` 此前只认 `col_*` 新式库，`get_deps("eval_admin")` 会解析到不存在的 `data/collections/eval_admin` → 检索恒空。补旧式映射（`eval_admin→eval_admin_ws`、`eval_cservice→eval_cservice_ws`，chunks/parse 走 `data/{chunks,parse}/<col>`，与 `m9_eval.runner._LEGACY_WS` 同源）。
+- **不做：LLM 摘要压缩**（本条为反驳结论）。实测第二轮平均 `tokens_in` 8839、最高 12335；历史裁剪预算 6000 字符（≈4–5k tokens）需约 18 轮对话才触发。摘要会额外增加一次 LLM 调用（延迟 + 非确定性），而触发频率极低——留待长会话真实出现再评估。
+
+**验证（10 组 × 2 轮，20 轮全量）**：通过 **10/10**，均耗时 **17.8s/轮**（turn1 均值 6618 tokens_in，turn2 均值 8839）。每轮均触发检索、角标全部可解析。**工作记忆生效证据**：MT-004 第二轮仅 1 次检索（单次最多 5 条引用）却产出 7 条引用 → 至少 2 条由上一轮带入。
+
 ## [v6.3] 2026-10-29 —— M10 P0 上下文管理第一切片：历史注入裁剪 + 旧角标剥离
 
 **影响模块**：`backend/app/m10_agent/agent.py`（新增 `MAX_HISTORY_MSGS` / `HISTORY_CHAR_BUDGET` / `_strip_history_markers` / `_prepare_history`，改写 `_initial_messages`）。

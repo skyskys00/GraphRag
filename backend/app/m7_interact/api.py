@@ -139,6 +139,19 @@ def _conv_history(deps: Any, conv_id: str | None) -> list[dict[str, Any]]:
             if m.get("role") in ("user", "assistant") and m.get("content")]
 
 
+def _last_citations(deps: Any, conv_id: str | None) -> list[dict[str, Any]]:
+    """上一条 assistant 消息的引用（工作记忆：跨轮复用已检索依据，v6.3.1）。"""
+    if not conv_id:
+        return []
+    conv = conversations.get_conversation(deps, conv_id)
+    if conv is None:
+        return []
+    for m in reversed(conv.get("messages", [])):
+        if m.get("role") == "assistant":
+            return m.get("citations") or []
+    return []
+
+
 @app.post("/agent")
 async def post_agent(req: AgentRequest) -> dict[str, Any]:
     """Agent 统一对话入口（M10 v0.4）：LangGraph 决策循环 + 工具注册表。
@@ -150,12 +163,14 @@ async def post_agent(req: AgentRequest) -> dict[str, Any]:
         deps = await get_deps(req.collection_id)
         _ensure_conversation(deps, req.conversation_id)
         history = _conv_history(deps, req.conversation_id)
+        prior = _last_citations(deps, req.conversation_id)
         run_id = await telemetry.start_run(
             collection_id=req.collection_id,
             conversation_id=req.conversation_id,
             question=req.query,
         )
-        result = await run_agent(deps, req.query, history=history, response_type=req.response_type)
+        result = await run_agent(deps, req.query, history=history,
+                                 prior_citations=prior, response_type=req.response_type)
         telemetry.finish_run(run_id, "completed", result=result)
         if req.conversation_id:
             await conversations.append_round(
@@ -215,6 +230,7 @@ async def stream_agent_ep(
     deps = await get_deps(collection_id)
     _ensure_conversation(deps, conversation_id)
     history = _conv_history(deps, conversation_id)
+    prior = _last_citations(deps, conversation_id)
     run_id = await telemetry.start_run(
         collection_id=collection_id, conversation_id=conversation_id, question=q)
 
@@ -226,7 +242,8 @@ async def stream_agent_ep(
 
         async def runner() -> None:
             try:
-                result = await run_agent(deps, q, history=history, response_type=response, on_event=emit)
+                result = await run_agent(deps, q, history=history,
+                                         prior_citations=prior, response_type=response, on_event=emit)
                 telemetry.finish_run(run_id, "completed", result=result)
                 await queue.put({"type": "__run_done__", "result": result})
             except asyncio.CancelledError:  # 客户端断流：标记终态后继续向上传播
