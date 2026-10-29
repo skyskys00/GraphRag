@@ -1,8 +1,8 @@
 # M5 模块记录：检索层
 
-> **版本：** v1.14
+> **版本：** v1.15
 > **状态：** 已落地
-> **更新：** 2026-10-15（正文补齐 v5.8/v5.9/v5.13 检索优化实现细节，功能代码早已在 HEAD）
+> **更新：** 2026-10-29（§5 速查第 2 条修正：sparse 仅随上传重建，删除走 excluded_docs 过滤）
 > **定位：** 三路召回（graph/vector/keyword）+ RRF(k=60) + bge-reranker + 五特征融合排序 + 表格 NL 摘要 + query 预处理 + 白名单过滤
 > **契约：** query + 模式 → 精排后 chunk 列表（full_doc_id / score / snippet）
 > **上游：** [M3 索引层](M3_index.md) / [M4 存储层](M4_storage.md) | **下游：** [M6 生成层](M6_generate.md)
@@ -98,7 +98,7 @@ LightRAG 同文档 content 去重导致 `block_type` 对齐错位（`build()` �
 速查清单：
 
 1. **bge-m3 实例必须 `return_sparse=true` 启动**——否则 sparse 请求报错；当前已重载好。
-2. **sparse 索引随上传/删除自动重建**（M7 `build_workspace_deps`），无需手动。
+2. **sparse 索引随上传自动重建**（M7 `build_workspace_deps`）；删除不重建，PG 数据与 sparse 条目保留，检索时按 `excluded_docs` 过滤结果。
 3. **PG 向量表名带模型后缀**——换模=新表，同 M4 坑 1。
 4. **纯口语 query 预处理无提升**——需 C 查询改写（LLM），暂不做。
 5. **keyword 路用 bge-m3 sparse**——没走 jieba/BM25；需领域分词定制再加。
@@ -136,6 +136,7 @@ LightRAG 同文档 content 去重导致 `block_type` 对齐错位（`build()` �
 
 ## 9. 版本
 
+- **v1.15**（2026-10-29）：§5 速查第 2 条改正——sparse 索引只随**上传**自动重建（`build_workspace_deps` 仅由 `ingest` 调用）；**删除不重建**，PG 数据与 sparse 条目保留，检索时按 `excluded_docs` 过滤（`documents.delete_doc` 路径）。
 - **v1.10**（2026-09-21）：rerank 同步阻塞事件循环修复——`rerank()` 调用包 `asyncio.to_thread`（单 worker 下同步 urllib 占死事件循环，并发切会话请求被排队），详见 CHANGELOG v5.4。
 - **v1.6**（2026-09-14）：软删过滤 + sparse 联动重建。
 - **v1.9**（2026-09-21）：rerank 排序 bug 修复（按 relevance_score 降序，而非输入 index），详见 CHANGELOG v5.3。
