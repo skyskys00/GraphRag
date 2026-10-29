@@ -1,18 +1,33 @@
 # M4 模块记录：存储层
 
-> **版本：** v1
+> **版本：** v1.1
 > **状态：** 已落地
-> **更新：** 2026-09-13
+> **更新：** 2026-10-29（上下游核对修正）
 > **定位：** Postgres + pgvector 一库通吃，可切换后端
-> **契约：** M3 写 / M5 读，统一 `Base*Storage` 抽象
-> **上游：** [M3 索引层](M3_index.md) | **下游：** [M5 检索层](M5_retrieve.md)
+> **契约：** M3/M7 写、M5/M6/M7/M9/M10 读，统一 `Base*Storage` 抽象
+> **上游：** [M3 索引层](M3_index.md)（索引写入）、[M7 交互层](M7_interact.md)（上传/删库） | **下游：** [M5 检索层](M5_retrieve.md)、[M6 生成层](M6_generate.md)、[M7 交互层](M7_interact.md)、[M9 评测层](M9_evaluation.md)、[M10 Agent](M10_agent.md)
 > **依据：** [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.5 / §3.1
 > **运行：** `.env` 中 `STORAGE_BACKEND=pg` 切换
 > **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md)
 
 ## 1. 定位与职责
 
-M4 = **统一存取接口 + 可切换后端**：M3 写、M5 读，全链路只依赖一组 `Base*Storage` 抽象，后端（默认文件态 ↔ Postgres）切换只改构造参数，不碰业务代码。
+M4 = **统一存取接口 + 可切换后端**：M3/M7 写、M5/M6/M7/M9/M10 读，全链路只依赖一组 `Base*Storage` 抽象，后端（默认文件态 ↔ Postgres）切换只改构造参数，不碰业务代码。
+
+**当前访问方（2026-10-29 核对代码）**：
+
+| 模块 | 方向 | 访问方式 |
+|---|---|---|
+| M3 索引 | 写 | `build_rag` + `ainsert_custom_chunks`：四类存储入库 |
+| M7 交互 | 写 | 上传入库（`documents.py`）、删库 `DELETE workspace`（`collections.py`）、每库建 deps（`bootstrap.py`） |
+| M5 检索 | 读 | 三路检索 + chunk 回表（`retriever.py`、`sparse_index.py`） |
+| M6 生成 | 读（间接） | 经 M5 检索结果；sidecar 读 M2 的 `data/chunks/*.jsonl` 文件，不读 PG |
+| M7 交互 | 读 | 图谱查询直查 `lightrag_doc_chunks`（`graph.py`）、仪表盘统计（`api.py`） |
+| M9 评测 | 读 | `build_rag` + `retrieve()`，只读不写 |
+| M10 Agent | 读写（自建表） | `agent_runs`/spans 埋点 + LangGraph checkpoint（`telemetry.py` 直连 asyncpg）；检索经工具间接 |
+| M8 前端 | 不直连 | 全部经 M7 REST API |
+
+> 注：M1/M2 只产出文件，不访问存储；M7 文档**软删只清注册表+文件，PG 共享图数据保留**（不做存储层删除）。
 
 **半程联调意义**：M1–M4 完成「文档 → 可检索」持久化闭环——当前 M3/M5 已在**默认文件态**（`data/lightrag_deepseek`）跑通，M4 是把同一套数据搬到 PG，**功能等价、数据可迁移、检索冒烟保持绿色**。
 
@@ -88,4 +103,5 @@ PG 存储层共 7 个常见坑（向量表后缀 / HNSW 删改 / 单写者不变
 ## 7. 版本
 
 - **v1**（2026-09-13）：Postgres+pgvector 一库通吃落地。
+- **v1.1**（2026-10-29）：上下游核对修正——由「M3 写 / M5 读」补全为 M3/M7 写、M5/M6/M7/M9/M10 读；§1 新增访问方表（含 M10 自建埋点/checkpoint 表）。
 - 变更记录：**逐条版本历史见 `docs/CHANGELOG.md`**（v0 规划 → v1 落地 PG）。本文件不再维护历史流水。
