@@ -73,14 +73,20 @@ def build_storage_config() -> dict:
 
 
 def _llm_config() -> dict:
-    """按 LLM_BACKEND 取 LLM 连接配置（build_llm_func / build_query_stream_func 共用）。"""
+    """按 LLM_BACKEND 取 LLM 连接配置（build_llm_func / build_query_stream_func / M10 agent 共用）。
+
+    temperature 供 M10 agent 决策与生成使用（v6.4.1）：不设时后端默认 1.0，
+    工具决策随机性偏高（v5.50 A 规则在追问场景约 50% 被绕过）。0.1 保稳定且不僵硬。
+    """
     backend = os.environ.get("LLM_BACKEND", "glm").lower()
+    temperature = float(os.environ.get("AGENT_TEMPERATURE", "0.1"))
     if backend == "deepseek":
         return {
             "api_key": os.environ.get("DEEPSEEK_API_KEY", ""),
             "base_url": os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1"),
             "extract_model": os.environ.get("EXTRACT_MODEL") or "deepseek-v4-flash",
             "query_model": os.environ.get("QUERY_MODEL") or "deepseek-v4-flash",
+            "temperature": temperature,
             # v4-flash 推理模型默认开思考，reasoning_tokens 会吞掉 max_tokens -> content 空
             "extra_kwargs": {"extra_body": {"thinking": {"type": "disabled"}}},
         }
@@ -89,6 +95,7 @@ def _llm_config() -> dict:
         "base_url": os.environ.get("GLM_BASE_URL", "https://open.bigmodel.cn/api/paas/v4"),
         "extract_model": os.environ.get("EXTRACT_MODEL") or "glm-4.5-flash",
         "query_model": os.environ.get("QUERY_MODEL") or "glm-4.5-flash",
+        "temperature": temperature,
         "extra_kwargs": {},
     }
 

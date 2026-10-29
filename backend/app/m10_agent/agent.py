@@ -211,7 +211,8 @@ _register_builtin_tools()
 async def _chat(cfg: dict, messages: list[dict], tools: bool) -> Any:
     client = AsyncOpenAI(api_key=cfg["api_key"], base_url=cfg["base_url"])
     try:
-        kw: dict[str, Any] = {"model": cfg["query_model"], "messages": messages, **cfg["extra_kwargs"]}
+        kw: dict[str, Any] = {"model": cfg["query_model"], "messages": messages,
+                              "temperature": cfg.get("temperature", 0.1), **cfg["extra_kwargs"]}
         if tools:
             kw["tools"] = registry.tool_definitions()
         return await client.chat.completions.create(**kw)
@@ -377,7 +378,8 @@ async def _stream_chat(cfg: dict, messages: list[dict], usage: dict[str, int] | 
     """
     client = AsyncOpenAI(api_key=cfg["api_key"], base_url=cfg["base_url"])
     try:
-        kw: dict[str, Any] = {"model": cfg["query_model"], "messages": messages, **cfg["extra_kwargs"]}
+        kw: dict[str, Any] = {"model": cfg["query_model"], "messages": messages,
+                              "temperature": cfg.get("temperature", 0.1), **cfg["extra_kwargs"]}
         try:
             stream = await client.chat.completions.create(
                 **kw, stream=True, stream_options={"include_usage": True})

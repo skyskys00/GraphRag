@@ -26,6 +26,29 @@
 
 ---
 
+## [v6.4.1] 2026-10-29 —— M10 agent 采样温度固定 0.1：修复工具决策随机性偏高
+
+**影响模块**：`backend/app/m3_index/providers.py`（`_llm_config()` 新增 `temperature`，读 `AGENT_TEMPERATURE`，缺省 0.1）；`backend/app/m10_agent/agent.py`（`_chat` / `_stream_chat` 传入该参数）；`backend/.env.example`（新增配置项说明）。
+
+**内容**：
+- 此前 agent 的决策与生成**未设 temperature**，后端按默认 1.0 采样 → 是否调用检索工具高度随机，v5.50 A 规则（事实性问题必须先检索）在追问场景约 50% 被绕过。
+- 统一取 `AGENT_TEMPERATURE`（默认 **0.1**）：保稳定又不至于因完全 0 产生重复/僵硬输出。LightRAG 抽取链路（`build_llm_func`）不受影响，仍走 `runner.llm_model_kwargs` 的既有配置。
+
+**验证（同库同测试集）**：
+- **多轮冒烟**：10 组 → 通过 **9/10**（同测试此前 v6.4 为 7/10、v6.3.1 为 6/10）；均耗时 17.6s/轮。仅 MT-009 turn2 仍出现 `tool_calls=0`。
+- **30 题行政库 agent 评测**（vs v6.4 同集同口径）：
+
+| 指标 | v6.4（默认 1.0） | v6.4.1（0.1） | Δ |
+|---|---|---|---|
+| Faithfulness | 0.9817 | 0.9833 | +0.0016 |
+| Answer Relevance | 0.9650 | 0.9433 | −0.0217 |
+| Correctness | 0.9579 | 0.9752 | **+0.0173** |
+| Citation Accuracy | 0.8493 | 0.9337 | **+0.0844** |
+| Multi-hop Recall | 0.8451 | 0.8732 | +0.0281 |
+| Tool Accuracy | 0.9523 | 0.9633 | +0.0110 |
+
+5 项上升、1 项小幅下降。answer_relevance 的 −0.022 落在 judge 单次判定方差内（§9.2：同题多轮重判可跳 0→0.83），且温度降低会减少口语化补充、使答案更贴事实陈述——结论以「不劣化 + 其余五项改善」为准。
+
 ## [v6.4] 2026-10-29 —— M10 checkpointer 统一：多轮历史改建 LangGraph PG 快照
 
 **影响模块**：`backend/app/m10_agent/telemetry.py`（新增 checkpointer 生命周期 open/close/get/delete_thread）；`backend/app/m10_agent/agent.py`（`_deps`/`_on_event` 移入 contextvar、`build_graph(checkpointer)`、`run_agent(conversation_id=)` 从快照取历史、新增 `_messages_to_history`）；`backend/app/m7_interact/api.py`（lifespan 开关 checkpointer、两个 agent 端点传 `conversation_id`、删库清 thread）；`backend/app/m7_interact/conversations.py`（删会话清 thread）；`backend/environment.yml`（+`langgraph-checkpoint-postgres==3.2.0` / `psycopg[binary]==3.3.6` / `psycopg-pool==3.3.3`）。
@@ -46,7 +69,7 @@
 
 **已知限制**：每轮 5–6 份全量快照（裁剪后约 6000 字符/份），20 轮会话约 3–5MB，暂不做清理策略；同一会话并发请求会互相覆盖 state（单用户场景接受）；checkpointer 仅 API lifespan 打开，脚本/评测进程内 `get_checkpointer()` 为 None。
 
-**附带发现（未修）**：`_llm_config()` 未设 `temperature`，工具决策随机性偏高（v5.50 A 规则在追问场景约 50% 概率被绕过），需独立评估后再改。
+**附带发现（已在 v6.4.1 修复）**：`_llm_config()` 未设 `temperature`，工具决策随机性偏高（v5.50 A 规则在追问场景约 50% 概率被绕过）。
 
 ## [v6.3.1] 2026-10-29 —— M10 工作记忆（跨轮引用复用）+ 多轮结构测试集；附带修复旧式评测库加载
 
