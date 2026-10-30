@@ -1,8 +1,8 @@
 # M6 模块记录：生成层（编排 + 引用标注）
 
-> **版本：** v1.6
+> **版本：** v1.7
 > **状态：** 已落地
-> **更新：** 2026-10-02
+> **更新：** 2026-10-30（明确 v1 上下文组装只含「原文块」一条轨道，补预算口径与三条未接入轨道）
 > **定位：** 上下文组装 + DeepSeek 生成 + 引用标注 + 流式
 > **契约：** query + M5 精排 context → Answer（text + citations + meta）
 > **上游：** [M5 检索层](M5_retrieve.md) | **下游：** [M7 交互层](M7_interact.md)
@@ -18,7 +18,7 @@ M6 = **从「精排 chunk 列表」到「带引用的最终答案」** 这一段
 
 ## 2. 需求来源（架构既定方向）
 
-- **上下文组装（5 轨道）**：把 原文块/实体/关系/图谱路径 各路召回经排名+过滤后压缩进 token 预算窗口（`max_data_tokens`），独立成函数便于复用测试（ARCHITECTURE §2.7-2）。
+- **上下文组装（5 轨道，二期目标）**：把 原文块/实体/关系/图谱路径 各路召回经排名+过滤后压缩进 token 预算窗口（`max_data_tokens`），独立成函数便于复用测试（ARCHITECTURE §2.7-2）。**当前 v1 只实现「原文块」一条轨道**——`assemble()` 拼的是 M5 精排 top5 的 chunk 原文（`[n] content`），实体 / 关系 / 图谱路径三条轨道**未接入**，原因是 M5 的图路只输出 chunk 排序，实体与关系在 LightRAG 内部用完即弃，`retrieve()` 返回结构里没有它们（接入需先扩展 M5 返回结构）。
 - **引用标注（grounded citations）**：让「来源 doc_id / TextUnit ID / 节点名」整链路流转，答案外层附 `[引用列表]`；local 层用 TextUnit ID 细引用，全局层用主题/报告名粗引用（§2.7-3）。
 - **意图路由**：跨文档综述 → map-reduce（分块要点→合并→生成）；实体级/局部 → single-window（§2.7-1）。
 - **流式**：SSE + token 级；map-reduce 只在 reduce 阶段流式（§2.7-4）→ 归 M7，M6 留事件位不实现。
@@ -28,12 +28,13 @@ M6 = **从「精排 chunk 列表」到「带引用的最终答案」** 这一段
 ## 3. MVP 范围
 
 **做什么**：
-1. **上下文组装器**：M5 精排 top-N chunk → 按 token 预算压缩成生成用 context（带 marker）。
+1. **上下文组装器（单轨道）**：M5 精排 top-N chunk → 按 token 预算压缩成生成用 context（带 marker）。**只组装原文块一条轨道**：每块一行 `[n] content`，预算 `max_data_tokens=4000`（先扣 system prompt 预留 256 + query 估算，每块成本 = 字符数÷2 + 8 行开销，超预算按精排位次直接 `break`）；`markers[n]` 记 `chunk_id/full_doc_id/content/score` 供引用回查。
 2. **生成**：中文 prompt + DeepSeek v4-flash（关思考模式），要求按 marker 输出 grounded 引用标注。
 3. **引用解析**：把正文 `[n]` 映射回 TextUnit 级引用（text_unit_id / full_doc_id / file_path / page_range / anchor / snippet），输出结构化 citations。
 4. **M6 溯源 sidecar**：chunk_id → {file_path, title_path, page_range, anchor, block_type, image_path}，从 M2 产物 `data/chunks/*.jsonl` 构建，**按 PG chunk 主键索引**（见 §4.2），启动 / 入库 / 删除后各重建一次（**不改 M5 返回结构**，解耦）。
 
 **暂不做**（列入二期 / 他模块）：
+- **上下文组装的实体 / 关系 / 图谱路径三条轨道**（v1.7 明确）：当前 context 只有原文块，图证据（关系描述）不进 prompt——「A 与 B 什么关系」这类问题，模型只能从原文块自行读出，图检索仅用于挑选 chunk。接入前提是先扩展 M5 返回结构（带上 `aquery_data` 的实体/关系列表）；
 - map-reduce 跨文档综述（意图路由 v1 固定 single-window，函数位先留）；
 - SSE 流式、多轮 history、工具调用（M7）；
 - LangGraph 状态机（仅当多智能体/复杂工具调用需要，架构 §2.7）；
@@ -140,6 +141,7 @@ class Answer:
 
 ## 10. 版本
 
+- **v1.7**（2026-10-30）：明确上下文组装现状——§2 把「5 轨道」标注为二期目标并说明 v1 只实现原文块轨道及原因（M5 图路只输出 chunk 排序，实体/关系不进 `retrieve()` 返回）；§3 补单轨道的预算口径（4000 / 每块 `[n] content` / 超预算 break）与三条未接入轨道的影响（图证据不进 prompt）。
 - **v1.6**（2026-10-02）：sidecar 索引键由 `(full_doc_id, content)` 改为 PG chunk 主键（`make_custom_chunk_id`）+ first-wins，修同文档重复 content 导致的图片/页码溯源错位（详见 CHANGELOG v5.28.1）。
 - **v1.1**（2026-09-14）：软删 `exclude_docs` 透传 M5。
 - **v1.4**（2026-09-21）：检索/生成 query 分离（Bug4 根因修复，方案 D，详见 CHANGELOG v5.3）。
