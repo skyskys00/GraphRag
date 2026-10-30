@@ -1,6 +1,6 @@
 # GraphRAG
 
-面向中文场景的**通用型图增强检索生成（GraphRAG）**系统 —— 基于 LightRAG 内核，支持多格式文档解析入库、双层知识图谱可视化、**多模态图片检索**、SSE 流式问答与 `[n]` 引用溯源。上层是**自研 agentic RAG**：由 LangGraph 状态机驱动的多轮工具决策，而不是「一次检索 + 一次生成」的固定流程。链路不绑定特定领域，已在**客服、行政、器械**三个领域数据集上完成量化评测验证，获得可复用的通用 RAG 能力。
+面向中文场景的**通用型图增强检索生成（GraphRAG）**系统 —— 基于 LightRAG 内核，支持多格式文档解析入库、双层知识图谱可视化、**多模态图片检索**、SSE 流式问答与 `[n]` 引用溯源。上层是**自研 agentic RAG**：由 LangGraph 状态机驱动的多轮工具决策，而不是「一次检索 + 一次生成」的固定流程。链路不绑定特定领域，已在**客服、行政、医疗器械**三个领域数据集上完成量化评测验证，获得可复用的通用 RAG 能力。
 
 FastAPI + React/TypeScript 前后端分离；Postgres/pgvector 存储；bge-m3 向量（经 Xinference）；DeepSeek V4-Flash 生成与视觉理解。内置**量化评测体系**（检索 + 生成共八维指标，三库 130 题）。
 
@@ -15,7 +15,7 @@ FastAPI + React/TypeScript 前后端分离；Postgres/pgvector 存储；bge-m3 �
 ## 功能特性
 
 - **多格式解析**：PDF / DOCX / PPTX / XLSX / Markdown / HTML / TXT / EPUB 等，经 MinerU + Docling 统一结构化，图片型内容经视觉模型转写
-- **Agent 问答**：LangGraph 状态机驱动多轮工具决策（检索 / 综合应答 / 文档清单），最多 5 轮；复杂问句自动注入三步计划；答案带 `[n]` 引用标注，可溯源到原文片段
+- **Agent 问答**：LangGraph 状态机驱动多轮工具决策（检索 / 综合应答 / 文档清单）；复杂问句自动注入计划工具；答案带 `[n]` 引用标注，可溯源到原文片段
 - **多轮对话**：会话以 LangGraph checkpoint 持久化（Postgres），跨轮复用已检索依据；切走会话/刷新不丢已生成的回答
 - **知识图谱**：双层图谱（文档级 + 实体级），力导向布局，支持话题聚类 / 关系分类 / 实体筛选 / 图片节点预览，详见上「界面预览」
 - **多模态检索**：文档图片入索引，图片型表格经视觉模型转写，带图内容可检索、可溯源
@@ -71,6 +71,7 @@ npm run dev                   # 前端 http://localhost:5173
 
 查询管线（在线）
   用户问题 → [M10 Agent 编排：LangGraph 状态图]
+                  ├─ 计划分支：规则判定为复杂题 → 注入三步计划，每轮回注 + 生成前覆盖核对
                   ├─ tool_retrieve   → [M5 检索]
                   ├─ tool_rag_answer → [M5 检索] + [M6 生成]
                   └─ tool_list_docs  → [M7 文档列表]
@@ -80,6 +81,7 @@ npm run dev                   # 前端 http://localhost:5173
 
 - 索引管线（离线）：MinerU/Docling → TextUnit → LightRAG 图索引 + bge-m3 向量；图片经 DeepSeek 视觉转写独立成块
 - 查询管线（在线）：agent 每轮依据工具返回决定下一步 → 检索侧三路召回 → RRF → rerank → 五特征融合 → DeepSeek 生成 + 引用标注
+- 计划分支**不是工具**：由代码规则（问句长度 / 多问句 / 对比词）判定，命中后写进图状态并在每轮路由前回注，不占模型的选择权
 - M6 直连生成保留为 `tool_rag_answer` 的内部落点与评测对照组，不作为独立入口
 
 详细架构见 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)；模块划分见 [`docs/FRAMEWORK_NOTES.md`](docs/FRAMEWORK_NOTES.md)。
@@ -107,7 +109,7 @@ START → route ──(决定调工具)──→ execute_tools ──┐
 - **route / execute_tools / generate** 三个节点，route 用 v4-flash 的原生 function calling 选工具，最多 5 轮，防止无限自问自答
 - **工具注册表**自研（agent 与底座的唯一接缝）：`tool_retrieve` / `tool_rag_answer` / `tool_list_docs`，都是对 M5/M6/M7 现有能力的薄封装
 - **状态持久化**用 LangGraph checkpointer 落 Postgres（`thread_id = conversation_id`），多轮历史与上一轮引用池从 checkpoint 恢复，而不是每次重塞全文历史
-- **计划分支**：问句长度/对比词触发规则判定后，回注固定三步计划，绕开小模型「不主动调元工具」的偏好
+- **计划分支（不是工具）**：复杂题（问句 >35 字 / 多问句 / 含对比词）由代码规则判定，命中后写进图状态一份三步计划（拆解 → 逐项检索 → 汇总标注引用），每次路由前回注、生成前做步骤覆盖核对。原本注册成 `tool_plan` 让模型自己决定，实测 7 次采样 0 触发——小模型不选元工具，只能改由规则兜住；触发组耗时 +46%，收益要靠跨文档对比类复杂题验证
 
 **4. 流式与断连兜底**
 

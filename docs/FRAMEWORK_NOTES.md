@@ -58,6 +58,7 @@
                     ┌──────────────── 解答线 B（在线）─────────────────┐
 用户问题             │  M10 Agent 编排（唯一对话入口）                  │
   │  HTTP/SSE       │   LangGraph: route ⇄ execute_tools → generate     │
+  │                 │     计划分支（非工具）：复杂题 → state.plan 三步    │
   │                 │     └─ 工具：M5 检索 / M5+M6 综合应答 / M7 文档   │
   │                 │  M7 交互层：FastAPI + SSE + 多会话 + 文档管理     │
   └────────────────┼───────────────────────────────────────────────────┘
@@ -80,7 +81,7 @@
 | **M7 交互层** | FastAPI + SSE + 多轮记忆 + WebUI + **文档管理**（`POST/GET /docs`、`DELETE /docs/{doc_id}` 软删，见 v3）+ **图谱导出**（`GET /graph`，软删过滤，见 v4）+ **文档预览**（`GET /docs/{doc_id}/preview`，见 v5）+ **按文档过滤图谱**（`GET /graph?doc_id=`，见 v5）+ agent SSE 端点（`/agent/stream`，断流后后台落库） | HTTP → 流式响应 / 文档列表 / 图谱 JSON / 预览 JSON |
 | **M8 前端实现** | 正式 Web 前端（消费 M7 契约）：**v1** 答案 + 引用定位原文（SSE 逐字）→ **v2.1** 文档上传/文档管理视图 → **v2.2** 知识图谱（AntV G6 全图 + 引用「在图谱中查看」联动聚焦） → **v2.3** 侧边栏 + 右栏 tab + 文档全文预览 → **v5.7** agent 决策链卡片 → **v6.5.2** 回答区 Markdown 渲染 + `[n]` 角标插件 | HTTP/SSE → 用户界面 |
 | **M9 评测层** | 三库 130 题测试集 + 检索四维 / 生成四维 + agent 专项（工具准确率、多跳召回）+ 裁判校准 | 测试集 → 指标报告 |
-| **M10 Agent 系统** | **Agent 为主体、RAG 为底座**：唯一对话入口（`/agent`、`/agent/stream`）+ 工具注册表（`tool_retrieve` / `tool_rag_answer` / `tool_list_docs`，薄封装 M5/M6/M7）+ **LangGraph StateGraph**（route → execute_tools ⇄ route → generate，最多 5 轮，v4-flash 原生 function calling）+ PG checkpointer 会话快照 + 跨轮引用复用 + 规则触发计划分支 + `agent_runs`/`agent_spans` 可观测；**已落地（2026-10-30）** | query+history → 多轮工具决策 → 答案+引用 |
+| **M10 Agent 系统** | **Agent 为主体、RAG 为底座**：唯一对话入口（`/agent`、`/agent/stream`）+ 工具注册表（`tool_retrieve` / `tool_rag_answer` / `tool_list_docs`，薄封装 M5/M6/M7）+ **LangGraph StateGraph**（route → execute_tools ⇄ route → generate，最多 5 轮，v4-flash 原生 function calling）+ PG checkpointer 会话快照 + 跨轮引用复用 + **规则触发的计划分支**（非工具：复杂题写 `state.plan` 三步计划，route 每轮回注 + generate 前核对覆盖） + `agent_runs`/`agent_spans` 可观测；**已落地（2026-10-30）** | query+history → 多轮工具决策 → 答案+引用 |
 | **M11 MCP 接入层** | 把检索/问答能力暴露为 MCP 工具（`stdio` / `streamable-http` 两种传输），供 Claude Desktop / Cursor 等外部 AI 客户端调用；**旁路接入面，不进问答主链路**；**方案稿 v0.1，未实施** | MCP `tools/call` → 检索片段 / 带引用答案 |
 
 > **关键技术排查清单**（拆模块时容易漏的技术支撑，与模块的归属对应）：

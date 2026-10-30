@@ -74,6 +74,8 @@
 │    ├─ M10 Agent 编排（唯一对话入口）：LangGraph StateGraph                 │
 │    │    route ──(调工具)──► execute_tools ──► route …（≤5 轮）             │
 │    │      └──(信息足够)──► generate ──► END                                │
+│    │    计划分支（非工具）：规则判定复杂题 → state.plan 三步计划            │
+│    │        route 每轮回注「当前计划」+ generate 前核对步骤覆盖             │
 │    │    工具注册表：tool_retrieve / tool_rag_answer / tool_list_docs       │
 │    │    会话状态：LangGraph checkpointer 落 PG（thread_id=conversation_id）│
 │    └─ M6 直连生成：意图路由 → 上下文组装（token 预算）→ DeepSeek 生成      │
@@ -193,7 +195,7 @@
 | 工具注册表 | 自研 `m10_agent/registry.py`，`tool_retrieve`（M5 检索）/ `tool_rag_answer`（M5+M6 直连生成）/ `tool_list_docs`（M7 文档清单） |
 | 会话状态 | LangGraph checkpointer 落 Postgres，`thread_id = conversation_id`；多轮历史与上一轮引用池从 checkpoint 恢复 |
 | 工作记忆 | 上一轮 citations 并入本轮引用池（追问可直接复用已检索依据）；历史注入裁剪为最近 4 轮 / 6000 字符，且剥除旧 `[n]` 角标（编号每轮重排，复用会指向错块） |
-| 计划分支 | 规则判定（问句长度 + 对比词）而非模型自主决策——实测 v4-flash 不主动调元工具（见 CHANGELOG v6.5） |
+| 计划分支 | **规则判定（问句 >35 字 / 多问句 / 含「对比·区别·差异·不同·分别」）而非模型自主决策**——v6.5 实测 v4-flash 不主动选 `tool_plan` 元工具（7 次采样 0 触发）。命中后 `_rule_plan()` 生成固定三步计划（拆解 → 逐项检索 → 汇总标注引用），写进 `state.plan`：route 每轮回注「当前计划」，generate 前追加覆盖核对；不写回 `messages`，避免污染历史。**代价与保留理由见 CHANGELOG v6.5**：30 题行政库触发 12/30，触发组耗时 +46%，指标小幅下降且与答案重生成混杂——行政库是单文档多跳题，plan 的多对象拆解编排发挥不出效果，**保留待跨文档对比类复杂场景再测** |
 | 答案分箱 | 主体只写有资料依据的事实，操作建议/安全提醒统一进 `<advice>` 段 |
 | 可观测 | 每次运行落 `agent_runs` / `agent_spans`（OTel GenAI 语义，token/时延/工具名） |
 

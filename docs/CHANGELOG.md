@@ -41,6 +41,8 @@
 
 **附**：`ARCHITECTURE.md` 开头原有 11 行「本版修订摘要」（逐次修订的 A 档修正 / 补充 / 瘦身记录），与 §0 文档治理「版本变更只进 CHANGELOG」相冲突，已压缩为「调研日期 + 最近对齐日期 + 指向 CHANGELOG」三行。
 
+**补（同日）**：三份文档原先只把 M10 写成「三节点 + 三个工具」，漏了 **`state.plan` 计划分支**。已在 README 架构图与「Agent 编排」小节、`ARCHITECTURE.md` §1 管线图与 §2.7 落地形态表、`FRAMEWORK_NOTES.md` §3 模块图与 M10 行补入，并明确口径：**plan 不是注册工具**（v6.5 曾按 `tool_plan` 元工具实现，实测 0 触发后改为规则判定），保留理由与代价指向 v6.5 条目。
+
 ## [v6.5.2] 2026-10-30 —— M8 回答区补齐 Markdown 渲染（标题/加粗/列表/表格）；引用片段去表格噪音
 
 **影响模块**：`frontend/src/components/MessageBubble.tsx`、`frontend/src/lib/remarkCitations.ts`（新增）、`frontend/src/App.css`、`frontend/src/lib/cite.ts`、`frontend/package.json`；`backend/app/m6_generate/cite.py`；`docs/screenshots/04-chat.png`。
