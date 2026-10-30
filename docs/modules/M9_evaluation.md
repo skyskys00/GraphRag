@@ -1,7 +1,7 @@
 # M9 模块规划：评测层
 
 > **版本：** v1.15
-> **状态：** 可用（retrieval 模式 + gold_rank 诊断 + 双窗口 + nDCG + **e2e 生成四指标** + **行政库完整版 30 题检索基线 / NL 摘要激活复测 / 30 题全量 e2e / 裁判一致性抽检 10/10** + **可选 reranker=llm（LLM listwise 终审）** + **gold_rank 词汇匹配器强化（v5.23）** + **裁判 hit 字段修复（v5.29：context_recall 假阳性修正 + comparison per-doc 检索）** + **评测窗口收敛 @5（v5.31）** + **三库评测横向汇总表 + 客服 50 题 / 行政 30 题 retrieval 当前口径重跑（v5.37）** + **M10 agent 端到端评测（v5.46：`--mode agent` + multi_hop_recall/tool_accuracy + 引用口径修正）**）；Phase 3 待执行
+> **状态：** 可用（retrieval 模式 + gold_rank 诊断 + 双窗口 + nDCG + **e2e 生成四指标** + **行政库完整版 30 题检索基线 / NL 摘要激活复测 / 30 题全量 e2e / 裁判一致性抽检 10/10** + **可选 reranker=llm（LLM listwise 终审）** + **gold_rank 词汇匹配器强化（v5.23）** + **裁判 hit 字段修复（v5.29：context_recall 假阳性修正 + comparison per-doc 检索）** + **评测窗口收敛 @5（v5.31）** + **三库评测横向汇总表 + 客服 50 题 / 行政 30 题 retrieval 当前口径重跑（v5.37）** + **M10 agent 端到端评测（v5.46：`--mode agent` + multi_hop_recall/tool_accuracy + 引用口径修正）** + **裁判温度固定 0（v6.4.2：修复判定随机性，修复前 Δ<0.03 的版本比较不可信）**）；Phase 3 待执行
 > **更新：** 2026-10-24
 > **定位：** 中文 RAG 系统量化评测——测试集 + 指标 + ablation + 回归
 > **契约：** 测试集（question + contexts + ground_truth）→ 评测报告（各指标分数 + 对比基线）
@@ -212,7 +212,7 @@ reports/                      # 评测输出（gitignore，关键版本存档）
 | `metrics/answer_relevance.py` | 答案相关性 |
 | `metrics/correctness.py` | 答案正确性（需 ground_truth） |
 | `metrics/citation_accuracy.py` | 引用准确率 |
-| `judge.py` | LLM 裁判封装（DeepSeek flash + 缓存 + 重试） |
+| `judge.py` | LLM 裁判封装（DeepSeek flash + 缓存 + 重试；**temperature 固定 0**——判定任务需确定性，实测默认 1.0 下单题 citation 可随机漂 0.15~0.33，见 CHANGELOG v6.4.2） |
 | `ablation.py` | ablation 配置与多轮对比报告生成 |
 | `report.py` | 汇总指标 → JSON + 人类可读 Markdown |
 
