@@ -1,6 +1,6 @@
 # GraphRAG 系统架构与选型方案（v2）
 
-> 调研日期：2026-09-03 ｜ 修订：2026-09-11（依据拆解调研与 **docs/FRAMEWORK_NOTES.md** 修正事实、明确「内建 vs 自研」边界、补版本锁定与全部实施路线）
+> 调研日期：2026-09-03 ｜ 修订：2026-09-11（依据拆解调研与 **docs/FRAMEWORK_NOTES.md** 修正事实、明确「内建 vs 自研」边界、补版本锁定与全部实施路线）｜ 2026-10-30（M10 agent 落地后对齐生产：§1 管线图 / §2.7 编排 / §3.1 版本表 / §6 路线 / §7 决策）
 >
 > **本文件层定位（蓝图层）**：方向 / 选型 / 版本锁定 / 路线。不承载模块实现细节（见 `docs/modules/Mx_*.md`）、不承载版本时序（见 `docs/CHANGELOG.md`）、概念决策与文档治理见 `docs/FRAMEWORK_NOTES.md` §0/§5。
 >
@@ -10,6 +10,7 @@
 > - **§6 分阶段实施路线已完整撰写**（按模块顺序、逐阶段给验收）。
 > - **2026-09-16 瘦身**：§8 实测附录并入 `docs/CHANGELOG.md`（时序内容移出蓝图，本节留指引）；§2 压缩引擎/选型过程细节，保留选型结论与「内建 vs 自研」边界。
 > - **2026-10-24 补正（对齐生产代码）**：§2.4「内建 vs 自研」边界与 §2.6 外层增强清单补「五特征融合排序（`fuse_and_rank`，v5.9 正式）」，rerank 表述修正为全候选打分、不截断、名次交由特征融合决定——此前两处均只写到 rerank 精排，遗漏 M5 检索链路末段，属历史欠账随 v5.40+ 文档核对清点（实现细节见 `docs/modules/RETRIEVAL_OPTIMIZATION.md` §五特征融合排序）。
+> - **2026-10-30 补正（M10 agent 落地）**：§1 查询管线图与 §2.7 从「M6 自研极简编排、不引 LangGraph」改为**「M6 直连生成降为工具落点 + M10 LangGraph agent 为唯一对话入口」**；§3.1 版本表补 LangGraph 与 Postgres checkpointer；§6/§7 的 M0–M9 表述更新为 M0–M11（M11 = MCP 接入层，规划中未实施）。
 
 本节结论由 4 路并行调研交叉验证（框架层 / 解析层 / 存储检索层 / Agent 与平台层），信息源自 GitHub 一手仓库与官方文档，个别观点标注了来源与风险。
 
@@ -27,7 +28,7 @@
 | LLM 接入 | **DeepSeek**（OpenAI 兼容 API） | 抽取/生成统一走 DeepSeek，单 key 跑通全链路；**实测定 `deepseek-v4-flash` 全模型（抽取+生成），不用 pro**（见 §3.1 与 CHANGELOG v1.0 M3） |
 | 内容形态 | **PDF 为主** + doc/txt/md 等 | MinerU 主力 + Docling 补多格式 |
 | 综述问答 | **需要全局综述** | LightRAG `global`/`mix` 起步，按效果决定是否补社区摘要 |
-| 目标 | **开发练手、测通即可**；暂不优化长期运维成本 | 存储做成**可切换接口**：MVP 用 LightRAG 默认存储跑通，Postgres 适配器随时切换；代码按 M0–M9 模块化重建（见 **docs/FRAMEWORK_NOTES.md**） |
+| 目标 | **开发练手、测通即可**；暂不优化长期运维成本 | 存储做成**可切换接口**：MVP 用 LightRAG 默认存储跑通，Postgres 适配器随时切换；代码按 M0–M11 模块化重建（见 **docs/FRAMEWORK_NOTES.md**） |
 
 **核心选型一句话**：
 **LightRAG（框架内核）+ MinerU 3.x（文档解析）+ bge-m3（本地 embedding，经 Xinference 供 dense+sparse）+ bge-reranker-v2-m3（精排）+ Postgres/pgvector（持久化）+ LangGraph 状态机（agent 编排，M10）**，全部本地私有化，抽取/建图用国产便宜模型（deepseek-v4-flash），**全链路统一 `deepseek-v4-flash`（2026-09-13 实测定案，见 CHANGELOG v1.0；不用 pro）**。
@@ -77,14 +78,22 @@
 │    └─ 五特征融合排序（rerank/sparse/rrf/数字匹配/密度）→ top5（v5.9）     │
 │    │                                                                      │
 │    ▼                                                                      │
-│  [6 Agent 编排]：自研极简编排（不引 LangChain/LangGraph）                 │
-│    意图路由（v1 single-window，map-reduce 留位）→ 上下文组装（token 预算）│
-│    → DeepSeek 生成（[n] grounded 标注）→ 引用解析（回连 TextUnit→原文）   │
+│  [6 编排与生成]（M6 直连 + M10 agent，二者非并列入口）                     │
+│    ├─ M10 Agent 编排（唯一对话入口）：LangGraph StateGraph                 │
+│    │    route ──(调工具)──► execute_tools ──► route …（≤5 轮）             │
+│    │      └──(信息足够)──► generate ──► END                                │
+│    │    工具注册表：tool_retrieve / tool_rag_answer / tool_list_docs       │
+│    │    会话状态：LangGraph checkpointer 落 PG（thread_id=conversation_id）│
+│    └─ M6 直连生成：意图路由 → 上下文组装（token 预算）→ DeepSeek 生成      │
+│         （[n] grounded 标注）→ 引用解析（回连 TextUnit→原文）              │
+│         **降为 tool_rag_answer 的内部落点 + 评测对照组，不单独对外**       │
 │    │                                                                      │
 │    ▼                                                                      │
-│  [7 交互层]  FastAPI + SSE 流式（token 增量）+ 引用标注 + 多知识库/多会话 │
+│  [7 交互层]  FastAPI + SSE 流式（token 增量）+ 引用标注 + 多知识库/多会话  │
 └───────────────────────────────────────────────────────────────────────────┘
 ```
+
+> ⚠️ 该图 2026-10-30 已对齐生产：早期版本写的是「[6] 自研极简编排（不引 LangChain/LangGraph）」，那是 M10 定案前的方案。现状 = **LangGraph 承担 agent 决策环**，M6 退为工具实现。
 
 ---
 
@@ -181,7 +190,20 @@
 
 ### 2.7 Agent 编排与上下文组装（「传给 agent → 返回用户」这一段的落地）
 
-**推荐：LightRAG 内核 + 一层可控的 Agent 编排**（蓝图规划于 M6，2026-10-23 独立为 **M10**；选型随 M10 v0.3 更新为 **LangGraph 状态机**，编排方案见 `docs/modules/M10_agent.md` §2.1/§2.2）。用 **LangGraph**（依赖树自带 langchain-core 消息/工具抽象）承担 **对话 history 注入**与**工具调用协议**（agent 可调图谱检索 / 文档检索等工具，经 M10 工具注册表薄封装）；模板化的 prompt/上下文组装**自研（M6），不深度用 LCEL 抽象**；**不单独引 LangChain**。复杂场景（多 agent / 持久化 / 中断恢复）在 StateGraph 上继续编排，checkpoint / interrupt 为 LangGraph 增值点。
+**推荐：LightRAG 内核 + 一层可控的 Agent 编排**（蓝图规划于 M6，2026-10-23 独立为 **M10**；选型随 M10 v0.3 更新为 **LangGraph 状态机**，**2026-10-30 已落地为唯一对话入口**，编排方案见 `docs/modules/M10_agent.md` §2.1/§2.2）。用 **LangGraph**（依赖树自带 langchain-core 消息/工具抽象）承担 **对话 history 注入**与**工具调用协议**（agent 可调图谱检索 / 文档检索等工具，经 M10 工具注册表薄封装）；模板化的 prompt/上下文组装**自研（M6），不深度用 LCEL 抽象**；**不单独引 LangChain**。复杂场景（多 agent / 持久化 / 中断恢复）在 StateGraph 上继续编排，checkpoint / interrupt 为 LangGraph 增值点。
+
+**已落地形态（2026-10-30）**：
+
+| 要素 | 实现 |
+|---|---|
+| 状态图 | `START → route`，`route` 条件边分流到 `execute_tools`（回边回 `route`）或 `generate → END`；最多 5 轮 |
+| 决策协议 | v4-flash 原生 function calling（thinking=disabled）；不走 JSON 兜底的解析路径 |
+| 工具注册表 | 自研 `m10_agent/registry.py`，`tool_retrieve`（M5 检索）/ `tool_rag_answer`（M5+M6 直连生成）/ `tool_list_docs`（M7 文档清单） |
+| 会话状态 | LangGraph checkpointer 落 Postgres，`thread_id = conversation_id`；多轮历史与上一轮引用池从 checkpoint 恢复 |
+| 工作记忆 | 上一轮 citations 并入本轮引用池（追问可直接复用已检索依据）；历史注入裁剪为最近 4 轮 / 6000 字符，且剥除旧 `[n]` 角标（编号每轮重排，复用会指向错块） |
+| 计划分支 | 规则判定（问句长度 + 对比词）而非模型自主决策——实测 v4-flash 不主动调元工具（见 CHANGELOG v6.5） |
+| 答案分箱 | 主体只写有资料依据的事实，操作建议/安全提醒统一进 `<advice>` 段 |
+| 可观测 | 每次运行落 `agent_runs` / `agent_spans`（OTel GenAI 语义，token/时延/工具名） |
 
 组装规范（抄微软 GraphRAG 的最佳实践、做中文化）：
 
@@ -226,9 +248,11 @@
 | **Xinference（模型网关）** | 当前稳定版 | Apache-2.0 | 本地进程/容器 | 统一承载 bge 两模型，单地址三端点；先于一切模块部署 |
 | DeepSeek API | `deepseek-v4-flash`（**全链路统一，不用 pro**） | — | 云端（OpenAI 兼容） | 抽取 / 生成，单 key 全链路；**注意 v4-flash 是推理模型，须 `extra_body` 传 `thinking={"type":"disabled"}` 关思考模式**（见 CHANGELOG v1.0） |
 | GLM（bigmodel，测试/低成本备选） | `glm-4.5-flash` / `glm-4-flash-250414`（免费档） | 商用授权视邀请（个人测试 OK） | 云端 `https://open.bigmodel.cn/api/paas/v4` | 测试 / 评测 / 降级用；`glm-4.7-flash` 流量大不稳定，不作主选 |
-| Postgres + pgvector | Postgres 16 + pgvector 0.8+ | PostgreSQL / Apache | 本地或容器 | 准生产，一库通吃 |
+| Postgres + pgvector | Postgres 16 + pgvector 0.8+ | PostgreSQL / Apache | 本地或容器 | 准生产，一库通吃；同时承载 LangGraph checkpoint |
+| **LangGraph** | 1.2.16（`langgraph`）+ `langgraph-checkpoint-postgres` 3.2.0 | MIT | Python 包 | M10 agent 编排内核（StateGraph + PG 快照）；随依赖树带入 `langchain-core` 1.6.2，**不单独引 LangChain** |
 | FastAPI | 当前稳定版 | MIT | Python | SSE 流式 |
 | AntV G6 | v5.1.1（**已落地** 2026-09-15） | MIT | npm 前端（frontend/） | 知识图谱渲染（M8 v2.2）；引入后 dist JS ≈1.65MB（gzip ≈481KB，后续可代码分割） |
+| react-markdown + remark-gfm | 10.1 / 4.0（**已落地** 2026-10-30） | MIT | npm 前端（frontend/） | 回答区 Markdown 渲染（M8 v6.5.2）；不注入 innerHTML |
 
 ---
 
@@ -267,11 +291,11 @@
 | **② 拆解 MinerU / Docling 源码** | 分别拉取安装，用样例 PDF / docx 跑通，读源码 | **数据流**（输入 → 版面/文字 → 中间表示 → 输出；页码 / 表格 / 公式 / 标题路径如何携带）与**输入输出接口规范**；确认可归一为统一 Markdown（M1 adapter 的对接依据） |
 | **③ 部署 Xinference 模型网关** | 启动 Xinference，加载 bge-m3 与 bge-reranker-v2-m3，写启动 + 健康检查脚本 | 验证 embedding / rerank 端点可用；**实测 bge-m3 dense+sparse 双输出**（「免建 BM25」的前提，拿不到早失败）；可与 ①② 并行 |
 | **④ 定契约地基（共享层 M0）** | 定义 Document / TextUnit Schema、config（模型映射 / 缓存 / 语言）、llm_client / embed_client | **契约先行**：TextUnit 字段（text / doc_id / 页码 / 标题路径 / 块类型 / embedding / 实体引用）与 doc_id 规则定死，所有模块据此开发、用样例数据 mock 上下游；**契约以 JSON Schema 机器校验落地，说明见 `docs/modules/M0_contracts/`**；**落地（2026-10-16 对齐代码）**：契约文档=M0_contracts（parse 产物 + TextUnit v2）；config / LLM / Embedding client 无常驻独立 m0 包，落实于 `m3_index/providers.py`，M5/M6/M7/M9 复用 |
-| **⑤ Agent 编排（M6）** | 按 LangChain 薄包装接入（history + 工具协议）；定意图路由与上下文组装的方向 | **编排边界**：组装 / 引用自研，LangChain 不做重抽象；single-window 与 map-reduce 各治哪类问题 |
+| **⑤ Agent 编排（M6 → M10）** | 编排边界：组装 / 引用自研，编排内核**由自研极简循环改为 LangGraph 状态图**（2026-10-23 定案，2026-10-30 落地）；M6 直连降为 `tool_rag_answer` 工具落点 | **编排边界**：组装 / 引用自研，LangChain 不做重抽象；single-window 与 map-reduce 各治哪类问题；**agent 后置校验（verifier）为下一步方案**，见 M10 §11.5 |
 | **⑥ 前端设计与展示** | ① （可选）Figma 画稿，对齐「问题 → 回答 + 引用 → 定位原文 → 图谱游走」动线；② **搭前端工程并引入 AntV G6**（本机未装：npm 初始化 + 安装 `@antv/g6`，属部署步骤）；③ **与 ⑤ 编排对齐，定前端所需的最小 API 契约**（SSE 事件定义 / 引用标注字段形状）；④ 按主轴线实现页面：回答 + 引用高亮 → 点击定位原文 → 答案节点图上游走 | 页面**只依赖稳定 API**（SSE + 引用标注）、与后端解耦；时序是**先部署依赖（②）→ 画稿对齐（①）→ 定 API 契约（③）→ 渲染实现（④）**；G6 只做渲染层，布局/交互体验在稿上先定 |
 | **⑦ 联调与评测基线** | 后端各段（解析 → 切分 → 索引 → 检索 → 编排）+ **前端页面端到端**汇合：FastAPI（StreamingResponse + SSE）作统一入口，产物经「契约校验（④ 的 Schema）/ 写库」衔接；跑真实文档，建 RAGAS 种子测试集；**含前端走查**（引用高亮 / 点击定位 / 图谱游走）；最后 **Docker Compose** 收敛部署 | 联调**先过契约再过行为**；靠**统一日志 / 观测**定位断点（契约错 vs 行为错）；评测基线守住每次改动；前端当「眼睛」，端到端问题在真实路径上暴露 |
 
-> **当前推进状态（2026-09-16）**：①–⑦ 路线已全部落地（模块记录在 `docs/modules/`），**M9 评测层待启动**；Docker Compose 收敛部署未做（后续项）。各模块版本与实测见 `docs/CHANGELOG.md`。
+> **当前推进状态（2026-10-30）**：①–⑦ 路线已全部落地（模块记录在 `docs/modules/`）。M9 评测层已落地（三库 130 题 + 八维指标）；M10 agent 已成为唯一对话入口（LangGraph + 工具注册表 + PG 会话快照）；M11（MCP 接入层）仅有方案稿、未实施。Docker Compose 收敛部署未做（后续项）。各模块版本与实测见 `docs/CHANGELOG.md`。
 
 ---
 
@@ -288,7 +312,8 @@
 | 7 | embedding/rerank 载体 | **Xinference**（本地模型网关，支持 dense+sparse 与 `/v1/rerank`；不选 Ollama） |
 | 8 | DeepSeek 模型 | **统一 `deepseek-v4-flash`**（抽取+生成；不用 pro；2026-09-13 实测定案，见 CHANGELOG v1.0） |
 | 9 | 检索增强 | 三路 RRF(k=60) + rerank **外层自研**（模块 M5） |
-| 10 | 开发形态 | 按 **M0–M9** 模块化重做；契约先行、线 A/B 并行走；记录按 docs/modules/ |
+| 10 | 开发形态 | 按 **M0–M11** 模块化重做（M10 = agent 编排，M11 = MCP 接入层·规划中）；契约先行、线 A/B 并行走；记录按 docs/modules/ |
+| 11 | 编排内核 | **LangGraph StateGraph**（2026-10-23 定案）：agent 为唯一对话入口，M6 直连降为工具落点 |
 
 ---
 

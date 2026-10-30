@@ -26,6 +26,19 @@
 
 ---
 
+## [v6.5.3] 2026-10-30 —— 文档对齐：ARCHITECTURE / FRAMEWORK_NOTES / README 反映 agent 落地（纯文档）
+
+**影响模块**：`docs/ARCHITECTURE.md`、`docs/FRAMEWORK_NOTES.md`、`README.md`。
+
+**背景**：M10 agent 已是大框架主体，但三份门面文档仍停在「M6 自研极简编排、不引 LangGraph」「M10 规划中」的旧表述。
+
+**内容**：
+- `ARCHITECTURE.md`：§1 查询管线图 `[6]` 改为「M10 agent（唯一入口）+ M6 直连（工具落点/对照组）」；§2.7 补「已落地形态」表（状态图 / 决策协议 / 工具注册表 / PG checkpointer / 工作记忆 / 计划分支 / 答案分箱 / 可观测）；§3.1 版本表补 LangGraph 1.2.16 + `langgraph-checkpoint-postgres` 3.2.0 + react-markdown；§6 路线与推进状态、§7 决策表更新到 M0–M11。
+- `FRAMEWORK_NOTES.md`：§3 模块图改为「M10 为在线线入口、M6 降为工具落点」；M10 行由「方案稿 v0.3、规划中」改为「已落地」并补 M11 MCP 层（未实施）；关键技术清单的 LangGraph 行同步为已落地。
+- `README.md`：首段与功能特性补 agentic RAG / 多轮对话 / 可观测；架构图重画为 M10 主导；**新增「关键技术实现」章**（三路召回 + RRF + 五特征融合、引用溯源、LangGraph 编排、流式与断连兜底、裁判校准、多模态索引、前端渲染）；技术栈表与项目结构同步。
+
+**口径说明**：README 评测表保留 M6 直连线结果（当前唯一完整跑满三库的生产口径），并显式标注 agent 线指标另见 M9/M10 文档，避免把未按新裁判口径复跑的数字当结论。
+
 ## [v6.5.2] 2026-10-30 —— M8 回答区补齐 Markdown 渲染（标题/加粗/列表/表格）；引用片段去表格噪音
 
 **影响模块**：`frontend/src/components/MessageBubble.tsx`、`frontend/src/lib/remarkCitations.ts`（新增）、`frontend/src/App.css`、`frontend/src/lib/cite.ts`、`frontend/package.json`；`backend/app/m6_generate/cite.py`；`docs/screenshots/04-chat.png`。

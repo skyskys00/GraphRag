@@ -1,6 +1,6 @@
 # GraphRAG 重做：框架实现补充笔记（对话整理 v1）
 
-> 整理日期：2026-09-11 ｜ 修订：2026-09-16（新增 §0 文档治理；按「结果导向」删除 §5 概念澄清与技术决策，实测记录并入 `docs/CHANGELOG.md`）｜ 定位：**`docs/ARCHITECTURE.md` 的补充细节与待办清单**，不替代架构文档。
+> 整理日期：2026-09-11 ｜ 修订：2026-09-16（新增 §0 文档治理；按「结果导向」删除 §5 概念澄清与技术决策，实测记录并入 `docs/CHANGELOG.md`）｜ 2026-10-30（M10 agent 落地、M11 MCP 层立项，§3 模块图与关键技术清单对齐生产） ｜ 定位：**`docs/ARCHITECTURE.md` 的补充细节与待办清单**，不替代架构文档。
 > 来源：重做规划讨论（旧代码审查结论、模块划分、宏观选型与技术决策）。
 > 范围：本文件不含分阶段实施路线（见 `docs/ARCHITECTURE.md` §6）与版本时序（见 `docs/CHANGELOG.md`）。
 > 约定：文中「内建」指 LightRAG 开箱具备的能力，「需自研/外包」指要在外层我们自己实现。
@@ -47,7 +47,7 @@
 
 ---
 
-## 3. 模块划分（M0–M9，高内聚 / 低耦合）
+## 3. 模块划分（M0–M11，高内聚 / 低耦合）
 
 ```
                     ┌───────────────── 数据线 A（离线）──────────────────┐
@@ -56,12 +56,16 @@
   ▼                └─────────────────────────────────────────────────┘
                                                     │ 经 M4 存储层
                     ┌──────────────── 解答线 B（在线）─────────────────┐
-用户问题             │  M5 检索层   M6 编排层        M7 交互层          │
-  │  HTTP/SSE       │  LightRAG召回 → RRF+rerank → 组装+引用 → FastAPI/UI│
+用户问题             │  M10 Agent 编排（唯一对话入口）                  │
+  │  HTTP/SSE       │   LangGraph: route ⇄ execute_tools → generate     │
+  │                 │     └─ 工具：M5 检索 / M5+M6 综合应答 / M7 文档   │
+  │                 │  M7 交互层：FastAPI + SSE + 多会话 + 文档管理     │
   └────────────────┼───────────────────────────────────────────────────┘
         M0 数据契约层（parse 产物契约 + TextUnit 检索管线数据规范）──所有模块以契约衔接
-        M9 评测层（中文测试集 + RAGAS 指标，贯穿全程）
-        M10 Agent 系统（规划中：统一对话入口 + 工具注册表，主体内嵌 M5/M6/M7 底座能力）
+        M6 生成层（直连：检索 → 组装 → 生成 + 引用）——降为 agent 的工具落点与评测对照
+        M8 前端实现（React，消费 M7 契约）
+        M9 评测层（三库 130 题 + 八维指标，贯穿全程）
+        M11 MCP 接入层（规划中：把检索/问答能力暴露为 MCP 工具，旁路接入面）
 ```
 
 | 模块 | 职责边界 | 输入 → 输出契约 |
@@ -71,22 +75,24 @@
 | **M2 切分层** | 标题层级切分 / TokenChunker / 表格整块 / 元数据抽取 | 统一 Markdown → TextUnit(JSONL) |
 | **M3 索引层** | LightRAG 建图（中文实体抽取、增量/选择性删除）+ bge-m3 编码；**兼任全项目共享 config / LLM / Embedding client（`providers.py`）** | TextUnit → 图+向量 |
 | **M4 存储层** | 统一存取接口，后端可切换（默认 → Postgres+pgvector） | 供 M3 写、M5 读 |
-| **M5 检索层** | 内建三路 + sparse/BM25（bge-m3 sparse 关键词路）+ RRF(k=60) + rerank（经 **Xinference** bge-reranker）+ query 预处理 | query+模式 → 精排 context 带来源 |
-| **M6 编排层** | 意图路由 / map-reduce / 上下文组装（token 预算）/ 引用标注 / 流式事件 | query+context → 答案+引用 |
-| **M7 交互层** | FastAPI + SSE + 多轮记忆 + WebUI + **文档管理**（`POST/GET /docs`、`DELETE /docs/{doc_id}` 软删，见 v3）+ **图谱导出**（`GET /graph`，软删过滤，见 v4）+ **文档预览**（`GET /docs/{doc_id}/preview`，见 v5）+ **按文档过滤图谱**（`GET /graph?doc_id=`，见 v5）+ 引用排序修复 | HTTP → 流式响应 / 文档列表 / 图谱 JSON / 预览 JSON |
-| **M8 前端实现** | 正式 Web 前端（消费 M7 契约）：**v1** 答案 + 引用定位原文（SSE 逐字）→ **v2.1** 文档上传/文档管理视图 → **v2.2** 知识图谱（AntV G6 全图 + 引用「在图谱中查看」联动聚焦） → **v2.3** 左侧可折叠侧边栏 + 右栏 tab（引用/预览）+ 文档全文预览（置信度第一片段高亮）+ 引用按置信度排序并限前 5 条 + 图谱按文档过滤 | HTTP/SSE → 用户界面 |
-| **M9 评测层** | 中文测试集 + RAGAS 指标 + 回归对比 | 测试集 → 指标报告 |
-| **M10 Agent 系统** | **Agent 为主体、RAG 为底座**：统一对话入口（`/agent`）+ 工具注册表（检索/综合应答/文档/图谱/对比，薄封装 M5/M6/M7）+ **LangGraph 编排内核**（显式 StateGraph：route / execute_tools / generate，决策协议原生 function calling 优先·JSON 兜底，最多 N=5 轮）；RAG 直连降为内部工具落点 + 评测对照；**方案稿 v0.3，规划中（2026-10-23）** | query+history → 多轮工具决策 → 答案+引用 |
+| **M5 检索层** | 内建三路 + sparse/BM25（bge-m3 sparse 关键词路）+ RRF(k=60) + rerank（经 **Xinference** bge-reranker）+ 五特征融合排序 + query 预处理 | query+模式 → 精排 context 带来源 |
+| **M6 生成层** | 意图路由 / 上下文组装（token 预算）/ 引用标注 / 流式事件；**agent 落地后降为 `tool_rag_answer` 的内部实现与评测对照组**，不再是独立入口 | query+context → 答案+引用 |
+| **M7 交互层** | FastAPI + SSE + 多轮记忆 + WebUI + **文档管理**（`POST/GET /docs`、`DELETE /docs/{doc_id}` 软删，见 v3）+ **图谱导出**（`GET /graph`，软删过滤，见 v4）+ **文档预览**（`GET /docs/{doc_id}/preview`，见 v5）+ **按文档过滤图谱**（`GET /graph?doc_id=`，见 v5）+ agent SSE 端点（`/agent/stream`，断流后后台落库） | HTTP → 流式响应 / 文档列表 / 图谱 JSON / 预览 JSON |
+| **M8 前端实现** | 正式 Web 前端（消费 M7 契约）：**v1** 答案 + 引用定位原文（SSE 逐字）→ **v2.1** 文档上传/文档管理视图 → **v2.2** 知识图谱（AntV G6 全图 + 引用「在图谱中查看」联动聚焦） → **v2.3** 侧边栏 + 右栏 tab + 文档全文预览 → **v5.7** agent 决策链卡片 → **v6.5.2** 回答区 Markdown 渲染 + `[n]` 角标插件 | HTTP/SSE → 用户界面 |
+| **M9 评测层** | 三库 130 题测试集 + 检索四维 / 生成四维 + agent 专项（工具准确率、多跳召回）+ 裁判校准 | 测试集 → 指标报告 |
+| **M10 Agent 系统** | **Agent 为主体、RAG 为底座**：唯一对话入口（`/agent`、`/agent/stream`）+ 工具注册表（`tool_retrieve` / `tool_rag_answer` / `tool_list_docs`，薄封装 M5/M6/M7）+ **LangGraph StateGraph**（route → execute_tools ⇄ route → generate，最多 5 轮，v4-flash 原生 function calling）+ PG checkpointer 会话快照 + 跨轮引用复用 + 规则触发计划分支 + `agent_runs`/`agent_spans` 可观测；**已落地（2026-10-30）** | query+history → 多轮工具决策 → 答案+引用 |
+| **M11 MCP 接入层** | 把检索/问答能力暴露为 MCP 工具（`stdio` / `streamable-http` 两种传输），供 Claude Desktop / Cursor 等外部 AI 客户端调用；**旁路接入面，不进问答主链路**；**方案稿 v0.1，未实施** | MCP `tools/call` → 检索片段 / 带引用答案 |
 
 > **关键技术排查清单**（拆模块时容易漏的技术支撑，与模块的归属对应）：
 
 | 关键技术 | 归属模块 | 在本项目的角色 |
 |---|---|---|
 | **Xinference（模型服务网关）** | M3（`providers.py` client）＋ M5（rerank） | 统一承载 bge-m3（dense+sparse）与 bge-reranker-v2-m3，全项目经 HTTP 共用；**不属于任一个模块的内建部分** |
-| **LangChain / LangGraph** | ~~M6~~ → **M10（引入 LangGraph 编排内核）** | 蓝图曾规划 M6 薄包装 LangChain 做工具调用协议；**M10 方案（v0.3）定 LangGraph 为 agent 编排内核**——工具注册表自研（agent 与底座的唯一接缝），StateGraph 承载决策环（route / execute_tools / generate），决策协议先探底 v4-flash 原生 function calling（`with_structured_output` JSON 兜底）；**不单独引 LangChain**（langchain-core 随 langgraph 依赖树自带），不深度用 LCEL |
+| **LangGraph** | **M10（agent 编排内核，已落地）** | 蓝图曾规划 M6 薄包装 LangChain 做工具调用协议；**实际以 LangGraph 为编排内核**——工具注册表自研（agent 与底座的唯一接缝），StateGraph 承载决策环（route / execute_tools / generate），决策协议用 v4-flash 原生 function calling，会话状态用 PG checkpointer（`thread_id = conversation_id`）；**不单独引 LangChain**（langchain-core 随 langgraph 依赖树自带），不深度用 LCEL |
 | **Postgres + pgvector** | M4（存储实现） | 准生产地基：图 / 向量 / 原文块 / 状态一库 |
 | **FastAPI + SSE** | M7（后端壳） | 对外 HTTP + 流式响应 |
 | **AntV G6** | M8（前端渲染） | **已落地 v2.2**：知识图谱渲染 + 引用→图谱联动（答案→引用→原文→图上游走），v5.1.1 |
+| **react-markdown / remark** | M8（回答渲染） | **已落地 v6.5.2**：回答区 Markdown 渲染；引用角标由自写 remark 插件在语法树上把 `[n]` 拆成链接节点，不注入 innerHTML |
 | **RAGAS** | M9（评测） | LLM 裁判打分 |
 | **DeepSeek**（deepseek-v4-flash） | M3（`providers.py` LLM client） | 抽取/生成统一 flash（2026-09-13 实测定案） |
 | **MinerU / Docling** | M1（解析层） | PDF 主力 / 多格式兜底 |
@@ -119,5 +125,8 @@
 
 ## 5. 待办与下一步
 
-- 实施进度（M0–M8 全线落地 2026-09-15；文档治理 v2.0 2026-09-16）**不再在本文维护**，逐版本见 `docs/CHANGELOG.md`。
-- ⏳ **M9 评测层**（P0，已规划待落地，v0.1 规划见 `docs/modules/M9_evaluation.md`）：中文测试集（50 题，7 类）+ LLM 裁判（DeepSeek flash）+ 6 项核心指标 + 7 组 ablation study + 回归对比。三阶段约 7 天：骨架+检索指标 → 生成指标+完整测试集 → ablation+回归门禁。
+- 实施进度**不在本文维护**，逐版本见 `docs/CHANGELOG.md`。里程碑：M0–M8 落地 2026-09-15｜M9 评测层落地 2026-10-06（三库 130 题）｜M10 agent 成为唯一对话入口 2026-10-30。
+- ✅ **M9 评测层**（已落地）：三库 130 题 + 检索四维 / 生成四维 / agent 专项，裁判温度固定 0 + 判定缓存；版本间 Δ ≤ 0.03 视为噪声。
+- ⏳ **M10 verifier**（方案稿，未实施，见 `docs/modules/M10_agent.md` §11.5）：生成后校验引用支撑与计划覆盖，最多重试一次；验证门槛 30 题 A/B、Δ > 0.03 才算有效。
+- ⏳ **M11 MCP 接入层**（方案稿 v0.1，未实施，见 `docs/modules/M11_mcp.md`）：stdio + streamable-http 两套传输，把检索/问答暴露为 MCP 工具。
+- ⏳ **Docker Compose 收敛部署**（长期未做）：当前靠 `dev.sh` 分组件拉起。
