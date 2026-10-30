@@ -39,6 +39,8 @@
 
 **口径说明**：README 评测表保留 M6 直连线结果（当前唯一完整跑满三库的生产口径），并显式标注 agent 线指标另见 M9/M10 文档，避免把未按新裁判口径复跑的数字当结论。
 
+**附**：`ARCHITECTURE.md` 开头原有 11 行「本版修订摘要」（逐次修订的 A 档修正 / 补充 / 瘦身记录），与 §0 文档治理「版本变更只进 CHANGELOG」相冲突，已压缩为「调研日期 + 最近对齐日期 + 指向 CHANGELOG」三行。
+
 ## [v6.5.2] 2026-10-30 —— M8 回答区补齐 Markdown 渲染（标题/加粗/列表/表格）；引用片段去表格噪音
 
 **影响模块**：`frontend/src/components/MessageBubble.tsx`、`frontend/src/lib/remarkCitations.ts`（新增）、`frontend/src/App.css`、`frontend/src/lib/cite.ts`、`frontend/package.json`；`backend/app/m6_generate/cite.py`；`docs/screenshots/04-chat.png`。
