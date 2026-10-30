@@ -18,6 +18,9 @@ RETRY_BASE_DELAY = 2.0   # 指数退避基数（秒）：2 → 4 → 8
 RETRY_MAX_DELAY = 20.0   # 单次退避上限（秒）
 RETRY_JITTER = 0.5       # 退避随机抖动（±秒），避免同批调用同步重试
 CONCURRENCY = 5          # 全局 LLM 裁判并发上限：每题 20+ chunk 并发直连会互相踩
+# 裁判固定 temperature=0：后端默认 1.0 时同一引用可判出 0.90/0.00 两极，
+# 单题 citation 分数随机漂 0.15~0.33（2026-10-30 实测），一半以上的版本间差异来自此处。
+JUDGE_TEMPERATURE = 0.0
 # 4xx 客户端错误类名（openai SDK），重试无意义
 _NON_RETRYABLE_NAMES = (
     "BadRequestError", "AuthenticationError", "PermissionDeniedError",
@@ -126,7 +129,7 @@ async def judge(
     可附带 total_facts / correct_facts / incorrect 等诊断字段。
     如果解析失败，返回 score=0 + raw_text 供排查。
     """
-    key = _hash(*(cache_key_parts or [prompt]))
+    key = _hash(f"t{JUDGE_TEMPERATURE}", *(cache_key_parts or [prompt]))
 
     cached = _cache_read(key, metric)
     if cached is not None:
@@ -136,7 +139,8 @@ async def judge(
         last_err: Exception | None = None
         for attempt in range(MAX_RETRIES + 1):
             try:
-                raw = await query_func(prompt, system_prompt=system_prompt)
+                raw = await query_func(prompt, system_prompt=system_prompt,
+                                       temperature=JUDGE_TEMPERATURE)
                 result = _parse_judge_output(raw)
                 result["raw"] = raw
                 _cache_write(key, metric, result)

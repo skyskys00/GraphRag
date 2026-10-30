@@ -26,6 +26,23 @@
 
 ---
 
+## [v6.4.2] 2026-10-30 —— M9 裁判温度固定 0：修复评测方差，citation 判定恢复可复现
+
+**影响模块**：`backend/app/m9_eval/judge.py`（新增 `JUDGE_TEMPERATURE=0.0`；`query_func` 调用显式传温度；缓存 key 加温度前缀）。`backend/scripts/probe_temperature_effective.py` / `probe_citation_judge_spread.py` / `verify_judge_temperature_fix.py`（探底与验证脚本留档，可复跑）。
+
+**问题**：v6.4.1 给 `_llm_config()` 加了 `temperature`（默认 0.1），但 `build_llm_func()` 的 `make()` 只展开 `cfg["extra_kwargs"]`，**该字段从未被使用**——agent 的 `_chat`/`_stream_chat` 自己显式传参所以生效，**judge 与 M6 直连生成始终跑在后端默认 1.0**。
+
+**内容**：
+- judge 调用固定 `temperature=0.0`（判定任务要确定性，与生成任务的 0.1 分开设）；`make()` 的 `**kw` 原样透传，不改 providers 与线上生成行为。
+- 缓存 key 加温度前缀，避免旧的 1.0 判定结果继续命中。
+
+**实测（同一份答案、同一段上下文，5 次重复判）**：
+- **t=1.0（修复前）**：q010 整题分数按轮 0.51 / 0.64 / 0.62 / 0.33 / 0.66（极差 **0.33**）、q013 极差 0.16；单条引用可判出 `0.90 / 0.90 / 0.90 / 0.00 / 1.00` 两级翻盘。
+- **t=0.0（修复后）**：q010 五轮全 0.48（极差 **0.00**）、q013 极差 0.02；单条判定全部稳定。
+- **固定答案重判两份历史报告**：v6.4.1 0.9337 → **0.9413**、v6.5 0.8979 → **0.9152**，两轮差距从 −0.0358 收窄到 −0.0261。
+
+**口径影响**：历史评测的 citation_accuracy（及所有走 `judge()` 的指标）均含裁判随机项，**跨版本对比以 v6.4.2 之后口径为准**；此前差异小于 ±0.03 的版本比较建议重跑确认。
+
 ## [v6.4.1] 2026-10-29 —— M10 agent 采样温度固定 0.1：修复工具决策随机性偏高
 
 **影响模块**：`backend/app/m3_index/providers.py`（`_llm_config()` 新增 `temperature`，读 `AGENT_TEMPERATURE`，缺省 0.1）；`backend/app/m10_agent/agent.py`（`_chat` / `_stream_chat` 传入该参数）；`backend/.env.example`（新增配置项说明）。
