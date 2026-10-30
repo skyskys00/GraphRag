@@ -1,14 +1,14 @@
 # M9 模块规划：评测层
 
-> **版本：** v1.15
-> **状态：** 可用（retrieval 模式 + gold_rank 诊断 + 双窗口 + nDCG + **e2e 生成四指标** + **行政库完整版 30 题检索基线 / NL 摘要激活复测 / 30 题全量 e2e / 裁判一致性抽检 10/10** + **可选 reranker=llm（LLM listwise 终审）** + **gold_rank 词汇匹配器强化（v5.23）** + **裁判 hit 字段修复（v5.29：context_recall 假阳性修正 + comparison per-doc 检索）** + **评测窗口收敛 @5（v5.31）** + **三库评测横向汇总表 + 客服 50 题 / 行政 30 题 retrieval 当前口径重跑（v5.37）** + **M10 agent 端到端评测（v5.46：`--mode agent` + multi_hop_recall/tool_accuracy + 引用口径修正）** + **裁判温度固定 0（v6.4.2：修复判定随机性，修复前 Δ<0.03 的版本比较不可信）**）；Phase 3 待执行
-> **更新：** 2026-10-24
+> **版本：** v1.16
+> **状态：** 可用。三种评测模式：`retrieval`（检索）/ `e2e`（生成四指标）/ `agent`（M10 决策链）。三库均已建集跑过基线（客服 50 / 行政 30 / 器械 50）。**当前口径：裁判 temperature=0（v6.4.2），此前数值含裁判随机项**。
+> **更新：** 2026-10-30
 > **定位：** 中文 RAG 系统量化评测——测试集 + 指标 + ablation + 回归
 > **契约：** 测试集（question + contexts + ground_truth）→ 评测报告（各指标分数 + 对比基线）
-> **上游：** [M5 检索层](M5_retrieve.md) / [M6 生成层](M6_generate.md) / [M7 交互层](M7_interact.md) | **下游：** 回归门禁 / 评测量化数据 / README 展示
+> **上游：** [M5 检索层](M5_retrieve.md) / [M6 生成层](M6_generate.md) / [M7 交互层](M7_interact.md) / [M10 Agent](M10_agent.md) | **下游：** 回归门禁 / 评测量化数据 / README 展示
 > **依据：** [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.7 ｜ [`FRAMEWORK_NOTES.md`](../FRAMEWORK_NOTES.md) §3 ｜ [`M9_testset.md`](M9_testset.md)（测试语料与测试集设计规范）
-> **运行：** `cd backend && python -m app.m9_eval.runner --testset testsets/default.json --report reports/run_xxx.json`；重排终审：`--reranker llm`
-> **变更历史：** 见 [`CHANGELOG.md`](../CHANGELOG.md) v5.6（Phase 1 落地）/ v5.7（裁判稳定性 + 测试集 GT 修正 + 表格双表示后新基线）/ v5.14（Phase 2 生成四指标 + 50 题全量）/ v5.15（裁判 prompt 校准：correctness 语义对齐 + judge 明细字段透传）/ v5.21（--reranker llm 可选终审）/ v5.29（裁判 hit 字段修复 + comparison per-doc 检索）/ v5.46（M10 agent 端到端评测：`--mode agent` + multi_hop_recall/tool_accuracy + citation `ctx_by_marker` 口径修正）
+> **运行：** `cd backend && python -m app.m9_eval.runner --testset testsets/default.json --report reports/run_xxx.json`；重排终审：`--reranker llm`；agent 模式：`--mode agent --collection <id>`
+> **变更历史：** 全部版本见 [`CHANGELOG.md`](../CHANGELOG.md)；模块版本号（v1.x）与项目版本的对应关系见本文 §10
 
 ---
 
@@ -183,6 +183,7 @@ reports/                      # 评测输出（gitignore，关键版本存档）
 - 每个指标独立一次 LLM 调用（faithfulness / context_recall / answer_relevance / correctness 各一次），提示词参考 RAGAS 但**中文化**。
 - 打分用 0-1 连续值 + 简短理由，方便事后排查。
 - 加缓存：同一题 + 同一答案 + 同一指标，结果缓存到本地 JSON，重复评测不重复花钱。
+- **温度固定 0（v6.4.2 起）**：判定任务要确定性，与生成任务的 0.1 分开设。此前 `build_llm_func` 未透传温度，judge 一直跑后端默认 1.0 —— 同答案同上下文重复判，单条引用可判出 0.90/0.00 两极，单题 citation 随机漂 0.15~0.33。**修复前的评测数值含此随机项，Δ<0.03 的版本比较不可信。**
 - **裁判自验证**：v1.0 落地时，人工抽检 10 道题的裁判结果，计算「人 vs 裁判」一致性——如果低于 80%，说明提示词或模型有问题，需要调优后再正式使用。
 
 **已知偏差（2026-09-27 两库重跑 × 20 题人工抽检发现）**：
@@ -302,6 +303,8 @@ ABLATIONS = {
 ## 6. 里程碑与验收
 
 ### 6.1 实施路线（分三阶段）
+
+> **落地状态：** Phase 1 / 2 已完成；Phase 3 中 ablation 与 Markdown 报告已落地，一键命令（`make evaluate`）与 README 展示章节未做。
 
 #### Phase 1：骨架 + 检索指标（~2 天）
 - 建 `app/m9_eval/` 目录与 `runner.py` / `testset.py`
@@ -436,6 +439,20 @@ cd backend && python -m app.m9_eval.runner \
 
 ## 8. 评测结果快照（按库）
 
+### 8.0 三库评测时间线
+
+按时间顺序总览，详细数据走各自链接；横向对比见 [`eval_results_summary.md`](../../backend/tests/final_results/eval_results_summary.md)。
+
+| 时间 | 库 / 题集 | 本轮内容 | 报告 / 详情 |
+|---|---|---|---|
+| 2026-09-25 | 客服 50 题 | 生成四指标首次全量 + 裁判校准 | [CHANGELOG v5.14/v5.15](../CHANGELOG.md)；[M9_testset.md](M9_testset.md) |
+| 2026-09-25 | 行政 30 题 | 六文档建库 + 检索基线 + e2e + 裁判抽检 | §8.1 ~ §8.1d ｜ [CHANGELOG v5.16–v5.19](../CHANGELOG.md) |
+| 2026-10-05 | **器械 50 题（v2）** | 题集全删重建（5:3:2、12 文档全覆盖）+ 检索 + e2e | [DEVICE_SCENARIO.md](DEVICE_SCENARIO.md) §11 ｜ `final_results/run_retrieval_device_50_20261005.json` / `run_e2e_device_50_20261005_strict.json` |
+| 2026-10-06 | 客服 / 行政重跑 | 口径修复后三库对齐重跑 + 横向汇总 | [CHANGELOG v5.36/v5.37](../CHANGELOG.md) ｜ [retrieval_comparison.md](../../backend/tests/reports/retrieval_comparison.md) |
+| 2026-10-24 | 客服 50 题（agent） | M10 `--mode agent` 评测 + 直连 A/B | [CHANGELOG v5.46](../CHANGELOG.md) ｜ [M10_agent.md](M10_agent.md) §11 |
+
+> **器械库评测与场景文档是双向入口**：语料来源、题集设计动机（有源器械说明书、参数速查）见 [DEVICE_SCENARIO.md](DEVICE_SCENARIO.md)；其状态行反向指回本文。器械库数据只在该文档与 `final_results/` 报告里维护，本文不重复列。
+
 ### 8.1 办公行政库（eval_admin）检索基线（2026-09-25，M9 v1.5 → v1.7）
 
 15 题最小集（`testsets/testset_admin_15.json`，建库 3 篇 117 chunks）retrieval 模式评测（`tests/reports/retrieval/history/run_retr_admin_baseline.json`，双窗口 top5/top8）：
@@ -539,26 +556,37 @@ gold_rank top5 覆盖率仅 0.261（客服库 v5.9 基线 52%）——行政库�
 ## 9. 遗留 / 后续（v2.0 及以后）
 
 1. **更多维度**：latency benchmark（文档量上去后做）、token 成本统计、抗扰动测试（同义改写问题看答案稳定性）。
-2. **多库评测**：每个 collection 可以有自己的测试集，评测按库隔离。（行政库已建 own workspace + 测试集，评测 runner 已支持 `--collection`；客服库 / 行政库各自独立跑。）
+2. **多库评测** ✔ 已落地：评测按 `--collection` 隔离，三库各自独立包（客服 50 / 行政 30 / 器械 50）。
 3. **CI 集成**：接入 GitHub Actions，PR 自动跑冒烟集（当前单机项目不急）。
 4. **可视化报告**：把评测结果做成简单的 HTML 仪表盘（当前 JSON + Markdown 够用）。
-5. **垂直场景评测**：等 P1 落地垂直场景后，针对该场景建专属测试集（如学术论文 / 产品文档）。
+5. **垂直场景评测** ✔ 已落地：器械库 50 题 v2（2026-10-05），见 [DEVICE_SCENARIO.md](DEVICE_SCENARIO.md) §11。
+6. **评测稳定性**：裁判层方差已由温度固定 0 收敛（v6.4.2）；剩余方差来自答案重生成（多轮 agent 每轮采样累积），要分辨小差异需多次跑取均值。
 
 ---
 
 ## 10. 版本
 
-- **v0.1**（2026-09-21）：初始规划。定义定位、6 个核心指标、50 题测试集方案、7 组 ablation 设计、三阶段实施路线。
-- **v1.1**（2026-09-22）：Phase 1 落地。retrieval 模式可用，context_recall + context_precision + LLM 裁判缓存 + 35 题客服业务测试集。
-- **v1.2**（2026-09-24）：新增 gold_rank 诊断维度 + 双窗口评测（top5/top8 同跑）。gold_rank 双模式（词汇/LLM），定位为排序质量诊断工具而非精确指标。
-- **v1.3**（2026-09-24）：新增 nDCG@k 排序质量指标。从 CP 的 per_chunk score 推导，零额外 LLM 成本；MRR 不实现，由 nDCG 替代。
-- **v1.4**（2026-09-25）：Phase 2 落地。e2e 生成四指标：faithfulness / answer_relevance / correctness / citation_accuracy（各自 LLM 裁判 + 缓存）；50 题客服业务测试集全量跑通 + 逐题可追溯（ground_truth/key_facts/retrieval/gen_meta）；裁判一致性人工抽检（10 题，LLM 判定与人工一致性约 7/10，偏差集中在「表述不同但实质覆盖」被裁判低估）。测试集 GT 修正 5 题（CS-FC-005/007、CS-CP-003/004、CS-SM-001，含 CS-CP-004 人工抽检发现 v1.0 指标目标纯属幻觉→GT 改为「不可比」）。
-- **v1.5**（2026-09-25）：裁判校准。correctness 裁判 prompt 校准（分母改标准答案事实点 + 语义对齐含中文译名 + 额外正确信息不计入分母 + 部分覆盖按比例），judge 透传 total_facts/correct_facts/incorrect。全量重判 correctness 0.8321→**0.8353**（详见 [CHANGELOG](../CHANGELOG.md) v5.15）。校准后重做人工一致性抽检 **10/10 达标**（|diff|≤0.25 判一致，平均 0.043、最大 0.15；报告 `tests/reports/checklists/human_checklist_run_e2e_cservice_50_v2.md`）。
-- **v1.7**（2026-09-25）：行政库表格 NL 摘要激活。排查并修正 v5.16 推断（q013 非「建库未套用摘要」，真因是稀疏索引缺 block_type → M7 `build_workspace_deps` 漏传 `chunks_dir`）；M7 修复 + admin sparse 重建后复测（`tests/reports/retrieval/history/run_retr_admin_nl.json`），Recall@5 0.9405→0.9583、加权 Prec@5 0.5878→0.6122、nDCG@5 0.8518→0.8649，`adm_q012` nDCG 0.83→0.99（能力生效直接证据）；q013/q014 排序不变——表格碎片化确认为 M2 行级切分独立问题。详见 [§8.1a](#81a-表格-nl-摘要激活后复测2026-09-25m9-v16--v17) 与 [CHANGELOG](../CHANGELOG.md) v5.17。
-- **v1.6**（2026-09-25）：行政库（eval_admin）首轮检索基线。15 题最小集 retrieval 模式评测出值（Recall@5 0.9405 / Prec@5 0.5878 / nDCG@5 0.8518），逐题检索质量诊断定位四大问题（q013 表碎片化、q004 跨表依赖、q010 字符串命中、q015 拒答前提成立），gold_rank 词汇模式 top5 覆盖率 0.261 印证 [§7.5](M9_evaluation.md) 文档型事实边界。详见 [CHANGELOG](../CHANGELOG.md) v5.16 与本文 §8.1。
-- **v1.9**（2026-09-25）：行政库 30 题完整版评测。六文档 203 chunks 建库 + 测试集 v0.2（30 题），全量检索基线（Rec@5/8 0.9524、Prec@5 加权 0.619 / @8 0.5359、nDCG@5 0.8567 / @8 0.9019、gold_rank avg 2.04）+ 全量 e2e（faithfulness 0.884 / answer_relevance 0.9333 / correctness 0.9713 / citation_accuracy 0.8187，judge_failed=0）+ 裁判一致性抽检 **10/10 达标**（平均 |diff| 0.049、最大 0.15）。详见 [§8.1c/8.1d](#81c-行政库30题全量检索基线2026-09-25m9-v19) 与 [CHANGELOG](../CHANGELOG.md) v5.19。
-- **v1.8**（2026-09-25）：行政库 e2e 生成质量评测。15 题全量四指标首次出值（faithfulness 0.9277 / answer_relevance 0.9000 / correctness 0.9373 / citation_accuracy 0.8928，judge_failed=0，耗时 9.3 分钟），拒答验证通过（q015 正确拒答）、干扰题行为正确（q010）、检索缺口传导到生成（q004 correctness 0.5）。详见 [§8.1b](#81b-行政库e2e生成质量评测2026-09-25m9-v17--v18) 与 [CHANGELOG](../CHANGELOG.md) v5.18。
-- **v1.10**（2026-09-27）：LLM listwise 终审正式化（`--reranker llm`，对应 CHANGELOG v5.21）。新增 §7.7 正式使用小节（机制 / 启用 / 决策边界）；nDCG@5 0.8567→**0.9479**、Re@5 0.9524→**0.9857**、gold_rank avg 2.04→**1.76**。仅 M9 评测启用，不接 answer / 生产 M5。
-- **v1.11**（2026-09-27）：judge 可靠性修复 P0 + P1 落地（对应 CHANGELOG v5.22）。P1 precision 数字纪律（归一化标准答案 → 要点句 + 【关键数值】清单，消除 68.5 类数值幻读，两库重跑 0 处）；P0 recall 证据强制（hit 必引原文 + `_enforce_evidence` 兜底，原 6 处过宽全降 miss）。v5.22 粗校版误杀 20 处合法命中（客服 12 / 行政 8，v5.22.1 逐一核对全恢复），**v5.22.1 精准化已落地**（空洞否定才降 miss，27 例离线回归 STRICT 20/20，两库重跑校正 27→5/2、recall +8.5pt/+7.5pt）——详见 §4.3 第 3 条 + CHANGELOG v5.22.1。
-- **v1.12**（2026-09-27）：gold_rank 词汇匹配器修复（对应 CHANGELOG v5.23）。`metrics/gold_rank.py` `_lexical_match` 四层修复：数字边界正则（千分位等价 + 防「30」误中「130」）、分隔符归一化（「疏忽大意30%」↔分离表格块跨单元格连续匹配）、文本佐证累计匹配长度、锚定分类（结论位 = 等式右值必中 / 弱锚版本年份差值序数不算强证据）。三态回归 35 题 135 facts：NEW 107/135=79.3%（vs STRICT 找回 43，新增漏仅 2 皆如实缺口：CS-TN-003 推导型 1.29 倍、CS-FC-005 Q3 AHT 等式主结论 top8 无支撑）；伪命中被拒：合计扣分=30、剩余=70 分。两库定向重跑（客服 35 题）：judge 判据零改动（context_recall/precision/ndcg 逐位不变），gold_rank_avg 2.08→**1.71**、top8 事实覆盖率 0.517→**0.838** ——详见 §7.5 词汇模式边界更新 + CHANGELOG v5.23。
-- **v1.13**（2026-10-06）：**客服库评测口径回填**（对应 CHANGELOG v5.36，代码零改动）。v5.23/v5.29/v5.30/v5.31 四次口径修复（gold_rank 匹配器、裁判 hit 字段、context_recall 缓存键含完整 context_str、评测窗口 @5）后，旧 recall 判定为修复前口径的虚高值。§8.1b 加口径注记；当前代码重跑 35 题 retrieval（Recall 0.7515 / nDCG 0.9443 / gold_rank 1.6）与 50 题 e2e（Recall 0.8 / Correctness 0.8149 / nDCG 0.9377），nDCG/gold_rank 均较旧值改善证明非链路退化，报告归档 `tests/final_results/`。详见 [CHANGELOG](../CHANGELOG.md) v5.36 与 [retrieval_comparison.md](../../backend/tests/reports/retrieval_comparison.md)「口径变更说明」。
+**模块版本号（v1.x）与项目版本号（vX.Y）的对应关系。** 变更过程、实测数据、决策依据一律以 [`CHANGELOG.md`](../CHANGELOG.md) 为准，本节只做索引，不复述内容。
+
+| M9 版本 | 项目版本 | 内容 |
+|---|---|---|
+| v0.1 | — | 初始规划（定位 / 6 指标 / 50 题方案 / 7 组 ablation / 三阶段路线） |
+| v1.0 | v5.6 | Phase 1 落地：`retrieval` 模式 + recall/precision + 裁判缓存 + 35 题客服集 |
+| v1.1 | v5.7 | 裁判稳定性改进 |
+| v1.2 | — | gold_rank 诊断维度 + 双窗口（top5/top8） |
+| v1.3 | — | nDCG@k 排序指标 |
+| v1.4 | v5.14 | Phase 2 落地：e2e 生成四指标 |
+| v1.5 | v5.15 | 裁判 prompt 校准（correctness 语义对齐 + 明细字段透传） |
+| v1.6 | v5.16 | 行政库最小集 + 首轮检索基线 |
+| v1.7 | v5.17 | 表格 NL 摘要激活（行政库） |
+| v1.8 | v5.18 | 行政库 e2e 15 题 |
+| v1.9 | v5.19 | 行政库 30 题完整版 |
+| v1.10 | v5.21 | LLM listwise 终审（`--reranker llm`） |
+| v1.11 | v5.22 / v5.22.1 | judge 可靠性修复（P0 证据强制 + P1 数字纪律 + 误杀精准化） |
+| v1.12 | v5.23 | gold_rank 词汇匹配器修复 |
+| v1.13 | v5.36 | 客服库评测口径回填（旧 recall 判为虚高） |
+| v1.14 | v5.37 | 三库横向汇总表 + 报告归档整理 |
+| v1.15 | v5.46.1 | M10 agent 评测收口（引用劣化归因于标注粒度） |
+| v1.16 | v6.4.2 | 裁判温度固定 0（评测方差修复） |
+
+> v1.2 / v1.3 未单独登记项目版本（随 M5/M2 版本一并提交，gold_rank 与 nDCG 维度的转正记录见 CHANGELOG v5.23 / v5.31）。
