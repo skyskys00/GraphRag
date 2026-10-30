@@ -76,6 +76,8 @@
 
 **附带核实**：日志中 `finish_run 写入失败（expected datetime, got str）` 为 2026-10-28 的历史错误，当前代码已用 `datetime.fromisoformat` 转换，`agent_spans` 现有 142 条记录正常，无需再修。
 
+**善后**：新增 `backend/scripts/recover_conversations.py`，从 checkpoint 的 `channel_values.messages` 反读并写回会话明细（只处理明细为空的会话，默认预览、`--apply` 才写）。已恢复 `col_b7b876b1/conv_5fca3b59` 丢失的 2 轮对话（4 条消息）；全库扫描确认无其他待恢复会话。
+
 ## [v6.4.2] 2026-10-30 —— M9 裁判温度固定 0：修复评测方差，citation 判定恢复可复现
 
 **影响模块**：`backend/app/m9_eval/judge.py`（新增 `JUDGE_TEMPERATURE=0.0`；`query_func` 调用显式传温度；缓存 key 加温度前缀）。`backend/scripts/probe_temperature_effective.py` / `probe_citation_judge_spread.py` / `verify_judge_temperature_fix.py`（探底与验证脚本留档，可复跑）。
