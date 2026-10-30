@@ -97,12 +97,14 @@ backend/app/m11_mcp/
 
 ### 3.1 先纠正一个常见误解：SSE 是旧传输
 
-MCP 有两代 HTTP 传输，**官方文档明确建议新实现用后者**：
+MCP 有两代 HTTP 传输，**MCP 协议维护方（modelcontextprotocol）在协议规范与官方 Python SDK 文档中一致建议：新实现不要再基于 SSE**。
 
 | 传输 | 规范版本 | 形态 | 官方态度 |
 |---|---|---|---|
-| `sse` | 2024-11 | 两个端点：`GET /sse` 建长连接收消息，`POST /messages?session_id=…` 发消息 | **旧传输，新实现不建议用** |
-| `streamable-http` | 2025-03-26 | 单端点 `/mcp`：POST 发 JSON-RPC，响应按需返回 JSON 或 SSE 流 | **推荐**，SDK 文档原话是部署就该用它 |
+| `sse` | 2024-11-05 | 两个端点：`GET /sse` 建长连接收消息，`POST /messages?session_id=…` 发消息 | **旧传输**。SDK 传输选择表里「何时用」一列写的是 "You don't."；警告块原文：SSE was superseded by Streamable HTTP in the 2025-03-26 protocol revision … **Don't build anything new on it.** |
+| `streamable-http` | 2025-03-26 | 单端点 `/mcp`：POST 发 JSON-RPC，响应按需返回 JSON 或 SSE 流 | **推荐**，SDK 文档的「何时用」一列写的是 "Anything you deploy." |
+
+> 出处：[`modelcontextprotocol/python-sdk`](https://github.com/modelcontextprotocol/python-sdk) `docs/run/index.md`（传输选择表 + 警告块）；协议规范见 modelcontextprotocol.io/specification 的 2025-03-26 修订版。SDK 仍保留 `mcp.run(transport="sse")`，仅为兼容未迁移的客户端。
 
 差别在长连接管理：SSE 传输要求连接全程不断，断线即会话失效，反向代理和负载均衡都容易出问题；Streamable HTTP 允许每次请求独立，服务端可在同一端点上按需流式返回。**本方案主推 `streamable-http`，`sse` 只作为兼容旧客户端的备选**（配置项切换，代码近乎相同）。
 
