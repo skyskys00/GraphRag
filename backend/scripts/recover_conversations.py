@@ -21,6 +21,7 @@ import asyncio
 
 from app.m10_agent import telemetry
 from app.m10_agent.agent import _messages_to_history
+from app.m7_interact.api import _events_to_tool_steps
 
 
 def _fmt(history: list[dict]) -> list[dict]:
@@ -58,11 +59,19 @@ async def main() -> None:
             continue
         raw_messages = (state.get("channel_values") or {}).get("messages") or []
         history = _messages_to_history(raw_messages)
+        # checkpoint 只保留最后一轮的事件；挂到最后一条 assistant 上恢复决策链卡片
+        rounds = _events_to_tool_steps((state.get("channel_values") or {}).get("events") or [])
         print(f"{cid}: 现有 {len(existing)} 条 → checkpoint 可恢复 {len(history)} 条")
         for h in history[:6]:
             print(f"    {h['role']}: {h['content'][:50]}")
         if args.apply and history:
-            detail["messages"] = _fmt(history)
+            msgs = _fmt(history)
+            if rounds:
+                for m in reversed(msgs):
+                    if m["role"] == "assistant":
+                        m["tool_steps"] = rounds
+                        break
+            detail["messages"] = msgs
             path.write_text(json.dumps(detail, ensure_ascii=False, indent=2), encoding="utf-8")
             reg_path = ws / "conversations.json"
             reg = json.loads(reg_path.read_text(encoding="utf-8"))
