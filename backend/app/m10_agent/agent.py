@@ -50,6 +50,9 @@ SYSTEM_PROMPT = (
     " <advice> 与 </advice> 之间（单独成一段）；没有建议就不要输出 <advice> 段，主体不残留任何 <advice> 标签。"
 )
 MAX_ROUNDS = 5  # 最大决策轮 N（M10 §2.2 硬约束）
+COMPLEX_CHAR_LIMIT = 35  # 长文本阈值（30 题中位数 22.5，长文本题集中在 34-46 字）
+_MULTI_ASK_CHARS = 25    # 多问句叠加的额外字数门槛（避免「…是多久？怎么算？」这类单跳双问误判）
+_COMPLEX_MARKERS = ("对比", "区别", "差异", "不同", "分别")  # 明确的对比/多对象特征词
 MAX_HISTORY_MSGS = 8        # 历史注入上限：最近 4 轮（问+答）
 HISTORY_CHAR_BUDGET = 6000  # 历史字符预算（中文约 1 字 ≈ 1 token，留余量）
 
@@ -65,6 +68,7 @@ class AgentState(TypedDict, total=False):
     citations: list[dict[str, Any]]
     answer_text: str
     spans: list[dict[str, Any]]        # 节点级运行数据（v6.2 可观测；内核只采集，API 层落库）
+    plan: list[str]                    # 当前任务计划（v6.5：规则判定复杂问题后生成，route 每轮回注）
 
 
 # v6.4：deps / on_event 不进 state —— checkpointer 会把 state msgpack 序列化落 PG，
@@ -169,6 +173,47 @@ async def _rag_answer_tool(deps: Any):
     return fn
 
 
+def _is_complex_query(query: str) -> bool:
+    """规则判定复杂度（v6.5）：长文本 / 多问句叠加 / 对比特征词任一命中。
+
+    用规则而非模型判定：v6.5 实测 v4-flash 不主动选择元工具（tool_plan 7 次采样 0 触发），
+    换成代码判定才能保证「复杂题必进 plan、简单题零成本」。
+    """
+    q = (query or "").strip()
+    if len(q) > COMPLEX_CHAR_LIMIT:
+        return True
+    if q.count("？") + q.count("?") >= 2 and len(q) > _MULTI_ASK_CHARS:
+        return True
+    return any(m in q for m in _COMPLEX_MARKERS)
+
+
+def _rule_plan(query: str) -> list[str]:
+    """规则生成粗粒度计划：不依赖模型，只给分步框架（具体检索内容由模型自主决定）。"""
+    return [
+        "拆解问题涉及的对象与方面",
+        "逐项检索并确认依据",
+        "汇总成答案，逐条标注引用",
+    ]
+
+
+def _plan_context_text(plan: list[str]) -> str:
+    """每轮回注的计划提示（route 调用时临时拼接，不写回 state.messages）。"""
+    lines = "\n".join(f"{i}. {s}" for i, s in enumerate(plan, 1))
+    return (
+        f"当前任务计划：\n{lines}\n"
+        "请逐项执行；已完成的步骤不要重复检索，未完成的不要遗漏。"
+    )
+
+
+def _plan_check_text(plan: list[str]) -> str:
+    """generate 收尾检查：确认计划各步是否都被覆盖。"""
+    lines = "\n".join(f"{i}. {s}" for i, s in enumerate(plan, 1))
+    return (
+        f"本任务计划：\n{lines}\n"
+        "回答前检查各步骤是否都已覆盖；若有未覆盖的，如实说明缺哪部分。"
+    )
+
+
 def _register_builtin_tools() -> None:
     registry.register_tool(
         "tool_list_docs",
@@ -224,7 +269,11 @@ async def route(state: AgentState) -> dict[str, Any]:
     """决策节点：LLM bind_tools 判「调工具 / 直答」，把 assistant 消息与 tool_decision 事件写入状态。"""
     t0, started_at = time.perf_counter(), _now()
     cfg = _llm_config()
-    resp = await _chat(cfg, state["messages"], tools=True)
+    # v6.5：计划提示只在调用时拼接，不写回 state.messages（否则会被 checkpoint 存成逐轮累积的历史）
+    ctx = list(state["messages"])
+    if state.get("plan"):
+        ctx.append({"role": "system", "content": _plan_context_text(state["plan"])})
+    resp = await _chat(cfg, ctx, tools=True)
     msg = resp.choices[0].message
     tc = msg.tool_calls or []
     msgs = list(state["messages"])
@@ -416,6 +465,8 @@ async def generate(state: AgentState) -> dict[str, Any]:
             "role": "system",
             "content": "本轮可引用资料清单为空：不要输出任何 [n] 角标；如实基于现有信息回答，或说明无法回答。",
         })
+    if state.get("plan"):  # v6.5：生成前检查计划覆盖（只拼在调用侧，不写回 state）
+        messages.append({"role": "system", "content": _plan_check_text(state["plan"])})
 
     text = ""
     events = list(state["events"])
@@ -600,6 +651,7 @@ async def run_agent(
             "events": [],
             "citations": list(base_prior or []),
             "spans": [],
+            "plan": _rule_plan(query) if _is_complex_query(query) else [],
         }, config)
     finally:
         _CTX.reset(token)
