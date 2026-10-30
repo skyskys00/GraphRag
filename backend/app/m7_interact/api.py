@@ -219,6 +219,10 @@ def _events_to_tool_steps(events: list[dict]) -> list[list[dict]]:
     return rounds
 
 
+# 断流后仍在收尾的后台任务（v6.4.3）：持有强引用防 GC，完成即移除
+_bg_tasks: set[asyncio.Task] = set()
+
+
 @app.get("/agent/stream")
 async def stream_agent_ep(
     q: str = Query(..., description="问题"),
@@ -249,6 +253,15 @@ async def stream_agent_ep(
                                          history=history, prior_citations=prior,
                                          response_type=response, on_event=emit)
                 telemetry.finish_run(run_id, "completed", result=result)
+                # 落库放在后台任务内（v6.4.3）：客户端断流（切会话/刷新）不应丢掉已生成的这一轮
+                if conversation_id and result and result.get("answer"):
+                    await conversations.append_round(
+                        deps, conversation_id,
+                        user=q,
+                        assistant={"content": result["answer"],
+                                   "citations": result.get("citations", []), "meta": None,
+                                   "tool_steps": _events_to_tool_steps(result.get("events", []))},
+                    )
                 await queue.put({"type": "__run_done__", "result": result})
             except asyncio.CancelledError:  # 客户端断流：标记终态后继续向上传播
                 telemetry.finish_run(run_id, "cancelled")
@@ -259,33 +272,23 @@ async def stream_agent_ep(
                 await queue.put({"type": "__run_done__", "result": None})
 
         task = asyncio.create_task(runner())
+        # 断流后不取消：让已发出的 LLM 调用跑完并落库，结果在下次进入会话时可见
+        _bg_tasks.add(task)
+        task.add_done_callback(_bg_tasks.discard)
         try:
-            result: dict[str, Any] | None = None
             while True:
                 evt = await queue.get()
                 if evt.get("type") == "__run_done__":
-                    result = evt.get("result")
                     break
                 if evt.get("type") == "__run_error__":
                     yield sse("error", {"message": evt["message"]})
                     continue
                 payload = {k: v for k, v in evt.items() if k != "type"}
                 yield sse(evt["type"], payload)
-            if conversation_id and result and result.get("answer"):
-                await conversations.append_round(
-                    deps, conversation_id,
-                    user=q,
-                    assistant={"content": result["answer"],
-                               "citations": result.get("citations", []), "meta": None,
-                               "tool_steps": _events_to_tool_steps(result.get("events", []))},
-                )
         except asyncio.CancelledError:
             raise
         except Exception as e:  # noqa: BLE001
             yield sse("error", {"message": f"{type(e).__name__}: {e}"})
-        finally:
-            if not task.done():
-                task.cancel()
 
     return StreamingResponse(
         gen(), media_type="text/event-stream",

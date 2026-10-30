@@ -56,6 +56,26 @@
 
 **结论（2026-10-30 定）**：**保留**。行政库 30 题以单文档多跳为主，plan 的「多对象拆解」编排没有发挥场景；真正能验证收益的是跨文档对比类复杂题。当前版本先收在此，**复杂题场景再测**。代价明确（复杂题 +46% 耗时），若后续在真实复杂场景仍无收益则回滚。
 
+## [v6.4.3] 2026-10-30 —— M7 SSE 断流丢轮修复：切走会话不再丢失已生成的回答
+
+**影响模块**：`backend/app/m7_interact/api.py`（`stream_agent_ep`：落库移入后台 `runner()`；断流不再 `task.cancel()`；新增模块级 `_bg_tasks` 持有强引用）。
+
+**问题**：`append_round` 原本写在 SSE generator 的循环之后，客户端一旦断开（切换会话 / 刷新页面），`gen()` 收到 `CancelledError` 直接跳过落库；`finally` 里还会 `task.cancel()` 杀掉正在跑的后台 agent。结果：**token 花了、答案生成了、什么都没存**，用户切回会话看到空白。
+
+**实测证据**：`agent_runs` 中该场景的 4 条记录全部为 `status='cancelled'`，对应 `conversations/<id>.json` 的 `message_count=0`。
+
+**修复**：
+- 落库移入后台任务 `runner()`，与 SSE 消费解耦。
+- 断流后**不取消**后台任务——已发出的 LLM 调用跑完并落库，下次进入会话即可见（行业常规：客户端断开不回滚服务端已完成的工作）。
+- 模块级 `_bg_tasks` 持有 task 强引用，防断流后无人引用被 GC；完成即移除。
+
+**验证**：
+- 断流场景：创建会话 → 发起 SSE → 3 秒后客户端主动断开 → 后台继续跑完，会话落盘 user + assistant 共 2 条且答案完整。
+- 正常流程：完整 SSE 跑完，落库 2 条，行为不变。
+- 删除会话时后台落库会因文件已删返回 False，不报错。
+
+**附带核实**：日志中 `finish_run 写入失败（expected datetime, got str）` 为 2026-10-28 的历史错误，当前代码已用 `datetime.fromisoformat` 转换，`agent_spans` 现有 142 条记录正常，无需再修。
+
 ## [v6.4.2] 2026-10-30 —— M9 裁判温度固定 0：修复评测方差，citation 判定恢复可复现
 
 **影响模块**：`backend/app/m9_eval/judge.py`（新增 `JUDGE_TEMPERATURE=0.0`；`query_func` 调用显式传温度；缓存 key 加温度前缀）。`backend/scripts/probe_temperature_effective.py` / `probe_citation_judge_spread.py` / `verify_judge_temperature_fix.py`（探底与验证脚本留档，可复跑）。
