@@ -2,15 +2,26 @@
 
 面向中文场景的**通用型图增强检索生成（GraphRAG）**系统 —— 基于 LightRAG 内核，支持多格式文档解析入库、双层知识图谱可视化、**多模态图片检索**、SSE 流式问答与 `[n]` 引用溯源。上层是**自研 agentic RAG**：由 LangGraph 状态机驱动的多轮工具决策，而不是「一次检索 + 一次生成」的固定流程。链路不绑定特定领域，已在**客服、行政、医疗器械**三个领域数据集上完成量化评测验证，获得可复用的通用 RAG 能力。
 
+**四条设计主线**
+
+- **混合召回**，不是单路向量：图 / 向量 / 稀疏三路召回 → RRF(k=60) → bge-reranker 全候选重排 → 五特征加权取 top5；表格数值类目 Precision **0.281 → 0.400**
+- **Agentic 编排**，不是固定流程：LangGraph 状态图 + 原生 function calling 多轮决策，工具注册表可扩展；复杂题由规则注入三步计划（实测模型自主触发率 0/7）
+- **可评测**，不是凭感觉：三领域 130 题 + 检索/生成 8 维指标 + 自研 gold_rank；LLM 裁判温度固定 0 + 判定缓存 + 证据强制，**版本间 Δ≤0.03 视为噪声**
+- **可溯源**，不是幻觉兜底：`[n]` 角标逐句映射回 chunk → TextUnit → 原文页码，前端点击即跳转到原文片段
+
 FastAPI + React/TypeScript 前后端分离；Postgres/pgvector 存储；bge-m3 向量（经 Xinference）；DeepSeek V4-Flash 生成与视觉理解。内置**量化评测体系**（检索 + 生成共八维指标，三库 130 题）。
 
+**生产口径指标（三库 @5）**：检索 Recall **0.80–0.88** ｜ nDCG@5 **0.89–0.94** ｜ 生成 Faithfulness **0.978–0.998** ｜ 引用准确率 **0.86–0.90**
+
 ## 界面预览
+
+> 以下均为真实运行截图（`有源器械说明书` 知识库）。问答页展示 agent 决策链（本轮 2 次工具调用：文档清单 + 知识库检索）、回答中的 `[n]` 角标，以及右侧可追溯到页码的引用面板。
 
 | 知识图谱 · 实体级（`默认知识库`） | 知识图谱 · 文档级（`有源器械说明书`） | 表格预览 |
 |---|---|---|
 | ![实体级图谱](docs/screenshots/03-graph-entity.png) | ![文档级图谱](docs/screenshots/02-graph-doc.png) | ![表格预览](docs/screenshots/04-table-preview.png) |
-| 仪表盘 · 库概览 | 文档问答（SSE 流式 + `[n]` 引用溯源） | 文档管理 |
-| ![仪表盘](docs/screenshots/01-dashboard.png) | ![文档问答](docs/screenshots/04-chat.png) | ![文档管理](docs/screenshots/02-docs.png) |
+| 仪表盘 · 库概览 | Agent 问答（决策链回放 + 工具调用 + `[n]` 引用溯源） | 文档管理 |
+| ![仪表盘](docs/screenshots/01-dashboard.png) | ![Agent 问答](docs/screenshots/04-chat.png) | ![文档管理](docs/screenshots/02-docs.png) |
 
 ## 功能特性
 
