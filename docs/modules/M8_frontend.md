@@ -1,8 +1,8 @@
 # M8 模块记录：正式问答前端（React + TypeScript + Vite）
 
-> **版本：** v5.7
+> **版本：** v6.5.2
 > **状态：** 已落地
-> **更新：** 2026-10-02
+> **更新：** 2026-10-30
 > **定位：** 五视图（问答 / 文档管理 / 知识图谱 / 仪表盘 / 参数对比）+ 多知识库切换 + 多会话 + 器械场景 chip
 > **契约：** 消费 M7 REST + SSE 接口（见 Swagger UI: http://localhost:8787/swagger）
 > **上游：** [M7 交互层](M7_interact.md) | **下游：** 浏览器用户
@@ -22,7 +22,9 @@
 - **v5.3**：文档预览表格渲染——`PreviewUnit.html` 随上游 M7 v10.3 透传，表格单元（`block_type=table`）以真实 HTML 表格展示（`dangerouslySetInnerHTML`，来源为自身解析器结构化输出），无 html 时回退纯文本。
 - **v5.7**（2026-10-23）：问答接 agent（M10）——SSE 端点 `/answer/stream` → `/agent/stream`（agent 唯一对话入口，无模式开关）+ 决策链折叠卡片（每轮工具调用 `🔧 知识库检索、文档清单（…）`，默认收起 / 流式中最后轮展开）+ 引用面板对 agent 简化 citations 容错（无 score 即隐藏假置信度，标题回退 doc_id）。
 
-设计约定：浅暖色系（米白 #FAF6F0 / 暖棕 #B36B3B / 琥珀 #E59B3C）；**纯文本渲染 LLM 输出**（`textContent`，禁止 innerHTML 注入）。
+- **v6.5.2**（2026-10-30）：回答区补齐 Markdown 渲染——`react-markdown` + `remark-gfm`，标题/加粗/列表/表格/代码块不再原样漏出；`[n]` 引用角标由自写 `remarkCitations` 插件转成 `#cite-n` 链接后替换为可点击按钮；引用面板 snippet 清洗掉压平表格残留的 `|---|---|`。
+
+设计约定：浅暖色系（米白 #FAF6F0 / 暖棕 #B36B3B / 琥珀 #E59B3C）；**LLM 输出经 react-markdown 转 React 元素渲染（不注入 innerHTML，等价 XSS 安全）**，用户消息仍为纯文本 `textContent`。
 
 ## 2. 代码结构（frontend/src/）
 
@@ -31,7 +33,7 @@
 | `App.tsx` | 视图切换（问答/文档管理/知识图谱）+ 健康探测 + 文档列表状态/上传/删除/2s 处理中轮询 + toast + 右栏 tab（引用/预览）+ 引用→图谱焦点透传（`graphFocus`） |
 | `components/TopBar.tsx` | 顶栏：后端状态灯 + 新对话（v5.0 改「清空会话」→「新对话」） |
 | `components/Sidebar.tsx` | 左侧可折叠导航：知识库切换器（v3.0）+ 会话列表区（v5.0，新对话/重命名/删除）+ 导航项数组（仪表盘/问答/文档管理/图谱，扩展只需 push 一项） |
-| `components/ChatView.tsx` / `MessageBubble.tsx` | 消息流：user/assistant 气泡、流式增量渲染、引用角标 `[n]`、错误态 + 决策链折叠卡片（v5.7，每轮工具调用） |
+| `components/ChatView.tsx` / `MessageBubble.tsx` | 消息流：user/assistant 气泡、流式增量渲染、引用角标 `[n]`、错误态 + 决策链折叠卡片（v5.7，每轮工具调用）+ 回答 Markdown 渲染（v6.5.2，`react-markdown`） |
 | `components/CitationPanel.tsx` | 右栏引用列表：按置信度排序限前 5 条（score 降序）+ 每条「在图谱中查看」「原文档 #」跳预览（v2.2+v2.3） |
 | `components/DocumentPreview.tsx` | 文档预览：读 `GET /docs/{id}/preview`，按 `text_unit_id` 定位，最高置信度片段柔和高亮（v2.3） |
 | `components/InputBar.tsx` | 输入区：多行 + Enter 提交 + 回答要求模板 + 左侧附件上传按钮（v2.1；v2.3 输入区向上 5px） |
@@ -41,7 +43,8 @@
 | `hooks/useChat.ts` | 会话状态机（pending/streaming/complete/error）+ SSE 订阅 + 多会话管理（v5.0 重写：会话列表/选中/新建/重命名/删除，懒创建，后端持久化）+ agent 决策链 rounds 累积（v5.7，按 tool_decision 组 + pendingResult 封存分轮） |
 | `lib/sse.ts` | SSE 事件线解析（agent：tool_decision→tool_result→(逐轮)→delta→citations→done/error）；连接断开兜底文案 |
 | `lib/api.ts` | 后端 API 封装：postAnswer / checkHealth + v2.1 uploadDoc / listDocs / deleteDoc + v2.2 fetchGraph + v2.3 fetchDocPreview / fetchGraph(docId) + v3.0 collections/stats + v5.0 conversations |
-| `lib/cite.ts` | 正文 `[n]` 角标正则拆分 |
+| `lib/cite.ts` | HTML 转义工具（纯文本渲染兜底） |
+| `lib/remarkCitations.ts` | remark 插件（v6.5.2）：把 Markdown 文本节点里的 `[n]` 拆成 `#cite-n` 链接节点，交给渲染层换成可点击角标；代码块不处理 |
 | `mocks/events.ts` | `VITE_USE_MOCK=true` 离线 mock 流（不依赖后端走查） |
 
 ## 3. 与 M7 契约对接

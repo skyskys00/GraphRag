@@ -26,6 +26,20 @@
 
 ---
 
+## [v6.5.2] 2026-10-30 —— M8 回答区补齐 Markdown 渲染（标题/加粗/列表/表格）；引用片段去表格噪音
+
+**影响模块**：`frontend/src/components/MessageBubble.tsx`、`frontend/src/lib/remarkCitations.ts`（新增）、`frontend/src/App.css`、`frontend/src/lib/cite.ts`、`frontend/package.json`；`backend/app/m6_generate/cite.py`；`docs/screenshots/04-chat.png`。
+
+**问题**：assistant 回答此前按纯文本渲染，`##` 标题、`**加粗**`、`| 表格 |` 全部原样漏到界面上（模型输出本就是 Markdown，只是前端没解析）。
+
+**方案**：
+- 引入 `react-markdown` + `remark-gfm`，回答区改 Markdown 渲染；`.bubble .md` 补标题/列表/表格/代码/引用块样式。
+- 引用角标单独处理：自写 `remarkCitations` 插件把文本节点里的 `[n]` 拆成 `url=#cite-n` 的 link 节点，渲染层再换成可点击按钮。**用 hash 而非自定义协议**，因为 react-markdown 的 `urlTransform` 会把 `cite:1` 这类未知协议过滤成空字符串。代码块/行内代码不处理——那里的 `[n]` 是原文内容。
+- 表格用 `display: table` 保持真实表布局（`display: block` 会让气泡在 flex 上下文里塌成文字宽度、列被挤成竖排），过宽时由 `.md` 横向滚动兜住。
+- 顺带修：引用来源面板的 snippet 是 chunk 原文压平成一行，Markdown 表格分隔行 `|---|---|` 会跟着漏出 → `_html_to_text` 增加分隔行与连续空单元格的清洗。
+
+**已知边界**：M10 的跨轮引用复用（`base_prior = checkpoint.citations`）会把上一轮的 citation 对象原样带进下一轮，因此**修复前生成的老会话仍显示旧 snippet**；新会话/新链路不再出现。
+
 ## [v6.5.1] 2026-10-30 —— M10 §11.5 verifier 反思方案稿（纯文档，未执行）
 
 **影响模块**：`docs/modules/M10_agent.md` §11.5（三行规划 → 可执行方案稿）。

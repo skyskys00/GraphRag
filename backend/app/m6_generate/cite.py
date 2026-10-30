@@ -18,12 +18,17 @@ CITE_MIN_KEEP = 2
 _TAG_END_RE = re.compile(r"</(?:td|th|tr|p|div|li|br)>", re.IGNORECASE)
 _TAG_RE = re.compile(r"<[^>]+>")
 _WS_RE = re.compile(r"\s+")
+# Markdown 表格分隔行（|---|:--:|）+ 连续空单元格，压平成一行后只是噪音
+_MD_TABLE_SEP_RE = re.compile(r"\|\s*(?::?-{3,}:?\s*\|)+")
+_EMPTY_CELL_RE = re.compile(r"(\|\s*){2,}")
 
 
 def _html_to_text(html: str) -> str:
     t = _TAG_END_RE.sub(" ", html)
     t = _TAG_RE.sub("", t)
-    return _WS_RE.sub(" ", t).strip()
+    t = _WS_RE.sub(" ", t).strip()
+    t = _MD_TABLE_SEP_RE.sub("| ", t)
+    return _EMPTY_CELL_RE.sub("| ", t)
 
 
 @dataclass

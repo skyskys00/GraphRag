@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { splitCitations } from '../lib/cite'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import { remarkCitations } from '../lib/remarkCitations'
 import type { ChatMessage, ToolStep } from '../types'
 
 // M10 工具可读名（未知名回退原名）
@@ -137,7 +139,6 @@ export function MessageBubble({ message, onCitationClick, activeCitation }: Mess
             <ToolRounds message={message} />
             <RenderedText
               text={message.text}
-              hasCitations={!!message.citations?.length}
               onCitationClick={onCitationClick}
               activeCitation={activeCitation}
             />
@@ -155,32 +156,41 @@ export function MessageBubble({ message, onCitationClick, activeCitation }: Mess
 
 function RenderedText({
   text,
-  hasCitations,
   onCitationClick,
   activeCitation,
 }: {
   text: string
-  hasCitations: boolean
   onCitationClick: (marker: number) => void
   activeCitation: number | null
 }) {
-  const parts = hasCitations ? splitCitations(text) : [{ kind: 'text' as const, content: text }]
   return (
-    <>
-      {parts.map((p, i) =>
-        p.kind === 'text' ? (
-          <span key={i}>{p.content}</span>
-        ) : (
-          <button
-            key={i}
-            className={`citation ${activeCitation === p.marker ? 'active' : ''}`}
-            onClick={() => onCitationClick(p.marker)}
-            title={`跳转至引用 ${p.marker}`}
-          >
-            [{p.marker}]
-          </button>
-        ),
-      )}
-    </>
+    <div className="md">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm, remarkCitations]}
+        components={{
+          a: ({ href, children }) => {
+            if (href?.startsWith('#cite-')) {
+              const n = Number(href.slice(6))
+              return (
+                <button
+                  className={`citation ${activeCitation === n ? 'active' : ''}`}
+                  onClick={() => onCitationClick(n)}
+                  title={`跳转至引用 ${n}`}
+                >
+                  [{n}]
+                </button>
+              )
+            }
+            return (
+              <a href={href} target="_blank" rel="noreferrer">
+                {children}
+              </a>
+            )
+          },
+        }}
+      >
+        {text}
+      </ReactMarkdown>
+    </div>
   )
 }

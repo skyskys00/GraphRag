@@ -504,6 +504,100 @@
   display: none;
 }
 
+/* ===== Markdown 渲染（assistant 回答）===== */
+.bubble .md {
+  white-space: normal;
+  overflow-x: auto;
+}
+.bubble .md > :first-child {
+  margin-top: 0;
+}
+.bubble .md > :last-child {
+  margin-bottom: 0;
+}
+.bubble .md h1,
+.bubble .md h2,
+.bubble .md h3,
+.bubble .md h4,
+.bubble .md h5,
+.bubble .md h6 {
+  margin: 14px 0 8px;
+  line-height: 1.4;
+  font-weight: 600;
+}
+.bubble .md h1 {
+  font-size: 1.24em;
+}
+.bubble .md h2 {
+  font-size: 1.14em;
+}
+.bubble .md h3 {
+  font-size: 1.04em;
+}
+.bubble .md p {
+  margin: 8px 0;
+}
+.bubble .md ul,
+.bubble .md ol {
+  margin: 8px 0;
+  padding-left: 1.4em;
+}
+.bubble .md li {
+  margin: 3px 0;
+}
+.bubble .md li > p {
+  margin: 0;
+}
+.bubble .md strong {
+  font-weight: 600;
+}
+.bubble .md table {
+  /* 保持 table 布局：气泡按表格内容撑开；过宽时由 .md 横向滚动兜住 */
+  display: table;
+  border-collapse: collapse;
+  margin: 10px 0;
+  font-size: 0.94em;
+}
+.bubble .md th,
+.bubble .md td {
+  border: 1px solid var(--border);
+  padding: 5px 9px;
+  text-align: left;
+  vertical-align: top;
+}
+.bubble .md th {
+  background: var(--surface-alt);
+  font-weight: 600;
+}
+.bubble .md code {
+  background: var(--bg-soft);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.92em;
+}
+.bubble .md pre {
+  background: var(--bg-soft);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  overflow-x: auto;
+  margin: 10px 0;
+}
+.bubble .md pre code {
+  background: none;
+  padding: 0;
+}
+.bubble .md blockquote {
+  margin: 10px 0;
+  padding-left: 12px;
+  border-left: 3px solid var(--border);
+  color: var(--text-soft);
+}
+.bubble .md hr {
+  border: none;
+  border-top: 1px solid var(--border-soft);
+  margin: 14px 0;
+}
+
 /* 引用角标 [n] */
 .citation {
   display: inline-block;
